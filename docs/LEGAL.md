@@ -5,8 +5,9 @@ the open Google-terms questions that must be answered before paid launch.
 
 ## Part 1 — Non-negotiable engineering guardrails
 
-These are product invariants, enforced in code and tests, not policies subject to
-interpretation.
+These are product invariants, not policies subject to interpretation. Each is enforced
+in code and tests as soon as the surface it guards exists; where a named test does not
+exist yet, the wave that must build it is stated.
 
 ### 1. Never fetch, crawl, or scrape a result page
 
@@ -28,16 +29,20 @@ terms prohibit caching outright, because we have not yet verified that they don'
 
 The contact finder produces name-pattern **permutations**, not verified addresses. Every
 surface that renders one carries a visible "unverified" badge that cannot be dismissed or
-hidden by CSS. No bulk-generate, no "copy all." A permanent test asserts the badge is
-present wherever a generated address renders.
+hidden by CSS. No bulk-generate, no "copy all." A permanent test (built with the
+contact finder in W5) asserts the badge is present wherever a generated address
+renders.
 
 ### 4. No field, anywhere, for protected characteristics
 
 No column, filter, enum, note template, or free-form-adjacent structure for race,
 ethnicity, religion, age, gender identity, disability, national origin, sexual
 orientation, health, pregnancy, or veteran status. A hiring tool that lets a user record
-those is a discrimination lawsuit. A permanent CI test greps schema and codebase for
-these field names and fails the build on a match.
+those is a discrimination lawsuit. A permanent CI test will grep schema and codebase
+for these field names and fail the build on a match — due no later than W5, and it
+should land with the first schema migration in W1 (see BACKLOG). As of W0 this
+guardrail is doctrine, not yet enforcement; do not rely on CI to catch a violation
+until that test exists.
 
 ### 5. A working DSAR path, and honest outreach
 

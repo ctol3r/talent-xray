@@ -20,3 +20,5 @@ Ideas and known gaps land here instead of creeping into the current wave.
   not before.
 - CI deploy to Cloudflare (`CLOUDFLARE_API_TOKEN` secret + workflow step) — once Chris
   has run `wrangler login` and the first manual `pnpm cf:deploy` has succeeded.
+- Pull the protected-characteristics grep test forward from W5 into W1, landing with
+  the first schema migration — LEGAL.md guardrail 4 is doctrine-only until it exists.

@@ -10,16 +10,16 @@ load-bearing.
 
 ## Layout
 
-| Path                   | Purpose                                                         |
-| ---------------------- | --------------------------------------------------------------- |
-| `app/`                 | Next.js App Router routes                                       |
-| `components/`          | UI components                                                   |
-| `lib/`                 | Domain logic — query composer, corpus, facets                   |
-| `lib/corpus/`          | The 100-domain corpus, facets, recipes                          |
-| `supabase/migrations/` | SQL migrations (RLS policies live with their tables)            |
-| `reference/`           | `talent-xray.html`, the validated reference console — read-only |
-| `docs/`                | ADRs, [LEGAL.md](docs/LEGAL.md), [BACKLOG.md](docs/BACKLOG.md)  |
-| `tests/`               | Vitest unit tests (Playwright arrives with the first UI wave)   |
+| Path                   | Purpose                                                                                                                                             |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`                 | Next.js App Router routes                                                                                                                           |
+| `components/`          | UI components                                                                                                                                       |
+| `lib/`                 | Domain logic — query composer, corpus, facets                                                                                                       |
+| `lib/corpus/`          | The 100-domain corpus, facets, recipes                                                                                                              |
+| `supabase/migrations/` | SQL migrations (RLS policies live with their tables)                                                                                                |
+| `reference/`           | Home of `talent-xray.html`, the validated reference console (read-only; placed by Chris before W2 — see [reference/README.md](reference/README.md)) |
+| `docs/`                | ADRs, [LEGAL.md](docs/LEGAL.md), [BACKLOG.md](docs/BACKLOG.md)                                                                                      |
+| `tests/`               | Vitest unit tests (Playwright arrives with the first UI wave)                                                                                       |
 
 ## Develop
 
@@ -33,4 +33,5 @@ pnpm build      # production build
 ```
 
 Hosting is decided in [docs/ADR-001-hosting.md](docs/ADR-001-hosting.md). CI runs
-typecheck, lint, unit tests, and build on every push.
+format check, typecheck, lint, unit tests, and build on every push to `main` and on
+every pull request — branch pushes without a PR are not CI-verified.
