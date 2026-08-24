@@ -1,0 +1,8 @@
+node_modules
+.next
+.vercel
+pnpm-lock.yaml
+# The reference implementation is read-only. Never reformat it.
+reference/
+# CLAUDE.md is verbatim from the build spec. Do not reformat.
+CLAUDE.md
