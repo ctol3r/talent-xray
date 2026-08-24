@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Talent X-Ray — sourcing console</title>
+<style>
+:root{
+  --bg:#0d0e12; --panel:#14161c; --panel2:#1a1d25; --line:#262a35;
+  --ink:#e8eaf0; --dim:#8b93a7; --dimmer:#5d6478;
+  --accent:#7c9cff; --accent2:#4ade80; --warn:#fbbf24; --hot:#f472b6;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.app{display:grid;grid-template-columns:340px 1fr;height:100vh;overflow:hidden}
+@media(max-width:900px){.app{grid-template-columns:1fr;height:auto;overflow:visible}}
+
+/* ---------- sidebar ---------- */
+.side{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:0 0 60px}
+.brand{padding:18px 18px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:5}
+.brand h1{margin:0;font-size:15px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.brand .sub{color:var(--dim);font-size:11.5px;margin-top:3px}
+.sec{border-bottom:1px solid var(--line);padding:14px 18px}
+.sec h2{margin:0 0 10px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dimmer);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.sec h2 .hint{text-transform:none;letter-spacing:0;color:var(--dimmer);font-weight:400;font-size:10.5px}
+label.f{display:block;font-size:11px;color:var(--dim);margin:10px 0 4px}
+input[type=text],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;outline:none}
+input[type=text]:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:54px;font-family:var(--mono);font-size:12px}
+select{cursor:pointer}
+
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.chip{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 9px;font-size:11.5px;color:var(--dim);cursor:pointer;user-select:none;transition:.12s}
+.chip:hover{border-color:var(--dimmer);color:var(--ink)}
+.chip.on{background:rgba(124,156,255,.15);border-color:var(--accent);color:#cfdaff}
+.chip.tag{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.4);color:#b6f3cd}
+.chip.neg{background:rgba(244,114,182,.1);border-color:rgba(244,114,182,.35);color:#ffc7e4}
+.chip .x{opacity:.5;margin-left:5px}
+.chip .x:hover{opacity:1}
+
+.row{display:flex;gap:8px}
+.row>*{flex:1;min-width:0}
+
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:500;transition:.12s}
+.btn:hover{border-color:var(--dimmer)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0a0d1a;font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 9px;font-size:12px;border-radius:6px}
+
+/* ---------- main ---------- */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:14px 20px;border-bottom:1px solid var(--line);background:var(--panel);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qwrap{flex:1;min-width:280px;position:relative}
+#q{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-family:var(--mono);font-size:12.5px;min-height:44px}
+.qmeta{display:flex;gap:14px;font-size:11px;color:var(--dimmer);margin-top:6px;flex-wrap:wrap}
+.qmeta b{color:var(--dim);font-weight:500}
+
+.body{flex:1;overflow-y:auto;padding:0 20px 80px}
+.tabs{display:flex;gap:2px;padding:12px 0 0;position:sticky;top:0;background:var(--bg);z-index:4}
+.tab{padding:8px 14px;border-radius:8px 8px 0 0;color:var(--dim);cursor:pointer;font-size:12.5px;border:1px solid transparent;border-bottom:none}
+.tab.on{background:var(--panel);color:var(--ink);border-color:var(--line)}
+.pane{display:none;padding:18px 0}
+.pane.on{display:block}
+
+.empty{color:var(--dimmer);text-align:center;padding:70px 20px;font-size:13px}
+.empty kbd{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:11px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 16px;margin-bottom:10px}
+.card .ttl{font-size:15px;font-weight:600;margin:0 0 3px}
+.card .url{font-family:var(--mono);font-size:11px;color:var(--accent2);word-break:break-all;opacity:.85}
+.card .snip{color:var(--dim);font-size:12.5px;margin:7px 0 0}
+.card .acts{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.src{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dimmer);border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:2px}
+
+.notice{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);color:#f8e2ad;border-radius:9px;padding:11px 14px;font-size:12.5px;margin:14px 0}
+.notice b{color:var(--warn)}
+
+table.k{width:100%;border-collapse:collapse;font-size:12.5px}
+table.k td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.k td:first-child{color:var(--dim);width:150px;white-space:nowrap}
+code{font-family:var(--mono);font-size:12px;background:var(--panel2);padding:1px 5px;border-radius:4px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.mono{font-family:var(--mono);font-size:12px}
+.muted{color:var(--dim)}
+.tiny{font-size:11px}
+hr.d{border:none;border-top:1px solid var(--line);margin:14px 0}
+.gsc-control-cse{background:transparent!important;border:none!important;font-family:var(--sans)!important}
+.gsc-webResult .gsc-result{background:var(--panel)!important;border:1px solid var(--line)!important;border-radius:11px!important;padding:12px!important;margin-bottom:10px!important}
+.gs-title,.gs-title b{color:var(--ink)!important}
+.gs-snippet{color:var(--dim)!important}
+.gsc-url-top,.gs-visibleUrl{color:var(--accent2)!important}
+.gsc-above-wrapper-area,.gsc-adBlock{border:none!important}
+mark,.gs-snippet b,.gs-title b{background:rgba(251,191,36,.22)!important;color:#ffe9ae!important;border-radius:3px;padding:0 2px;font-weight:600}
+.card mark{background:rgba(251,191,36,.22);color:#ffe9ae}
+.ftabs{display:flex;gap:6px;flex-wrap:wrap;padding:14px 0 4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.ftab{padding:7px 13px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--dim);cursor:pointer;font-size:12.5px;white-space:nowrap;transition:.12s}
+.ftab:hover{border-color:var(--dimmer);color:var(--ink)}
+.ftab.on{background:rgba(124,156,255,.16);border-color:var(--accent);color:#cfdaff;font-weight:600}
+.ftab .n{opacity:.55;margin-left:5px;font-size:11px}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- ============ SIDEBAR ============ -->
+<aside class="side">
+  <div class="brand">
+    <h1>Talent X-Ray</h1>
+    <div class="sub">people-only search · <span id="domcount">…</span></div>
+  </div>
+
+  <div class="sec">
+    <h2>1 · Who <span class="hint">role or free text</span></h2>
+    <label class="f">Industry</label>
+    <select id="industry"></select>
+    <label class="f">Role recipe</label>
+    <select id="role"></select>
+    <label class="f">Job titles <span class="tiny">(Enter to add · OR'd together)</span></label>
+    <input type="text" id="titleIn" placeholder="e.g. head of nursing">
+    <div class="chips" id="titleChips"></div>
+    <label class="f">Seniority</label>
+    <div class="chips" id="senChips"></div>
+  </div>
+
+  <div class="sec">
+    <h2>2 · What they can do</h2>
+    <label class="f">Must have <span class="tiny">(all required)</span></label>
+    <input type="text" id="mustIn" placeholder="e.g. epic, kubernetes, CPA">
+    <div class="chips" id="mustChips"></div>
+    <label class="f">Any of <span class="tiny">(at least one)</span></label>
+    <input type="text" id="anyIn" placeholder="e.g. rust, golang">
+    <div class="chips" id="anyChips"></div>
+    <label class="f">Credentials &amp; licenses</label>
+    <div class="chips" id="credChips"></div>
+  </div>
+
+  <div class="sec">
+    <h2>3 · Where</h2>
+    <label class="f">Metro preset</label>
+    <select id="metro"></select>
+    <label class="f">Locations</label>
+    <input type="text" id="locIn" placeholder="city, state, or country">
+    <div class="chips" id="locChips"></div>
+    <label class="f">Companies / employers</label>
+    <input type="text" id="coIn" placeholder="e.g. Sutter Health">
+    <div class="chips" id="coChips"></div>
+    <label class="f">Schools</label>
+    <input type="text" id="eduIn" placeholder="e.g. Johns Hopkins">
+    <div class="chips" id="eduChips"></div>
+  </div>
+
+  <div class="sec">
+    <h2>4 · Where to look</h2>
+    <div class="chips" id="facetChips"></div>
+    <div class="tiny muted" id="facetBlurb" style="margin-top:8px"></div>
+  </div>
+
+  <div class="sec">
+    <h2>5 · Filters</h2>
+    <label class="f">Freshness</label>
+    <select id="time"></select>
+    <label class="f">Language</label>
+    <select id="lang">
+      <option value="">Any language</option>
+      <option value="lang_en">English</option><option value="lang_es">Spanish</option>
+      <option value="lang_fr">French</option><option value="lang_de">German</option>
+      <option value="lang_pt">Portuguese</option><option value="lang_zh-CN">Chinese</option>
+      <option value="lang_ja">Japanese</option><option value="lang_hi">Hindi</option>
+    </select>
+    <label class="f">Noise filters</label>
+    <div class="chips" id="negChips"></div>
+    <label class="f">Exclude words</label>
+    <input type="text" id="exIn" placeholder="word or phrase to exclude">
+    <div class="chips" id="exChips"></div>
+  </div>
+
+  <div class="sec">
+    <h2>Engines</h2>
+    <label class="f">Core engine ID (cx)</label>
+    <input type="text" id="cx1" placeholder="a157d37906e1141cc">
+    <label class="f">Second engine ID <span class="tiny">(optional)</span></label>
+    <input type="text" id="cx2" placeholder="918bc00e18d0c46e5">
+    <label class="f">Custom Search API key <span class="tiny">(optional — unlocks merge + CSV)</span></label>
+    <input type="text" id="apikey" placeholder="AIza…">
+    <div class="tiny muted" style="margin-top:8px">No key → free embedded results from the core engine. With a key → both engines merged, deduped, exportable.</div>
+    <hr class="d">
+    <div class="row">
+      <button class="btn sm" id="saveCfg">Export setup</button>
+      <button class="btn sm" id="loadCfg">Import setup</button>
+    </div>
+    <input type="file" id="cfgFile" accept=".json" style="display:none">
+  </div>
+</aside>
+
+<!-- ============ MAIN ============ -->
+<main class="main">
+  <div class="topbar">
+    <div class="qwrap">
+      <textarea id="q" rows="2" spellcheck="false"></textarea>
+      <div class="qmeta">
+        <span><b id="qlen">0</b> chars</span>
+        <span><b id="qterms">0</b> clauses</span>
+        <span id="qmode"></span>
+        <span id="qwarn" style="color:var(--warn)"></span>
+        <span class="muted">⌘/Ctrl + Enter to search</span>
+      </div>
+    </div>
+    <button class="btn primary" id="go">Search</button>
+    <button class="btn" id="copyQ">Copy</button>
+    <button class="btn ghost" id="reset">Reset</button>
+  </div>
+
+  <div class="body">
+    <div class="tabs">
+      <div class="tab on" data-p="results">Results</div>
+      <div class="tab" data-p="contact">Contact finder</div>
+      <div class="tab" data-p="board">Shortlist <span id="boardN" class="muted"></span></div>
+      <div class="tab" data-p="help">Playbook</div>
+    </div>
+
+    <div class="pane on" id="p-results">
+      <div class="ftabs" id="ftabs"></div>
+      <div id="apiResults"></div>
+      <div id="gsWrap"></div>
+      <div class="empty" id="emptyState">
+        Build a search on the left, or hit <kbd>Search</kbd>.<br>
+        This engine only indexes people surfaces — profiles, bios, CVs, rosters and contact records.
+      </div>
+    </div>
+
+    <div class="pane" id="p-contact"></div>
+    <div class="pane" id="p-board"></div>
+    <div class="pane" id="p-help"></div>
+  </div>
+</main>
+</div>
+<script>
+/* ============================================================
+   TALENT X-RAY — taxonomy
+   ============================================================ */
+const SENIORITY = {
+  intern:   {label:"Intern / Student", t:['intern','"summer analyst"','trainee','apprentice','student']},
+  entry:    {label:"Entry", t:['associate','"entry level"','junior','coordinator','assistant','I']},
+  mid:      {label:"Mid", t:['specialist','analyst','"II"','"III"','consultant']},
+  senior:   {label:"Senior", t:['senior','"Sr."','lead','principal','staff']},
+  manager:  {label:"Manager", t:['manager','supervisor','"team lead"','superintendent']},
+  director: {label:"Director", t:['director','"head of"','"associate director"']},
+  vp:       {label:"VP", t:['"vice president"','VP','SVP','EVP','"vice-president"']},
+  exec:     {label:"C-suite / Owner", t:['chief','CEO','COO','CTO','CFO','CMO','CIO','CNO','"managing partner"','founder','owner','president']}
+};
+
+const NEGATIVES = {
+  jobposts: {label:"Job posts & ads", on:true, t:['-"job description"','-"apply now"','-"we are hiring"','-intitle:jobs','-intitle:careers']},
+  recruiters:{label:"Recruiters & agencies", on:false, t:['-recruiter','-"talent acquisition"','-"executive search"','-staffing','-headhunter']},
+  dirnoise: {label:"Directory index pages", on:true, t:['-intitle:"profiles"','-inurl:"dir/"','-inurl:"/jobs"']},
+  vendors:  {label:"Vendors & marketing", on:false, t:['-"contact us"','-"request a demo"','-"pricing"','-"case study"']},
+  deceased: {label:"Obituaries & memorials", on:false, t:['-obituary','-"in memoriam"','-memorial']}
+};
+
+const INDUSTRIES = {
+  any:        {label:"Any industry", terms:[]},
+  healthcare: {label:"Healthcare & clinical", terms:['physician','nurse','clinician','"patient care"','hospital','clinic','"medical group"'],
+    creds:['MD','DO','NP','PA-C','RN','BSN','MSN','DNP','CRNA','"board certified"','"NPI"','LCSW','PharmD','DPT','RRT','"MLS(ASCP)"']},
+  lifesci:    {label:"Life sciences & pharma", terms:['pharmaceutical','biotech','"clinical trial"','"drug development"','GxP','GMP','"regulatory affairs"'],
+    creds:['PhD','PharmD','"RAC"','"CCRP"','"CCRA"']},
+  software:   {label:"Software & engineering", terms:['software','engineer','developer','"full stack"','backend','frontend','platform','SRE','DevOps'],
+    creds:['"BS Computer Science"','"MS Computer Science"']},
+  data:       {label:"Data, AI & ML", terms:['"machine learning"','"data science"','"data engineer"','MLOps','LLM','"deep learning"','analytics'],
+    creds:['PhD','"MS Statistics"']},
+  security:   {label:"Cybersecurity", terms:['security','"information security"','"threat detection"','SOC','"incident response"','"penetration test"'],
+    creds:['CISSP','CISM','OSCP','"Security+"','GIAC','CEH']},
+  it:         {label:"IT & infrastructure", terms:['"system administrator"','"network engineer"','helpdesk','"IT manager"','Azure','AWS','VMware'],
+    creds:['"CCNA"','"CCNP"','"MCSE"','"ITIL"','"CompTIA"']},
+  finance:    {label:"Finance & banking", terms:['finance','banking','"investment banking"','"private equity"','"portfolio manager"','treasury','FP&A'],
+    creds:['CFA','CPA','MBA','"Series 7"','"Series 63"','FRM']},
+  insurance:  {label:"Insurance", terms:['underwriting','actuarial','claims','"risk management"','broker','"P&C"'],
+    creds:['CPCU','FSA','ASA','ARM','"Series 6"']},
+  accounting: {label:"Accounting & audit", terms:['accounting','audit','tax','controller','"financial reporting"','GAAP','IFRS'],
+    creds:['CPA','CMA','CIA','"EA"','ACCA']},
+  legal:      {label:"Legal", terms:['attorney','lawyer','counsel','litigation','"general counsel"','paralegal','compliance'],
+    creds:['JD','"Esq"','LLM','"bar admitted"','"state bar"']},
+  sales:      {label:"Sales & GTM", terms:['sales','"account executive"','"business development"','quota','"revenue"','"customer success"'],
+    creds:[]},
+  marketing:  {label:"Marketing & growth", terms:['marketing','brand','demand generation','SEO','"content strategy"','"growth"','lifecycle'],
+    creds:[]},
+  design:     {label:"Design & creative", terms:['design','"product design"','UX','UI','"art director"','illustrator','motion','"brand identity"'],
+    creds:[]},
+  product:    {label:"Product & program", terms:['"product manager"','"product owner"','roadmap','"program manager"','PMO','"technical product"'],
+    creds:['PMP','CSM','SAFe']},
+  manufacturing:{label:"Manufacturing & industrial", terms:['manufacturing','"plant manager"','"process engineer"','lean','"six sigma"','"quality engineer"','ISO'],
+    creds:['"Six Sigma Black Belt"','"PE"','"CQE"','"APICS"','"CPIM"']},
+  construction:{label:"Construction & skilled trades", terms:['construction','"project superintendent"','electrician','plumber','welder','HVAC','"general contractor"','estimator'],
+    creds:['"journeyman"','"master electrician"','"OSHA 30"','"LEED AP"','"PE license"','"NCCER"']},
+  energy:     {label:"Energy & utilities", terms:['energy','utility','"oil and gas"','solar','renewables','grid','"power plant"','drilling'],
+    creds:['"PE"','"NERC"','"API 510"']},
+  logistics:  {label:"Logistics & supply chain", terms:['logistics','"supply chain"','warehouse','"3PL"','freight','procurement','"fleet manager"'],
+    creds:['"CSCP"','"CPIM"','"CDL"','"CLTD"']},
+  retail:     {label:"Retail & ecommerce", terms:['retail','merchandising','"store manager"','ecommerce','"category manager"','"district manager"'],
+    creds:[]},
+  hospitality:{label:"Hospitality & food", terms:['hospitality','hotel','restaurant','"executive chef"','"food and beverage"','"general manager"','culinary'],
+    creds:['"ServSafe"','"CEC"','"CHA"']},
+  education:  {label:"Education & academia", terms:['professor','teacher','faculty','lecturer','"instructional design"','curriculum','dean','principal'],
+    creds:['PhD','EdD','"M.Ed"','"credentialed teacher"','"NBCT"']},
+  government: {label:"Government & public sector", terms:['"public sector"','municipal','county','federal','"city manager"','policy','"program analyst"'],
+    creds:['"GS-"','"PMP"','"clearance"','"TS/SCI"']},
+  nonprofit:  {label:"Nonprofit & social impact", terms:['nonprofit','"501(c)(3)"','"development director"','philanthropy','"grant writing"','"program director"'],
+    creds:['CFRE','MSW','MPA']},
+  realestate: {label:"Real estate & property", terms:['"real estate"','broker','"property manager"','appraisal','"asset management"','leasing','CRE'],
+    creds:['"CCIM"','"MAI"','"CPM"','"licensed broker"']},
+  media:      {label:"Media & journalism", terms:['journalist','reporter','editor','producer','"content creator"','anchor','columnist'],
+    creds:[]},
+  aerospace:  {label:"Aerospace & defense", terms:['aerospace','avionics','defense','"systems engineer"','"flight test"','satellite','"DoD"'],
+    creds:['"PE"','"A&P license"','"security clearance"','"TS/SCI"','"INCOSE"']},
+  automotive: {label:"Automotive & mobility", terms:['automotive','powertrain','"vehicle engineering"','autonomous','"manufacturing engineer"','EV'],
+    creds:['"ASE certified"','"PE"']},
+  agriculture:{label:"Agriculture & food production", terms:['agriculture','agronomy','"food safety"','ranch','"crop science"','"farm manager"'],
+    creds:['"CCA"','"HACCP"','"PCQI"']},
+  telecom:    {label:"Telecom & networks", terms:['telecom','wireless','fiber','RF','"network operations"','5G','"OSP engineer"'],
+    creds:['"CCIE"','"iNARTE"']},
+  sports:     {label:"Sports, fitness & wellness", terms:['coach','"athletic trainer"','"strength and conditioning"','fitness','"personal trainer"','"sports performance"'],
+    creds:['"CSCS"','"ATC"','"NASM"','"ACSM"']},
+  science:    {label:"Research & science", terms:['researcher','"principal investigator"','laboratory','"postdoctoral"','"research scientist"'],
+    creds:['PhD','"PI"','"NIH grant"']}
+};
+
+/* Role recipes: label, industry, title synonyms, useful extra terms, best facets */
+const ROLES = [
+ ["Chief Nursing Officer","healthcare",['"Chief Nursing Officer"','CNO','"VP of Nursing"','"Chief Nurse Executive"'],['RN','MSN','DNP'],["profiles","clinical"]],
+ ["Hospitalist / Internal Medicine","healthcare",['hospitalist','"internal medicine physician"','"attending physician"'],['MD','DO','"board certified"'],["clinical","profiles"]],
+ ["Nurse Practitioner","healthcare",['"nurse practitioner"','NP','FNP','AGNP','PMHNP'],['"board certified"','MSN','DNP'],["clinical","profiles"]],
+ ["Physician Assistant","healthcare",['"physician assistant"','"PA-C"','"physician associate"'],['NCCPA'],["clinical","profiles"]],
+ ["Registered Nurse (specialty)","healthcare",['"registered nurse"','RN','"ICU nurse"','"ER nurse"','"OR nurse"'],['BSN','ACLS','PALS'],["clinical","profiles"]],
+ ["CRNA / Anesthesia","healthcare",['CRNA','"nurse anesthetist"','anesthesiologist'],['"board certified"'],["clinical","profiles"]],
+ ["Medical Director","healthcare",['"medical director"','"chief medical officer"','CMO'],['MD','MBA'],["profiles","clinical"]],
+ ["Credentialing / Medical Staff","healthcare",['"credentialing specialist"','"medical staff coordinator"','"CVO manager"','"provider enrollment"'],['CPCS','CPMSM'],["profiles"]],
+ ["Clinical Research Associate","lifesci",['"clinical research associate"','CRA','"clinical trial manager"'],['ICH-GCP','"CCRA"'],["profiles","academic"]],
+ ["Regulatory Affairs","lifesci",['"regulatory affairs"','"RA manager"','"submissions manager"'],['RAC','FDA','"510(k)"'],["profiles"]],
+ ["Bench / Research Scientist","science",['"research scientist"','"senior scientist"','"principal investigator"','postdoc'],['PhD'],["academic","profiles"]],
+ ["Backend Engineer","software",['"backend engineer"','"software engineer"','"backend developer"','"server engineer"'],['Go','Rust','Java','Python'],["portfolio","profiles"]],
+ ["Frontend Engineer","software",['"frontend engineer"','"front-end developer"','"UI engineer"'],['React','TypeScript','Next.js'],["portfolio","profiles"]],
+ ["Platform / SRE / DevOps","software",['SRE','"site reliability"','"platform engineer"','"DevOps engineer"','"infrastructure engineer"'],['Kubernetes','Terraform','AWS'],["portfolio","profiles"]],
+ ["Mobile Engineer","software",['"iOS engineer"','"Android engineer"','"mobile developer"','"React Native"'],['Swift','Kotlin'],["portfolio","profiles"]],
+ ["Engineering Leadership","software",['"VP of Engineering"','"Head of Engineering"','"Director of Engineering"','"engineering manager"'],[],["profiles"]],
+ ["ML / AI Engineer","data",['"machine learning engineer"','"ML engineer"','"AI engineer"','"research engineer"'],['PyTorch','LLM','transformers'],["portfolio","academic"]],
+ ["Data Engineer","data",['"data engineer"','"analytics engineer"','"data platform"'],['Spark','dbt','Snowflake','Airflow'],["portfolio","profiles"]],
+ ["Data Scientist","data",['"data scientist"','"quantitative analyst"','"decision scientist"'],['Python','causal','experimentation'],["portfolio","academic"]],
+ ["Security Engineer","security",['"security engineer"','"application security"','"detection engineer"','"red team"'],['OSCP','CISSP'],["portfolio","profiles"]],
+ ["CISO / Security Leadership","security",['CISO','"Chief Information Security Officer"','"VP Security"','"Head of Security"'],['CISSP','CISM'],["profiles"]],
+ ["Product Manager","product",['"product manager"','"senior product manager"','"group product manager"','"principal PM"'],['roadmap','discovery'],["profiles"]],
+ ["Product Designer","design",['"product designer"','"UX designer"','"UI designer"','"design lead"'],['Figma','"design system"'],["portfolio","profiles"]],
+ ["Brand / Art Director","design",['"art director"','"creative director"','"brand designer"'],['"brand identity"'],["portfolio","profiles"]],
+ ["Account Executive","sales",['"account executive"','"enterprise AE"','"sales director"','"strategic accounts"'],['quota','"closed won"'],["profiles"]],
+ ["Sales Leadership","sales",['"VP of Sales"','CRO','"Chief Revenue Officer"','"Head of Sales"'],[],["profiles"]],
+ ["Growth / Demand Gen","marketing",['"growth marketing"','"demand generation"','"performance marketing"','"lifecycle marketing"'],['HubSpot','Marketo'],["profiles"]],
+ ["Controller / Accounting","accounting",['controller','"assistant controller"','"accounting manager"','"director of accounting"'],['CPA','GAAP'],["profiles"]],
+ ["FP&A / Finance","finance",['"FP&A"','"financial analyst"','"finance manager"','"director of finance"'],['CFA','MBA'],["profiles"]],
+ ["General Counsel / Attorney","legal",['"general counsel"','"associate general counsel"','attorney','partner'],['JD','"state bar"'],["licensed","profiles"]],
+ ["Litigation Associate","legal",['"litigation associate"','"trial attorney"','litigator'],['JD'],["licensed","profiles"]],
+ ["Plant / Operations Manager","manufacturing",['"plant manager"','"operations manager"','"production manager"','"manufacturing manager"'],['lean','"six sigma"'],["profiles"]],
+ ["Quality Engineer","manufacturing",['"quality engineer"','"QA engineer"','"supplier quality"'],['ISO 9001','"CQE"'],["profiles"]],
+ ["Project Superintendent","construction",['superintendent','"project superintendent"','"construction manager"','"project engineer"'],['OSHA','Procore'],["profiles"]],
+ ["Skilled Trade","construction",['electrician','plumber','welder','"HVAC technician"','millwright','machinist'],['journeyman','"OSHA 10"'],["profiles","social"]],
+ ["Field / Reliability Engineer","energy",['"reliability engineer"','"field engineer"','"maintenance engineer"','"process engineer"'],['PE','"root cause"'],["profiles"]],
+ ["Supply Chain Manager","logistics",['"supply chain manager"','"logistics manager"','"procurement manager"','"demand planner"'],['CSCP','SAP'],["profiles"]],
+ ["Store / District Manager","retail",['"store manager"','"district manager"','"regional manager"','"area manager"'],['P&L'],["profiles"]],
+ ["Executive Chef / F&B","hospitality",['"executive chef"','"chef de cuisine"','"food and beverage director"','"sous chef"'],['ServSafe'],["profiles","social"]],
+ ["Faculty / Professor","education",['professor','"assistant professor"','"associate professor"','lecturer','faculty'],['PhD'],["academic","profiles"]],
+ ["K-12 Teacher / Principal","education",['teacher','principal','"assistant principal"','"instructional coach"'],['"credentialed"','"M.Ed"'],["profiles"]],
+ ["Program / Policy Analyst","government",['"program analyst"','"policy analyst"','"management analyst"','"city manager"'],['MPA'],["profiles"]],
+ ["Nonprofit Development","nonprofit",['"development director"','"major gifts officer"','"executive director"','"grants manager"'],['CFRE'],["profiles"]],
+ ["Commercial Real Estate","realestate",['"commercial real estate"','"investment sales"','"asset manager"','"leasing director"'],['CCIM','MAI'],["licensed","profiles"]],
+ ["Journalist / Editor","media",['reporter','journalist','editor','correspondent','"managing editor"'],[],["rosters","profiles"]],
+ ["Aerospace Systems Engineer","aerospace",['"systems engineer"','"avionics engineer"','"GNC engineer"','"flight software"'],['INCOSE','"clearance"'],["profiles","academic"]],
+ ["Automotive / EV Engineer","automotive",['"powertrain engineer"','"battery engineer"','"vehicle integration"','"controls engineer"'],['CAN','ISO 26262'],["profiles"]],
+ ["Agronomist / Food Safety","agriculture",['agronomist','"food safety manager"','"quality assurance manager"','"farm manager"'],['HACCP','CCA'],["profiles"]],
+ ["RF / Network Engineer","telecom",['"RF engineer"','"network engineer"','"OSP engineer"','"transport engineer"'],['CCIE','5G'],["profiles"]],
+ ["Strength Coach / Trainer","sports",['"strength and conditioning coach"','"athletic trainer"','"performance coach"','"personal trainer"'],['CSCS','ATC'],["profiles","social"]],
+ ["Therapist / Counselor","healthcare",['therapist','"licensed clinical social worker"','LCSW','LMFT','"psychologist"'],['LCSW','PsyD','"licensed"'],["licensed","profiles"]],
+ ["Pharmacist","healthcare",['pharmacist','"clinical pharmacist"','"pharmacy manager"'],['PharmD','"board certified"'],["clinical","profiles"]],
+ ["Physical / Occupational Therapist","healthcare",['"physical therapist"','"occupational therapist"','DPT','OTR'],['DPT','"licensed"'],["clinical","profiles"]],
+ ["Radiology / Imaging Tech","healthcare",['"radiologic technologist"','"MRI technologist"','sonographer','"CT tech"'],['ARRT','RDMS'],["clinical","profiles"]],
+ ["Lab / Medical Technologist","healthcare",['"medical technologist"','"clinical laboratory scientist"','"MLS(ASCP)"'],['ASCP'],["clinical","profiles"]]
+];
+
+const METROS = {
+ "San Francisco Bay Area":['"San Francisco"','"Bay Area"','Oakland','"Palo Alto"','"San Jose"','"Mountain View"'],
+ "New York":['"New York"','NYC','Manhattan','Brooklyn','"New York City"'],
+ "Los Angeles":['"Los Angeles"','"Santa Monica"','Pasadena','"Long Beach"','LA'],
+ "Seattle":['Seattle','Bellevue','Redmond','"Puget Sound"'],
+ "Austin":['Austin','"Round Rock"','"Central Texas"'],
+ "Boston":['Boston','Cambridge','"Greater Boston"','Somerville'],
+ "Chicago":['Chicago','Evanston','"Chicagoland"'],
+ "Denver":['Denver','Boulder','"Front Range"','Aurora'],
+ "Atlanta":['Atlanta','Alpharetta','"Metro Atlanta"'],
+ "Dallas–Fort Worth":['Dallas','"Fort Worth"','Plano','DFW','Irving'],
+ "Houston":['Houston','"The Woodlands"','Katy'],
+ "Miami":['Miami','"Fort Lauderdale"','"South Florida"','"Coral Gables"'],
+ "Phoenix":['Phoenix','Scottsdale','Tempe','Mesa'],
+ "Sacramento / Central Valley":['Sacramento','Modesto','Stockton','Fresno','"Central Valley"'],
+ "San Diego":['"San Diego"','"La Jolla"','Carlsbad'],
+ "Washington DC":['"Washington DC"','Arlington','Bethesda','"DMV"','Alexandria'],
+ "Philadelphia":['Philadelphia','"Greater Philadelphia"','"King of Prussia"'],
+ "Minneapolis":['Minneapolis','"St. Paul"','"Twin Cities"'],
+ "Nashville":['Nashville','Franklin','"Middle Tennessee"'],
+ "Toronto":['Toronto','"GTA"','Mississauga'],
+ "London":['London','"Greater London"','"United Kingdom"'],
+ "Berlin":['Berlin','Germany'],
+ "Bangalore":['Bangalore','Bengaluru','India'],
+ "Singapore":['Singapore'],
+ "Sydney":['Sydney','Australia','NSW'],
+ "Remote (US)":['remote','"remote-first"','"work from home"','"United States"']
+};
+
+const FACETS = {
+ profiles:   {label:"Profiles", eng:"A", blurb:"LinkedIn, about.me, read.cv, Polywork, Wellfound, Crunchbase, The Org, Xing, Contra, Upwork, Toptal",
+   sites:["linkedin.com/in","about.me","read.cv","polywork.com","wellfound.com","angel.co","crunchbase.com","theorg.com","xing.com","contra.com","producthunt.com","upwork.com","toptal.com"]},
+ social:     {label:"Social bios", eng:"A", blurb:"X, Instagram, Facebook, Threads, Bluesky, Reddit, TikTok, YouTube, Quora, Medium, Substack, Mastodon, Telegram",
+   sites:["x.com","twitter.com","instagram.com","facebook.com","threads.com","bsky.app","reddit.com/user","tiktok.com","youtube.com","quora.com","medium.com","substack.com","mastodon.social","t.me"]},
+ portfolio:  {label:"Portfolios & code", eng:"A", blurb:"GitHub, GitLab, Bitbucket, Stack Overflow, Stack Exchange, Kaggle, Hugging Face, npm, PyPI, dev.to, Hashnode, Behance, Dribbble, ArtStation, Figma, CodePen, Devpost",
+   sites:["github.com","gitlab.com","bitbucket.org","stackoverflow.com/users","stackexchange.com","kaggle.com","huggingface.co","npmjs.com","pypi.org","dev.to","hashnode.com","behance.net","dribbble.com","artstation.com","figma.com","codepen.io","devpost.com"]},
+ resumes:    {label:"Resumes & CVs", eng:"AB", blurb:"Google Docs & Drive, SlideShare, Scribd on engine 1; Academia.edu, Speaker Deck and VisualCV on engine 2",
+   sites:["docs.google.com","drive.google.com","slideshare.net","scribd.com","academia.edu","speakerdeck.com","visualcv.com"]},
+ academic:   {label:"Academic & research", eng:"AB", blurb:"Google Scholar and Google Patents on engine 1; ORCID, ResearchGate, Semantic Scholar, PubMed, Europe PMC, arXiv, DBLP, SSRN, Scopus, IEEE, ClinicalTrials, NIH RePORTER on engine 2",
+   sites:["scholar.google.com","patents.google.com","orcid.org","researchgate.net","semanticscholar.org","pubmed.ncbi.nlm.nih.gov","europepmc.org","webofscience.com","loop.frontiersin.org","arxiv.org","dblp.org","papers.ssrn.com","clinicaltrials.gov","reporter.nih.gov","scopus.com","ieeexplore.ieee.org","patents.justia.com","osti.gov"]},
+ clinical:   {label:"Clinicians", eng:"B", blurb:"NPI registry, NPIno, NPIdb, Doximity, Healthgrades, Vitals, WebMD, Zocdoc, Castle Connolly, DocSpot, CMS open data",
+   sites:["npiregistry.cms.hhs.gov","npino.com","npidb.org","doximity.com","healthgrades.com","vitals.com","doctor.webmd.com","zocdoc.com","castleconnolly.com","docspot.com","data.cms.gov"]},
+ licensed:   {label:"Licensed pros", eng:"B", blurb:"Avvo, Martindale, Justia, FindLaw, Super Lawyers, FINRA BrokerCheck, SEC IAPD, Psychology Today",
+   sites:["avvo.com","martindale.com","justia.com","findlaw.com","superlawyers.com","brokercheck.finra.org","adviserinfo.sec.gov","psychologytoday.com"]},
+ contactdata:{label:"Contact data", eng:"B", blurb:"RocketReach, ZoomInfo, SignalHire, Lusha, LeadIQ, Apollo, OpenCorporates, Bloomberg, PitchBook",
+   sites:["rocketreach.co","zoominfo.com","signalhire.com","lusha.com","leadiq.com","apollo.io","opencorporates.com","bloomberg.com","pitchbook.com"]},
+ rosters:    {label:"Lists & rosters", eng:"B", blurb:"Sessionize, Meetup, Muck Rack \u2014 speaker lists, member rolls, bylines",
+   sites:["sessionize.com","meetup.com","muckrack.com"]}
+};
+
+const TIMES = {
+ "":  "Any time",
+ "d7":"Past week",
+ "m1":"Past month",
+ "m3":"Past 3 months",
+ "m6":"Past 6 months",
+ "y1":"Past year",
+ "y2":"Past 2 years"
+};
+
+
+const CORPUS_NOTE = "100 domains \u00b7 2 engines";
+
+</script>
+<script>
+/* ============================================================
+   TALENT X-RAY — console logic
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const S = {
+  industry:'any', role:'', titles:[], sen:[], must:[], any:[], creds:[],
+  loc:[], co:[], edu:[], facets:[], time:'', lang:'', neg:{}, ex:[],
+  cx1:'a157d37906e1141cc', cx2:'918bc00e18d0c46e5', key:'', board:[], lastQ:''
+};
+Object.keys(NEGATIVES).forEach(k => S.neg[k] = NEGATIVES[k].on);
+
+/* ---------- helpers ---------- */
+const q = t => {                                   // quote multiword, leave operators alone
+  t = String(t).trim();
+  if (!t) return '';
+  if (/^[-"(]/.test(t) || /^\w+:/.test(t)) return t;
+  return /\s/.test(t) ? '"' + t.replace(/"/g,'') + '"' : t;
+};
+const orGroup = arr => {
+  const c = arr.filter(Boolean).map(q);
+  if (!c.length) return '';
+  return c.length === 1 ? c[0] : '(' + c.join(' OR ') + ')';
+};
+
+/* ---------- query builder ---------- */
+function buildQuery(){
+  const parts = [];
+  const ind = INDUSTRIES[S.industry] || INDUSTRIES.any;
+
+  // WHO — titles OR'd, seniority OR'd as a separate clause
+  const titles = [...S.titles];
+  if (S.role){
+    const r = ROLES.find(x => x[0] === S.role);
+    if (r) r[2].forEach(t => { if (!titles.includes(t)) titles.push(t); });
+  }
+  if (titles.length) parts.push(orGroup(titles));
+  if (S.sen.length) parts.push(orGroup(S.sen.flatMap(k => SENIORITY[k].t)));
+
+  // WHAT
+  S.must.forEach(m => parts.push(q(m)));
+  if (S.any.length) parts.push(orGroup(S.any));
+  if (S.creds.length) parts.push(orGroup(S.creds));
+
+  // industry flavour only when no explicit titles (keeps precision high)
+  if (!titles.length && ind.terms && ind.terms.length) parts.push(orGroup(ind.terms.slice(0,6)));
+
+  // WHERE
+  if (S.loc.length) parts.push(orGroup(S.loc));
+  if (S.co.length)  parts.push(orGroup(S.co));
+  if (S.edu.length) parts.push(orGroup(S.edu));
+
+  // NOISE
+  Object.keys(S.neg).forEach(k => { if (S.neg[k]) NEGATIVES[k].t.forEach(t => parts.push(t)); });
+  S.ex.forEach(e => parts.push('-' + q(e)));
+
+  // SOURCE TYPE — narrow the already-restricted corpus with a site: group
+  if (S.facets.length){
+    const sites = [...new Set(S.facets.flatMap(f => FACETS[f].sites))];
+    parts.push('(' + sites.map(s => 'site:' + s).join(' OR ') + ')');
+  }
+
+  return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+}
+
+function refresh(){
+  const s = buildQuery();
+  $('#q').value = s;
+  S.lastQ = s;
+  $('#qlen').textContent = s.length;
+  $('#qterms').textContent = s ? s.split(/\s(?=(?:[^"]*"[^"]*")*[^"]*$)/).length : 0;
+  $('#qmode').innerHTML = S.key
+    ? '<b style="color:var(--accent2)">API mode</b> · merged + exportable'
+    : '<b>Embedded mode</b> · free, no key';
+  const warn = $('#qwarn');
+  if (s.length > 1700){
+    $('#qlen').style.color = 'var(--warn)';
+    warn.textContent = '· long query — drop a source type or a noise filter';
+  } else { $('#qlen').style.color = ''; warn.textContent = ''; }
+}
+
+/* ---------- chip factory ---------- */
+function chipList(host, items, {cls='tag', onRemove}={}){
+  const el = $(host); el.innerHTML = '';
+  items.forEach((v,i) => {
+    const c = document.createElement('span');
+    c.className = 'chip ' + cls;
+    c.innerHTML = esc(v) + ' <span class="x">×</span>';
+    c.onclick = () => { onRemove(i); };
+    el.appendChild(c);
+  });
+}
+function toggleSet(host, dict, selected, onChange, labelFn){
+  const el = $(host); el.innerHTML = '';
+  Object.keys(dict).forEach(k => {
+    const c = document.createElement('span');
+    c.className = 'chip' + (selected.includes(k) ? ' on' : '');
+    c.textContent = labelFn ? labelFn(k) : (dict[k].label || k);
+    c.onclick = () => { onChange(k); };
+    el.appendChild(c);
+  });
+}
+function bindAdd(inputSel, arr, render){
+  $(inputSel).addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.value.trim()){
+      e.preventDefault();
+      e.target.value.split(',').map(x=>x.trim()).filter(Boolean).forEach(v => { if(!arr.includes(v)) arr.push(v); });
+      e.target.value = ''; render(); refresh();
+    }
+  });
+}
+
+/* ---------- render sidebar ---------- */
+function renderTitles(){ chipList('#titleChips', S.titles, {onRemove:i=>{S.titles.splice(i,1);renderTitles();refresh();}}); }
+function renderMust(){ chipList('#mustChips', S.must, {onRemove:i=>{S.must.splice(i,1);renderMust();refresh();}}); }
+function renderAny(){ chipList('#anyChips', S.any, {onRemove:i=>{S.any.splice(i,1);renderAny();refresh();}}); }
+function renderLoc(){ chipList('#locChips', S.loc, {onRemove:i=>{S.loc.splice(i,1);renderLoc();refresh();}}); }
+function renderCo(){ chipList('#coChips', S.co, {onRemove:i=>{S.co.splice(i,1);renderCo();refresh();}}); }
+function renderEdu(){ chipList('#eduChips', S.edu, {onRemove:i=>{S.edu.splice(i,1);renderEdu();refresh();}}); }
+function renderEx(){ chipList('#exChips', S.ex, {cls:'neg', onRemove:i=>{S.ex.splice(i,1);renderEx();refresh();}}); }
+
+function renderCreds(){
+  const ind = INDUSTRIES[S.industry] || {};
+  const pool = [...new Set([...(ind.creds||[]), ...S.creds])];
+  const el = $('#credChips'); el.innerHTML = '';
+  if (!pool.length){ el.innerHTML = '<span class="tiny muted">no presets for this industry — add under “Must have”</span>'; return; }
+  pool.forEach(c => {
+    const on = S.creds.includes(c);
+    const sp = document.createElement('span');
+    sp.className = 'chip' + (on ? ' on' : '');
+    sp.textContent = c.replace(/"/g,'');
+    sp.onclick = () => { on ? S.creds.splice(S.creds.indexOf(c),1) : S.creds.push(c); renderCreds(); refresh(); };
+    el.appendChild(sp);
+  });
+}
+function renderSen(){
+  toggleSet('#senChips', SENIORITY, S.sen, k => {
+    const i = S.sen.indexOf(k); i>=0 ? S.sen.splice(i,1) : S.sen.push(k);
+    renderSen(); refresh();
+  });
+}
+function renderNeg(){
+  const el = $('#negChips'); el.innerHTML='';
+  Object.keys(NEGATIVES).forEach(k => {
+    const sp = document.createElement('span');
+    sp.className = 'chip' + (S.neg[k] ? ' on' : '');
+    sp.textContent = NEGATIVES[k].label;
+    sp.onclick = () => { S.neg[k] = !S.neg[k]; renderNeg(); refresh(); };
+    el.appendChild(sp);
+  });
+}
+function renderFacets(){
+  const el = $('#facetChips'); el.innerHTML='';
+  Object.keys(FACETS).forEach(k => {
+    const sp = document.createElement('span');
+    sp.className = 'chip' + (S.facets.includes(k) ? ' on' : '');
+    sp.textContent = FACETS[k].label + (FACETS[k].eng==='B' ? ' ·2' : '');
+    sp.title = FACETS[k].blurb;
+    sp.onclick = () => {
+      const i = S.facets.indexOf(k); i>=0 ? S.facets.splice(i,1) : S.facets.push(k);
+      renderFacets(); refresh();
+    };
+    el.appendChild(sp);
+  });
+  const needB = S.facets.some(f => FACETS[f].eng === 'B') && !S.cx2;
+  $('#facetBlurb').innerHTML = (S.facets.length
+    ? S.facets.map(f => '<b>'+FACETS[f].label+'</b> — '+FACETS[f].blurb).join('<br>')
+    : 'No filter → every people surface in the corpus. Pick one or more to narrow by source type.')
+    + (needB ? '<br><span style="color:var(--warn)">·2 sources live on the second engine. Add its cx above (and an API key) or these return nothing.</span>' : '');
+}
+function renderRoles(){
+  const sel = $('#role');
+  const list = ROLES.filter(r => S.industry==='any' || r[1]===S.industry);
+  sel.innerHTML = '<option value="">— none (free text) —</option>' +
+    list.map(r => `<option value="${esc(r[0])}"${S.role===r[0]?' selected':''}>${esc(r[0])}</option>`).join('');
+  if (!list.some(r => r[0]===S.role)) S.role = '';
+}
+
+function applyRole(name){
+  // strip whatever the previous recipe injected so recipes never stack
+  (S._roleSkills||[]).forEach(s => { const i = S.any.indexOf(s); if(i>=0) S.any.splice(i,1); });
+  S._roleSkills = [];
+  S.role = name;
+  const r = ROLES.find(x => x[0]===name);
+  if (r){
+    r[3].forEach(s => { if(!S.any.includes(s)){ S.any.push(s); S._roleSkills.push(s); } });
+    S.facets = [...r[4]];
+  } else {
+    S.facets = [];
+  }
+  renderAny(); renderFacets();
+  refresh();
+}
+
+/* ---------- init controls ---------- */
+function init(){
+  $('#industry').innerHTML = Object.keys(INDUSTRIES).map(k =>
+    `<option value="${k}">${esc(INDUSTRIES[k].label)}</option>`).join('');
+  $('#metro').innerHTML = '<option value="">— pick a metro —</option>' +
+    Object.keys(METROS).map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join('');
+  $('#time').innerHTML = Object.keys(TIMES).map(k =>
+    `<option value="${k}">${esc(TIMES[k])}</option>`).join('');
+
+  $('#industry').onchange = e => {
+    S.industry = e.target.value; S.creds = [];
+    applyRole('');                      // clears the old recipe's skills + facets
+    renderRoles(); $('#role').value=''; renderCreds(); refresh();
+  };
+  $('#role').onchange = e => applyRole(e.target.value);
+  $('#metro').onchange = e => {
+    const m = METROS[e.target.value];
+    if (m){ m.forEach(x => { if(!S.loc.includes(x)) S.loc.push(x); }); renderLoc(); refresh(); }
+    e.target.value = '';
+  };
+  $('#time').onchange = e => { S.time = e.target.value; refresh(); };
+  $('#lang').onchange = e => { S.lang = e.target.value; refresh(); };
+
+  bindAdd('#titleIn', S.titles, renderTitles);
+  bindAdd('#mustIn', S.must, renderMust);
+  bindAdd('#anyIn', S.any, renderAny);
+  bindAdd('#locIn', S.loc, renderLoc);
+  bindAdd('#coIn', S.co, renderCo);
+  bindAdd('#eduIn', S.edu, renderEdu);
+  bindAdd('#exIn', S.ex, renderEx);
+
+  $('#cx1').value = S.cx1;
+  ['cx1','cx2','apikey'].forEach(id => {
+    $('#'+id).oninput = e => {
+      if(id==='apikey') S.key = e.target.value.trim();
+      else if(id==='cx1') S.cx1 = e.target.value.trim();
+      else S.cx2 = e.target.value.trim();
+      refresh();
+    };
+  });
+
+  $('#go').onclick = runSearch;
+  $('#copyQ').onclick = () => { navigator.clipboard.writeText($('#q').value); flash($('#copyQ'),'Copied'); };
+  $('#reset').onclick = () => location.reload();
+  $('#q').addEventListener('keydown', e => {
+    if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); runSearch(); }
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); runSearch(); }
+  });
+
+  $$('.tab').forEach(t => t.onclick = () => {
+    $$('.tab').forEach(x => x.classList.remove('on')); t.classList.add('on');
+    $$('.pane').forEach(p => p.classList.remove('on'));
+    $('#p-' + t.dataset.p).classList.add('on');
+    if (t.dataset.p === 'contact') renderContact();
+    if (t.dataset.p === 'board') renderBoard();
+    if (t.dataset.p === 'help') renderHelp();
+  });
+
+  $('#saveCfg').onclick = exportCfg;
+  $('#loadCfg').onclick = () => $('#cfgFile').click();
+  $('#cfgFile').onchange = importCfg;
+
+  renderTitles(); renderMust(); renderAny(); renderLoc(); renderCo(); renderEdu(); renderEx();
+  renderSen(); renderNeg(); renderFacets(); renderCreds(); renderRoles(); renderFTabs();
+  $('#domcount').textContent = CORPUS_NOTE;
+  refresh();
+}
+function flash(btn, txt){ const o = btn.textContent; btn.textContent = txt; setTimeout(()=>btn.textContent=o, 1100); }
+
+
+/* ---------- result filter tabs ---------- */
+const LINKEDIN = ["linkedin.com/in","linkedin.com/pub"];
+const RESULT_TABS = [
+  {k:"all",      label:"Everything", sites:null,
+   note:"Every people surface in the corpus."},
+  {k:"resumes",  label:"Resumes & CVs",
+   sites:["docs.google.com","drive.google.com","slideshare.net","scribd.com","academia.edu","speakerdeck.com","visualcv.com","issuu.com"],
+   note:"Documents people wrote about themselves \u2014 Google Docs & Drive, SlideShare, Scribd, Academia.edu, Speaker Deck, VisualCV."},
+  {k:"linkedin", label:"LinkedIn only", sites:LINKEDIN,
+   note:"Personal LinkedIn profiles only \u2014 company pages excluded."},
+  {k:"rosters",  label:"Lists & rosters",
+   sites:["sessionize.com","meetup.com","muckrack.com","linkedin.com/company","theorg.com","crunchbase.com/organization"],
+   note:"Speaker lists, member rolls, bylines and org charts \u2014 mine one page, get many people."},
+  {k:"profiles", label:"Other profiles", not:["linkedin.com"],
+   note:"Every people surface in the corpus except LinkedIn \u2014 portfolios, code, social bios, registries, contact records."}
+];
+let activeTab = "all";
+
+const SITE_GROUP_RX = /\s*\((?:\s*-?site:[^\s()]+(?:\s+OR)?)+\s*\)\s*$/i;
+const SITE_NEG_RX   = /(?:\s+-site:[^\s()]+)+\s*$/i;
+function stripSiteGroup(q){ return q.replace(SITE_GROUP_RX, '').replace(SITE_NEG_RX, '').trim(); }
+function tabQuery(base){
+  const t = RESULT_TABS.find(x => x.k === activeTab);
+  if (!t || (!t.sites && !t.not)) return base;
+  const stem = stripSiteGroup(base);
+  if (t.not) return stem + ' ' + t.not.map(s => '-site:' + s).join(' ');
+  return stem + ' (' + t.sites.map(s => 'site:' + s).join(' OR ') + ')';
+}
+function renderFTabs(){
+  const el = $('#ftabs'); if(!el) return;
+  el.innerHTML = '';
+  RESULT_TABS.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'ftab' + (activeTab === t.k ? ' on' : '');
+    b.textContent = t.label;
+    b.title = t.note;
+    b.onclick = () => { activeTab = t.k; renderFTabs(); if ($('#q').value.trim()) runSearch(); };
+    el.appendChild(b);
+  });
+  const note = document.createElement('div');
+  note.className = 'tiny muted';
+  note.style.cssText = 'flex-basis:100%;margin-top:2px';
+  note.textContent = (RESULT_TABS.find(x => x.k === activeTab) || {}).note || '';
+  el.appendChild(note);
+}
+
+/* ---------- keyword highlighting ---------- */
+let HL = [];
+const STOP = new Set(['or','and','the','a','of','in','at','for','to','on','www','com','http','https','amp','quot']);
+function queryTerms(str){
+  let s = String(str || '');
+  s = s.replace(/-(?:[a-z]+:)?"[^"]*"/gi, ' ');   // -"phrase" and -intitle:"phrase"
+  s = s.replace(/[a-z]+:"[^"]*"/gi, ' ');         // intitle:"phrase"
+  s = s.replace(/-\S+/g, ' ');                    // -word, -site:x, -inurl:x
+  s = s.replace(/\b[a-z]+:\S+/gi, ' ');           // site:x more:x after:x
+  const out = new Set();
+  s = s.replace(/"([^"]+)"/g, (m, phrase) => { out.add(phrase.trim()); return ' '; });
+  s.split(/[\s()]+/).forEach(t => {
+    const clean = (t || '').replace(/[^\w.&+#'-]/g, '');
+    if (clean.length < 2 || STOP.has(clean.toLowerCase())) return;
+    if (/^(OR|AND)$/i.test(clean)) return;
+    out.add(clean);
+  });
+  return [...out].filter(Boolean).sort((a,b) => b.length - a.length).slice(0, 40);
+}
+const rxEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function hlRx(){ return HL.length ? new RegExp('(' + HL.map(rxEsc).join('|') + ')', 'gi') : null; }
+function hl(text){
+  const t = esc(text || '');
+  const rx = hlRx(); if (!rx) return t;
+  return t.replace(/&[a-z]+;|[^&]+/gi, seg => seg[0] === '&' ? seg : seg.replace(rx, '<mark>$1</mark>'));
+}
+function hlDom(root){
+  const rx = hlRx(); if (!rx || !root) return;
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => (n.parentNode && /^(MARK|SCRIPT|STYLE)$/.test(n.parentNode.nodeName))
+      ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+  });
+  const hits = []; let n;
+  while ((n = walk.nextNode())) if (rx.test(n.nodeValue)) { rx.lastIndex = 0; hits.push(n); }
+  hits.forEach(node => {
+    const span = document.createElement('span');
+    span.innerHTML = esc(node.nodeValue).replace(rx, '<mark>$1</mark>');
+    node.parentNode.replaceChild(span, node);
+  });
+}
+
+/* ---------- search ---------- */
+function runSearch(){
+  const base = $('#q').value.trim();
+  if (!base){ return; }
+  const query = tabQuery(base);
+  HL = queryTerms(query);
+  S.lastQ = query;
+  $('#emptyState').style.display = 'none';
+  if (S.key && S.cx1) apiSearch(query); else elementSearch(query);
+}
+
+let gsLoaded = false;
+function elementSearch(query){
+  $('#apiResults').innerHTML = '';
+  const wrap = $('#gsWrap');
+  if (!gsLoaded){
+    wrap.innerHTML = '<div class="gcse-searchresults-only" data-queryParameterName="tq" data-linkTarget="_blank"></div>';
+    window.__gcse = Object.assign(window.__gcse || {}, { linkTarget: '_blank' });
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://cse.google.com/cse.js?cx=' + encodeURIComponent(S.cx1);
+    s.onerror = () => fallbackLink(query);
+    document.head.appendChild(s);
+    gsLoaded = true;
+    let waited = 0;
+    const t = setInterval(() => {
+      waited += 250;
+      if (window.google && google.search && google.search.cse && google.search.cse.element){
+        clearInterval(t); execElement(query);
+      } else if (waited > 12000){
+        clearInterval(t); gsLoaded = false; fallbackLink(query);
+      }
+    }, 250);
+  } else execElement(query);
+}
+function fallbackLink(query){
+  $('#gsWrap').innerHTML =
+    '<div class="notice"><b>Embedded results are blocked here.</b> Some networks and browser privacy modes block '
+    + '<code>cse.google.com</code>. Your query is fine — run it directly:<br><br>'
+    + '<a class="btn sm" target="_blank" rel="noopener" href="https://cse.google.com/cse?cx=' + encodeURIComponent(S.cx1)
+    + '#gsc.q=' + encodeURIComponent(query) + '">Open on the engine &rarr;</a> '
+    + '<span class="tiny muted">or paste an API key in the sidebar for in-app results.</span></div>';
+}
+function execElement(query){
+  try{
+    const el = google.search.cse.element.getElement('searchresults-only0')
+            || google.search.cse.element.getAllElements()[Object.keys(google.search.cse.element.getAllElements())[0]];
+    let full = query;
+    if (S.time) full += ' ' + dateOperator(S.time);
+    el.execute(full);
+    setTimeout(decorateElementResults, 1200);
+    setTimeout(decorateElementResults, 3000);
+  }catch(e){
+    $('#gsWrap').insertAdjacentHTML('afterbegin',
+      '<div class="notice">Embedded results could not load. Open the query on the engine directly: '
+      + '<a target="_blank" href="https://cse.google.com/cse?cx=' + encodeURIComponent(S.cx1)
+      + '&q=' + encodeURIComponent(query) + '">run search →</a></div>');
+  }
+}
+function dateOperator(t){
+  const now = new Date(); const d = new Date(now);
+  const map = {d7:7, m1:30, m3:91, m6:182, y1:365, y2:730};
+  d.setDate(d.getDate() - (map[t]||0));
+  return 'after:' + d.toISOString().slice(0,10);
+}
+function decorateElementResults(){
+  $$('#gsWrap a').forEach(a => { a.target = '_blank'; a.rel = 'noopener'; });
+  $$('.gsc-webResult .gsc-result').forEach(r => {
+    if (r.dataset.tx) return; r.dataset.tx = '1';
+    hlDom(r.querySelector('.gs-title'));
+    hlDom(r.querySelector('.gs-snippet'));
+    const a = r.querySelector('a.gs-title'); if (!a) return;
+    const bar = document.createElement('div'); bar.className = 'acts';
+    bar.style.cssText = 'display:flex;gap:6px;margin-top:8px;flex-wrap:wrap';
+    bar.appendChild(mkBtn('★ Shortlist', () => addBoard({title:a.textContent, link:a.href, snippet:(r.querySelector('.gs-snippet')||{}).textContent||''})));
+    bar.appendChild(mkBtn('✉ Find contact', () => { gotoContact(a.textContent, a.href); }));
+    r.appendChild(bar);
+  });
+}
+function mkBtn(label, fn){ const b=document.createElement('button'); b.className='btn sm'; b.textContent=label; b.onclick=e=>{e.preventDefault();fn();}; return b; }
+
+async function apiSearch(query){
+  $('#gsWrap').innerHTML = '';
+  const host = $('#apiResults');
+  host.innerHTML = '<div class="empty">Searching…</div>';
+  const engines = [S.cx1, S.cx2].filter(Boolean);
+  const calls = [];
+  engines.forEach(cx => {
+    for (let start = 1; start <= 11; start += 10){
+      const u = new URL('https://www.googleapis.com/customsearch/v1');
+      u.searchParams.set('key', S.key);
+      u.searchParams.set('cx', cx);
+      u.searchParams.set('q', query);
+      u.searchParams.set('num', '10');
+      u.searchParams.set('start', String(start));
+      if (S.time) u.searchParams.set('dateRestrict', S.time);
+      if (S.lang) u.searchParams.set('lr', S.lang);
+      calls.push(fetch(u).then(r=>r.json()).then(j=>({cx, j})).catch(e=>({cx, j:{error:{message:String(e)}}})));
+    }
+  });
+  const res = await Promise.all(calls);
+  const seen = new Set(); const rows = []; const errs = [];
+  res.forEach(({cx, j}) => {
+    if (j.error){ errs.push(j.error.message); return; }
+    (j.items||[]).forEach(it => {
+      const k = (it.link||'').replace(/[?#].*$/,'').toLowerCase();
+      if (seen.has(k)) return; seen.add(k);
+      rows.push(it);
+    });
+  });
+  if (!rows.length){
+    host.innerHTML = '<div class="notice"><b>No results.</b> '
+      + (errs.length ? esc(errs[0]) : 'Loosen a clause — every term is ANDed. Try removing “Must have” items or a noise filter.')
+      + '</div>';
+    return;
+  }
+  host.innerHTML = '<div class="qmeta" style="margin:0 0 12px"><b>' + rows.length + '</b> unique people surfaces'
+    + (errs.length ? ' · <span style="color:var(--warn)">' + esc(errs[0]) + '</span>' : '')
+    + ' &nbsp;<button class="btn sm" id="csv">Export CSV</button></div>'
+    + rows.map(cardHTML).join('');
+  $('#csv').onclick = () => exportCSV(rows);
+  window.__rows = rows;
+  host.querySelectorAll('[data-add]').forEach(b => b.onclick = () => addBoard(rows[+b.dataset.add]));
+  host.querySelectorAll('[data-contact]').forEach(b => b.onclick = () => {
+    const r = rows[+b.dataset.contact]; gotoContact(r.title, r.link);
+  });
+}
+function sourceOf(link){
+  try{ const h = new URL(link).hostname.replace(/^www\./,''); return h; }catch(e){ return ''; }
+}
+function cardHTML(it, i){
+  return '<div class="card">'
+   + '<div class="ttl">' + hl(cleanTitle(it.title)) + '<span class="src">' + esc(sourceOf(it.link)) + '</span></div>'
+   + '<div class="url">' + esc(it.link) + '</div>'
+   + '<div class="snip">' + hl(it.snippet||'') + '</div>'
+   + '<div class="acts">'
+   + '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(it.link) + '">Open</a>'
+   + '<button class="btn sm" data-add="' + i + '">★ Shortlist</button>'
+   + '<button class="btn sm" data-contact="' + i + '">✉ Find contact</button>'
+   + '</div></div>';
+}
+function cleanTitle(t){
+  return String(t||'').replace(/\s*[|\-–]\s*(LinkedIn|GitHub|X \(formerly Twitter\)|Twitter|Instagram|Facebook|Medium).*$/i,'').trim();
+}
+
+/* ---------- shortlist ---------- */
+function addBoard(it){
+  if (S.board.some(b => b.link === it.link)) return;
+  S.board.push({title:cleanTitle(it.title), link:it.link, snippet:it.snippet||'', source:sourceOf(it.link)});
+  $('#boardN').textContent = '(' + S.board.length + ')';
+}
+function renderBoard(){
+  const h = $('#p-board');
+  if (!S.board.length){ h.innerHTML = '<div class="empty">Nothing shortlisted yet. Star results to build a slate.</div>'; return; }
+  h.innerHTML = '<div class="qmeta" style="margin:0 0 12px"><b>' + S.board.length + '</b> shortlisted &nbsp;'
+    + '<button class="btn sm" id="bcsv">Export CSV</button> <button class="btn sm" id="bclr">Clear</button></div>'
+    + S.board.map((b,i) => '<div class="card"><div class="ttl">' + esc(b.title)
+      + '<span class="src">' + esc(b.source) + '</span></div><div class="url">' + esc(b.link) + '</div>'
+      + '<div class="snip">' + esc(b.snippet) + '</div>'
+      + '<div class="acts"><a class="btn sm" target="_blank" rel="noopener" href="' + esc(b.link) + '">Open \u2197</a>'
+      + '<button class="btn sm" data-rm="' + i + '">Remove</button></div></div>').join('');
+  $('#bcsv').onclick = () => exportCSV(S.board.map(b => ({title:b.title, link:b.link, snippet:b.snippet})));
+  $('#bclr').onclick = () => { S.board = []; $('#boardN').textContent=''; renderBoard(); };
+  h.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { S.board.splice(+b.dataset.rm,1); renderBoard(); $('#boardN').textContent = S.board.length?'('+S.board.length+')':''; });
+}
+function exportCSV(rows){
+  const head = ['name','url','source','snippet'];
+  const body = rows.map(r => [cleanTitle(r.title), r.link, sourceOf(r.link), (r.snippet||'').replace(/\s+/g,' ')]);
+  const csv = [head, ...body].map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  dl(new Blob([csv], {type:'text/csv'}), 'talent-xray.csv');
+}
+function dl(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+/* ---------- contact finder ---------- */
+let CONTACT = {name:'', company:'', domain:'', src:''};
+function gotoContact(name, link){
+  CONTACT.name = cleanTitle(name).split(/[,–|]/)[0].trim();
+  CONTACT.src = link;
+  $$('.tab').forEach(x => x.classList.remove('on'));
+  $$('.tab').find(x => x.dataset.p === 'contact').classList.add('on');
+  $$('.pane').forEach(p => p.classList.remove('on'));
+  $('#p-contact').classList.add('on');
+  renderContact();
+}
+function emailPatterns(name, domain){
+  const parts = name.toLowerCase().replace(/[^a-z\s\-']/g,'').split(/\s+/).filter(Boolean);
+  if (parts.length < 2 || !domain) return [];
+  const f = parts[0], l = parts[parts.length-1];
+  return [`${f}.${l}`,`${f[0]}${l}`,`${f}${l}`,`${f}_${l}`,`${f}`,`${l}${f[0]}`,`${f[0]}.${l}`,`${l}.${f}`]
+    .map(u => u + '@' + domain);
+}
+function renderContact(){
+  const h = $('#p-contact');
+  h.innerHTML = `
+   <div class="card">
+     <div class="ttl">Contact finder</div>
+     <div class="snip">Give a name and the employer's email domain. Everything below is a generated <em>hypothesis</em> — verify before you send.</div>
+     <div class="grid2" style="margin-top:12px">
+       <div><label class="f">Person</label><input type="text" id="cName" value="${esc(CONTACT.name)}" placeholder="Jordan Rivera"></div>
+       <div><label class="f">Employer</label><input type="text" id="cCo" value="${esc(CONTACT.company)}" placeholder="Sutter Health"></div>
+       <div><label class="f">Email domain</label><input type="text" id="cDom" value="${esc(CONTACT.domain)}" placeholder="sutterhealth.org"></div>
+       <div><label class="f">Source profile</label><input type="text" id="cSrc" value="${esc(CONTACT.src)}" placeholder="https://…"></div>
+     </div>
+     <div class="acts"><button class="btn primary sm" id="cGo">Generate</button></div>
+   </div>
+   <div id="cOut"></div>`;
+  ['cName','cCo','cDom','cSrc'].forEach(id => $('#'+id).oninput = e => {
+    CONTACT[{cName:'name',cCo:'company',cDom:'domain',cSrc:'src'}[id]] = e.target.value;
+  });
+  $('#cGo').onclick = contactOut;
+  if (CONTACT.name) contactOut();
+}
+function contactOut(){
+  const n = CONTACT.name, co = CONTACT.company, dom = CONTACT.domain.replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+  if (!n){ $('#cOut').innerHTML = '<div class="notice">Enter a name first.</div>'; return; }
+  const nq = '"' + n + '"';
+  const coq = co ? ' "' + co + '"' : '';
+  const hunts = [
+    ['Contact-data sites', nq + coq + ' more:contactdata'],
+    ['Direct email on any people surface', nq + coq + ' ("email" OR "@" OR "contact me" OR "reach me")'],
+    ['Phone / mobile', nq + coq + ' ("mobile" OR "cell" OR "direct line" OR "tel")'],
+    ['Personal site & link-in-bio', nq + ' more:social more:profiles'],
+    ['Conference speaker bio', nq + coq + ' more:rosters'],
+    ['Published work (email often in author block)', nq + coq + ' more:academic'],
+    ['CV or resume document', nq + coq + ' more:resumes']
+  ];
+  const ext = [
+    ['Google (whole web)', 'https://www.google.com/search?q=' + encodeURIComponent(nq + coq + ' (email OR contact)')],
+    ['LinkedIn people search', 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(n + ' ' + co)],
+    ['RocketReach', 'https://rocketreach.co/search?name=' + encodeURIComponent(n)],
+    ['Hunter — verify pattern', 'https://hunter.io/search/' + encodeURIComponent(dom||'')],
+    ['GitHub commit email', 'https://github.com/search?q=' + encodeURIComponent(n) + '&type=users']
+  ];
+  const pats = emailPatterns(n, dom);
+  $('#cOut').innerHTML =
+    '<div class="card"><div class="ttl">Run inside the engine</div>'
+    + hunts.map(([l,qq]) => '<div style="margin:9px 0"><div class="tiny muted">'+esc(l)+'</div>'
+        + '<div class="mono" style="margin:3px 0 5px">'+esc(qq)+'</div>'
+        + '<button class="btn sm" data-run="'+esc(qq)+'">Search this</button></div>').join('')
+    + '</div>'
+    + '<div class="card"><div class="ttl">Outside the engine</div><div class="acts">'
+    + ext.map(([l,u]) => '<a class="btn sm" target="_blank" rel="noopener" href="'+esc(u)+'">'+esc(l)+'</a>').join('')
+    + '</div></div>'
+    + (pats.length
+      ? '<div class="card"><div class="ttl">Likely email patterns <span class="src">unverified</span></div>'
+        + '<div class="snip">Ordered by how common the pattern is. Verify with a deliverability check before sending — do not blast all eight.</div>'
+        + '<table class="k" style="margin-top:10px">'
+        + pats.map(p => '<tr><td class="mono">'+esc(p)+'</td><td><button class="btn sm" data-cp="'+esc(p)+'">Copy</button> '
+            + '<a class="btn sm" href="mailto:'+esc(p)+'">Draft</a></td></tr>').join('')
+        + '</table></div>'
+      : '<div class="notice">Add an <b>email domain</b> to generate address patterns.</div>');
+  $$('#cOut [data-run]').forEach(b => b.onclick = () => {
+    $('#q').value = b.dataset.run;
+    $$('.tab').forEach(x=>x.classList.remove('on')); $$('.tab')[0].classList.add('on');
+    $$('.pane').forEach(p=>p.classList.remove('on')); $('#p-results').classList.add('on');
+    runSearch();
+  });
+  $$('#cOut [data-cp]').forEach(b => b.onclick = () => { navigator.clipboard.writeText(b.dataset.cp); flash(b,'Copied'); });
+}
+
+/* ---------- config ---------- */
+function exportCfg(){
+  dl(new Blob([JSON.stringify(S, null, 1)], {type:'application/json'}), 'talent-xray-setup.json');
+}
+function importCfg(e){
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { try{ Object.assign(S, JSON.parse(r.result)); location.hash=''; hydrate(); }catch(err){ alert('Bad file'); } };
+  r.readAsText(f);
+}
+function hydrate(){
+  $('#industry').value = S.industry; renderRoles(); $('#role').value = S.role||'';
+  $('#time').value = S.time; $('#lang').value = S.lang;
+  $('#cx1').value = S.cx1; $('#cx2').value = S.cx2; $('#apikey').value = S.key;
+  renderTitles();renderMust();renderAny();renderLoc();renderCo();renderEdu();renderEx();
+  renderSen();renderNeg();renderFacets();renderCreds();
+  $('#boardN').textContent = S.board.length ? '('+S.board.length+')' : '';
+  refresh();
+}
+
+/* ---------- playbook ---------- */
+function renderHelp(){
+  $('#p-help').innerHTML = `
+  <div class="card"><div class="ttl">What this actually searches</div>
+    <div class="snip">A Google Programmable Search Engine restricted to <b>people surfaces only</b> — profiles, social bios,
+    portfolios, CVs, credential registries, contact records and rosters. Company marketing pages and job postings are
+    largely absent by construction, which is why a two-word query returns candidates instead of ads.</div>
+    <table class="k" style="margin-top:12px">
+      ${Object.keys(FACETS).map(k=>`<tr><td>${esc(FACETS[k].label)}</td><td>${esc(FACETS[k].blurb)}</td></tr>`).join('')}
+    </table>
+  </div>
+  <div class="card"><div class="ttl">How the query is assembled</div>
+    <table class="k">
+      <tr><td>Job titles</td><td>OR'd inside one group — add every phrasing the market uses</td></tr>
+      <tr><td>Seniority</td><td>a second OR group, ANDed against titles</td></tr>
+      <tr><td>Must have</td><td>each term ANDed — three of these will cut your result count by ~90%</td></tr>
+      <tr><td>Any of</td><td>one OR group — the safe place to put skills</td></tr>
+      <tr><td>Locations</td><td>OR'd; metro presets expand to the aliases people actually write</td></tr>
+      <tr><td>Noise filters</td><td>negative operators; “Directory index pages” is what kills LinkedIn junk</td></tr>
+      <tr><td>Source type</td><td><code>more:label</code> — the engine's own refinement labels</td></tr>
+      <tr><td>Freshness</td><td><code>dateRestrict</code> in API mode, <code>after:</code> in embedded mode</td></tr>
+    </table>
+  </div>
+  <div class="card"><div class="ttl">Search craft that actually moves hit rate</div>
+    <table class="k">
+      <tr><td>Search the artifact</td><td>People rarely write their title the way you do. Search what they <em>made</em>: a protocol, a repo, a patent, a talk.</td></tr>
+      <tr><td>Two must-haves max</td><td>Every ANDed term is a filter on an already-narrow corpus. Start loose, tighten once.</td></tr>
+      <tr><td>Use the credential</td><td>“CRNA”, “CSCS”, “Series 7”, “journeyman” — licences are precise and self-declared.</td></tr>
+      <tr><td>Mine the roster</td><td>One conference speaker list or association page beats fifty profile queries.</td></tr>
+      <tr><td>Go sideways</td><td>Found one great person? Search their employer + title to surface the peer set.</td></tr>
+      <tr><td>Freshness = intent</td><td>A profile updated in the last 30 days is a stronger signal than any keyword.</td></tr>
+    </table>
+  </div>
+  <div class="card"><div class="ttl">Limits worth knowing</div>
+    <table class="k">
+      <tr><td>50 domains per engine</td><td>Google's hard cap. That is why coverage is split across engines — paste a second cx to merge.</td></tr>
+      <tr><td>Embedded vs API</td><td>Without a key you get free ad-supported results from one engine. With a key you get both engines merged, deduped and exportable (100 free queries/day).</td></tr>
+      <tr><td>Index, not database</td><td>Results reflect what Google has crawled. Gated sites (Doximity, ZoomInfo) show teaser pages, not full records.</td></tr>
+      <tr><td>Whole-web mode ends</td><td>Google discontinues “search the entire web” for programmable engines on 1 Jan 2027 — a curated corpus is the durable design.</td></tr>
+    </table>
+  </div>
+  <div class="card"><div class="ttl">Use it responsibly</div>
+    <div class="snip">Everything here is public, crawlable material. Email patterns are guesses, not verified addresses.
+    Hiring outreach is regulated — keep records defensible, honour opt-outs, and don't collect protected characteristics
+    you wouldn't be willing to show a candidate.</div>
+  </div>`;
+}
+
+init();
+
+</script>
+</body>
+</html>
