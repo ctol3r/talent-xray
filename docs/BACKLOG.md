@@ -18,7 +18,13 @@ Ideas and known gaps land here instead of creeping into the current wave.
 
 - Playwright e2e harness — added with the first wave that has a UI acceptance test (W2),
   not before.
-- CI deploy to Cloudflare (`CLOUDFLARE_API_TOKEN` secret + workflow step) — once Chris
-  has run `wrangler login` and the first manual `pnpm cf:deploy` has succeeded.
+- CI deploy to Cloudflare (`CLOUDFLARE_API_TOKEN` secret + workflow step). Unblocked —
+  `wrangler login` and the first `pnpm cf:deploy` both succeeded 2026-08-24. Do it once
+  GitHub Actions itself runs again (see below).
+- **GitHub Actions is blocked account-wide on private repos**: the account's payment
+  method is rejected ("Invalid payment method - authorization hold failed", Visa ending
+  1988). Workflows on this repo end in `startup_failure` in 0s; public repos still run
+  because their Actions minutes are free. Not a code defect — the committed pipeline was
+  verified green on a fresh clone. Only Chris can fix it (card entry).
 - Pull the protected-characteristics grep test forward from W5 into W1, landing with
   the first schema migration — LEGAL.md guardrail 4 is doctrine-only until it exists.

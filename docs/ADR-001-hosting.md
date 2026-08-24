@@ -45,16 +45,29 @@ is plain Next.js and moves with a config change.
 
 - `open-next.config.ts` — OpenNext Cloudflare adapter config
 - `wrangler.jsonc` — Worker name `talent-xray`, `nodejs_compat`, assets binding
-- `pnpm cf:build` — builds the Worker bundle (verified green)
-- `pnpm cf:deploy` — builds and deploys; **requires a one-time `wrangler login`** by
-  Chris (account creation and auth cannot be done by the build agent)
+- `pnpm cf:build` — builds the Worker bundle
+- `pnpm cf:deploy` — builds and deploys
+
+## Status — LIVE
+
+Deployed 2026-08-24 to the `ct@sourcd.xyz` Cloudflare account
+(`bc965e0dd816682e7846677e19449200`):
+
+**https://talent-xray.talent-xray.workers.dev** — verified HTTP 200, page renders.
+
+Notes from the first deploy: `wrangler login` is done on this machine; the account
+subdomain `talent-xray.workers.dev` already existed; the workers.dev route is enabled
+for both production and preview; and the TLS certificate took ~2 minutes to provision,
+during which the URL failed to connect despite DNS resolving. That delay is expected on
+a first deploy, not a fault.
 
 ## Consequences
 
 - Production deploys are `pnpm cf:deploy` (later: CI-driven with a
   `CLOUDFLARE_API_TOKEN` secret).
-- The Vercel Hobby staging page must never gain Stripe, auth, or any commercial
-  surface. Kill it once Cloudflare prod is live.
+- Vercel is now irrelevant to this product. The suspended VITALCV team still matters for
+  VitalCV's own hosting, but nothing in Talent X-Ray depends on it. Do not reintroduce a
+  Vercel deploy for this repo without revisiting this ADR.
 - Supabase (free tier, commercial use permitted) is unaffected by any of this.
 - Revisit only if OpenNext breaks on a future Next.js major and the fix costs more
   than a day.
