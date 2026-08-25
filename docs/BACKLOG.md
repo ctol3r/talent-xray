@@ -26,5 +26,23 @@ Ideas and known gaps land here instead of creeping into the current wave.
   1988). Workflows on this repo end in `startup_failure` in 0s; public repos still run
   because their Actions minutes are free. Not a code defect — the committed pipeline was
   verified green on a fresh clone. Only Chris can fix it (card entry).
+
+  Stay on GitHub — migrating CI elsewhere was evaluated 2026-08-24 and every option is
+  worse. GitHub Pro includes 3,000 private-repo Actions minutes/month, which this
+  pipeline fits inside for free. Codeberg is disqualified (FLOSS-scoped terms, and its
+  CI requires public repos). Bitbucket Free allows only 50 build minutes/month, roughly
+  6–15 runs. GitLab Free gives 400 minutes but gates CI behind risk-based identity
+  verification that can itself demand a payment method — the very thing that is broken
+  (and GitLab's terms pages 403 automated fetches, so its commercial-use stance is
+  unverified). Self-hosted Forgejo/Gitea is unlimited and unrestricted, but means
+  running a runner and porting `ci.yml`, whose Actions dialect is deliberately
+  "familiar, not compatible" with GitHub's.
+
+  Note for whoever debugs this next: GitHub's docs imply a within-quota account should
+  not be blocked at all ("usage is blocked once you use up your quota"), which
+  contradicts what this account is actually doing. Do not argue from the free quota —
+  what clears the flag is a card that successfully authorizes, and failing that,
+  GitHub Billing Support clearing it manually.
+
 - Pull the protected-characteristics grep test forward from W5 into W1, landing with
   the first schema migration — LEGAL.md guardrail 4 is doctrine-only until it exists.
