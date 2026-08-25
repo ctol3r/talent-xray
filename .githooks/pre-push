@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Runs the verify gates before every push. Bypass with `git push --no-verify`.
+#
+# Enabled by `git config core.hooksPath .githooks` (already set in this clone; a
+# fresh clone needs `pnpm hooks` once).
+
+set -euo pipefail
+
+echo "▸ pre-push: running pnpm verify"
+
+if ! pnpm verify; then
+  echo ""
+  echo "✗ Push aborted — verify failed."
+  echo "  Fix the failure, or bypass deliberately with: git push --no-verify"
+  exit 1
+fi
+
+echo "✓ verify passed — pushing."
