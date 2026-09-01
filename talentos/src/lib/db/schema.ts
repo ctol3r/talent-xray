@@ -1,5 +1,5 @@
 /**
- * TalentOS database schema. See DATA_MODEL.md for the narrative version.
+ * Application database schema. See DATA_MODEL.md for the narrative version.
  *
  * Deliberately absent everywhere (enforced by tests/unit/fair-hiring.test.ts):
  * columns or JSON keys for protected characteristics.
