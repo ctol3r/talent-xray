@@ -36,11 +36,13 @@ export class GenerationFailedError extends Error {
   }
 }
 
-export type ProviderKind = "anthropic" | "mock";
+export type ProviderKind = "anthropic" | "session" | "mock";
 
 export function resolveProviderKind(): ProviderKind {
   const configured = process.env.TALENTOS_MODEL_PROVIDER?.toLowerCase();
-  return configured === "mock" ? "mock" : "anthropic";
+  if (configured === "mock") return "mock";
+  if (configured === "session") return "session";
+  return "anthropic";
 }
 
 export function resolveModelId(): string {
@@ -67,6 +69,15 @@ export function getProviderStatus(): ProviderStatus {
       configured: true,
       detail:
         "Mock provider (TALENTOS_MODEL_PROVIDER=mock). Output is deterministic test fixture data, watermarked as mock — not real analysis.",
+    };
+  }
+  if (kind === "session") {
+    return {
+      kind,
+      model: "claude-session",
+      configured: true,
+      detail:
+        "Claude session provider — generations are fulfilled by a Claude Code/claude.ai session via the outbox (no API key). See docs/DECISIONS.md.",
     };
   }
   const hasCredential = Boolean(

@@ -10,6 +10,10 @@ import type { Db } from "@/lib/db/client";
 import { aiGenerations } from "@/lib/db/schema";
 import { createAnthropicProvider } from "./anthropic";
 import {
+  createSessionProvider,
+  SessionFulfillmentPendingError,
+} from "./session";
+import {
   GenerationRefusedError,
   ProviderNotConfiguredError,
   getProviderStatus,
@@ -99,7 +103,10 @@ export async function runAiTask<C, T>(
     if (status.kind === "mock") {
       raw = def.mock(ctx);
     } else {
-      const provider: ModelProvider = createAnthropicProvider(status.model);
+      const provider: ModelProvider =
+        status.kind === "session"
+          ? createSessionProvider(status.model)
+          : createAnthropicProvider(status.model);
       raw = await provider.generateStructured({
         schema: def.schema,
         schemaName: def.schemaName,
@@ -109,6 +116,8 @@ export async function runAiTask<C, T>(
       });
     }
   } catch (error) {
+    // A pending session handoff is not a failed generation — no audit row.
+    if (error instanceof SessionFulfillmentPendingError) throw error;
     const message = error instanceof Error ? error.message : String(error);
     await audit(
       error instanceof GenerationRefusedError ? "refused" : "failed",

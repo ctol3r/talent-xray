@@ -39,6 +39,16 @@ pnpm dev                   # http://localhost:3000
 Without an API key the app runs fully — AI features show an honest
 "provider not configured" state instead of generating. `TALENTOS_MODEL`
 overrides the default model (`claude-opus-5`).
+
+No API key at all? `TALENTOS_MODEL_PROVIDER=session` makes a Claude session
+the model: each generation writes a request file (prompt + JSON schema) to
+`data/session-outbox/`, a Claude Code / claude.ai session writes the output
+JSON back, and the normal pipeline (zod validation, fair-hiring scan, audit,
+persist) resumes on re-run. Model usage is covered by your Claude
+subscription — see docs/DECISIONS.md D-008. The CAIS golden benchmark runs
+key-free this way via `pnpm golden:session` (API-key edition:
+`pnpm golden:cais`).
+
 `TALENTOS_MODEL_PROVIDER=mock` enables the deterministic, watermarked mock
 provider used by tests — mock output is labeled MOCK in the UI and is never
 real analysis.

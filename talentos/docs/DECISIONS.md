@@ -122,3 +122,35 @@ hardcoded downgrades.
 
 **Tradeoffs.** Higher per-call cost; acceptable for a single power user, and
 overridable per environment.
+
+## D-008 — Session provider: Claude-as-model with no API key
+
+**Decision.** Third `ProviderKind` `"session"`: generations are written as
+request files (`system`, `user`, JSON schema, response path) to
+`TALENTOS_SESSION_OUTBOX` and the call throws
+`SessionFulfillmentPendingError`; a Claude session (Claude Code / claude.ai,
+covered by the owner's Claude subscription) writes the output JSON to the
+response path; the caller re-runs and the normal pipeline (zod validation,
+fair-hiring scan, audit, persist) proceeds unchanged. Requests are keyed by a
+prompt hash, so unchanged inputs reuse an existing response and changed
+inputs produce a fresh request. `pnpm golden:session` drives the CAIS golden
+benchmark end to end through this provider.
+
+**Alternatives.** (a) Require an Anthropic API key (rejected as the only
+path: the owner asked for a key-free mode; API mode remains available).
+(b) A claude.ai Artifact build of TalentOS using artifact runtime
+capabilities (candidate for a companion surface, not a replacement — the
+local app owns the database, imports, and analytics).
+(c) Driving the services directly from a Claude session without a contract
+(rejected: outputs would bypass schema validation, the fair-hiring scan, and
+the audit log).
+
+**Reason.** Zero marginal cost under a Claude subscription; the exact same
+prompts, schemas, validation, and persistence as API mode, so quality checks
+compare like for like; and the pending-request state is honest — nothing is
+generated until a real model fulfills it.
+
+**Tradeoffs.** Not real-time in the UI (a generation waits until a session
+fulfills it); the fulfilling model is whatever the session runs (recorded as
+`claude-session` in generation meta); stale responses are reused if inputs
+are byte-identical — delete the response file to force regeneration.
