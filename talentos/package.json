@@ -15,6 +15,7 @@
     "db:migrate": "tsx src/lib/db/migrate.ts",
     "db:seed": "tsx src/lib/db/seed-cli.ts",
     "e2e": "playwright test",
+    "smoke": "tsx scripts/critical-path.mts",
     "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },
   "dependencies": {
