@@ -1,6 +1,6 @@
 import {
-  channelSuggestionsPayloadSchema,
-  type ChannelSuggestionsPayload,
+  modelChannelSuggestionsPayloadSchema,
+  type ModelChannelSuggestionsPayload,
 } from "@/lib/core/payloads";
 import type { ChannelKind } from "@/lib/core/enums";
 import { CHANNEL_KINDS } from "@/lib/core/enums";
@@ -11,11 +11,11 @@ import { defineAiTask } from "../run";
 
 export const channelsTask = defineAiTask<
   ProjectContext,
-  ChannelSuggestionsPayload
+  ModelChannelSuggestionsPayload
 >({
   task: "channel_discovery",
   schemaName: "ChannelSuggestions",
-  schema: channelSuggestionsPayloadSchema,
+  schema: modelChannelSuggestionsPayloadSchema,
   system: () => `${systemPrelude("a sourcing-channel researcher")}
 
 Determine WHERE candidates for this specific profession actually exist and rank the channels for THIS search: registries, communities, publications, conferences, associations, universities, portfolios, open-source, directories, job boards (general/specialized/association/regional), alumni networks, referral sources, events, social networks, search engines, databases.

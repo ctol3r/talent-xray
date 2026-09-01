@@ -264,8 +264,8 @@ const guardrails = [
   {
     name: "Market claims never fabricate certainty (none marked 'verified')",
     ok: market.output.sections
-      .flatMap((s) => s.claims)
-      .every((c) => c.certainty !== "verified"),
+      .flatMap((s) => s.claims.map((c): string => c.certainty))
+      .every((certainty) => certainty !== "verified"),
   },
   {
     name: "X-ray queries composed (site: operators present)",

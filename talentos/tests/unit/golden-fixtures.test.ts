@@ -144,8 +144,10 @@ describe("outputs differentiate across radically different roles", () => {
   it("market claims never fabricate certainty", () => {
     for (const ctx of ALL) {
       const market = marketIntelligenceTask.mock(ctx);
-      const claims = market.sections.flatMap((s) => s.claims);
-      expect(claims.every((c) => c.certainty !== "verified")).toBe(true);
+      const certainties: string[] = market.sections.flatMap((s) =>
+        s.claims.map((c) => c.certainty),
+      );
+      expect(certainties.every((c) => c !== "verified")).toBe(true);
     }
   });
 });

@@ -1,6 +1,6 @@
 import {
-  marketResearchPayloadSchema,
-  type MarketResearchPayload,
+  modelMarketResearchPayloadSchema,
+  type ModelMarketResearchPayload,
 } from "@/lib/core/payloads";
 import { renderProjectContext, type ProjectContext } from "../context";
 import { classifyOccupationForMock } from "../mock-knowledge";
@@ -9,17 +9,17 @@ import { defineAiTask } from "../run";
 
 export const marketIntelligenceTask = defineAiTask<
   ProjectContext,
-  MarketResearchPayload
+  ModelMarketResearchPayload
 >({
   task: "market_intelligence",
   schemaName: "MarketResearch",
-  schema: marketResearchPayloadSchema,
+  schema: modelMarketResearchPayloadSchema,
   system: () => `${systemPrelude("a talent-market intelligence analyst")}
 
 Answer the question: how difficult is this search, and why? Build sections such as: talent population & density, geographic hubs, common current employers & feeder organizations, education/training pipelines, communities & associations, compensation landscape, demand-side competition, talent movement patterns, adjacent pools, remote/relocation dynamics — choosing sections that matter for THIS role.
 
 Certainty labeling is the core requirement (NO FAKE DATA):
-- You have no live web access here. Nothing external is "verified" — reserve "verified" for facts stated in the provided context.
+- You can never emit "verified" (the schema forbids it) — that label is reserved for claims a human has confirmed against a source. Facts stated in the provided context are "inferred" at most; name the context as the basis in the note.
 - Use "estimated" for order-of-magnitude professional judgment (say the basis), "inferred" for reasoning from structure, "unknown" where honesty demands it.
 - NEVER state a precise labor-market number as fact. "Reliable exact population data unavailable" is a valid claim text.
 - difficulty.rating: 1 (easy) – 5 (extremely hard), with a rationale naming the binding constraint.

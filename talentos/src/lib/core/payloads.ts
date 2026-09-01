@@ -207,6 +207,46 @@ export type ChannelSuggestionsPayload = z.infer<
   typeof channelSuggestionsPayloadSchema
 >;
 
+// ── Model-output restrictions (NO FAKE DATA, enforced in the schema) ────────
+// "verified" is reserved for claims a human confirmed against a source; model
+// output can never carry it. Generation tasks use these narrowed schemas, so
+// both API structured outputs and session responses are constrained; the wide
+// schemas above remain the storage/edit contract where humans may verify.
+
+export const modelCertaintySchema = z.enum([
+  "estimated",
+  "inferred",
+  "unknown",
+]);
+
+export const modelClaimSchema = claimSchema.extend({
+  certainty: modelCertaintySchema,
+});
+
+export const modelMarketResearchPayloadSchema =
+  marketResearchPayloadSchema.extend({
+    sections: z.array(
+      z.object({
+        id: z.string().optional(),
+        title: z.string(),
+        claims: z.array(modelClaimSchema),
+      }),
+    ),
+  });
+export type ModelMarketResearchPayload = z.infer<
+  typeof modelMarketResearchPayloadSchema
+>;
+
+export const modelChannelSuggestionsPayloadSchema =
+  channelSuggestionsPayloadSchema.extend({
+    channels: z.array(
+      channelSuggestionSchema.extend({ certainty: modelCertaintySchema }),
+    ),
+  });
+export type ModelChannelSuggestionsPayload = z.infer<
+  typeof modelChannelSuggestionsPayloadSchema
+>;
+
 // ── Module 8: Search strings (AI expansion output) ──────────────────────────
 
 export const querySuggestionSchema = z.object({
