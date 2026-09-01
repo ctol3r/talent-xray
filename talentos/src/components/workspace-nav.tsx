@@ -13,6 +13,7 @@ const MODULES: { path: string; label: string; exact?: boolean }[] = [
   { path: "/strategy", label: "Strategy" },
   { path: "/sources", label: "Sources" },
   { path: "/strings", label: "Strings" },
+  { path: "/discover", label: "Discover" },
   { path: "/candidates", label: "Candidates" },
   { path: "/outreach", label: "Outreach" },
   { path: "/screen", label: "Screen" },

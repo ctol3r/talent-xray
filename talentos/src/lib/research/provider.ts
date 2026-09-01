@@ -6,6 +6,8 @@
  * with url/title/source/snippet/query/retrievedAt provenance.
  */
 
+import { createGoogleCseProvider } from "./google-cse";
+
 export interface ResearchResult {
   url: string;
   title?: string;
@@ -21,7 +23,11 @@ export interface ResearchProvider {
   readonly configured: boolean;
   search(
     query: string,
-    options?: { limit?: number },
+    options?: {
+      limit?: number;
+      /** Provider-specific engine/index hint (e.g. CSE "core" | "reach"). */
+      engine?: string;
+    },
   ): Promise<ResearchResult[]>;
 }
 
@@ -37,5 +43,9 @@ export const noneResearchProvider: ResearchProvider = {
 };
 
 export function getResearchProvider(): ResearchProvider {
+  const configured = process.env.TALENTOS_RESEARCH_PROVIDER?.toLowerCase();
+  if (configured === "google-cse") {
+    return createGoogleCseProvider();
+  }
   return noneResearchProvider;
 }

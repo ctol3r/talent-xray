@@ -83,3 +83,12 @@ graph, critic + one revision pass, Crew tab, candidate-agent kickoff,
 `pnpm crew:work`. Acceptance: tests/unit/crew.test.ts (6 tests — full mock
 crew run, dependency gating, revision path, persistence, candidate chain,
 restart semantics); full verify green (57 unit tests, build).
+
+## W8 — Discovery execution (CLOSED 2026-09-01)
+
+Live people-only discovery: `google-cse` ResearchProvider backed by the
+two Talent X-Ray engines (BYO key), Discover tab running composed strings
+with per-result explicit save (URL or candidate). Result pages never
+fetched; nothing persists without a save. Acceptance:
+tests/unit/discovery.test.ts (6 tests); full verify green (63 unit tests,
+build).
