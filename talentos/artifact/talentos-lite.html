@@ -617,9 +617,29 @@ Data honesty (mandatory):
 Everything you produce is a draft the recruiter can edit; write content that is specific enough to be worth editing.`;
   }
 
+  /* Word-boundary trait scan (ported from lib/domain/fair-hiring — the
+     naive substring version false-positived on words like "language"). A
+     hit is a mandatory-review flag, not a block. */
+  const TRAIT_SCAN_PATTERNS = [
+    ["race/ethnicity", /\brace\b|\bethnicit/i],
+    ["religion", /\breligio(n|us)\b/i],
+    ["age", /\bage\b|\byears?\s+old\b/i],
+    ["gender identity", /\bgender\b/i],
+    [
+      "disability/health",
+      /\bdisabilit|\bdisabled\b|\bmedical condition\b|\bhealth condition\b/i,
+    ],
+    ["national origin", /\bnational origin\b/i],
+    ["sexual orientation", /\bsexual orientation\b/i],
+    ["pregnancy/family status", /\bpregnan|\bmarital\b|\bfamily status\b/i],
+    ["political affiliation", /\bpolitical (affiliation|beliefs?|views?)\b/i],
+    ["veteran status", /\bveteran status\b/i],
+  ];
   function scanForProtectedTraits(value) {
-    const text = JSON.stringify(value).toLowerCase();
-    return PROTECTED_TRAITS.filter((t) => text.includes(t));
+    const text = JSON.stringify(value);
+    return TRAIT_SCAN_PATTERNS.filter(([, re]) => re.test(text)).map(
+      ([trait]) => trait,
+    );
   }
 
   /* Model output may never claim "verified" (NO FAKE DATA). Returns how many
