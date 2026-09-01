@@ -24,7 +24,6 @@ function migrationsFolder(): string {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __talentosDb: Db | undefined;
 }
 

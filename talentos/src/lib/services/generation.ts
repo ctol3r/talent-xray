@@ -4,7 +4,6 @@
  * generative capability; all writes happen here, not in the AI layer.
  */
 import { desc, eq } from "drizzle-orm";
-import type { GenerationMeta } from "@/lib/core/enums";
 import type { QuerySuggestion } from "@/lib/core/payloads";
 import { composeQueries } from "@/lib/domain/search-strings";
 import type { Db } from "@/lib/db/client";
