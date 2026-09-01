@@ -154,3 +154,25 @@ generated until a real model fulfills it.
 fulfills it); the fulfilling model is whatever the session runs (recorded as
 `claude-session` in generation meta); stale responses are reused if inputs
 are byte-identical — delete the response file to force regeneration.
+
+## D-009 — Crew orchestration as a DB-backed job queue (W7)
+
+**Decision.** Per-search agent crews are a `crew_jobs` queue: dependency-
+ordered specialist generation jobs plus a critic pass per artifact and at
+most one revision pass (critique injected into the generation context).
+Jobs reuse the existing generate\* services untouched, so every agent
+output flows through zod validation, the fair-hiring scan, the audit log,
+and lands as an editable draft. With the session provider a job parks on a
+request file (awaiting_model/critiquing/revising) until a Claude session
+fulfills it; `pnpm crew:work` drives the queue headlessly and the Crew tab
+drives it from the UI.
+
+**Alternatives.** (a) In-memory orchestration inside one server action
+(rejected: not resumable, invisible, dies with the request). (b) External
+workflow engine (rejected: local-first, zero-ops constraint). (c) Unlimited
+generator↔critic loops (rejected: unbounded cost; one revision pass keeps
+the human in the loop as the real reviewer).
+
+**Tradeoffs.** Sequential dependency chain favors context quality over
+wall-clock; the critic doubles per-artifact model calls; outreach has no
+critic pass yet (persists as rows, not a single artifact).

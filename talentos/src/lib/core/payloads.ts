@@ -516,3 +516,13 @@ export function ensureIds<T>(value: T, isListItem = false): T {
   }
   return value;
 }
+
+// ── W7: crew critic ─────────────────────────────────────────────────────────
+
+/** The critic agent's structured review of one generated artifact. */
+export const critiquePayloadSchema = z.object({
+  verdict: z.enum(["accept", "revise"]),
+  strengths: z.array(z.string()),
+  issues: z.array(z.string()),
+});
+export type CritiquePayload = z.infer<typeof critiquePayloadSchema>;

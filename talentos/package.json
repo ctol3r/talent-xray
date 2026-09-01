@@ -18,6 +18,7 @@
     "smoke": "tsx scripts/critical-path.mts",
     "golden:cais": "tsx scripts/golden-cais.mts",
     "golden:session": "tsx scripts/golden-cais-session.mts",
+    "crew:work": "tsx scripts/crew-worker.mts",
     "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },
   "dependencies": {

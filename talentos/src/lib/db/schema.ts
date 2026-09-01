@@ -7,6 +7,7 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type {
   Breadth,
+  CrewJobStatus,
   Certainty,
   ChannelKind,
   ChannelPriority,
@@ -24,6 +25,7 @@ import type {
 import type {
   CandidateProfilePayload,
   ClosePlanPayload,
+  CritiquePayload,
   EvidenceAlignmentPayload,
   IntakePayload,
   InterviewPlanPayload,
@@ -550,6 +552,32 @@ export const aiGenerations = sqliteTable("ai_generations", {
   ),
   candidateId: text("candidate_id").references(() => candidates.id),
   createdAt: createdAt(),
+});
+
+// ── W7: crew orchestration ──────────────────────────────────────────────────
+
+export const crewJobs = sqliteTable("crew_jobs", {
+  id: uuid(),
+  searchProjectId: text("search_project_id")
+    .notNull()
+    .references(() => searchProjects.id),
+  candidateId: text("candidate_id").references(() => candidates.id),
+  task: text("task").notNull(),
+  status: text("status").notNull().$type<CrewJobStatus>().default("queued"),
+  /** Task keys that must be "done" before this job may run. */
+  dependsOn: text("depends_on", { mode: "json" })
+    .notNull()
+    .$type<string[]>()
+    .default([]),
+  attempt: integer("attempt").notNull().default(0),
+  /** Session-provider handoff file, when status is awaiting_model. */
+  requestPath: text("request_path"),
+  critique: text("critique", { mode: "json" }).$type<CritiquePayload>(),
+  error: text("error"),
+  startedAt: text("started_at"),
+  finishedAt: text("finished_at"),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 export const settings = sqliteTable("settings", {

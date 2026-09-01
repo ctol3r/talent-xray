@@ -60,139 +60,453 @@
     --chip-ink: #fdfcf9;
   }
 
-  * { box-sizing: border-box; }
-  html { height: 100%; }
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    height: 100%;
+  }
   body {
-    margin: 0; height: 100%;
-    background: var(--ink); color: var(--text);
+    margin: 0;
+    height: 100%;
+    background: var(--ink);
+    color: var(--text);
     font: 14px/1.55 var(--sans);
     -webkit-font-smoothing: antialiased;
   }
-  #app { display: flex; height: 100vh; overflow: hidden; }
+  #app {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
 
   /* ── Rail ──────────────────────────────────────────────────────────── */
   .rail {
-    width: 252px; flex: none; display: flex; flex-direction: column;
-    border-right: 1px solid var(--line); background: var(--surface);
+    width: 252px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
     overflow-y: auto;
   }
-  .brand { padding: 16px 16px 10px; border-bottom: 1px solid var(--line-soft); }
-  .brand h1 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: 0.01em; }
-  .brand h1 span { color: var(--accent); }
-  .brand small { color: var(--muted); font-size: 11px; display: block; margin-top: 2px; }
-  .rail-section { padding: 12px 10px 4px; }
+  .brand {
+    padding: 16px 16px 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .brand h1 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .brand h1 span {
+    color: var(--accent);
+  }
+  .brand small {
+    color: var(--muted);
+    font-size: 11px;
+    display: block;
+    margin-top: 2px;
+  }
+  .rail-section {
+    padding: 12px 10px 4px;
+  }
   .rail-label {
-    font: 600 10px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.12em;
-    color: var(--faint); padding: 0 6px 6px;
+    font: 600 10px/1 var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--faint);
+    padding: 0 6px 6px;
   }
   .search-item {
-    display: block; width: 100%; text-align: left; border: 0; background: none;
-    color: var(--text); font: inherit; padding: 7px 8px; border-radius: 6px; cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    padding: 7px 8px;
+    border-radius: 6px;
+    cursor: pointer;
   }
-  .search-item:hover { background: var(--surface-2); }
-  .search-item.active { background: var(--accent-soft); }
-  .search-item .si-name { font-weight: 600; font-size: 13px; }
-  .search-item .si-sub { color: var(--muted); font-size: 11.5px; }
-  .modnav { padding: 4px 10px 16px; }
+  .search-item:hover {
+    background: var(--surface-2);
+  }
+  .search-item.active {
+    background: var(--accent-soft);
+  }
+  .search-item .si-name {
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .search-item .si-sub {
+    color: var(--muted);
+    font-size: 11.5px;
+  }
+  .modnav {
+    padding: 4px 10px 16px;
+  }
   .mod-item {
-    display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none;
-    color: var(--muted); font: inherit; font-size: 12.5px; padding: 5px 8px;
-    border-radius: 6px; cursor: pointer; text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 12.5px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
   }
-  .mod-item:hover { background: var(--surface-2); color: var(--text); }
-  .mod-item.active { color: var(--text); background: var(--surface-2); }
-  .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--line); }
-  .dot.done { background: var(--ok); }
-  .rail-foot { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--line-soft); color: var(--faint); font-size: 11px; }
+  .mod-item:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .mod-item.active {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--line);
+  }
+  .dot.done {
+    background: var(--ok);
+  }
+  .rail-foot {
+    margin-top: auto;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line-soft);
+    color: var(--faint);
+    font-size: 11px;
+  }
 
   /* ── Main ──────────────────────────────────────────────────────────── */
-  .main { flex: 1; overflow-y: auto; }
-  .main-inner { max-width: 880px; margin: 0 auto; padding: 20px 28px 80px; }
-  .mod-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 6px 0 4px; }
-  .mod-head h2 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
-  .mod-desc { color: var(--muted); font-size: 13px; margin: 0 0 16px; max-width: 62ch; }
-  .spacer { flex: 1; }
+  .main {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .main-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 20px 28px 80px;
+  }
+  .mod-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 6px 0 4px;
+  }
+  .mod-head h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .mod-desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 16px;
+    max-width: 62ch;
+  }
+  .spacer {
+    flex: 1;
+  }
 
   button.btn {
-    font: 600 12.5px/1 var(--sans); padding: 8px 14px; border-radius: 6px; cursor: pointer;
-    border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+    font: 600 12.5px/1 var(--sans);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--text);
   }
-  button.btn:hover { border-color: var(--muted); }
-  button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  button.btn.primary:hover { filter: brightness(1.08); }
-  button.btn:disabled { opacity: 0.5; cursor: default; }
-  button.btn.small { padding: 5px 9px; font-size: 11.5px; }
-  button:focus-visible, .search-item:focus-visible, .mod-item:focus-visible,
-  input:focus-visible, textarea:focus-visible, select:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 1px;
+  button.btn:hover {
+    border-color: var(--muted);
+  }
+  button.btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  button.btn.primary:hover {
+    filter: brightness(1.08);
+  }
+  button.btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  button.btn.small {
+    padding: 5px 9px;
+    font-size: 11.5px;
+  }
+  button:focus-visible,
+  .search-item:focus-visible,
+  .mod-item:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
   }
 
-  .panel { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 16px 18px; margin: 0 0 14px; }
-  .panel h3 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
-  .panel h4 { margin: 14px 0 6px; font-size: 12.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-  .panel p { margin: 6px 0; }
-  .panel ul { margin: 6px 0; padding-left: 20px; }
-  .panel li { margin: 4px 0; }
-  .kv { display: grid; grid-template-columns: 150px 1fr; gap: 4px 14px; font-size: 13px; }
-  .kv dt { color: var(--muted); margin: 0; }
-  .kv dd { margin: 0; }
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 16px 18px;
+    margin: 0 0 14px;
+  }
+  .panel h3 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .panel h4 {
+    margin: 14px 0 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .panel p {
+    margin: 6px 0;
+  }
+  .panel ul {
+    margin: 6px 0;
+    padding-left: 20px;
+  }
+  .panel li {
+    margin: 4px 0;
+  }
+  .kv {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 4px 14px;
+    font-size: 13px;
+  }
+  .kv dt {
+    color: var(--muted);
+    margin: 0;
+  }
+  .kv dd {
+    margin: 0;
+  }
 
   .chip {
-    display: inline-block; font: 600 10px/1 var(--mono); letter-spacing: 0.06em;
-    text-transform: uppercase; padding: 3px 7px; border-radius: 4px; vertical-align: 1px;
-    border: 1px solid var(--line); color: var(--muted);
+    display: inline-block;
+    font: 600 10px/1 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 4px;
+    vertical-align: 1px;
+    border: 1px solid var(--line);
+    color: var(--muted);
   }
-  .chip.inference { border-color: var(--accent); color: var(--accent); }
-  .chip.ok { border-color: var(--ok); color: var(--ok); }
-  .chip.warn { border-color: var(--warn); color: var(--warn); }
-  .chip.bad { border-color: var(--bad); color: var(--bad); }
-  .chip.unknown { border-color: var(--unknown); color: var(--unknown); }
-  .chip.example { border-color: var(--warn); color: var(--warn); }
-
-  .notice { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; padding: 10px 14px; margin: 0 0 14px; font-size: 13px; color: var(--muted); background: var(--surface); }
-  .notice.error { border-left-color: var(--bad); }
-  .notice.warning { border-left-color: var(--warn); }
-  .notice strong { color: var(--text); }
-
-  textarea, input[type="text"], select {
-    width: 100%; background: var(--ink); color: var(--text); border: 1px solid var(--line);
-    border-radius: 6px; padding: 8px 10px; font: 13px/1.5 var(--sans);
+  .chip.inference {
+    border-color: var(--accent);
+    color: var(--accent);
   }
-  textarea.mono, pre.mono { font: 12px/1.6 var(--mono); }
-  textarea { resize: vertical; }
-  label.field { display: block; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
-  label.field b { display: block; margin-bottom: 3px; color: var(--text); font-weight: 600; }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; }
-  @media (max-width: 720px) { .form-grid { grid-template-columns: 1fr; } #app { display: block; height: auto; } .rail { width: 100%; border-right: 0; border-bottom: 1px solid var(--line); } }
+  .chip.ok {
+    border-color: var(--ok);
+    color: var(--ok);
+  }
+  .chip.warn {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+  .chip.bad {
+    border-color: var(--bad);
+    color: var(--bad);
+  }
+  .chip.unknown {
+    border-color: var(--unknown);
+    color: var(--unknown);
+  }
+  .chip.example {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .notice {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 0 0 14px;
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--surface);
+  }
+  .notice.error {
+    border-left-color: var(--bad);
+  }
+  .notice.warning {
+    border-left-color: var(--warn);
+  }
+  .notice strong {
+    color: var(--text);
+  }
+
+  textarea,
+  input[type="text"],
+  select {
+    width: 100%;
+    background: var(--ink);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font: 13px/1.5 var(--sans);
+  }
+  textarea.mono,
+  pre.mono {
+    font: 12px/1.6 var(--mono);
+  }
+  textarea {
+    resize: vertical;
+  }
+  label.field {
+    display: block;
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  label.field b {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 16px;
+  }
+  @media (max-width: 720px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    #app {
+      display: block;
+      height: auto;
+    }
+    .rail {
+      width: 100%;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+  }
 
   pre.mono {
-    background: var(--ink); border: 1px solid var(--line-soft); border-radius: 6px;
-    padding: 10px 12px; overflow-x: auto; margin: 6px 0; white-space: pre-wrap; word-break: break-word;
+    background: var(--ink);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    margin: 6px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
-  .qrow { display: flex; gap: 10px; align-items: flex-start; border-top: 1px solid var(--line-soft); padding: 10px 0; }
-  .qrow:first-child { border-top: 0; }
-  .qrow .qmeta { width: 190px; flex: none; font-size: 11.5px; color: var(--muted); }
-  .qrow .qmeta .plat { color: var(--text); font-weight: 600; font-size: 12px; }
-  .qrow pre.mono { flex: 1; margin: 0; }
-  .qrow .btn { flex: none; }
-  .num { font-variant-numeric: tabular-nums; }
+  .qrow {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border-top: 1px solid var(--line-soft);
+    padding: 10px 0;
+  }
+  .qrow:first-child {
+    border-top: 0;
+  }
+  .qrow .qmeta {
+    width: 190px;
+    flex: none;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .qrow .qmeta .plat {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .qrow pre.mono {
+    flex: 1;
+    margin: 0;
+  }
+  .qrow .btn {
+    flex: none;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
 
-  .thinking { color: var(--muted); font-size: 13px; display: flex; gap: 8px; align-items: center; }
+  .thinking {
+    color: var(--muted);
+    font-size: 13px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
   .thinking::before {
-    content: ""; width: 10px; height: 10px; border-radius: 50%;
-    border: 2px solid var(--accent); border-top-color: transparent;
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    border-top-color: transparent;
     animation: spin 0.9s linear infinite;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .thinking::before { animation: none; } }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .thinking::before {
+      animation: none;
+    }
+  }
 
-  .stream { font: 12px/1.6 var(--mono); color: var(--muted); white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow-y: auto; margin-top: 8px; }
-  .why { color: var(--muted); font-size: 12.5px; }
-  .qq { font-weight: 600; }
-  a { color: var(--accent); }
-  .cand-list .qrow .qmeta { width: 230px; }
+  .stream {
+    font: 12px/1.6 var(--mono);
+    color: var(--muted);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 180px;
+    overflow-y: auto;
+    margin-top: 8px;
+  }
+  .why {
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  .qq {
+    font-weight: 600;
+  }
+  a {
+    color: var(--accent);
+  }
+  .cand-list .qrow .qmeta {
+    width: 230px;
+  }
 </style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+/>
 <div id="app">
   <nav class="rail">
     <div class="brand">
@@ -202,49 +516,96 @@
     <div class="rail-section">
       <div class="rail-label">Searches</div>
       <div id="search-list"></div>
-      <button class="btn small" id="new-search-btn" style="margin:8px 6px 0">+ New search</button>
+      <button class="btn small" id="new-search-btn" style="margin: 8px 6px 0">
+        + New search
+      </button>
     </div>
     <div class="rail-section">
       <div class="rail-label">Modules</div>
       <div class="modnav" id="mod-nav"></div>
     </div>
-    <div class="rail-foot" id="rail-foot">Nothing sends automatically. Every AI draft is editable.</div>
+    <div class="rail-foot" id="rail-foot">
+      Nothing sends automatically. Every AI draft is editable.
+    </div>
   </nav>
   <main class="main"><div class="main-inner" id="main"></div></main>
 </div>
 
 <script>
-"use strict";
-/* TalentOS Lite — artifact companion to the local TalentOS app.
+  "use strict";
+  /* TalentOS Lite — artifact companion to the local TalentOS app.
    AI via the `sample` capability (viewer's own Claude — no API key);
    persistence via `db` with a localStorage fallback. Prompts and the
    deterministic query composer are ported from the repo (talentos/src). */
 
-/* ── Utilities ─────────────────────────────────────────────────────────── */
-const $ = (sel, el) => (el || document).querySelector(sel);
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-const clip = (s, n) => { s = String(s ?? ""); return s.length > n ? s.slice(0, n) + "\n…[truncated]" : s; };
+  /* ── Utilities ─────────────────────────────────────────────────────────── */
+  const $ = (sel, el) => (el || document).querySelector(sel);
+  const esc = (s) =>
+    String(s ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+  const uid = () =>
+    Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  const clip = (s, n) => {
+    s = String(s ?? "");
+    return s.length > n ? s.slice(0, n) + "\n…[truncated]" : s;
+  };
 
-function el(html) { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstChild; }
+  function el(html) {
+    const t = document.createElement("template");
+    t.innerHTML = html.trim();
+    return t.content.firstChild;
+  }
 
-async function copyText(text, btn) {
-  try { await navigator.clipboard.writeText(text); if (btn) { const old = btn.textContent; btn.textContent = "Copied"; setTimeout(() => { btn.textContent = old; }, 1200); } }
-  catch { if (btn) btn.textContent = "Copy failed"; }
-}
+  async function copyText(text, btn) {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (btn) {
+        const old = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(() => {
+          btn.textContent = old;
+        }, 1200);
+      }
+    } catch {
+      if (btn) btn.textContent = "Copy failed";
+    }
+  }
 
-/* ── Fair hiring + data honesty (ported from lib/domain/fair-hiring) ──── */
-const PROTECTED_TRAITS = ["race","ethnicity","religion","age","gender identity","disability","national origin","sexual orientation","health condition","pregnancy","family status","marital status","political affiliation","veteran status"];
-const NON_INFERENCE = `Fair-hiring constraints (mandatory):
+  /* ── Fair hiring + data honesty (ported from lib/domain/fair-hiring) ──── */
+  const PROTECTED_TRAITS = [
+    "race",
+    "ethnicity",
+    "religion",
+    "age",
+    "gender identity",
+    "disability",
+    "national origin",
+    "sexual orientation",
+    "health condition",
+    "pregnancy",
+    "family status",
+    "marital status",
+    "political affiliation",
+    "veteran status",
+  ];
+  const NON_INFERENCE = `Fair-hiring constraints (mandatory):
 - Never infer, mention, request, or reason about protected characteristics: ${PROTECTED_TRAITS.join(", ")}.
 - Evaluate and describe candidates only through job-related professional evidence that is observable in the provided material.
 - Never recommend rejecting, deprioritizing, or preferring anyone on the basis of a protected characteristic.
 - If provided material contains protected-characteristic information, ignore it entirely; do not repeat it in output.
 - All output is advisory decision support for a human recruiter; never phrase output as an employment decision.`;
 
-function systemPrelude(persona) {
-  return `You are ${persona} working inside a recruiting workroom used by one professional recruiter. Your output is decision support the recruiter will review and edit — write with the judgment of an elite practitioner, not the caution of a form letter.
+  function systemPrelude(persona) {
+    return `You are ${persona} working inside a recruiting workroom used by one professional recruiter. Your output is decision support the recruiter will review and edit — write with the judgment of an elite practitioner, not the caution of a form letter.
 
 ${NON_INFERENCE}
 
@@ -254,267 +615,457 @@ Data honesty (mandatory):
 - Surface your assumptions and open questions explicitly instead of projecting false confidence.
 - Adapt everything to THIS role, company, seniority, geography, and industry. Generic recruiting boilerplate is a failure.
 Everything you produce is a draft the recruiter can edit; write content that is specific enough to be worth editing.`;
-}
+  }
 
-function scanForProtectedTraits(value) {
-  const text = JSON.stringify(value).toLowerCase();
-  return PROTECTED_TRAITS.filter((t) => text.includes(t));
-}
+  function scanForProtectedTraits(value) {
+    const text = JSON.stringify(value).toLowerCase();
+    return PROTECTED_TRAITS.filter((t) => text.includes(t));
+  }
 
-/* Model output may never claim "verified" (NO FAKE DATA). Returns how many
+  /* Model output may never claim "verified" (NO FAKE DATA). Returns how many
    labels had to be downgraded — the golden test treats any as a guardrail hit. */
-function downgradeVerified(node) {
-  let count = 0;
-  if (Array.isArray(node)) { for (const child of node) count += downgradeVerified(child); return count; }
-  if (node && typeof node === "object") {
-    if (node.certainty === "verified") {
-      node.certainty = "inferred";
-      node.note = ((node.note || "") + " [downgraded from 'verified' — model output cannot verify]").trim();
-      count += 1;
+  function downgradeVerified(node) {
+    let count = 0;
+    if (Array.isArray(node)) {
+      for (const child of node) count += downgradeVerified(child);
+      return count;
     }
-    for (const child of Object.values(node)) count += downgradeVerified(child);
+    if (node && typeof node === "object") {
+      if (node.certainty === "verified") {
+        node.certainty = "inferred";
+        node.note = (
+          (node.note || "") +
+          " [downgraded from 'verified' — model output cannot verify]"
+        ).trim();
+        count += 1;
+      }
+      for (const child of Object.values(node))
+        count += downgradeVerified(child);
+    }
+    return count;
   }
-  return count;
-}
 
-/* ── Deterministic composer (ported from lib/domain/search-strings) ───── */
-function quoteTerm(term) {
-  const t = String(term).trim();
-  if (!t) return "";
-  if (/^[-"(]/.test(t) || /^\w+:/.test(t)) return t;
-  return /\s/.test(t) ? `"${t.replace(/"/g, "")}"` : t;
-}
-function orGroup(terms) {
-  const cleaned = (terms || []).filter(Boolean).map(quoteTerm).filter(Boolean);
-  if (!cleaned.length) return "";
-  return cleaned.length === 1 ? cleaned[0] : `(${cleaned.join(" OR ")})`;
-}
-const joinParts = (parts) => parts.filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
-const siteGroup = (sites) => !sites.length ? "" : (sites.length === 1 ? `site:${sites[0]}` : `(${sites.map((s) => `site:${s}`).join(" OR ")})`);
-
-const PLATFORM_TARGETS = [
-  { platform: "Google (LinkedIn x-ray)", sites: ["linkedin.com/in", "linkedin.com/pub"], purpose: "Public LinkedIn profiles via Google", tag: "general" },
-  { platform: "LinkedIn (native boolean)", sites: [], nativeBoolean: true, purpose: "Paste into LinkedIn people search", tag: "general" },
-  { platform: "Google (GitHub x-ray)", sites: ["github.com"], purpose: "Engineer profiles, READMEs, org membership", tag: "engineering" },
-  { platform: "Google (Scholar/arXiv x-ray)", sites: ["scholar.google.com", "arxiv.org", "openreview.net"], purpose: "Research authors and publication records", tag: "research" },
-  { platform: "Google (portfolio x-ray)", sites: ["behance.net", "dribbble.com"], purpose: "Design portfolios", tag: "design" },
-  { platform: "Google (open web)", sites: [], purpose: "CVs, personal sites, rosters, directories", tag: "general" },
-];
-const VARIANT_SPECS = [
-  { breadth: "narrow", expectedPrecision: "high", description: "Primary titles + all requirements" },
-  { breadth: "balanced", expectedPrecision: "medium", description: "Titles incl. alternates + core requirements" },
-  { breadth: "broad", expectedPrecision: "low", description: "All titles, requirements relaxed to an OR group" },
-  { breadth: "adjacent", expectedPrecision: "low", description: "Adjacent-population titles + core skills" },
-];
-
-function variantParts(input, breadth) {
-  const parts = [];
-  const allTitles = [...input.titles, ...input.alternateTitles];
-  if (breadth === "narrow") {
-    parts.push(orGroup(input.titles));
-    input.mustHave.forEach((m) => parts.push(quoteTerm(m)));
-    parts.push(orGroup(input.anyOf), orGroup(input.credentials));
-  } else if (breadth === "balanced") {
-    parts.push(orGroup(allTitles));
-    input.mustHave.slice(0, 2).forEach((m) => parts.push(quoteTerm(m)));
-    parts.push(orGroup(input.anyOf));
-  } else if (breadth === "broad") {
-    parts.push(orGroup(allTitles), orGroup([...input.mustHave, ...input.anyOf]));
-  } else if (breadth === "adjacent") {
-    parts.push(orGroup(input.adjacentTitles.length ? input.adjacentTitles : input.alternateTitles));
-    parts.push(orGroup([...input.mustHave, ...input.anyOf].slice(0, 6)));
+  /* ── Deterministic composer (ported from lib/domain/search-strings) ───── */
+  function quoteTerm(term) {
+    const t = String(term).trim();
+    if (!t) return "";
+    if (/^[-"(]/.test(t) || /^\w+:/.test(t)) return t;
+    return /\s/.test(t) ? `"${t.replace(/"/g, "")}"` : t;
   }
-  parts.push(orGroup(input.locations));
-  if (breadth === "narrow" && input.companies.length) parts.push(orGroup(input.companies));
-  input.exclusions.forEach((e) => parts.push(`-${quoteTerm(e)}`));
-  return parts;
-}
+  function orGroup(terms) {
+    const cleaned = (terms || [])
+      .filter(Boolean)
+      .map(quoteTerm)
+      .filter(Boolean);
+    if (!cleaned.length) return "";
+    return cleaned.length === 1 ? cleaned[0] : `(${cleaned.join(" OR ")})`;
+  }
+  const joinParts = (parts) =>
+    parts.filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+  const siteGroup = (sites) =>
+    !sites.length
+      ? ""
+      : sites.length === 1
+        ? `site:${sites[0]}`
+        : `(${sites.map((s) => `site:${s}`).join(" OR ")})`;
 
-/* Golden-test judge follow-ups baked in: relevant-platform filtering,
+  const PLATFORM_TARGETS = [
+    {
+      platform: "Google (LinkedIn x-ray)",
+      sites: ["linkedin.com/in", "linkedin.com/pub"],
+      purpose: "Public LinkedIn profiles via Google",
+      tag: "general",
+    },
+    {
+      platform: "LinkedIn (native boolean)",
+      sites: [],
+      nativeBoolean: true,
+      purpose: "Paste into LinkedIn people search",
+      tag: "general",
+    },
+    {
+      platform: "Google (GitHub x-ray)",
+      sites: ["github.com"],
+      purpose: "Engineer profiles, READMEs, org membership",
+      tag: "engineering",
+    },
+    {
+      platform: "Google (Scholar/arXiv x-ray)",
+      sites: ["scholar.google.com", "arxiv.org", "openreview.net"],
+      purpose: "Research authors and publication records",
+      tag: "research",
+    },
+    {
+      platform: "Google (portfolio x-ray)",
+      sites: ["behance.net", "dribbble.com"],
+      purpose: "Design portfolios",
+      tag: "design",
+    },
+    {
+      platform: "Google (open web)",
+      sites: [],
+      purpose: "CVs, personal sites, rosters, directories",
+      tag: "general",
+    },
+  ];
+  const VARIANT_SPECS = [
+    {
+      breadth: "narrow",
+      expectedPrecision: "high",
+      description: "Primary titles + all requirements",
+    },
+    {
+      breadth: "balanced",
+      expectedPrecision: "medium",
+      description: "Titles incl. alternates + core requirements",
+    },
+    {
+      breadth: "broad",
+      expectedPrecision: "low",
+      description: "All titles, requirements relaxed to an OR group",
+    },
+    {
+      breadth: "adjacent",
+      expectedPrecision: "low",
+      description: "Adjacent-population titles + core skills",
+    },
+  ];
+
+  function variantParts(input, breadth) {
+    const parts = [];
+    const allTitles = [...input.titles, ...input.alternateTitles];
+    if (breadth === "narrow") {
+      parts.push(orGroup(input.titles));
+      input.mustHave.forEach((m) => parts.push(quoteTerm(m)));
+      parts.push(orGroup(input.anyOf), orGroup(input.credentials));
+    } else if (breadth === "balanced") {
+      parts.push(orGroup(allTitles));
+      input.mustHave.slice(0, 2).forEach((m) => parts.push(quoteTerm(m)));
+      parts.push(orGroup(input.anyOf));
+    } else if (breadth === "broad") {
+      parts.push(
+        orGroup(allTitles),
+        orGroup([...input.mustHave, ...input.anyOf]),
+      );
+    } else if (breadth === "adjacent") {
+      parts.push(
+        orGroup(
+          input.adjacentTitles.length
+            ? input.adjacentTitles
+            : input.alternateTitles,
+        ),
+      );
+      parts.push(orGroup([...input.mustHave, ...input.anyOf].slice(0, 6)));
+    }
+    parts.push(orGroup(input.locations));
+    if (breadth === "narrow" && input.companies.length)
+      parts.push(orGroup(input.companies));
+    input.exclusions.forEach((e) => parts.push(`-${quoteTerm(e)}`));
+    return parts;
+  }
+
+  /* Golden-test judge follow-ups baked in: relevant-platform filtering,
    cross-platform dedupe, and a visible Google ~32-word budget flag. */
-function composeQueries(input, relevantTags) {
-  const results = [];
-  const seen = new Set();
-  for (const target of PLATFORM_TARGETS) {
-    if (target.tag !== "general" && relevantTags && !relevantTags.includes(target.tag)) continue;
-    for (const spec of VARIANT_SPECS) {
-      if (spec.breadth === "adjacent" && !input.adjacentTitles.length) continue;
-      const site = target.nativeBoolean ? "" : siteGroup(target.sites);
-      const query = joinParts([...variantParts(input, spec.breadth), site]);
-      if (!query) continue;
-      const dedupeKey = query.toLowerCase();
-      if (seen.has(dedupeKey)) continue;
-      seen.add(dedupeKey);
-      const words = query.split(/\s+/).length;
-      results.push({
-        platform: target.platform, query, breadth: spec.breadth,
-        purpose: `${target.purpose} — ${spec.description}`,
-        expectedPrecision: spec.expectedPrecision,
-        overBudget: !target.nativeBoolean && words > 32, words,
-      });
+  function composeQueries(input, relevantTags) {
+    const results = [];
+    const seen = new Set();
+    for (const target of PLATFORM_TARGETS) {
+      if (
+        target.tag !== "general" &&
+        relevantTags &&
+        !relevantTags.includes(target.tag)
+      )
+        continue;
+      for (const spec of VARIANT_SPECS) {
+        if (spec.breadth === "adjacent" && !input.adjacentTitles.length)
+          continue;
+        const site = target.nativeBoolean ? "" : siteGroup(target.sites);
+        const query = joinParts([...variantParts(input, spec.breadth), site]);
+        if (!query) continue;
+        const dedupeKey = query.toLowerCase();
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+        const words = query.split(/\s+/).length;
+        results.push({
+          platform: target.platform,
+          query,
+          breadth: spec.breadth,
+          purpose: `${target.purpose} — ${spec.description}`,
+          expectedPrecision: spec.expectedPrecision,
+          overBudget: !target.nativeBoolean && words > 32,
+          words,
+        });
+      }
     }
+    return results;
   }
-  return results;
-}
 
-/* ── Storage: db capability with localStorage fallback ────────────────── */
-const LS_KEY = "talentos-lite-v1";
-let dbApi = null; // resolved db namespace or null
+  /* ── Storage: db capability with localStorage fallback ────────────────── */
+  const LS_KEY = "talentos-lite-v1";
+  let dbApi = null; // resolved db namespace or null
 
-const localStore = {
-  read() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "null") || { searches: {} }; } catch { return { searches: {} }; } },
-  write(data) { try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch { /* private mode etc. */ } },
-};
+  const localStore = {
+    read() {
+      try {
+        return (
+          JSON.parse(localStorage.getItem(LS_KEY) || "null") || { searches: {} }
+        );
+      } catch {
+        return { searches: {} };
+      }
+    },
+    write(data) {
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+      } catch {
+        /* private mode etc. */
+      }
+    },
+  };
 
-const store = {
-  async listSearches() {
-    if (dbApi) {
-      try { const snap = await dbApi.collection("searches").orderBy("createdAt", "desc").limit(200).get(); return snap.docs.map((d) => ({ id: d.id, ...d.data() })); }
-      catch (e) { console.warn("db listSearches", e); }
-    }
-    const data = localStore.read();
-    return Object.values(data.searches).map((s) => s.facts).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-  },
-  async saveSearch(facts) {
-    if (dbApi) { try { await dbApi.doc("searches/" + facts.id).set(facts); return; } catch (e) { console.warn("db saveSearch", e); } }
-    const data = localStore.read();
-    data.searches[facts.id] = data.searches[facts.id] || { facts, artifacts: {}, candidates: {} };
-    data.searches[facts.id].facts = facts;
-    localStore.write(data);
-  },
-  async loadArtifacts(searchId) {
-    if (dbApi) {
-      try { const snap = await dbApi.doc("searches/" + searchId).collection("artifacts").get(); const out = {}; for (const d of snap.docs) out[d.id] = d.data(); return out; }
-      catch (e) { console.warn("db loadArtifacts", e); }
-    }
-    return (localStore.read().searches[searchId] || {}).artifacts || {};
-  },
-  async saveArtifact(searchId, task, record) {
-    if (dbApi) { try { await dbApi.doc(`searches/${searchId}/artifacts/${task}`).set(record); return; } catch (e) { console.warn("db saveArtifact", e); } }
-    const data = localStore.read();
-    if (!data.searches[searchId]) data.searches[searchId] = { facts: { id: searchId }, artifacts: {}, candidates: {} };
-    data.searches[searchId].artifacts[task] = record;
-    localStore.write(data);
-  },
-  async listCandidates(searchId) {
-    if (dbApi) {
-      try { const snap = await dbApi.doc("searches/" + searchId).collection("candidates").get(); return snap.docs.map((d) => ({ id: d.id, ...d.data() })); }
-      catch (e) { console.warn("db listCandidates", e); }
-    }
-    return Object.values((localStore.read().searches[searchId] || {}).candidates || {});
-  },
-  async saveCandidate(searchId, cand) {
-    if (dbApi) { try { await dbApi.doc(`searches/${searchId}/candidates/${cand.id}`).set(cand); return; } catch (e) { console.warn("db saveCandidate", e); } }
-    const data = localStore.read();
-    if (!data.searches[searchId]) data.searches[searchId] = { facts: { id: searchId }, artifacts: {}, candidates: {} };
-    data.searches[searchId].candidates[cand.id] = cand;
-    localStore.write(data);
-  },
-};
+  const store = {
+    async listSearches() {
+      if (dbApi) {
+        try {
+          const snap = await dbApi
+            .collection("searches")
+            .orderBy("createdAt", "desc")
+            .limit(200)
+            .get();
+          return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        } catch (e) {
+          console.warn("db listSearches", e);
+        }
+      }
+      const data = localStore.read();
+      return Object.values(data.searches)
+        .map((s) => s.facts)
+        .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+    },
+    async saveSearch(facts) {
+      if (dbApi) {
+        try {
+          await dbApi.doc("searches/" + facts.id).set(facts);
+          return;
+        } catch (e) {
+          console.warn("db saveSearch", e);
+        }
+      }
+      const data = localStore.read();
+      data.searches[facts.id] = data.searches[facts.id] || {
+        facts,
+        artifacts: {},
+        candidates: {},
+      };
+      data.searches[facts.id].facts = facts;
+      localStore.write(data);
+    },
+    async loadArtifacts(searchId) {
+      if (dbApi) {
+        try {
+          const snap = await dbApi
+            .doc("searches/" + searchId)
+            .collection("artifacts")
+            .get();
+          const out = {};
+          for (const d of snap.docs) out[d.id] = d.data();
+          return out;
+        } catch (e) {
+          console.warn("db loadArtifacts", e);
+        }
+      }
+      return (localStore.read().searches[searchId] || {}).artifacts || {};
+    },
+    async saveArtifact(searchId, task, record) {
+      if (dbApi) {
+        try {
+          await dbApi.doc(`searches/${searchId}/artifacts/${task}`).set(record);
+          return;
+        } catch (e) {
+          console.warn("db saveArtifact", e);
+        }
+      }
+      const data = localStore.read();
+      if (!data.searches[searchId])
+        data.searches[searchId] = {
+          facts: { id: searchId },
+          artifacts: {},
+          candidates: {},
+        };
+      data.searches[searchId].artifacts[task] = record;
+      localStore.write(data);
+    },
+    async listCandidates(searchId) {
+      if (dbApi) {
+        try {
+          const snap = await dbApi
+            .doc("searches/" + searchId)
+            .collection("candidates")
+            .get();
+          return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        } catch (e) {
+          console.warn("db listCandidates", e);
+        }
+      }
+      return Object.values(
+        (localStore.read().searches[searchId] || {}).candidates || {},
+      );
+    },
+    async saveCandidate(searchId, cand) {
+      if (dbApi) {
+        try {
+          await dbApi
+            .doc(`searches/${searchId}/candidates/${cand.id}`)
+            .set(cand);
+          return;
+        } catch (e) {
+          console.warn("db saveCandidate", e);
+        }
+      }
+      const data = localStore.read();
+      if (!data.searches[searchId])
+        data.searches[searchId] = {
+          facts: { id: searchId },
+          artifacts: {},
+          candidates: {},
+        };
+      data.searches[searchId].candidates[cand.id] = cand;
+      localStore.write(data);
+    },
+  };
 
-/* ── Example search (golden fixture; clearly marked, safe to delete) ──── */
-const EXAMPLE_SEARCH = {
-  id: "example-cais",
-  example: true,
-  name: "CAIS — Research Scientist / Research Engineer",
-  companyName: "Center for AI Safety",
-  roleTitle: "Research Scientist / Research Engineer",
-  geography: "San Francisco, CA", country: "United States",
-  industry: "AI safety research", seniority: "Senior",
-  employmentType: "Permanent, full-time", compensationNote: "",
-  businessObjective: "Expand empirical ML safety research capacity ahead of next benchmark cycle.",
-  recruiterNotes: "",
-  createdAt: "2026-09-01T00:00:00.000Z",
-  jd: `The Center for AI Safety (CAIS) is hiring a Research Scientist or Research Engineer to advance empirical machine learning safety research in San Francisco.
+  /* ── Example search (golden fixture; clearly marked, safe to delete) ──── */
+  const EXAMPLE_SEARCH = {
+    id: "example-cais",
+    example: true,
+    name: "CAIS — Research Scientist / Research Engineer",
+    companyName: "Center for AI Safety",
+    roleTitle: "Research Scientist / Research Engineer",
+    geography: "San Francisco, CA",
+    country: "United States",
+    industry: "AI safety research",
+    seniority: "Senior",
+    employmentType: "Permanent, full-time",
+    compensationNote: "",
+    businessObjective:
+      "Expand empirical ML safety research capacity ahead of next benchmark cycle.",
+    recruiterNotes: "",
+    createdAt: "2026-09-01T00:00:00.000Z",
+    jd: `The Center for AI Safety (CAIS) is hiring a Research Scientist or Research Engineer to advance empirical machine learning safety research in San Francisco.
 
 You will design and run experiments on frontier-scale language models: adversarial robustness, dangerous-capability evaluations, unlearning, and benchmark construction. You will own projects end to end — forming hypotheses, building training and evaluation infrastructure, running large-scale experiments, and publishing at top venues.
 
 We are looking for someone with a strong empirical research record (e.g., first-author publications at NeurIPS, ICML, ICLR, or equivalent impact through open-source research artifacts), excellent engineering ability in Python and PyTorch or JAX, and experience with distributed training or large-scale experiment orchestration. Research taste matters more to us than citation counts: we want people who pick important problems and execute quickly.
 
 Familiarity with AI safety literature is preferred. A PhD is common among our researchers but not required — several of our strongest contributors came from engineering-heavy backgrounds. The role is on-site in San Francisco with competitive nonprofit compensation. Interest in reducing societal-scale risks from AI is essential.`,
-};
-
-/* ── Context assembly (ported from lib/ai/context) ────────────────────── */
-function renderContext(search, artifacts) {
-  const p = search;
-  const facts = [
-    `Search: ${p.name}`, `Company: ${p.companyName || "unknown"}`, `Role title: ${p.roleTitle}`,
-    `Geography: ${p.geography || "unspecified"} (${p.country || "country unspecified"})`,
-    p.industry ? `Industry: ${p.industry}` : "", p.seniority ? `Seniority: ${p.seniority}` : "",
-    p.employmentType ? `Employment type: ${p.employmentType}` : "",
-    p.compensationNote ? `Compensation: ${p.compensationNote}` : "",
-    p.businessObjective ? `Business objective: ${p.businessObjective}` : "",
-    p.recruiterNotes ? `Recruiter notes: ${p.recruiterNotes}` : "",
-  ].filter(Boolean).join("\n");
-
-  const sections = [`## Search project\n${facts}`];
-  if (p.jd) sections.push(`## Job description (verbatim)\n${clip(p.jd, 6000)}`);
-  const art = (key, title, budget) => {
-    const rec = artifacts[key];
-    if (rec && rec.payload) sections.push(`## ${title}\n${clip(JSON.stringify(rec.payload, null, 1), budget)}`);
   };
-  art("role_intelligence", "Role intelligence (recruiter-reviewed)", 6000);
-  const intake = artifacts.intake && artifacts.intake.payload;
-  if (intake) {
-    const answered = [];
-    for (const cat of intake.categories || []) for (const q of cat.questions || [])
-      if (q.answer && q.answer.trim()) answered.push(`Q (${cat.title}): ${q.question}\nA: ${q.answer}`);
-    if (answered.length) sections.push(`## Hiring-manager intake answers\n${clip(answered.join("\n\n"), 6000)}`);
-  }
-  art("success_profile", "Success profile", 6000);
-  art("market_intelligence", "Market intelligence", 5000);
-  art("sourcing_strategy", "Sourcing strategy", 5000);
-  return sections.join("\n");
-}
 
-/* ── AI task registry (prompts ported from lib/ai/tasks) ──────────────── */
-function shapeCheck(payload, spec) {
-  for (const [field, kind] of Object.entries(spec)) {
-    const v = payload && payload[field];
-    if (kind === "array" && !Array.isArray(v)) return `missing array field "${field}"`;
-    if (kind === "string" && typeof v !== "string") return `missing string field "${field}"`;
-    if (kind === "object" && (typeof v !== "object" || v === null)) return `missing object field "${field}"`;
-  }
-  return null;
-}
+  /* ── Context assembly (ported from lib/ai/context) ────────────────────── */
+  function renderContext(search, artifacts) {
+    const p = search;
+    const facts = [
+      `Search: ${p.name}`,
+      `Company: ${p.companyName || "unknown"}`,
+      `Role title: ${p.roleTitle}`,
+      `Geography: ${p.geography || "unspecified"} (${p.country || "country unspecified"})`,
+      p.industry ? `Industry: ${p.industry}` : "",
+      p.seniority ? `Seniority: ${p.seniority}` : "",
+      p.employmentType ? `Employment type: ${p.employmentType}` : "",
+      p.compensationNote ? `Compensation: ${p.compensationNote}` : "",
+      p.businessObjective ? `Business objective: ${p.businessObjective}` : "",
+      p.recruiterNotes ? `Recruiter notes: ${p.recruiterNotes}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
 
-const TASKS = {
-  role_intelligence: {
-    label: "Role Intelligence",
-    desc: "Extracts the role's real shape from the JD — hard requirements strictly separated from preferences, signals, assumptions, and open questions.",
-    persona: "an elite talent-intelligence analyst",
-    rules: `Extraction discipline (mandatory):
+    const sections = [`## Search project\n${facts}`];
+    if (p.jd)
+      sections.push(`## Job description (verbatim)\n${clip(p.jd, 6000)}`);
+    const art = (key, title, budget) => {
+      const rec = artifacts[key];
+      if (rec && rec.payload)
+        sections.push(
+          `## ${title}\n${clip(JSON.stringify(rec.payload, null, 1), budget)}`,
+        );
+    };
+    art("role_intelligence", "Role intelligence (recruiter-reviewed)", 6000);
+    const intake = artifacts.intake && artifacts.intake.payload;
+    if (intake) {
+      const answered = [];
+      for (const cat of intake.categories || [])
+        for (const q of cat.questions || [])
+          if (q.answer && q.answer.trim())
+            answered.push(`Q (${cat.title}): ${q.question}\nA: ${q.answer}`);
+      if (answered.length)
+        sections.push(
+          `## Hiring-manager intake answers\n${clip(answered.join("\n\n"), 6000)}`,
+        );
+    }
+    art("success_profile", "Success profile", 6000);
+    art("market_intelligence", "Market intelligence", 5000);
+    art("sourcing_strategy", "Sourcing strategy", 5000);
+    return sections.join("\n");
+  }
+
+  /* ── AI task registry (prompts ported from lib/ai/tasks) ──────────────── */
+  function shapeCheck(payload, spec) {
+    for (const [field, kind] of Object.entries(spec)) {
+      const v = payload && payload[field];
+      if (kind === "array" && !Array.isArray(v))
+        return `missing array field "${field}"`;
+      if (kind === "string" && typeof v !== "string")
+        return `missing string field "${field}"`;
+      if (kind === "object" && (typeof v !== "object" || v === null))
+        return `missing object field "${field}"`;
+    }
+    return null;
+  }
+
+  const TASKS = {
+    role_intelligence: {
+      label: "Role Intelligence",
+      desc: "Extracts the role's real shape from the JD — hard requirements strictly separated from preferences, signals, assumptions, and open questions.",
+      persona: "an elite talent-intelligence analyst",
+      rules: `Extraction discipline (mandatory):
 - Read the job description and search facts, then extract and infer the role's real shape.
 - Separate strictly: hardRequirements (explicitly stated as required, non-negotiable), preferences (explicitly nice-to-have or softly worded), signals (positive indicators that predict success but are not stated requirements), assumptions (things YOU infer that the JD does not say), unresolvedQuestions (things only the hiring manager can settle).
 - NEVER promote vague JD language ("strong communicator", "fast-paced environment") into hardRequirements — route it to preferences or unresolvedQuestions.
 - Set provenance per item: "jd" when directly stated in the JD text, "model_inference" when you inferred it.
 - likelyTalentCompetitors: employer types or named categories competing for this talent; name specific companies only when the context supports it.
 - Finish with roleHypothesis: one paragraph stating what this role appears to really need, phrased so the recruiter can falsify it with the hiring manager.`,
-    ask: "Extract complete role intelligence for this search now.",
-    shape: `{"canonicalTitle": string, "alternateTitles": string[], "seniority": string, "profession": string, "roleHypothesis": string, "hardRequirements": [{"text": string, "provenance": "jd"|"model_inference"}], "preferences": [same shape], "signals": [same shape], "assumptions": string[], "unresolvedQuestions": string[], "likelyTalentCompetitors": string[]}`,
-    check: (p) => shapeCheck(p, { canonicalTitle: "string", roleHypothesis: "string", hardRequirements: "array", preferences: "array", assumptions: "array", unresolvedQuestions: "array" }),
-    render: renderRoleIntelligence,
-  },
-  intake: {
-    label: "HM Intake",
-    desc: "A hiring-manager intake interview generated for this exact profession — answer questions inline; answers feed every later module.",
-    persona: "an elite recruiter preparing a hiring-manager intake interview",
-    rules: `You are generating the intake interview for THIS specific role — intakes for different professions must be radically different. Generic recruiter questions may appear only where they earn their place.
+      ask: "Extract complete role intelligence for this search now.",
+      shape: `{"canonicalTitle": string, "alternateTitles": string[], "seniority": string, "profession": string, "roleHypothesis": string, "hardRequirements": [{"text": string, "provenance": "jd"|"model_inference"}], "preferences": [same shape], "signals": [same shape], "assumptions": string[], "unresolvedQuestions": string[], "likelyTalentCompetitors": string[]}`,
+      check: (p) =>
+        shapeCheck(p, {
+          canonicalTitle: "string",
+          roleHypothesis: "string",
+          hardRequirements: "array",
+          preferences: "array",
+          assumptions: "array",
+          unresolvedQuestions: "array",
+        }),
+      render: renderRoleIntelligence,
+    },
+    intake: {
+      label: "HM Intake",
+      desc: "A hiring-manager intake interview generated for this exact profession — answer questions inline; answers feed every later module.",
+      persona: "an elite recruiter preparing a hiring-manager intake interview",
+      rules: `You are generating the intake interview for THIS specific role — intakes for different professions must be radically different. Generic recruiter questions may appear only where they earn their place.
 - Organize questions into categories that fit this role: why the role exists, success definition (30/90/180/365), exemplars, true requirements (must-have vs trainable, false positives/negatives), deep TECHNICAL/FUNCTIONAL questions specific to this profession, team, candidate motivation, compensation, geography, competition for this talent, interview process, closing dynamics, sourcing inputs, risks, negative exemplars, calibration.
 - The technical/functional category must show real domain understanding of this profession. Derive the right equivalents for THIS role.
 - Each question carries whyItMatters: what the answer changes about the search.
 - End with the playback: target, hardRequirements, flexibleRequirements, idealPhenotype, adjacentPhenotypes, disqualifiers, unresolvedQuestions — so the recruiter can ask the hiring manager "What did I get wrong?".
 - 6–10 categories, 3–7 questions each. Sharp, non-overlapping, answerable in a live conversation.`,
-    ask: "Generate the complete hiring-manager intake interview for this search, ending with the playback summary.",
-    shape: `{"categories": [{"title": string, "rationale": string, "questions": [{"question": string, "whyItMatters": string}]}], "playback": {"target": string, "hardRequirements": string[], "flexibleRequirements": string[], "idealPhenotype": string, "adjacentPhenotypes": string[], "disqualifiers": string[], "unresolvedQuestions": string[]}}`,
-    check: (p) => shapeCheck(p, { categories: "array", playback: "object" }),
-    render: renderIntake,
-  },
-  success_profile: {
-    label: "Success Profile",
-    desc: "The structured hiring contract: mission, outcomes, must-haves with provenance, evidence signals a sourcer can actually find.",
-    persona: "an elite recruiter compiling a success profile",
-    rules: `Compile the structured success profile from everything known: JD, role intelligence, and — above all — the hiring-manager intake answers. Where sources conflict, the hiring manager's answers win, and the conflict goes into unresolvedQuestions.
+      ask: "Generate the complete hiring-manager intake interview for this search, ending with the playback summary.",
+      shape: `{"categories": [{"title": string, "rationale": string, "questions": [{"question": string, "whyItMatters": string}]}], "playback": {"target": string, "hardRequirements": string[], "flexibleRequirements": string[], "idealPhenotype": string, "adjacentPhenotypes": string[], "disqualifiers": string[], "unresolvedQuestions": string[]}}`,
+      check: (p) => shapeCheck(p, { categories: "array", playback: "object" }),
+      render: renderIntake,
+    },
+    success_profile: {
+      label: "Success Profile",
+      desc: "The structured hiring contract: mission, outcomes, must-haves with provenance, evidence signals a sourcer can actually find.",
+      persona: "an elite recruiter compiling a success profile",
+      rules: `Compile the structured success profile from everything known: JD, role intelligence, and — above all — the hiring-manager intake answers. Where sources conflict, the hiring manager's answers win, and the conflict goes into unresolvedQuestions.
 Provenance per item (mandatory): "jd", "hiring_manager", "recruiter", "market_research", "model_inference". Do not launder inference into "hiring_manager".
 - mustHave: only criteria with explicit backing; keep it short and real.
 - trainable: what a strong hire can learn in-seat.
@@ -522,31 +1073,41 @@ Provenance per item (mandatory): "jd", "hiring_manager", "recruiter", "market_re
 - negativeSignals: patterns that predict failure for THIS role, never protected characteristics.
 - exemplarPeople: only names present in the provided context; never invent people.
 - unresolvedQuestions: whatever still needs the hiring manager.`,
-    ask: "Compile the success profile for this search now.",
-    shape: `{"mission": string, "outcomes": [{"text": string, "provenance": string}], "mustHave": [same], "preferred": [same], "trainable": [same], "evidenceSignals": [same], "negativeSignals": [same], "sellingPoints": [same], "candidateMotivators": [same], "unresolvedQuestions": string[]}`,
-    check: (p) => shapeCheck(p, { mission: "string", mustHave: "array", evidenceSignals: "array" }),
-    render: renderSuccessProfile,
-  },
-  market_intelligence: {
-    label: "Market Intel",
-    desc: "How hard is this search and why — every claim carries an honest certainty label; nothing is presented as verified.",
-    persona: "a talent-market intelligence analyst",
-    rules: `Answer the question: how difficult is this search, and why? Build sections such as: talent population & density, geographic hubs, common current employers & feeder organizations, education/training pipelines, communities & associations, compensation landscape, demand-side competition, adjacent pools, remote/relocation dynamics — choosing sections that matter for THIS role.
+      ask: "Compile the success profile for this search now.",
+      shape: `{"mission": string, "outcomes": [{"text": string, "provenance": string}], "mustHave": [same], "preferred": [same], "trainable": [same], "evidenceSignals": [same], "negativeSignals": [same], "sellingPoints": [same], "candidateMotivators": [same], "unresolvedQuestions": string[]}`,
+      check: (p) =>
+        shapeCheck(p, {
+          mission: "string",
+          mustHave: "array",
+          evidenceSignals: "array",
+        }),
+      render: renderSuccessProfile,
+    },
+    market_intelligence: {
+      label: "Market Intel",
+      desc: "How hard is this search and why — every claim carries an honest certainty label; nothing is presented as verified.",
+      persona: "a talent-market intelligence analyst",
+      rules: `Answer the question: how difficult is this search, and why? Build sections such as: talent population & density, geographic hubs, common current employers & feeder organizations, education/training pipelines, communities & associations, compensation landscape, demand-side competition, adjacent pools, remote/relocation dynamics — choosing sections that matter for THIS role.
 Certainty labeling is the core requirement (NO FAKE DATA):
 - certainty must be "estimated", "inferred", or "unknown" — never "verified" (you cannot verify anything).
 - NEVER state a precise labor-market number as fact. "Reliable exact population data unavailable" is a valid claim text.
 - difficulty.rating: 1 (easy) – 5 (extremely hard), with a rationale naming the binding constraint.
 - List assumptions and missingInformation explicitly.`,
-    ask: "Produce the market-intelligence assessment for this search now.",
-    shape: `{"difficulty": {"rating": number, "rationale": string}, "sections": [{"title": string, "claims": [{"text": string, "certainty": "estimated"|"inferred"|"unknown", "note": string?}]}], "assumptions": string[], "missingInformation": string[]}`,
-    check: (p) => shapeCheck(p, { difficulty: "object", sections: "array", assumptions: "array" }),
-    render: renderMarket,
-  },
-  sourcing_strategy: {
-    label: "Strategy",
-    desc: "The search strategy brief: primary phenotype, viable variants, adjacent populations, titles to chase and noise to cut.",
-    persona: "an elite sourcer writing a search strategy brief",
-    rules: `Produce the search strategy brief for THIS search:
+      ask: "Produce the market-intelligence assessment for this search now.",
+      shape: `{"difficulty": {"rating": number, "rationale": string}, "sections": [{"title": string, "claims": [{"text": string, "certainty": "estimated"|"inferred"|"unknown", "note": string?}]}], "assumptions": string[], "missingInformation": string[]}`,
+      check: (p) =>
+        shapeCheck(p, {
+          difficulty: "object",
+          sections: "array",
+          assumptions: "array",
+        }),
+      render: renderMarket,
+    },
+    sourcing_strategy: {
+      label: "Strategy",
+      desc: "The search strategy brief: primary phenotype, viable variants, adjacent populations, titles to chase and noise to cut.",
+      persona: "an elite sourcer writing a search strategy brief",
+      rules: `Produce the search strategy brief for THIS search:
 - primaryTargetProfile: one tight paragraph describing the phenotype most likely to succeed and be closeable.
 - secondaryTargetProfiles: distinct, viable variants (not weaker copies of the primary).
 - adjacentPossibilities: non-obvious populations with a rationale for why they transfer.
@@ -554,31 +1115,37 @@ Certainty labeling is the core requirement (NO FAKE DATA):
 - targetCompanies / feederCompanies: name companies only when the context or well-known industry structure supports them; otherwise describe the company type.
 - rationale: why this strategy fits this market and this company's pull.
 - risks: where this strategy fails and what would signal that early.`,
-    ask: "Write the sourcing strategy brief for this search now.",
-    shape: `{"primaryTargetProfile": string, "secondaryTargetProfiles": string[], "adjacentPossibilities": [{"text": string, "rationale": string}], "targetTitles": string[], "excludedTitles": string[], "targetCompanies": string[], "feederCompanies": string[], "targetIndustries": string[], "targetGeographies": string[], "rationale": string, "risks": string[]}`,
-    check: (p) => shapeCheck(p, { primaryTargetProfile: "string", targetTitles: "array", risks: "array" }),
-    render: renderStrategy,
-  },
-  channels: {
-    label: "Channels",
-    desc: "Where these candidates actually exist, ranked for this search — named venues are marked inferred until you verify them.",
-    persona: "a sourcing-channel researcher",
-    rules: `Determine WHERE candidates for this specific profession actually exist and rank the channels for THIS search: registries, communities, publications, conferences, associations, universities, portfolios, open-source, directories, job boards, alumni networks, referral sources, events, social networks, databases.
+      ask: "Write the sourcing strategy brief for this search now.",
+      shape: `{"primaryTargetProfile": string, "secondaryTargetProfiles": string[], "adjacentPossibilities": [{"text": string, "rationale": string}], "targetTitles": string[], "excludedTitles": string[], "targetCompanies": string[], "feederCompanies": string[], "targetIndustries": string[], "targetGeographies": string[], "rationale": string, "risks": string[]}`,
+      check: (p) =>
+        shapeCheck(p, {
+          primaryTargetProfile: "string",
+          targetTitles: "array",
+          risks: "array",
+        }),
+      render: renderStrategy,
+    },
+    channels: {
+      label: "Channels",
+      desc: "Where these candidates actually exist, ranked for this search — named venues are marked inferred until you verify them.",
+      persona: "a sourcing-channel researcher",
+      rules: `Determine WHERE candidates for this specific profession actually exist and rank the channels for THIS search: registries, communities, publications, conferences, associations, universities, portfolios, open-source, directories, job boards, alumni networks, referral sources, events, social networks, databases.
 - priority: "high" (work it first), "medium", "experimental" — whyRelevant explains the ranking for THIS search.
 - NEVER invent venues. You have no live web access, so mark named external venues certainty "inferred" at best; something you cannot name confidently becomes a channel type description with certainty "unknown". certainty is never "verified".
 - Only include a url when highly confident of the canonical domain; otherwise omit it.
 - costModel: "free", "paid", or "unknown" — never guess "free".
 - reasoningSummary: 3–5 sentences on the overall channel logic.`,
-    ask: "Produce the ranked channel map for this search now.",
-    shape: `{"channels": [{"name": string, "kind": string, "url": string?, "whyRelevant": string, "priority": "high"|"medium"|"experimental", "costModel": "free"|"paid"|"unknown", "certainty": "estimated"|"inferred"|"unknown"}], "reasoningSummary": string}`,
-    check: (p) => shapeCheck(p, { channels: "array", reasoningSummary: "string" }),
-    render: renderChannels,
-  },
-  search_strings: {
-    label: "Search Strings",
-    desc: "AI expands the vocabulary; a deterministic composer builds the boolean/x-ray matrix. Every query visible, editable, copyable.",
-    persona: "an expert boolean/x-ray sourcer",
-    rules: `Expand this search's vocabulary for query composition:
+      ask: "Produce the ranked channel map for this search now.",
+      shape: `{"channels": [{"name": string, "kind": string, "url": string?, "whyRelevant": string, "priority": "high"|"medium"|"experimental", "costModel": "free"|"paid"|"unknown", "certainty": "estimated"|"inferred"|"unknown"}], "reasoningSummary": string}`,
+      check: (p) =>
+        shapeCheck(p, { channels: "array", reasoningSummary: "string" }),
+      render: renderChannels,
+    },
+    search_strings: {
+      label: "Search Strings",
+      desc: "AI expands the vocabulary; a deterministic composer builds the boolean/x-ray matrix. Every query visible, editable, copyable.",
+      persona: "an expert boolean/x-ray sourcer",
+      rules: `Expand this search's vocabulary for query composition:
 - titles: the 2–4 sharpest titles for the primary phenotype.
 - alternateTitles: real-world title variants (what these people actually put on profiles).
 - adjacentTitles: adjacent-population titles worth an exploratory pass.
@@ -591,34 +1158,58 @@ Certainty labeling is the core requirement (NO FAKE DATA):
 - relevantPlatforms: which of ["research","engineering","design"] platform families fit THIS population (empty array if none beyond general web/LinkedIn).
 - extraQueries: platform-specific ready-to-run queries the generic matrix can't express — only real platforms, no invented sites.
 All terms must be real search tokens (short, quotable), not sentences.`,
-    ask: "Produce the query-expansion vocabulary and platform-specific extra queries for this search now.",
-    shape: `{"titles": string[], "alternateTitles": string[], "adjacentTitles": string[], "mustHave": string[], "anyOf": string[], "credentials": string[], "locations": string[], "companies": string[], "exclusions": string[], "relevantPlatforms": string[], "extraQueries": [{"platform": string, "query": string, "purpose": string, "breadth": "narrow"|"balanced"|"broad"|"adjacent"|"experimental"}]}`,
-    check: (p) => shapeCheck(p, { titles: "array", anyOf: "array", locations: "array", exclusions: "array" }),
-    render: renderStrings,
-  },
-};
-const MODULE_ORDER = ["overview", "role_intelligence", "intake", "success_profile", "market_intelligence", "sourcing_strategy", "channels", "search_strings", "candidates", "golden_test"];
+      ask: "Produce the query-expansion vocabulary and platform-specific extra queries for this search now.",
+      shape: `{"titles": string[], "alternateTitles": string[], "adjacentTitles": string[], "mustHave": string[], "anyOf": string[], "credentials": string[], "locations": string[], "companies": string[], "exclusions": string[], "relevantPlatforms": string[], "extraQueries": [{"platform": string, "query": string, "purpose": string, "breadth": "narrow"|"balanced"|"broad"|"adjacent"|"experimental"}]}`,
+      check: (p) =>
+        shapeCheck(p, {
+          titles: "array",
+          anyOf: "array",
+          locations: "array",
+          exclusions: "array",
+        }),
+      render: renderStrings,
+    },
+  };
+  const MODULE_ORDER = [
+    "overview",
+    "role_intelligence",
+    "intake",
+    "success_profile",
+    "market_intelligence",
+    "sourcing_strategy",
+    "channels",
+    "search_strings",
+    "candidates",
+    "golden_test",
+  ];
 
-/* ── Sample plumbing ──────────────────────────────────────────────────── */
-let sampleApi = null; // resolved sample fn or null
-let aiHidden = false; // set true on not_granted / sampling_disabled
+  /* ── Sample plumbing ──────────────────────────────────────────────────── */
+  let sampleApi = null; // resolved sample fn or null
+  let aiHidden = false; // set true on not_granted / sampling_disabled
 
-const ERROR_COPY = {
-  not_granted: "Claude access wasn't allowed for this page, so AI generation is off. Everything else still works.",
-  sampling_disabled: "Claude isn't available on this account, so AI generation is off.",
-  rate_limited: "Claude is rate-limited right now — wait a little and try again.",
-  refused: "Claude declined this request. Edit the inputs and try a different framing.",
-  invalid_json: "The reply wasn't valid JSON. Try again — if it keeps failing, trim the JD or notes.",
-  prompt_too_large: "The assembled context is too large. Trim the JD or recruiter notes and retry.",
-  empty_completion: "Claude produced no output. Try again with slightly different inputs.",
-  cancelled: "Stopped.",
-  upstream_error: "A transient error interrupted the call. Try again.",
-};
-const copyFor = (code) => ERROR_COPY[code] || ERROR_COPY.upstream_error;
+  const ERROR_COPY = {
+    not_granted:
+      "Claude access wasn't allowed for this page, so AI generation is off. Everything else still works.",
+    sampling_disabled:
+      "Claude isn't available on this account, so AI generation is off.",
+    rate_limited:
+      "Claude is rate-limited right now — wait a little and try again.",
+    refused:
+      "Claude declined this request. Edit the inputs and try a different framing.",
+    invalid_json:
+      "The reply wasn't valid JSON. Try again — if it keeps failing, trim the JD or notes.",
+    prompt_too_large:
+      "The assembled context is too large. Trim the JD or recruiter notes and retry.",
+    empty_completion:
+      "Claude produced no output. Try again with slightly different inputs.",
+    cancelled: "Stopped.",
+    upstream_error: "A transient error interrupted the call. Try again.",
+  };
+  const copyFor = (code) => ERROR_COPY[code] || ERROR_COPY.upstream_error;
 
-async function runTask(taskKey, extraContext, ui, opts) {
-  const task = TASKS[taskKey];
-  const prompt = `${systemPrelude(task.persona)}
+  async function runTask(taskKey, extraContext, ui, opts) {
+    const task = TASKS[taskKey];
+    const prompt = `${systemPrelude(task.persona)}
 
 ${task.rules}
 
@@ -630,200 +1221,334 @@ ${task.ask}
 ## Output format
 Reply with ONLY one JSON object (no markdown fences, no commentary) of this shape:
 ${task.shape}`;
-  const ctl = new AbortController();
-  if (ui && ui.bindStop) ui.bindStop(ctl);
-  const payload = await sampleApi.json(prompt, {
-    signal: ctl.signal,
-    cache: opts && opts.regenerate ? false : true,
-    onText: ui && ui.onText,
-  });
-  const err = task.check(payload);
-  if (err) { const e = { code: "invalid_json", message: "shape: " + err, text: JSON.stringify(payload) }; throw e; }
-  const downgrades = downgradeVerified(payload);
-  return {
-    payload,
-    meta: { provider: "claude-artifact", generatedAt: new Date().toISOString(), downgrades },
-    traitWarnings: scanForProtectedTraits(payload),
+    const ctl = new AbortController();
+    if (ui && ui.bindStop) ui.bindStop(ctl);
+    const payload = await sampleApi.json(prompt, {
+      signal: ctl.signal,
+      cache: opts && opts.regenerate ? false : true,
+      onText: ui && ui.onText,
+    });
+    const err = task.check(payload);
+    if (err) {
+      const e = {
+        code: "invalid_json",
+        message: "shape: " + err,
+        text: JSON.stringify(payload),
+      };
+      throw e;
+    }
+    const downgrades = downgradeVerified(payload);
+    return {
+      payload,
+      meta: {
+        provider: "claude-artifact",
+        generatedAt: new Date().toISOString(),
+        downgrades,
+      },
+      traitWarnings: scanForProtectedTraits(payload),
+    };
+  }
+
+  /* ── App state ────────────────────────────────────────────────────────── */
+  const state = {
+    searches: [],
+    current: null,
+    artifacts: {},
+    candidates: [],
+    module: "overview",
+    storageMode: "local",
   };
-}
 
-/* ── App state ────────────────────────────────────────────────────────── */
-const state = {
-  searches: [], current: null, artifacts: {}, candidates: [],
-  module: "overview", storageMode: "local",
-};
+  async function selectSearch(id) {
+    state.current = state.searches.find((s) => s.id === id) || null;
+    state.artifacts = state.current ? await store.loadArtifacts(id) : {};
+    state.candidates = state.current ? await store.listCandidates(id) : [];
+    state.module = "overview";
+    render();
+  }
 
-async function selectSearch(id) {
-  state.current = state.searches.find((s) => s.id === id) || null;
-  state.artifacts = state.current ? await store.loadArtifacts(id) : {};
-  state.candidates = state.current ? await store.listCandidates(id) : [];
-  state.module = "overview";
-  render();
-}
+  /* ── Rendering: shell ─────────────────────────────────────────────────── */
+  function render() {
+    renderRail();
+    renderMain();
+  }
 
-/* ── Rendering: shell ─────────────────────────────────────────────────── */
-function render() {
-  renderRail();
-  renderMain();
-}
-
-function renderRail() {
-  const list = $("#search-list");
-  list.innerHTML = "";
-  for (const s of state.searches) {
-    const active = state.current && state.current.id === s.id;
-    const item = el(`<button class="search-item ${active ? "active" : ""}">
+  function renderRail() {
+    const list = $("#search-list");
+    list.innerHTML = "";
+    for (const s of state.searches) {
+      const active = state.current && state.current.id === s.id;
+      const item = el(`<button class="search-item ${active ? "active" : ""}">
       <div class="si-name">${esc(s.roleTitle)} ${s.example ? '<span class="chip example">example</span>' : ""}</div>
       <div class="si-sub">${esc(s.companyName || "")} · ${esc(s.geography || "")}</div>
     </button>`);
-    item.onclick = () => selectSearch(s.id);
-    list.append(item);
-  }
-  const nav = $("#mod-nav");
-  nav.innerHTML = "";
-  if (!state.current) return;
-  for (const key of MODULE_ORDER) {
-    const label = key === "overview" ? "Overview" : key === "candidates" ? "Candidates" : key === "golden_test" ? "Golden Test" : TASKS[key].label;
-    const done = key === "overview" ? true : key === "candidates" ? state.candidates.length > 0 : Boolean(state.artifacts[key]);
-    const item = el(`<button class="mod-item ${state.module === key ? "active" : ""}"><span class="dot ${done ? "done" : ""}"></span>${esc(label)}</button>`);
-    item.onclick = () => { state.module = key; render(); };
-    nav.append(item);
-  }
-  $("#rail-foot").textContent = state.storageMode === "db"
-    ? "Saved to this artifact's private store. Nothing sends automatically."
-    : "Saved in this browser only (offline mode). Nothing sends automatically.";
-}
-
-function renderMain() {
-  const main = $("#main");
-  main.innerHTML = "";
-  if (!state.current) { main.append(renderNewSearchForm(true)); return; }
-  if (state.module === "overview") return renderOverview(main);
-  if (state.module === "candidates") return renderCandidates(main);
-  if (state.module === "golden_test") return renderGolden(main);
-  renderTaskModule(main, state.module);
-}
-
-/* ── Module frame with generate / regenerate / edit JSON ──────────────── */
-function renderTaskModule(main, key) {
-  const task = TASKS[key];
-  const rec = state.artifacts[key];
-  main.append(el(`<div class="mod-head"><h2>${esc(task.label)}</h2>
-    ${rec ? '<span class="chip inference">model inference</span>' : ""}
-    <span class="spacer"></span></div>`));
-  main.append(el(`<p class="mod-desc">${esc(task.desc)}</p>`));
-
-  const head = $(".mod-head", main);
-  const body = el(`<div></div>`);
-  main.append(body);
-
-  if (aiHidden) main.append(el(`<div class="notice warning">${esc(copyFor("not_granted"))}</div>`));
-
-  const genBtn = el(`<button class="btn ${rec ? "" : "primary"}">${rec ? "Regenerate" : "Generate"}</button>`);
-  const stopBtn = el(`<button class="btn small" hidden>Stop</button>`);
-  if (!aiHidden && sampleApi) { head.append(genBtn, stopBtn); }
-
-  let ctl = null;
-  stopBtn.onclick = () => ctl && ctl.abort();
-
-  genBtn.onclick = async () => {
-    genBtn.disabled = true; stopBtn.hidden = false;
-    body.innerHTML = "";
-    const think = el(`<div class="panel"><div class="thinking">Generating ${esc(task.label.toLowerCase())} — Claude is thinking…</div><div class="stream"></div></div>`);
-    body.append(think);
-    const streamEl = $(".stream", think);
-    try {
-      const result = await runTask(key, renderContext(state.current, state.artifacts), {
-        bindStop: (c) => { ctl = c; },
-        onText: ({ text }) => { streamEl.textContent = text.slice(-1500); streamEl.scrollTop = streamEl.scrollHeight; },
-      }, { regenerate: Boolean(rec) });
-      state.artifacts[key] = result;
-      await store.saveArtifact(state.current.id, key, result);
-      render();
-    } catch (e) {
-      if (e && (e.code === "not_granted" || e.code === "sampling_disabled")) { aiHidden = true; }
-      body.innerHTML = "";
-      body.append(el(`<div class="notice error"><strong>Generation failed.</strong> ${esc(copyFor(e && e.code))}</div>`));
-      if (rec) paintArtifact(body, key, rec);
-      genBtn.disabled = false; stopBtn.hidden = true;
+      item.onclick = () => selectSearch(s.id);
+      list.append(item);
     }
-  };
-
-  if (rec) paintArtifact(body, key, rec);
-  else body.append(el(`<div class="panel"><p class="why">Not generated yet. ${aiHidden || !sampleApi ? "AI generation is unavailable in this view." : "Generation runs on your Claude account — the first call asks for permission."}</p></div>`));
-}
-
-function paintArtifact(body, key, rec) {
-  if (rec.traitWarnings && rec.traitWarnings.length) {
-    body.append(el(`<div class="notice warning"><strong>Review required:</strong> the output mentions ${esc(rec.traitWarnings.join(", "))}. Protected characteristics must never drive evaluation — edit before use.</div>`));
+    const nav = $("#mod-nav");
+    nav.innerHTML = "";
+    if (!state.current) return;
+    for (const key of MODULE_ORDER) {
+      const label =
+        key === "overview"
+          ? "Overview"
+          : key === "candidates"
+            ? "Candidates"
+            : key === "golden_test"
+              ? "Golden Test"
+              : TASKS[key].label;
+      const done =
+        key === "overview"
+          ? true
+          : key === "candidates"
+            ? state.candidates.length > 0
+            : Boolean(state.artifacts[key]);
+      const item = el(
+        `<button class="mod-item ${state.module === key ? "active" : ""}"><span class="dot ${done ? "done" : ""}"></span>${esc(label)}</button>`,
+      );
+      item.onclick = () => {
+        state.module = key;
+        render();
+      };
+      nav.append(item);
+    }
+    $("#rail-foot").textContent =
+      state.storageMode === "db"
+        ? "Saved to this artifact's private store. Nothing sends automatically."
+        : "Saved in this browser only (offline mode). Nothing sends automatically.";
   }
-  const rendered = el(`<div></div>`);
-  try { TASKS[key].render(rendered, rec.payload); }
-  catch (e) { rendered.append(el(`<div class="notice error">Render failed (${esc(String(e && e.message))}) — use Edit JSON below.</div>`)); }
-  body.append(rendered);
 
-  const editWrap = el(`<div class="panel"><h4 style="margin-top:0">Edit JSON <span class="why">— the draft is yours; edits are saved verbatim</span></h4></div>`);
-  const ta = el(`<textarea class="mono" rows="10"></textarea>`);
-  ta.value = JSON.stringify(rec.payload, null, 2);
-  const saveBtn = el(`<button class="btn small" style="margin-top:8px">Save edits</button>`);
-  const msg = el(`<span class="why" style="margin-left:10px"></span>`);
-  saveBtn.onclick = async () => {
+  function renderMain() {
+    const main = $("#main");
+    main.innerHTML = "";
+    if (!state.current) {
+      main.append(renderNewSearchForm(true));
+      return;
+    }
+    if (state.module === "overview") return renderOverview(main);
+    if (state.module === "candidates") return renderCandidates(main);
+    if (state.module === "golden_test") return renderGolden(main);
+    renderTaskModule(main, state.module);
+  }
+
+  /* ── Module frame with generate / regenerate / edit JSON ──────────────── */
+  function renderTaskModule(main, key) {
+    const task = TASKS[key];
+    const rec = state.artifacts[key];
+    main.append(
+      el(`<div class="mod-head"><h2>${esc(task.label)}</h2>
+    ${rec ? '<span class="chip inference">model inference</span>' : ""}
+    <span class="spacer"></span></div>`),
+    );
+    main.append(el(`<p class="mod-desc">${esc(task.desc)}</p>`));
+
+    const head = $(".mod-head", main);
+    const body = el(`<div></div>`);
+    main.append(body);
+
+    if (aiHidden)
+      main.append(
+        el(`<div class="notice warning">${esc(copyFor("not_granted"))}</div>`),
+      );
+
+    const genBtn = el(
+      `<button class="btn ${rec ? "" : "primary"}">${rec ? "Regenerate" : "Generate"}</button>`,
+    );
+    const stopBtn = el(`<button class="btn small" hidden>Stop</button>`);
+    if (!aiHidden && sampleApi) {
+      head.append(genBtn, stopBtn);
+    }
+
+    let ctl = null;
+    stopBtn.onclick = () => ctl && ctl.abort();
+
+    genBtn.onclick = async () => {
+      genBtn.disabled = true;
+      stopBtn.hidden = false;
+      body.innerHTML = "";
+      const think = el(
+        `<div class="panel"><div class="thinking">Generating ${esc(task.label.toLowerCase())} — Claude is thinking…</div><div class="stream"></div></div>`,
+      );
+      body.append(think);
+      const streamEl = $(".stream", think);
+      try {
+        const result = await runTask(
+          key,
+          renderContext(state.current, state.artifacts),
+          {
+            bindStop: (c) => {
+              ctl = c;
+            },
+            onText: ({ text }) => {
+              streamEl.textContent = text.slice(-1500);
+              streamEl.scrollTop = streamEl.scrollHeight;
+            },
+          },
+          { regenerate: Boolean(rec) },
+        );
+        state.artifacts[key] = result;
+        await store.saveArtifact(state.current.id, key, result);
+        render();
+      } catch (e) {
+        if (e && (e.code === "not_granted" || e.code === "sampling_disabled")) {
+          aiHidden = true;
+        }
+        body.innerHTML = "";
+        body.append(
+          el(
+            `<div class="notice error"><strong>Generation failed.</strong> ${esc(copyFor(e && e.code))}</div>`,
+          ),
+        );
+        if (rec) paintArtifact(body, key, rec);
+        genBtn.disabled = false;
+        stopBtn.hidden = true;
+      }
+    };
+
+    if (rec) paintArtifact(body, key, rec);
+    else
+      body.append(
+        el(
+          `<div class="panel"><p class="why">Not generated yet. ${aiHidden || !sampleApi ? "AI generation is unavailable in this view." : "Generation runs on your Claude account — the first call asks for permission."}</p></div>`,
+        ),
+      );
+  }
+
+  function paintArtifact(body, key, rec) {
+    if (rec.traitWarnings && rec.traitWarnings.length) {
+      body.append(
+        el(
+          `<div class="notice warning"><strong>Review required:</strong> the output mentions ${esc(rec.traitWarnings.join(", "))}. Protected characteristics must never drive evaluation — edit before use.</div>`,
+        ),
+      );
+    }
+    const rendered = el(`<div></div>`);
     try {
-      const payload = JSON.parse(ta.value);
-      const err = TASKS[key].check(payload);
-      if (err) { msg.textContent = "Not saved — " + err; return; }
-      downgradeVerified(payload);
-      rec.payload = payload;
-      rec.meta = { ...(rec.meta || {}), editedAt: new Date().toISOString(), editedBy: "recruiter" };
-      rec.traitWarnings = scanForProtectedTraits(payload);
-      await store.saveArtifact(state.current.id, key, rec);
-      render();
-    } catch { msg.textContent = "Not saved — invalid JSON."; }
+      TASKS[key].render(rendered, rec.payload);
+    } catch (e) {
+      rendered.append(
+        el(
+          `<div class="notice error">Render failed (${esc(String(e && e.message))}) — use Edit JSON below.</div>`,
+        ),
+      );
+    }
+    body.append(rendered);
+
+    const editWrap = el(
+      `<div class="panel"><h4 style="margin-top:0">Edit JSON <span class="why">— the draft is yours; edits are saved verbatim</span></h4></div>`,
+    );
+    const ta = el(`<textarea class="mono" rows="10"></textarea>`);
+    ta.value = JSON.stringify(rec.payload, null, 2);
+    const saveBtn = el(
+      `<button class="btn small" style="margin-top:8px">Save edits</button>`,
+    );
+    const msg = el(`<span class="why" style="margin-left:10px"></span>`);
+    saveBtn.onclick = async () => {
+      try {
+        const payload = JSON.parse(ta.value);
+        const err = TASKS[key].check(payload);
+        if (err) {
+          msg.textContent = "Not saved — " + err;
+          return;
+        }
+        downgradeVerified(payload);
+        rec.payload = payload;
+        rec.meta = {
+          ...(rec.meta || {}),
+          editedAt: new Date().toISOString(),
+          editedBy: "recruiter",
+        };
+        rec.traitWarnings = scanForProtectedTraits(payload);
+        await store.saveArtifact(state.current.id, key, rec);
+        render();
+      } catch {
+        msg.textContent = "Not saved — invalid JSON.";
+      }
+    };
+    editWrap.append(ta, saveBtn, msg);
+    body.append(editWrap);
+    if (rec.meta)
+      body.append(
+        el(
+          `<p class="why num">Generated ${esc(rec.meta.generatedAt || "")}${rec.meta.editedAt ? ` · edited ${esc(rec.meta.editedAt)}` : ""} · provider: ${esc(rec.meta.provider || "claude-artifact")}</p>`,
+        ),
+      );
+  }
+
+  /* ── Renderers per artifact ───────────────────────────────────────────── */
+  const chipFor = (v) => {
+    const cls =
+      {
+        strong: "ok",
+        partial: "warn",
+        missing: "bad",
+        contradictory: "bad",
+        unknown: "unknown",
+        estimated: "warn",
+        inferred: "unknown",
+        high: "ok",
+        medium: "warn",
+        experimental: "unknown",
+      }[v] || "unknown";
+    return `<span class="chip ${cls}">${esc(v)}</span>`;
   };
-  editWrap.append(ta, saveBtn, msg);
-  body.append(editWrap);
-  if (rec.meta) body.append(el(`<p class="why num">Generated ${esc(rec.meta.generatedAt || "")}${rec.meta.editedAt ? ` · edited ${esc(rec.meta.editedAt)}` : ""} · provider: ${esc(rec.meta.provider || "claude-artifact")}</p>`));
-}
+  const provChip = (p) =>
+    `<span class="chip ${p === "model_inference" ? "inference" : ""}">${esc((p || "").replace("_", " "))}</span>`;
+  const tracedList = (items) =>
+    `<ul>${(items || []).map((i) => `<li>${esc(i.text)} ${provChip(i.provenance)}${i.note ? ` <span class="why">${esc(i.note)}</span>` : ""}</li>`).join("")}</ul>`;
+  const plainList = (items) =>
+    `<ul>${(items || []).map((i) => `<li>${esc(typeof i === "string" ? i : i.text)}</li>`).join("")}</ul>`;
 
-/* ── Renderers per artifact ───────────────────────────────────────────── */
-const chipFor = (v) => {
-  const cls = { strong: "ok", partial: "warn", missing: "bad", contradictory: "bad", unknown: "unknown",
-    estimated: "warn", inferred: "unknown", high: "ok", medium: "warn", experimental: "unknown" }[v] || "unknown";
-  return `<span class="chip ${cls}">${esc(v)}</span>`;
-};
-const provChip = (p) => `<span class="chip ${p === "model_inference" ? "inference" : ""}">${esc((p || "").replace("_", " "))}</span>`;
-const tracedList = (items) => `<ul>${(items || []).map((i) => `<li>${esc(i.text)} ${provChip(i.provenance)}${i.note ? ` <span class="why">${esc(i.note)}</span>` : ""}</li>`).join("")}</ul>`;
-const plainList = (items) => `<ul>${(items || []).map((i) => `<li>${esc(typeof i === "string" ? i : i.text)}</li>`).join("")}</ul>`;
-
-function renderRoleIntelligence(root, p) {
-  root.append(el(`<div class="panel"><h3>Role hypothesis</h3><p>${esc(p.roleHypothesis)}</p>
+  function renderRoleIntelligence(root, p) {
+    root.append(
+      el(`<div class="panel"><h3>Role hypothesis</h3><p>${esc(p.roleHypothesis)}</p>
     <dl class="kv"><dt>Canonical title</dt><dd>${esc(p.canonicalTitle)}</dd>
     <dt>Alternate titles</dt><dd>${esc((p.alternateTitles || []).join(", "))}</dd>
     <dt>Profession</dt><dd>${esc(p.profession || "")}</dd>
     <dt>Seniority</dt><dd>${esc(p.seniority || "")}</dd>
-    <dt>Likely competitors</dt><dd>${esc((p.likelyTalentCompetitors || []).join(", "))}</dd></dl></div>`));
-  root.append(el(`<div class="panel"><h3>Hard requirements <span class="why">— explicitly stated, non-negotiable</span></h3>${tracedList(p.hardRequirements)}
+    <dt>Likely competitors</dt><dd>${esc((p.likelyTalentCompetitors || []).join(", "))}</dd></dl></div>`),
+    );
+    root.append(
+      el(`<div class="panel"><h3>Hard requirements <span class="why">— explicitly stated, non-negotiable</span></h3>${tracedList(p.hardRequirements)}
     <h4>Preferences</h4>${tracedList(p.preferences)}
     <h4>Signals</h4>${tracedList(p.signals)}
     <h4>Assumptions (model's own)</h4>${plainList(p.assumptions)}
-    <h4>Unresolved questions for the hiring manager</h4>${plainList(p.unresolvedQuestions)}</div>`));
-}
-
-function renderIntake(root, p) {
-  for (const cat of p.categories || []) {
-    const panel = el(`<div class="panel"><h3>${esc(cat.title)}</h3><p class="why">${esc(cat.rationale || "")}</p></div>`);
-    for (const q of cat.questions || []) {
-      if (!q.id) q.id = uid();
-      const row = el(`<div style="margin:12px 0"><div class="qq">${esc(q.question)}</div><div class="why">Why: ${esc(q.whyItMatters || "")}</div></div>`);
-      const ta = el(`<textarea rows="2" placeholder="Hiring manager's answer…"></textarea>`);
-      ta.value = q.answer || "";
-      ta.onchange = async () => { q.answer = ta.value; await store.saveArtifact(state.current.id, "intake", state.artifacts.intake); renderRail(); };
-      row.append(ta); panel.append(row);
-    }
-    root.append(panel);
+    <h4>Unresolved questions for the hiring manager</h4>${plainList(p.unresolvedQuestions)}</div>`),
+    );
   }
-  const pb = p.playback;
-  if (pb) root.append(el(`<div class="panel"><h3>Playback — “Let me summarize the search as I now understand it.”</h3>
+
+  function renderIntake(root, p) {
+    for (const cat of p.categories || []) {
+      const panel = el(
+        `<div class="panel"><h3>${esc(cat.title)}</h3><p class="why">${esc(cat.rationale || "")}</p></div>`,
+      );
+      for (const q of cat.questions || []) {
+        if (!q.id) q.id = uid();
+        const row = el(
+          `<div style="margin:12px 0"><div class="qq">${esc(q.question)}</div><div class="why">Why: ${esc(q.whyItMatters || "")}</div></div>`,
+        );
+        const ta = el(
+          `<textarea rows="2" placeholder="Hiring manager's answer…"></textarea>`,
+        );
+        ta.value = q.answer || "";
+        ta.onchange = async () => {
+          q.answer = ta.value;
+          await store.saveArtifact(
+            state.current.id,
+            "intake",
+            state.artifacts.intake,
+          );
+          renderRail();
+        };
+        row.append(ta);
+        panel.append(row);
+      }
+      root.append(panel);
+    }
+    const pb = p.playback;
+    if (pb)
+      root.append(
+        el(`<div class="panel"><h3>Playback — “Let me summarize the search as I now understand it.”</h3>
     <dl class="kv"><dt>Target</dt><dd>${esc(pb.target)}</dd>
     <dt>Hard requirements</dt><dd>${esc((pb.hardRequirements || []).join(" · "))}</dd>
     <dt>Flexible</dt><dd>${esc((pb.flexibleRequirements || []).join(" · "))}</dd>
@@ -831,38 +1556,60 @@ function renderIntake(root, p) {
     <dt>Adjacent</dt><dd>${esc((pb.adjacentPhenotypes || []).join(" · "))}</dd>
     <dt>Disqualifiers</dt><dd>${esc((pb.disqualifiers || []).join(" · "))}</dd>
     <dt>Still unresolved</dt><dd>${esc((pb.unresolvedQuestions || []).join(" · "))}</dd></dl>
-    <p class="why">Close the intake by asking the hiring manager: <b style="color:var(--text)">“What did I get wrong?”</b></p></div>`));
-}
+    <p class="why">Close the intake by asking the hiring manager: <b style="color:var(--text)">“What did I get wrong?”</b></p></div>`),
+      );
+  }
 
-function renderSuccessProfile(root, p) {
-  root.append(el(`<div class="panel"><h3>Mission</h3><p>${esc(p.mission)}</p>
+  function renderSuccessProfile(root, p) {
+    root.append(
+      el(`<div class="panel"><h3>Mission</h3><p>${esc(p.mission)}</p>
     <h4>Outcomes</h4>${tracedList(p.outcomes)}
     <h4>Must-have</h4>${tracedList(p.mustHave)}
     <h4>Preferred</h4>${tracedList(p.preferred)}
-    <h4>Trainable</h4>${tracedList(p.trainable)}</div>`));
-  root.append(el(`<div class="panel"><h3>Evidence signals <span class="why">— what a sourcer can actually find</span></h3>${tracedList(p.evidenceSignals)}
+    <h4>Trainable</h4>${tracedList(p.trainable)}</div>`),
+    );
+    root.append(
+      el(`<div class="panel"><h3>Evidence signals <span class="why">— what a sourcer can actually find</span></h3>${tracedList(p.evidenceSignals)}
     <h4>Negative signals</h4>${tracedList(p.negativeSignals)}
     <h4>Selling points</h4>${tracedList(p.sellingPoints)}
     <h4>Candidate motivators</h4>${tracedList(p.candidateMotivators)}
-    <h4>Unresolved questions</h4>${plainList(p.unresolvedQuestions)}</div>`));
-}
-
-function renderMarket(root, p) {
-  const d = p.difficulty || {};
-  root.append(el(`<div class="panel"><h3>Difficulty: <span class="num">${esc(String(d.rating))} / 5</span></h3><p>${esc(d.rationale || "")}</p></div>`));
-  for (const s of p.sections || []) {
-    root.append(el(`<div class="panel"><h3>${esc(s.title)}</h3><ul>${(s.claims || []).map((c) =>
-      `<li>${esc(c.text)} ${chipFor(c.certainty)}${c.note ? ` <span class="why">${esc(c.note)}</span>` : ""}</li>`).join("")}</ul></div>`));
+    <h4>Unresolved questions</h4>${plainList(p.unresolvedQuestions)}</div>`),
+    );
   }
-  root.append(el(`<div class="panel"><h4 style="margin-top:0">Assumptions</h4>${plainList(p.assumptions)}
-    <h4>Missing information</h4>${plainList(p.missingInformation)}</div>`));
-}
 
-function renderStrategy(root, p) {
-  root.append(el(`<div class="panel"><h3>Primary target profile</h3><p>${esc(p.primaryTargetProfile)}</p>
+  function renderMarket(root, p) {
+    const d = p.difficulty || {};
+    root.append(
+      el(
+        `<div class="panel"><h3>Difficulty: <span class="num">${esc(String(d.rating))} / 5</span></h3><p>${esc(d.rationale || "")}</p></div>`,
+      ),
+    );
+    for (const s of p.sections || []) {
+      root.append(
+        el(
+          `<div class="panel"><h3>${esc(s.title)}</h3><ul>${(s.claims || [])
+            .map(
+              (c) =>
+                `<li>${esc(c.text)} ${chipFor(c.certainty)}${c.note ? ` <span class="why">${esc(c.note)}</span>` : ""}</li>`,
+            )
+            .join("")}</ul></div>`,
+        ),
+      );
+    }
+    root.append(
+      el(`<div class="panel"><h4 style="margin-top:0">Assumptions</h4>${plainList(p.assumptions)}
+    <h4>Missing information</h4>${plainList(p.missingInformation)}</div>`),
+    );
+  }
+
+  function renderStrategy(root, p) {
+    root.append(
+      el(`<div class="panel"><h3>Primary target profile</h3><p>${esc(p.primaryTargetProfile)}</p>
     <h4>Secondary profiles</h4>${plainList(p.secondaryTargetProfiles)}
-    <h4>Adjacent possibilities</h4><ul>${(p.adjacentPossibilities || []).map((a) => `<li>${esc(a.text)} <span class="why">— ${esc(a.rationale || "")}</span></li>`).join("")}</ul></div>`));
-  root.append(el(`<div class="panel"><dl class="kv">
+    <h4>Adjacent possibilities</h4><ul>${(p.adjacentPossibilities || []).map((a) => `<li>${esc(a.text)} <span class="why">— ${esc(a.rationale || "")}</span></li>`).join("")}</ul></div>`),
+    );
+    root.append(
+      el(`<div class="panel"><dl class="kv">
     <dt>Target titles</dt><dd>${esc((p.targetTitles || []).join(", "))}</dd>
     <dt>Excluded titles</dt><dd>${esc((p.excludedTitles || []).join(", "))}</dd>
     <dt>Target companies</dt><dd>${esc((p.targetCompanies || []).join(", "))}</dd>
@@ -870,158 +1617,257 @@ function renderStrategy(root, p) {
     <dt>Industries</dt><dd>${esc((p.targetIndustries || []).join(", "))}</dd>
     <dt>Geographies</dt><dd>${esc((p.targetGeographies || []).join(", "))}</dd></dl>
     <h4>Rationale</h4><p>${esc(p.rationale || "")}</p>
-    <h4>Risks</h4>${plainList(p.risks)}</div>`));
-}
-
-function renderChannels(root, p) {
-  root.append(el(`<div class="panel"><p class="why">${esc(p.reasoningSummary || "")}</p></div>`));
-  const order = { high: 0, medium: 1, experimental: 2 };
-  const channels = [...(p.channels || [])].sort((a, b) => (order[a.priority] ?? 3) - (order[b.priority] ?? 3));
-  const panel = el(`<div class="panel"></div>`);
-  for (const c of channels) {
-    panel.append(el(`<div class="qrow"><div class="qmeta"><div class="plat">${esc(c.name)}</div>${chipFor(c.priority)} ${chipFor(c.certainty)} <span class="chip">${esc(c.costModel)}</span></div>
-      <div style="flex:1"><div>${esc(c.whyRelevant)}</div>${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.url)}</a> <span class="why">(unverified)</span>` : ""}</div></div>`));
+    <h4>Risks</h4>${plainList(p.risks)}</div>`),
+    );
   }
-  root.append(panel);
-}
 
-function renderStrings(root, p) {
-  const input = {
-    titles: p.titles || [], alternateTitles: p.alternateTitles || [], adjacentTitles: p.adjacentTitles || [],
-    mustHave: p.mustHave || [], anyOf: p.anyOf || [], credentials: p.credentials || [],
-    locations: p.locations || [], companies: p.companies || [], exclusions: p.exclusions || [],
-  };
-  const composed = composeQueries(input, ["general", ...(p.relevantPlatforms || [])]);
-  const panel = el(`<div class="panel"><h3>Composed matrix <span class="why num">— ${composed.length} deterministic variants, deduped</span></h3></div>`);
-  for (const q of composed) {
-    const row = el(`<div class="qrow"><div class="qmeta"><div class="plat">${esc(q.platform)}</div>${chipFor(q.expectedPrecision)} <span class="chip">${esc(q.breadth)}</span>${q.overBudget ? ' <span class="chip warn">&gt;32 words</span>' : ""}</div>
+  function renderChannels(root, p) {
+    root.append(
+      el(
+        `<div class="panel"><p class="why">${esc(p.reasoningSummary || "")}</p></div>`,
+      ),
+    );
+    const order = { high: 0, medium: 1, experimental: 2 };
+    const channels = [...(p.channels || [])].sort(
+      (a, b) => (order[a.priority] ?? 3) - (order[b.priority] ?? 3),
+    );
+    const panel = el(`<div class="panel"></div>`);
+    for (const c of channels) {
+      panel.append(
+        el(`<div class="qrow"><div class="qmeta"><div class="plat">${esc(c.name)}</div>${chipFor(c.priority)} ${chipFor(c.certainty)} <span class="chip">${esc(c.costModel)}</span></div>
+      <div style="flex:1"><div>${esc(c.whyRelevant)}</div>${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.url)}</a> <span class="why">(unverified)</span>` : ""}</div></div>`),
+      );
+    }
+    root.append(panel);
+  }
+
+  function renderStrings(root, p) {
+    const input = {
+      titles: p.titles || [],
+      alternateTitles: p.alternateTitles || [],
+      adjacentTitles: p.adjacentTitles || [],
+      mustHave: p.mustHave || [],
+      anyOf: p.anyOf || [],
+      credentials: p.credentials || [],
+      locations: p.locations || [],
+      companies: p.companies || [],
+      exclusions: p.exclusions || [],
+    };
+    const composed = composeQueries(input, [
+      "general",
+      ...(p.relevantPlatforms || []),
+    ]);
+    const panel = el(
+      `<div class="panel"><h3>Composed matrix <span class="why num">— ${composed.length} deterministic variants, deduped</span></h3></div>`,
+    );
+    for (const q of composed) {
+      const row =
+        el(`<div class="qrow"><div class="qmeta"><div class="plat">${esc(q.platform)}</div>${chipFor(q.expectedPrecision)} <span class="chip">${esc(q.breadth)}</span>${q.overBudget ? ' <span class="chip warn">&gt;32 words</span>' : ""}</div>
       <pre class="mono">${esc(q.query)}</pre></div>`);
-    const btn = el(`<button class="btn small">Copy</button>`);
-    btn.onclick = () => copyText(q.query, btn);
-    row.append(btn);
-    panel.append(row);
-  }
-  root.append(panel);
-  if ((p.extraQueries || []).length) {
-    const extra = el(`<div class="panel"><h3>Platform-specific queries <span class="why">— model-suggested, verify the platform before relying on it</span></h3></div>`);
-    for (const q of p.extraQueries) {
-      const row = el(`<div class="qrow"><div class="qmeta"><div class="plat">${esc(q.platform)}</div><span class="chip">${esc(q.breadth || "")}</span><div class="why">${esc(q.purpose || "")}</div></div>
-        <pre class="mono">${esc(q.query)}</pre></div>`);
       const btn = el(`<button class="btn small">Copy</button>`);
       btn.onclick = () => copyText(q.query, btn);
       row.append(btn);
-      extra.append(row);
+      panel.append(row);
     }
-    root.append(extra);
+    root.append(panel);
+    if ((p.extraQueries || []).length) {
+      const extra = el(
+        `<div class="panel"><h3>Platform-specific queries <span class="why">— model-suggested, verify the platform before relying on it</span></h3></div>`,
+      );
+      for (const q of p.extraQueries) {
+        const row =
+          el(`<div class="qrow"><div class="qmeta"><div class="plat">${esc(q.platform)}</div><span class="chip">${esc(q.breadth || "")}</span><div class="why">${esc(q.purpose || "")}</div></div>
+        <pre class="mono">${esc(q.query)}</pre></div>`);
+        const btn = el(`<button class="btn small">Copy</button>`);
+        btn.onclick = () => copyText(q.query, btn);
+        row.append(btn);
+        extra.append(row);
+      }
+      root.append(extra);
+    }
+    if (composed.some((q) => q.overBudget))
+      root.append(
+        el(
+          `<div class="notice warning">Queries flagged <b>&gt;32 words</b> exceed Google's effective term limit and will silently truncate — trim before running.</div>`,
+        ),
+      );
   }
-  if (composed.some((q) => q.overBudget)) root.append(el(`<div class="notice warning">Queries flagged <b>&gt;32 words</b> exceed Google's effective term limit and will silently truncate — trim before running.</div>`));
-}
 
-/* ── Overview module ──────────────────────────────────────────────────── */
-function factsForm(s, onSave, isNew) {
-  const f = el(`<div class="panel"><div class="form-grid"></div></div>`);
-  const grid = $(".form-grid", f);
-  const fields = [
-    ["name", "Search name"], ["companyName", "Company"], ["roleTitle", "Role title"],
-    ["geography", "Geography"], ["country", "Country"], ["industry", "Industry"],
-    ["seniority", "Seniority"], ["employmentType", "Employment type"],
-    ["compensationNote", "Compensation note"], ["businessObjective", "Business objective"],
-  ];
-  const inputs = {};
-  for (const [key, label] of fields) {
-    const w = el(`<label class="field"><b>${esc(label)}</b></label>`);
-    const input = el(`<input type="text">`);
-    input.value = s[key] || "";
-    inputs[key] = input; w.append(input); grid.append(w);
+  /* ── Overview module ──────────────────────────────────────────────────── */
+  function factsForm(s, onSave, isNew) {
+    const f = el(`<div class="panel"><div class="form-grid"></div></div>`);
+    const grid = $(".form-grid", f);
+    const fields = [
+      ["name", "Search name"],
+      ["companyName", "Company"],
+      ["roleTitle", "Role title"],
+      ["geography", "Geography"],
+      ["country", "Country"],
+      ["industry", "Industry"],
+      ["seniority", "Seniority"],
+      ["employmentType", "Employment type"],
+      ["compensationNote", "Compensation note"],
+      ["businessObjective", "Business objective"],
+    ];
+    const inputs = {};
+    for (const [key, label] of fields) {
+      const w = el(`<label class="field"><b>${esc(label)}</b></label>`);
+      const input = el(`<input type="text">`);
+      input.value = s[key] || "";
+      inputs[key] = input;
+      w.append(input);
+      grid.append(w);
+    }
+    const jdW = el(
+      `<label class="field" style="grid-column:1/-1"><b>Job description (paste)</b></label>`,
+    );
+    const jd = el(`<textarea rows="8"></textarea>`);
+    jd.value = s.jd || "";
+    jdW.append(jd);
+    grid.append(jdW);
+    const notesW = el(
+      `<label class="field" style="grid-column:1/-1"><b>Recruiter notes</b></label>`,
+    );
+    const notes = el(`<textarea rows="2"></textarea>`);
+    notes.value = s.recruiterNotes || "";
+    notesW.append(notes);
+    grid.append(notesW);
+    const save = el(
+      `<button class="btn primary">${isNew ? "Create search" : "Save"}</button>`,
+    );
+    save.onclick = () => {
+      for (const [key] of fields) s[key] = inputs[key].value.trim();
+      s.jd = jd.value;
+      s.recruiterNotes = notes.value.trim();
+      if (!s.roleTitle) {
+        save.textContent = "Role title is required";
+        return;
+      }
+      if (!s.name) s.name = `${s.companyName || "Search"} — ${s.roleTitle}`;
+      onSave(s);
+    };
+    f.append(save);
+    return f;
   }
-  const jdW = el(`<label class="field" style="grid-column:1/-1"><b>Job description (paste)</b></label>`);
-  const jd = el(`<textarea rows="8"></textarea>`); jd.value = s.jd || ""; jdW.append(jd); grid.append(jdW);
-  const notesW = el(`<label class="field" style="grid-column:1/-1"><b>Recruiter notes</b></label>`);
-  const notes = el(`<textarea rows="2"></textarea>`); notes.value = s.recruiterNotes || ""; notesW.append(notes); grid.append(notesW);
-  const save = el(`<button class="btn primary">${isNew ? "Create search" : "Save"}</button>`);
-  save.onclick = () => {
-    for (const [key] of fields) s[key] = inputs[key].value.trim();
-    s.jd = jd.value; s.recruiterNotes = notes.value.trim();
-    if (!s.roleTitle) { save.textContent = "Role title is required"; return; }
-    if (!s.name) s.name = `${s.companyName || "Search"} — ${s.roleTitle}`;
-    onSave(s);
-  };
-  f.append(save);
-  return f;
-}
 
-function renderNewSearchForm(standalone) {
-  const wrap = el(`<div><div class="mod-head"><h2>New search</h2></div>
+  function renderNewSearchForm(standalone) {
+    const wrap = el(`<div><div class="mod-head"><h2>New search</h2></div>
     <p class="mod-desc">One search = one hiring need. The facts and JD you enter here become the context for every generated module.</p></div>`);
-  const s = { id: uid(), createdAt: new Date().toISOString() };
-  wrap.append(factsForm(s, async (saved) => {
-    await store.saveSearch(saved);
-    state.searches.unshift(saved);
-    await selectSearch(saved.id);
-  }, true));
-  if (standalone && state.searches.length) wrap.append(el(`<p class="why">…or pick an existing search from the left rail.</p>`));
-  return wrap;
-}
+    const s = { id: uid(), createdAt: new Date().toISOString() };
+    wrap.append(
+      factsForm(
+        s,
+        async (saved) => {
+          await store.saveSearch(saved);
+          state.searches.unshift(saved);
+          await selectSearch(saved.id);
+        },
+        true,
+      ),
+    );
+    if (standalone && state.searches.length)
+      wrap.append(
+        el(
+          `<p class="why">…or pick an existing search from the left rail.</p>`,
+        ),
+      );
+    return wrap;
+  }
 
-function renderOverview(main) {
-  const s = state.current;
-  main.append(el(`<div class="mod-head"><h2>${esc(s.name)}</h2>${s.example ? '<span class="chip example">example data</span>' : ""}</div>`));
-  main.append(el(`<p class="mod-desc">Everything below is the shared context for generation. Edit facts here; each module then generates from the latest state — role intelligence first, then intake, and onward down the rail.</p>`));
-  if (s.example) main.append(el(`<div class="notice">This is a bundled example search (a public CAIS job description) so the workroom isn't empty on first open. Create your own search from the rail — nothing here is your data.</div>`));
-  main.append(factsForm(s, async (saved) => { await store.saveSearch(saved); render(); }, false));
-  const done = MODULE_ORDER.filter((k) => k !== "overview" && k !== "candidates" && state.artifacts[k]).length;
-  main.append(el(`<div class="panel"><h3>Pipeline</h3><p class="num">${done} of ${MODULE_ORDER.length - 2} modules generated · ${state.candidates.length} candidate${state.candidates.length === 1 ? "" : "s"}</p>
-    <p class="why">Suggested order: Role Intelligence → HM Intake (answer the questions) → Success Profile → Market Intel → Strategy → Channels → Search Strings → Candidates.</p></div>`));
-}
+  function renderOverview(main) {
+    const s = state.current;
+    main.append(
+      el(
+        `<div class="mod-head"><h2>${esc(s.name)}</h2>${s.example ? '<span class="chip example">example data</span>' : ""}</div>`,
+      ),
+    );
+    main.append(
+      el(
+        `<p class="mod-desc">Everything below is the shared context for generation. Edit facts here; each module then generates from the latest state — role intelligence first, then intake, and onward down the rail.</p>`,
+      ),
+    );
+    if (s.example)
+      main.append(
+        el(
+          `<div class="notice">This is a bundled example search (a public CAIS job description) so the workroom isn't empty on first open. Create your own search from the rail — nothing here is your data.</div>`,
+        ),
+      );
+    main.append(
+      factsForm(
+        s,
+        async (saved) => {
+          await store.saveSearch(saved);
+          render();
+        },
+        false,
+      ),
+    );
+    const done = MODULE_ORDER.filter(
+      (k) => k !== "overview" && k !== "candidates" && state.artifacts[k],
+    ).length;
+    main.append(
+      el(`<div class="panel"><h3>Pipeline</h3><p class="num">${done} of ${MODULE_ORDER.length - 2} modules generated · ${state.candidates.length} candidate${state.candidates.length === 1 ? "" : "s"}</p>
+    <p class="why">Suggested order: Role Intelligence → HM Intake (answer the questions) → Success Profile → Market Intel → Strategy → Channels → Search Strings → Candidates.</p></div>`),
+    );
+  }
 
-/* ── Candidates module ────────────────────────────────────────────────── */
-function candidateContext(cand) {
-  const lines = [
-    `Name: ${cand.name}`,
-    cand.currentTitle ? `Current title: ${cand.currentTitle}` : "",
-    cand.currentCompany ? `Current company: ${cand.currentCompany}` : "",
-    cand.geography ? `Geography: ${cand.geography}` : "",
-    (cand.profileUrls || []).length ? `Profile URLs: ${cand.profileUrls.join(", ")}` : "",
-    cand.notes ? `Recruiter notes: ${cand.notes}` : "",
-    cand.pastedText ? `Resume / pasted profile text:\n${clip(cand.pastedText, 6000)}` : "",
-  ].filter(Boolean).join("\n");
-  return `## Candidate\n${lines}`;
-}
+  /* ── Candidates module ────────────────────────────────────────────────── */
+  function candidateContext(cand) {
+    const lines = [
+      `Name: ${cand.name}`,
+      cand.currentTitle ? `Current title: ${cand.currentTitle}` : "",
+      cand.currentCompany ? `Current company: ${cand.currentCompany}` : "",
+      cand.geography ? `Geography: ${cand.geography}` : "",
+      (cand.profileUrls || []).length
+        ? `Profile URLs: ${cand.profileUrls.join(", ")}`
+        : "",
+      cand.notes ? `Recruiter notes: ${cand.notes}` : "",
+      cand.pastedText
+        ? `Resume / pasted profile text:\n${clip(cand.pastedText, 6000)}`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+    return `## Candidate\n${lines}`;
+  }
 
-const CANDIDATE_TASKS = {
-  evidence: {
-    label: "Evidence alignment",
-    persona: "a talent researcher performing evidence alignment",
-    rules: `This is recruiter decision support, NOT candidate selection. Compare the candidate's observable, job-related professional evidence against the search's success-profile criteria.
+  const CANDIDATE_TASKS = {
+    evidence: {
+      label: "Evidence alignment",
+      persona: "a talent researcher performing evidence alignment",
+      rules: `This is recruiter decision support, NOT candidate selection. Compare the candidate's observable, job-related professional evidence against the search's success-profile criteria.
 For each relevant criterion produce an item:
 - status: "strong" (clear supporting evidence in the provided material), "partial", "missing" (criterion matters, no evidence found — absence of evidence, not evidence of absence), "contradictory", "unknown".
 - evidenceText: quote or precisely describe the evidence FROM THE PROVIDED MATERIAL ONLY. Never invent facts about this person. For "missing"/"unknown", say what was looked for and not found.
 - reviewPriority.suggestion is advisory only ("review_first"|"review"|"review_later") with reasoning; the recruiter decides.`,
-    ask: "Produce the evidence alignment for this candidate now.",
-    shape: `{"items": [{"criterion": string, "status": "strong"|"partial"|"missing"|"contradictory"|"unknown", "evidenceText": string}], "reviewPriority": {"suggestion": "review_first"|"review"|"review_later", "reasoning": string}, "questionsToValidate": string[]}`,
-    check: (p) => shapeCheck(p, { items: "array", reviewPriority: "object" }),
-  },
-  outreach: {
-    label: "Outreach drafts",
-    persona: "an elite candidate-engagement writer",
-    rules: `Draft a full outreach sequence for this candidate: email_1, follow_up_1, follow_up_2, follow_up_3, breakup, plus linkedin_connect (≤300 chars) and inmail. Nothing sends automatically — these are drafts the recruiter copies out.
+      ask: "Produce the evidence alignment for this candidate now.",
+      shape: `{"items": [{"criterion": string, "status": "strong"|"partial"|"missing"|"contradictory"|"unknown", "evidenceText": string}], "reviewPriority": {"suggestion": "review_first"|"review"|"review_later", "reasoning": string}, "questionsToValidate": string[]}`,
+      check: (p) => shapeCheck(p, { items: "array", reviewPriority: "object" }),
+    },
+    outreach: {
+      label: "Outreach drafts",
+      persona: "an elite candidate-engagement writer",
+      rules: `Draft a full outreach sequence for this candidate: email_1, follow_up_1, follow_up_2, follow_up_3, breakup, plus linkedin_connect (≤300 chars) and inmail. Nothing sends automatically — these are drafts the recruiter copies out.
 Non-negotiables:
 - NEVER invent facts about the candidate. Personalize ONLY from the provided evidence items and candidate material. Every personalization gets a citations entry: {personalization, evidence}. If there is no real evidence, write honest, direct outreach without fake familiarity — and say so in cadenceRationale.
 - Subject lines: 2–3 variants per email step, none clickbait.
 - Voice: direct, specific, peer-to-peer; match the seniority.
 - dayOffset per step. Default cadence 0/3/7/12/20 — ADAPT to seniority, scarcity, channel; explain in cadenceRationale.
 - No manipulation, no false urgency, no deceptive pressure. Include a respectful opt-out in the breakup step.`,
-    ask: "Draft the complete outreach sequence for this candidate now.",
-    shape: `{"steps": [{"kind": "email_1"|"follow_up_1"|"follow_up_2"|"follow_up_3"|"breakup"|"linkedin_connect"|"inmail", "dayOffset": number, "subjectVariants": string[], "body": string, "citations": [{"personalization": string, "evidence": string}]}], "cadenceRationale": string}`,
-    check: (p) => shapeCheck(p, { steps: "array", cadenceRationale: "string" }),
-  },
-};
+      ask: "Draft the complete outreach sequence for this candidate now.",
+      shape: `{"steps": [{"kind": "email_1"|"follow_up_1"|"follow_up_2"|"follow_up_3"|"breakup"|"linkedin_connect"|"inmail", "dayOffset": number, "subjectVariants": string[], "body": string, "citations": [{"personalization": string, "evidence": string}]}], "cadenceRationale": string}`,
+      check: (p) =>
+        shapeCheck(p, { steps: "array", cadenceRationale: "string" }),
+    },
+  };
 
-async function runCandidateTask(taskKey, cand, ui) {
-  const task = CANDIDATE_TASKS[taskKey];
-  const evidencePart = taskKey === "outreach" && cand.evidence
-    ? `\n## Evidence available for personalization\n${clip(JSON.stringify(cand.evidence.payload.items, null, 1), 4000)}` : "";
-  const prompt = `${systemPrelude(task.persona)}
+  async function runCandidateTask(taskKey, cand, ui) {
+    const task = CANDIDATE_TASKS[taskKey];
+    const evidencePart =
+      taskKey === "outreach" && cand.evidence
+        ? `\n## Evidence available for personalization\n${clip(JSON.stringify(cand.evidence.payload.items, null, 1), 4000)}`
+        : "";
+    const prompt = `${systemPrelude(task.persona)}
 
 ${task.rules}
 
@@ -1035,316 +1881,597 @@ ${task.ask}
 ## Output format
 Reply with ONLY one JSON object (no markdown fences, no commentary) of this shape:
 ${task.shape}`;
-  const ctl = new AbortController();
-  if (ui && ui.bindStop) ui.bindStop(ctl);
-  const payload = await sampleApi.json(prompt, { signal: ctl.signal, cache: false, onText: ui && ui.onText });
-  const err = task.check(payload);
-  if (err) throw { code: "invalid_json", message: err };
-  const downgrades = downgradeVerified(payload);
-  return { payload, meta: { provider: "claude-artifact", generatedAt: new Date().toISOString(), downgrades }, traitWarnings: scanForProtectedTraits(payload) };
-}
-
-function renderCandidates(main) {
-  main.append(el(`<div class="mod-head"><h2>Candidates</h2></div>`));
-  main.append(el(`<p class="mod-desc">Paste what's publicly observable, then compare it to the success profile. Evidence alignment is advisory decision support — you decide, and everything is editable. Profiles link out; nothing is fetched or scraped.</p>`));
-
-  const form = el(`<div class="panel"><h3>Add candidate</h3><div class="form-grid"></div></div>`);
-  const grid = $(".form-grid", form);
-  const inputs = {};
-  for (const [key, label] of [["name", "Name"], ["currentTitle", "Current title"], ["currentCompany", "Current company"], ["geography", "Geography"], ["profileUrl", "Profile URL"], ["notes", "Recruiter notes"]]) {
-    const w = el(`<label class="field"><b>${esc(label)}</b></label>`);
-    inputs[key] = el(`<input type="text">`); w.append(inputs[key]); grid.append(w);
-  }
-  const pw = el(`<label class="field" style="grid-column:1/-1"><b>Pasted profile / resume text</b></label>`);
-  const pasted = el(`<textarea rows="5"></textarea>`); pw.append(pasted); grid.append(pw);
-  const addBtn = el(`<button class="btn primary">Add candidate</button>`);
-  addBtn.onclick = async () => {
-    if (!inputs.name.value.trim()) { addBtn.textContent = "Name is required"; return; }
-    const cand = {
-      id: uid(), name: inputs.name.value.trim(), currentTitle: inputs.currentTitle.value.trim(),
-      currentCompany: inputs.currentCompany.value.trim(), geography: inputs.geography.value.trim(),
-      profileUrls: inputs.profileUrl.value.trim() ? [inputs.profileUrl.value.trim()] : [],
-      notes: inputs.notes.value.trim(), pastedText: pasted.value, createdAt: new Date().toISOString(),
+    const ctl = new AbortController();
+    if (ui && ui.bindStop) ui.bindStop(ctl);
+    const payload = await sampleApi.json(prompt, {
+      signal: ctl.signal,
+      cache: false,
+      onText: ui && ui.onText,
+    });
+    const err = task.check(payload);
+    if (err) throw { code: "invalid_json", message: err };
+    const downgrades = downgradeVerified(payload);
+    return {
+      payload,
+      meta: {
+        provider: "claude-artifact",
+        generatedAt: new Date().toISOString(),
+        downgrades,
+      },
+      traitWarnings: scanForProtectedTraits(payload),
     };
-    await store.saveCandidate(state.current.id, cand);
-    state.candidates.push(cand);
-    render();
-  };
-  form.append(addBtn);
-  main.append(form);
+  }
 
-  const list = el(`<div class="cand-list"></div>`);
-  for (const cand of state.candidates) list.append(renderCandidateCard(cand));
-  main.append(list);
-}
+  function renderCandidates(main) {
+    main.append(el(`<div class="mod-head"><h2>Candidates</h2></div>`));
+    main.append(
+      el(
+        `<p class="mod-desc">Paste what's publicly observable, then compare it to the success profile. Evidence alignment is advisory decision support — you decide, and everything is editable. Profiles link out; nothing is fetched or scraped.</p>`,
+      ),
+    );
 
-function renderCandidateCard(cand) {
-  const card = el(`<div class="panel"></div>`);
-  const head = el(`<div class="mod-head" style="margin:0 0 6px"><h3 style="margin:0">${esc(cand.name)}</h3>
+    const form = el(
+      `<div class="panel"><h3>Add candidate</h3><div class="form-grid"></div></div>`,
+    );
+    const grid = $(".form-grid", form);
+    const inputs = {};
+    for (const [key, label] of [
+      ["name", "Name"],
+      ["currentTitle", "Current title"],
+      ["currentCompany", "Current company"],
+      ["geography", "Geography"],
+      ["profileUrl", "Profile URL"],
+      ["notes", "Recruiter notes"],
+    ]) {
+      const w = el(`<label class="field"><b>${esc(label)}</b></label>`);
+      inputs[key] = el(`<input type="text">`);
+      w.append(inputs[key]);
+      grid.append(w);
+    }
+    const pw = el(
+      `<label class="field" style="grid-column:1/-1"><b>Pasted profile / resume text</b></label>`,
+    );
+    const pasted = el(`<textarea rows="5"></textarea>`);
+    pw.append(pasted);
+    grid.append(pw);
+    const addBtn = el(`<button class="btn primary">Add candidate</button>`);
+    addBtn.onclick = async () => {
+      if (!inputs.name.value.trim()) {
+        addBtn.textContent = "Name is required";
+        return;
+      }
+      const cand = {
+        id: uid(),
+        name: inputs.name.value.trim(),
+        currentTitle: inputs.currentTitle.value.trim(),
+        currentCompany: inputs.currentCompany.value.trim(),
+        geography: inputs.geography.value.trim(),
+        profileUrls: inputs.profileUrl.value.trim()
+          ? [inputs.profileUrl.value.trim()]
+          : [],
+        notes: inputs.notes.value.trim(),
+        pastedText: pasted.value,
+        createdAt: new Date().toISOString(),
+      };
+      await store.saveCandidate(state.current.id, cand);
+      state.candidates.push(cand);
+      render();
+    };
+    form.append(addBtn);
+    main.append(form);
+
+    const list = el(`<div class="cand-list"></div>`);
+    for (const cand of state.candidates) list.append(renderCandidateCard(cand));
+    main.append(list);
+  }
+
+  function renderCandidateCard(cand) {
+    const card = el(`<div class="panel"></div>`);
+    const head =
+      el(`<div class="mod-head" style="margin:0 0 6px"><h3 style="margin:0">${esc(cand.name)}</h3>
     <span class="why">${esc([cand.currentTitle, cand.currentCompany, cand.geography].filter(Boolean).join(" · "))}</span>
     <span class="spacer"></span></div>`);
-  card.append(head);
-  for (const url of cand.profileUrls || []) card.append(el(`<p><a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a></p>`));
+    card.append(head);
+    for (const url of cand.profileUrls || [])
+      card.append(
+        el(
+          `<p><a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a></p>`,
+        ),
+      );
 
-  const body = el(`<div></div>`);
-  card.append(body);
+    const body = el(`<div></div>`);
+    card.append(body);
 
-  const paint = () => {
-    body.innerHTML = "";
-    if (cand.evidence) {
-      const p = cand.evidence.payload;
-      body.append(el(`<h4>Evidence vs success profile <span class="chip inference">model inference</span> ${chipFor((p.reviewPriority || {}).suggestion === "review_first" ? "strong" : "partial")}</h4>`));
-      body.append(el(`<ul>${(p.items || []).map((i) => `<li><b>${esc(i.criterion)}</b> ${chipFor(i.status)}<div class="why">${esc(i.evidenceText)}</div></li>`).join("")}</ul>`));
-      body.append(el(`<p class="why"><b>Suggested review priority (advisory):</b> ${esc((p.reviewPriority || {}).suggestion || "")} — ${esc((p.reviewPriority || {}).reasoning || "")}</p>`));
-      if ((p.questionsToValidate || []).length) body.append(el(`<p class="why"><b>Validate:</b> ${esc(p.questionsToValidate.join(" · "))}</p>`));
-    }
-    if (cand.outreach) {
-      const p = cand.outreach.payload;
-      body.append(el(`<h4>Outreach drafts <span class="chip inference">model inference</span> <span class="why">nothing sends automatically</span></h4>`));
-      for (const step of p.steps || []) {
-        const stepEl = el(`<div class="qrow"><div class="qmeta"><div class="plat">${esc(step.kind)}</div><span class="chip num">day ${esc(String(step.dayOffset))}</span></div>
+    const paint = () => {
+      body.innerHTML = "";
+      if (cand.evidence) {
+        const p = cand.evidence.payload;
+        body.append(
+          el(
+            `<h4>Evidence vs success profile <span class="chip inference">model inference</span> ${chipFor((p.reviewPriority || {}).suggestion === "review_first" ? "strong" : "partial")}</h4>`,
+          ),
+        );
+        body.append(
+          el(
+            `<ul>${(p.items || []).map((i) => `<li><b>${esc(i.criterion)}</b> ${chipFor(i.status)}<div class="why">${esc(i.evidenceText)}</div></li>`).join("")}</ul>`,
+          ),
+        );
+        body.append(
+          el(
+            `<p class="why"><b>Suggested review priority (advisory):</b> ${esc((p.reviewPriority || {}).suggestion || "")} — ${esc((p.reviewPriority || {}).reasoning || "")}</p>`,
+          ),
+        );
+        if ((p.questionsToValidate || []).length)
+          body.append(
+            el(
+              `<p class="why"><b>Validate:</b> ${esc(p.questionsToValidate.join(" · "))}</p>`,
+            ),
+          );
+      }
+      if (cand.outreach) {
+        const p = cand.outreach.payload;
+        body.append(
+          el(
+            `<h4>Outreach drafts <span class="chip inference">model inference</span> <span class="why">nothing sends automatically</span></h4>`,
+          ),
+        );
+        for (const step of p.steps || []) {
+          const stepEl =
+            el(`<div class="qrow"><div class="qmeta"><div class="plat">${esc(step.kind)}</div><span class="chip num">day ${esc(String(step.dayOffset))}</span></div>
           <div style="flex:1">${(step.subjectVariants || []).length ? `<div class="why">Subj: ${esc(step.subjectVariants.join(" / "))}</div>` : ""}<pre class="mono">${esc(step.body)}</pre></div></div>`);
-        const btn = el(`<button class="btn small">Copy</button>`);
-        btn.onclick = () => copyText(step.body, btn);
-        stepEl.append(btn);
-        body.append(stepEl);
-      }
-      body.append(el(`<p class="why">Cadence: ${esc(p.cadenceRationale || "")}</p>`));
-    }
-  };
-  paint();
-
-  if (sampleApi && !aiHidden) {
-    const evBtn = el(`<button class="btn small">${cand.evidence ? "Re-run evidence" : "Evidence alignment"}</button>`);
-    const orBtn = el(`<button class="btn small">${cand.outreach ? "Re-draft outreach" : "Draft outreach"}</button>`);
-    const status = el(`<span class="why"></span>`);
-    head.append(evBtn, orBtn, status);
-    const run = async (key, btn) => {
-      if (key === "evidence" && !state.artifacts.success_profile) { status.textContent = "Generate the Success Profile first."; return; }
-      btn.disabled = true; status.textContent = "Thinking…";
-      try {
-        const result = await runCandidateTask(key, cand, {});
-        cand[key] = result;
-        await store.saveCandidate(state.current.id, cand);
-        status.textContent = ""; btn.disabled = false;
-        btn.textContent = key === "evidence" ? "Re-run evidence" : "Re-draft outreach";
-        paint();
-      } catch (e) {
-        if (e && (e.code === "not_granted" || e.code === "sampling_disabled")) aiHidden = true;
-        status.textContent = copyFor(e && e.code); btn.disabled = false;
+          const btn = el(`<button class="btn small">Copy</button>`);
+          btn.onclick = () => copyText(step.body, btn);
+          stepEl.append(btn);
+          body.append(stepEl);
+        }
+        body.append(
+          el(`<p class="why">Cadence: ${esc(p.cadenceRationale || "")}</p>`),
+        );
       }
     };
-    evBtn.onclick = () => run("evidence", evBtn);
-    orBtn.onclick = () => run("outreach", orBtn);
+    paint();
+
+    if (sampleApi && !aiHidden) {
+      const evBtn = el(
+        `<button class="btn small">${cand.evidence ? "Re-run evidence" : "Evidence alignment"}</button>`,
+      );
+      const orBtn = el(
+        `<button class="btn small">${cand.outreach ? "Re-draft outreach" : "Draft outreach"}</button>`,
+      );
+      const status = el(`<span class="why"></span>`);
+      head.append(evBtn, orBtn, status);
+      const run = async (key, btn) => {
+        if (key === "evidence" && !state.artifacts.success_profile) {
+          status.textContent = "Generate the Success Profile first.";
+          return;
+        }
+        btn.disabled = true;
+        status.textContent = "Thinking…";
+        try {
+          const result = await runCandidateTask(key, cand, {});
+          cand[key] = result;
+          await store.saveCandidate(state.current.id, cand);
+          status.textContent = "";
+          btn.disabled = false;
+          btn.textContent =
+            key === "evidence" ? "Re-run evidence" : "Re-draft outreach";
+          paint();
+        } catch (e) {
+          if (e && (e.code === "not_granted" || e.code === "sampling_disabled"))
+            aiHidden = true;
+          status.textContent = copyFor(e && e.code);
+          btn.disabled = false;
+        }
+      };
+      evBtn.onclick = () => run("evidence", evBtn);
+      orBtn.onclick = () => run("outreach", orBtn);
+    }
+    return card;
   }
-  return card;
-}
 
-/* ── CAIS golden test (ported from scripts/golden-shared.mts) ─────────── */
-const GOLDEN_THRESHOLD = 12;
-const GOLDEN_CONCEPTS = [
-  { concept: "Why the position exists now", pattern: /why (now|the role|the position|does this role exist)|exists now|why now/i },
-  { concept: "Capacity- vs capability-driven hiring", pattern: /capacit\w+[\s\S]{0,80}capabilit\w+|capabilit\w+[\s\S]{0,80}capacit\w+/i },
-  { concept: "Dream researchers / exemplars", pattern: /dream (candidate|researcher|hire)|exemplar|represents the bar/i },
-  { concept: "Research Scientist vs Research Engineer distinction", pattern: /research scientist[\s\S]{0,80}research engineer|scientist (vs\.?|versus|or) (research )?engineer|RS[\s\S]{0,20}RE\b/i },
-  { concept: "Publication quality", pattern: /publication|venue|paper/i },
-  { concept: "First-author significance", pattern: /first[- ]author/i },
-  { concept: "Empirical vs theoretical orientation", pattern: /empirical[\s\S]{0,120}theor|theor\w+[\s\S]{0,120}empirical/i },
-  { concept: "Research taste", pattern: /research taste|taste in (problems|research)|problem selection/i },
-  { concept: "Experimental execution", pattern: /experiment\w* (execution|velocity|design)|run\w* (experiments|ablations)|ablation/i },
-  { concept: "Distributed training / training scale", pattern: /distributed training|training scale|large[- ]scale (training|experiments?)|GPU|cluster/i },
-  { concept: "Frontier-lab experience", pattern: /frontier[- ](lab|scale|model)/i },
-  { concept: "Research lineages / labs / advisors", pattern: /lineage|advisor|(from|which|target) labs?\b|research group/i },
-  { concept: "Conferences (NeurIPS / ICML / ICLR)", pattern: /NeurIPS|ICML|ICLR/i },
-  { concept: "Mission alignment vs skepticism", pattern: /mission|safety motivation|skeptic/i },
-  { concept: "Candidate selling points / closing dynamics", pattern: /selling point|sell (the|this)|closing|why would (a|the|top)|counter[- ]?offer|compete for/i },
-  { concept: "Competitive labs / talent competitors", pattern: /compet\w+ (lab|employer|offer)|competing|lose (candidates|people) to|who else is hiring/i },
-];
-const GOLDEN_HM_ANSWERS = [
-  "[Golden-test HM answer] Capability-driven: we are standing up a dangerous-capability evaluations workstream and nobody on staff owns benchmark construction end to end.",
-  "[Golden-test HM answer] The bar is a researcher who has shipped a first-author empirical paper AND built the infrastructure behind it themselves; engineering-heavy backgrounds welcome.",
-  "[Golden-test HM answer] We lose finalists to frontier labs on compensation; we win on mission, autonomy, and publication freedom.",
-];
-const GOLDEN_CANDIDATE = {
-  name: "Synthetic Benchmark Candidate", currentTitle: "Member of Technical Staff",
-  currentCompany: "Example AI Lab (synthetic)", geography: "",
-  profileUrls: ["https://example.com/synthetic-profile"], notes: "",
-  pastedText: "SYNTHETIC PROFILE FOR BENCHMARKING — not a real person. Two first-author workshop papers on adversarial robustness (NeurIPS SafeML workshop). Built the distributed evaluation harness used across the lab (PyTorch, Ray, 256-GPU runs). Maintains a popular open-source jailbreak-evaluation benchmark. BS in CS; no PhD. Blogs about AI risk; previously a platform engineer at a fintech.",
-};
-
-function intakeFullText(payload) {
-  const parts = [];
-  for (const cat of payload.categories || []) {
-    parts.push(cat.title, cat.rationale);
-    for (const q of cat.questions || []) parts.push(q.question, q.whyItMatters);
-  }
-  if (payload.playback) parts.push(JSON.stringify(payload.playback));
-  return parts.join("\n");
-}
-
-function scoreGolden(artifacts, candidate) {
-  const intake = artifacts.intake.payload;
-  const text = intakeFullText(intake);
-  const hits = GOLDEN_CONCEPTS.map((c) => ({ concept: c.concept, hit: c.pattern.test(text) }));
-  const hitCount = hits.filter((h) => h.hit).length;
-  const sp = artifacts.search_strings.payload;
-  const composed = composeQueries({
-    titles: sp.titles || [], alternateTitles: sp.alternateTitles || [], adjacentTitles: sp.adjacentTitles || [],
-    mustHave: sp.mustHave || [], anyOf: sp.anyOf || [], credentials: sp.credentials || [],
-    locations: sp.locations || [], companies: sp.companies || [], exclusions: sp.exclusions || [],
-  }, ["general", ...(sp.relevantPlatforms || [])]);
-  const records = ["role_intelligence", "intake", "success_profile", "market_intelligence", "sourcing_strategy", "channels", "search_strings"]
-    .map((k) => artifacts[k]).concat([candidate.evidence, candidate.outreach]).filter(Boolean);
-  const downgrades = records.reduce((n, r) => n + ((r.meta && r.meta.downgrades) || 0), 0);
-  const traitWarnings = records.flatMap((r) => r.traitWarnings || []);
-  const guardrails = [
-    { name: "Intake ends with a playback summary", ok: intake.playback != null },
-    { name: "Model never emitted a 'verified' certainty label", ok: downgrades === 0 },
-    { name: "X-ray queries composed (site: operators present)", ok: composed.some((q) => q.query.includes("site:")) },
-    { name: "Evidence alignment includes gaps, not just matches", ok: (candidate.evidence.payload.items || []).some((i) => i.status === "missing" || i.status === "unknown") },
-    { name: "No protected-trait references in any generated payload", ok: traitWarnings.length === 0 },
+  /* ── CAIS golden test (ported from scripts/golden-shared.mts) ─────────── */
+  const GOLDEN_THRESHOLD = 12;
+  const GOLDEN_CONCEPTS = [
+    {
+      concept: "Why the position exists now",
+      pattern:
+        /why (now|the role|the position|does this role exist)|exists now|why now/i,
+    },
+    {
+      concept: "Capacity- vs capability-driven hiring",
+      pattern:
+        /capacit\w+[\s\S]{0,80}capabilit\w+|capabilit\w+[\s\S]{0,80}capacit\w+/i,
+    },
+    {
+      concept: "Dream researchers / exemplars",
+      pattern: /dream (candidate|researcher|hire)|exemplar|represents the bar/i,
+    },
+    {
+      concept: "Research Scientist vs Research Engineer distinction",
+      pattern:
+        /research scientist[\s\S]{0,80}research engineer|scientist (vs\.?|versus|or) (research )?engineer|RS[\s\S]{0,20}RE\b/i,
+    },
+    { concept: "Publication quality", pattern: /publication|venue|paper/i },
+    { concept: "First-author significance", pattern: /first[- ]author/i },
+    {
+      concept: "Empirical vs theoretical orientation",
+      pattern: /empirical[\s\S]{0,120}theor|theor\w+[\s\S]{0,120}empirical/i,
+    },
+    {
+      concept: "Research taste",
+      pattern: /research taste|taste in (problems|research)|problem selection/i,
+    },
+    {
+      concept: "Experimental execution",
+      pattern:
+        /experiment\w* (execution|velocity|design)|run\w* (experiments|ablations)|ablation/i,
+    },
+    {
+      concept: "Distributed training / training scale",
+      pattern:
+        /distributed training|training scale|large[- ]scale (training|experiments?)|GPU|cluster/i,
+    },
+    {
+      concept: "Frontier-lab experience",
+      pattern: /frontier[- ](lab|scale|model)/i,
+    },
+    {
+      concept: "Research lineages / labs / advisors",
+      pattern: /lineage|advisor|(from|which|target) labs?\b|research group/i,
+    },
+    {
+      concept: "Conferences (NeurIPS / ICML / ICLR)",
+      pattern: /NeurIPS|ICML|ICLR/i,
+    },
+    {
+      concept: "Mission alignment vs skepticism",
+      pattern: /mission|safety motivation|skeptic/i,
+    },
+    {
+      concept: "Candidate selling points / closing dynamics",
+      pattern:
+        /selling point|sell (the|this)|closing|why would (a|the|top)|counter[- ]?offer|compete for/i,
+    },
+    {
+      concept: "Competitive labs / talent competitors",
+      pattern:
+        /compet\w+ (lab|employer|offer)|competing|lose (candidates|people) to|who else is hiring/i,
+    },
   ];
-  const pass = hitCount >= GOLDEN_THRESHOLD && guardrails.every((g) => g.ok);
-  return { hits, hitCount, total: GOLDEN_CONCEPTS.length, threshold: GOLDEN_THRESHOLD, guardrails, verdict: pass ? "PASS" : "FAIL" };
-}
-
-async function runGoldenTest(ui) {
-  // The benchmark always runs against the bundled CAIS example search.
-  // Load its state directly — no re-render, so the progress panel survives.
-  if (!state.current || state.current.id !== EXAMPLE_SEARCH.id) {
-    state.current = state.searches.find((s) => s.id === EXAMPLE_SEARCH.id) || EXAMPLE_SEARCH;
-    state.artifacts = await store.loadArtifacts(EXAMPLE_SEARCH.id);
-    state.candidates = await store.listCandidates(EXAMPLE_SEARCH.id);
-    renderRail();
-  }
-  state.module = "golden_test";
-  const timings = [];
-  const startedAt = new Date().toISOString();
-  let currentCtl = null;
-  ui.bindStop(() => currentCtl && currentCtl.abort());
-
-  const stepUi = { bindStop: (c) => { currentCtl = c; }, onText: ui.onText };
-  const genSteps = ["role_intelligence", "intake", "success_profile", "market_intelligence", "sourcing_strategy", "channels", "search_strings"];
-  for (const key of genSteps) {
-    ui.step(TASKS[key].label);
-    const t0 = Date.now();
-    const result = await runTask(key, renderContext(state.current, state.artifacts), stepUi, { regenerate: Boolean(state.artifacts[key]) });
-    state.artifacts[key] = result;
-    await store.saveArtifact(state.current.id, key, result);
-    timings.push({ step: key, ms: Date.now() - t0 });
-    if (key === "intake") {
-      ui.step("Answering intake as the hiring manager");
-      const cats = result.payload.categories || [];
-      let answered = 0;
-      for (const cat of cats) {
-        if (answered >= GOLDEN_HM_ANSWERS.length) break;
-        const q = (cat.questions || [])[0];
-        if (!q) continue;
-        q.answer = GOLDEN_HM_ANSWERS[answered];
-        answered += 1;
-      }
-      await store.saveArtifact(state.current.id, "intake", result);
-    }
-  }
-
-  ui.step("Creating synthetic benchmark candidate");
-  let cand = state.candidates.find((c) => c.name === GOLDEN_CANDIDATE.name);
-  if (!cand) {
-    cand = { id: uid(), createdAt: new Date().toISOString(), ...GOLDEN_CANDIDATE };
-    state.candidates.push(cand);
-  }
-  for (const key of ["evidence", "outreach"]) {
-    ui.step(key === "evidence" ? "Evidence alignment" : "Outreach drafts");
-    const t0 = Date.now();
-    cand[key] = await runCandidateTask(key, cand, stepUi);
-    timings.push({ step: key, ms: Date.now() - t0 });
-  }
-  await store.saveCandidate(state.current.id, cand);
-
-  ui.step("Scoring");
-  const score = scoreGolden(state.artifacts, cand);
-  const record = {
-    payload: score,
-    meta: { provider: "claude-artifact", startedAt, generatedAt: new Date().toISOString(), timings },
+  const GOLDEN_HM_ANSWERS = [
+    "[Golden-test HM answer] Capability-driven: we are standing up a dangerous-capability evaluations workstream and nobody on staff owns benchmark construction end to end.",
+    "[Golden-test HM answer] The bar is a researcher who has shipped a first-author empirical paper AND built the infrastructure behind it themselves; engineering-heavy backgrounds welcome.",
+    "[Golden-test HM answer] We lose finalists to frontier labs on compensation; we win on mission, autonomy, and publication freedom.",
+  ];
+  const GOLDEN_CANDIDATE = {
+    name: "Synthetic Benchmark Candidate",
+    currentTitle: "Member of Technical Staff",
+    currentCompany: "Example AI Lab (synthetic)",
+    geography: "",
+    profileUrls: ["https://example.com/synthetic-profile"],
+    notes: "",
+    pastedText:
+      "SYNTHETIC PROFILE FOR BENCHMARKING — not a real person. Two first-author workshop papers on adversarial robustness (NeurIPS SafeML workshop). Built the distributed evaluation harness used across the lab (PyTorch, Ray, 256-GPU runs). Maintains a popular open-source jailbreak-evaluation benchmark. BS in CS; no PhD. Blogs about AI risk; previously a platform engineer at a fintech.",
   };
-  state.artifacts.golden_test = record;
-  await store.saveArtifact(state.current.id, "golden_test", record);
-  return record;
-}
 
-function renderGolden(main) {
-  main.append(el(`<div class="mod-head"><h2>CAIS Golden Test</h2><span class="spacer"></span></div>`));
-  main.append(el(`<p class="mod-desc">The product's live benchmark: generate every module for the bundled CAIS Research Scientist / Research Engineer search on your Claude account, then score the intake for 16 ML-research domain concepts plus five honesty and fair-hiring guardrails. About 9 Claude calls; expect 5–15 minutes. Progress is saved as it goes.</p>`));
-  const rec = state.artifacts.golden_test;
+  function intakeFullText(payload) {
+    const parts = [];
+    for (const cat of payload.categories || []) {
+      parts.push(cat.title, cat.rationale);
+      for (const q of cat.questions || [])
+        parts.push(q.question, q.whyItMatters);
+    }
+    if (payload.playback) parts.push(JSON.stringify(payload.playback));
+    return parts.join("\n");
+  }
 
-  if (aiHidden || !sampleApi) { main.append(el(`<div class="notice warning">${esc(copyFor("not_granted"))}</div>`)); }
-  else {
-    const head = $(".mod-head", main);
-    const runBtn = el(`<button class="btn ${rec ? "" : "primary"}">${rec ? "Run again" : "Run the golden test"}</button>`);
-    const stopBtn = el(`<button class="btn small" hidden>Stop</button>`);
-    head.append(runBtn, stopBtn);
-    runBtn.onclick = async () => {
-      runBtn.disabled = true; stopBtn.hidden = false;
-      const progress = el(`<div class="panel"><h3>Running…</h3><ul class="run-log"></ul><div class="stream"></div></div>`);
-      main.insertBefore(progress, main.children[2] || null);
-      const log = $(".run-log", progress);
-      const streamEl = $(".stream", progress);
-      let stopFn = null;
-      stopBtn.onclick = () => stopFn && stopFn();
-      try {
-        await runGoldenTest({
-          bindStop: (fn) => { stopFn = fn; },
-          step: (name) => { log.append(el(`<li>${esc(name)}</li>`)); },
-          onText: ({ text }) => { streamEl.textContent = text.slice(-1200); streamEl.scrollTop = streamEl.scrollHeight; },
-        });
-        render();
-      } catch (e) {
-        if (e && (e.code === "not_granted" || e.code === "sampling_disabled")) aiHidden = true;
-        progress.append(el(`<div class="notice error"><strong>Run stopped.</strong> ${esc(copyFor(e && e.code))} Completed steps are saved — “Run again” resumes by regenerating from the top with the saved context.</div>`));
-        runBtn.disabled = false; stopBtn.hidden = true;
-      }
+  function scoreGolden(artifacts, candidate) {
+    const intake = artifacts.intake.payload;
+    const text = intakeFullText(intake);
+    const hits = GOLDEN_CONCEPTS.map((c) => ({
+      concept: c.concept,
+      hit: c.pattern.test(text),
+    }));
+    const hitCount = hits.filter((h) => h.hit).length;
+    const sp = artifacts.search_strings.payload;
+    const composed = composeQueries(
+      {
+        titles: sp.titles || [],
+        alternateTitles: sp.alternateTitles || [],
+        adjacentTitles: sp.adjacentTitles || [],
+        mustHave: sp.mustHave || [],
+        anyOf: sp.anyOf || [],
+        credentials: sp.credentials || [],
+        locations: sp.locations || [],
+        companies: sp.companies || [],
+        exclusions: sp.exclusions || [],
+      },
+      ["general", ...(sp.relevantPlatforms || [])],
+    );
+    const records = [
+      "role_intelligence",
+      "intake",
+      "success_profile",
+      "market_intelligence",
+      "sourcing_strategy",
+      "channels",
+      "search_strings",
+    ]
+      .map((k) => artifacts[k])
+      .concat([candidate.evidence, candidate.outreach])
+      .filter(Boolean);
+    const downgrades = records.reduce(
+      (n, r) => n + ((r.meta && r.meta.downgrades) || 0),
+      0,
+    );
+    const traitWarnings = records.flatMap((r) => r.traitWarnings || []);
+    const guardrails = [
+      {
+        name: "Intake ends with a playback summary",
+        ok: intake.playback != null,
+      },
+      {
+        name: "Model never emitted a 'verified' certainty label",
+        ok: downgrades === 0,
+      },
+      {
+        name: "X-ray queries composed (site: operators present)",
+        ok: composed.some((q) => q.query.includes("site:")),
+      },
+      {
+        name: "Evidence alignment includes gaps, not just matches",
+        ok: (candidate.evidence.payload.items || []).some(
+          (i) => i.status === "missing" || i.status === "unknown",
+        ),
+      },
+      {
+        name: "No protected-trait references in any generated payload",
+        ok: traitWarnings.length === 0,
+      },
+    ];
+    const pass = hitCount >= GOLDEN_THRESHOLD && guardrails.every((g) => g.ok);
+    return {
+      hits,
+      hitCount,
+      total: GOLDEN_CONCEPTS.length,
+      threshold: GOLDEN_THRESHOLD,
+      guardrails,
+      verdict: pass ? "PASS" : "FAIL",
     };
   }
 
-  if (rec) {
-    const s = rec.payload;
-    main.append(el(`<div class="notice ${s.verdict === "PASS" ? "" : "error"}" style="border-left-color:${s.verdict === "PASS" ? "var(--ok)" : "var(--bad)"}">
-      <strong>Verdict: ${esc(s.verdict)}</strong> — ${esc(String(s.hitCount))}/${esc(String(s.total))} intake domain concepts present (threshold ${esc(String(s.threshold))}). Finished ${esc(rec.meta.generatedAt || "")}.</div>`));
-    main.append(el(`<div class="panel"><h3>Intake concept scorecard <span class="why num">${esc(String(s.hitCount))}/${esc(String(s.total))}</span></h3>
-      <ul>${s.hits.map((h) => `<li>${h.hit ? "✅" : "❌"} ${esc(h.concept)}</li>`).join("")}</ul></div>`));
-    main.append(el(`<div class="panel"><h3>Guardrails</h3>
-      <ul>${s.guardrails.map((g) => `<li>${g.ok ? "✅" : "❌"} ${esc(g.name)}</li>`).join("")}</ul></div>`));
-    if (rec.meta.timings) main.append(el(`<div class="panel"><h3>Step timings</h3><ul class="num">${rec.meta.timings.map((t) => `<li>${esc(t.step)}: ${(t.ms / 1000).toFixed(1)}s</li>`).join("")}</ul></div>`));
-    main.append(el(`<p class="why">The generated artifacts themselves are in the modules on the left — the scorecard only measures them.</p>`));
-  } else if (!aiHidden && sampleApi) {
-    main.append(el(`<div class="panel"><p class="why">Not run yet. The run regenerates Role Intelligence → Intake (auto-answered with three hiring-manager answers, labelled as test input) → Success Profile → Market Intel → Strategy → Channels → Search Strings, adds a clearly-synthetic candidate, runs Evidence and Outreach, then scores everything. Your Claude account does the generating; the first call asks permission.</p></div>`));
+  async function runGoldenTest(ui) {
+    // The benchmark always runs against the bundled CAIS example search.
+    // Load its state directly — no re-render, so the progress panel survives.
+    if (!state.current || state.current.id !== EXAMPLE_SEARCH.id) {
+      state.current =
+        state.searches.find((s) => s.id === EXAMPLE_SEARCH.id) ||
+        EXAMPLE_SEARCH;
+      state.artifacts = await store.loadArtifacts(EXAMPLE_SEARCH.id);
+      state.candidates = await store.listCandidates(EXAMPLE_SEARCH.id);
+      renderRail();
+    }
+    state.module = "golden_test";
+    const timings = [];
+    const startedAt = new Date().toISOString();
+    let currentCtl = null;
+    ui.bindStop(() => currentCtl && currentCtl.abort());
+
+    const stepUi = {
+      bindStop: (c) => {
+        currentCtl = c;
+      },
+      onText: ui.onText,
+    };
+    const genSteps = [
+      "role_intelligence",
+      "intake",
+      "success_profile",
+      "market_intelligence",
+      "sourcing_strategy",
+      "channels",
+      "search_strings",
+    ];
+    for (const key of genSteps) {
+      ui.step(TASKS[key].label);
+      const t0 = Date.now();
+      const result = await runTask(
+        key,
+        renderContext(state.current, state.artifacts),
+        stepUi,
+        { regenerate: Boolean(state.artifacts[key]) },
+      );
+      state.artifacts[key] = result;
+      await store.saveArtifact(state.current.id, key, result);
+      timings.push({ step: key, ms: Date.now() - t0 });
+      if (key === "intake") {
+        ui.step("Answering intake as the hiring manager");
+        const cats = result.payload.categories || [];
+        let answered = 0;
+        for (const cat of cats) {
+          if (answered >= GOLDEN_HM_ANSWERS.length) break;
+          const q = (cat.questions || [])[0];
+          if (!q) continue;
+          q.answer = GOLDEN_HM_ANSWERS[answered];
+          answered += 1;
+        }
+        await store.saveArtifact(state.current.id, "intake", result);
+      }
+    }
+
+    ui.step("Creating synthetic benchmark candidate");
+    let cand = state.candidates.find((c) => c.name === GOLDEN_CANDIDATE.name);
+    if (!cand) {
+      cand = {
+        id: uid(),
+        createdAt: new Date().toISOString(),
+        ...GOLDEN_CANDIDATE,
+      };
+      state.candidates.push(cand);
+    }
+    for (const key of ["evidence", "outreach"]) {
+      ui.step(key === "evidence" ? "Evidence alignment" : "Outreach drafts");
+      const t0 = Date.now();
+      cand[key] = await runCandidateTask(key, cand, stepUi);
+      timings.push({ step: key, ms: Date.now() - t0 });
+    }
+    await store.saveCandidate(state.current.id, cand);
+
+    ui.step("Scoring");
+    const score = scoreGolden(state.artifacts, cand);
+    const record = {
+      payload: score,
+      meta: {
+        provider: "claude-artifact",
+        startedAt,
+        generatedAt: new Date().toISOString(),
+        timings,
+      },
+    };
+    state.artifacts.golden_test = record;
+    await store.saveArtifact(state.current.id, "golden_test", record);
+    return record;
   }
-}
 
-/* ── Boot ─────────────────────────────────────────────────────────────── */
-$("#new-search-btn").onclick = () => { state.current = null; state.module = "overview"; const main = $("#main"); main.innerHTML = ""; main.append(renderNewSearchForm(false)); renderRail(); };
+  function renderGolden(main) {
+    main.append(
+      el(
+        `<div class="mod-head"><h2>CAIS Golden Test</h2><span class="spacer"></span></div>`,
+      ),
+    );
+    main.append(
+      el(
+        `<p class="mod-desc">The product's live benchmark: generate every module for the bundled CAIS Research Scientist / Research Engineer search on your Claude account, then score the intake for 16 ML-research domain concepts plus five honesty and fair-hiring guardrails. About 9 Claude calls; expect 5–15 minutes. Progress is saved as it goes.</p>`,
+      ),
+    );
+    const rec = state.artifacts.golden_test;
 
-(async function boot() {
-  // Render immediately from local data; light capabilities up as they resolve.
-  state.searches = await store.listSearches();
-  if (!state.searches.length) { await store.saveSearch(EXAMPLE_SEARCH); state.searches = [EXAMPLE_SEARCH]; }
-  await selectSearch(state.searches[0].id);
+    if (aiHidden || !sampleApi) {
+      main.append(
+        el(`<div class="notice warning">${esc(copyFor("not_granted"))}</div>`),
+      );
+    } else {
+      const head = $(".mod-head", main);
+      const runBtn = el(
+        `<button class="btn ${rec ? "" : "primary"}">${rec ? "Run again" : "Run the golden test"}</button>`,
+      );
+      const stopBtn = el(`<button class="btn small" hidden>Stop</button>`);
+      head.append(runBtn, stopBtn);
+      runBtn.onclick = async () => {
+        runBtn.disabled = true;
+        stopBtn.hidden = false;
+        const progress = el(
+          `<div class="panel"><h3>Running…</h3><ul class="run-log"></ul><div class="stream"></div></div>`,
+        );
+        main.insertBefore(progress, main.children[2] || null);
+        const log = $(".run-log", progress);
+        const streamEl = $(".stream", progress);
+        let stopFn = null;
+        stopBtn.onclick = () => stopFn && stopFn();
+        try {
+          await runGoldenTest({
+            bindStop: (fn) => {
+              stopFn = fn;
+            },
+            step: (name) => {
+              log.append(el(`<li>${esc(name)}</li>`));
+            },
+            onText: ({ text }) => {
+              streamEl.textContent = text.slice(-1200);
+              streamEl.scrollTop = streamEl.scrollHeight;
+            },
+          });
+          render();
+        } catch (e) {
+          if (e && (e.code === "not_granted" || e.code === "sampling_disabled"))
+            aiHidden = true;
+          progress.append(
+            el(
+              `<div class="notice error"><strong>Run stopped.</strong> ${esc(copyFor(e && e.code))} Completed steps are saved — “Run again” resumes by regenerating from the top with the saved context.</div>`,
+            ),
+          );
+          runBtn.disabled = false;
+          stopBtn.hidden = true;
+        }
+      };
+    }
 
-  const [db, sample] = await Promise.all([
-    window.claude ? claude.use("db") : Promise.resolve(null),
-    window.claude ? claude.use("sample") : Promise.resolve(null),
-  ]);
-  sampleApi = sample;
-  if (db) {
-    dbApi = db; state.storageMode = "db";
-    // Migrate: make sure the example exists in db, then reload from db.
-    const existing = await store.listSearches();
-    if (!existing.length) await store.saveSearch(EXAMPLE_SEARCH);
+    if (rec) {
+      const s = rec.payload;
+      main.append(
+        el(`<div class="notice ${s.verdict === "PASS" ? "" : "error"}" style="border-left-color:${s.verdict === "PASS" ? "var(--ok)" : "var(--bad)"}">
+      <strong>Verdict: ${esc(s.verdict)}</strong> — ${esc(String(s.hitCount))}/${esc(String(s.total))} intake domain concepts present (threshold ${esc(String(s.threshold))}). Finished ${esc(rec.meta.generatedAt || "")}.</div>`),
+      );
+      main.append(
+        el(`<div class="panel"><h3>Intake concept scorecard <span class="why num">${esc(String(s.hitCount))}/${esc(String(s.total))}</span></h3>
+      <ul>${s.hits.map((h) => `<li>${h.hit ? "✅" : "❌"} ${esc(h.concept)}</li>`).join("")}</ul></div>`),
+      );
+      main.append(
+        el(`<div class="panel"><h3>Guardrails</h3>
+      <ul>${s.guardrails.map((g) => `<li>${g.ok ? "✅" : "❌"} ${esc(g.name)}</li>`).join("")}</ul></div>`),
+      );
+      if (rec.meta.timings)
+        main.append(
+          el(
+            `<div class="panel"><h3>Step timings</h3><ul class="num">${rec.meta.timings.map((t) => `<li>${esc(t.step)}: ${(t.ms / 1000).toFixed(1)}s</li>`).join("")}</ul></div>`,
+          ),
+        );
+      main.append(
+        el(
+          `<p class="why">The generated artifacts themselves are in the modules on the left — the scorecard only measures them.</p>`,
+        ),
+      );
+    } else if (!aiHidden && sampleApi) {
+      main.append(
+        el(
+          `<div class="panel"><p class="why">Not run yet. The run regenerates Role Intelligence → Intake (auto-answered with three hiring-manager answers, labelled as test input) → Success Profile → Market Intel → Strategy → Channels → Search Strings, adds a clearly-synthetic candidate, runs Evidence and Outreach, then scores everything. Your Claude account does the generating; the first call asks permission.</p></div>`,
+        ),
+      );
+    }
+  }
+
+  /* ── Boot ─────────────────────────────────────────────────────────────── */
+  $("#new-search-btn").onclick = () => {
+    state.current = null;
+    state.module = "overview";
+    const main = $("#main");
+    main.innerHTML = "";
+    main.append(renderNewSearchForm(false));
+    renderRail();
+  };
+
+  (async function boot() {
+    // Render immediately from local data; light capabilities up as they resolve.
     state.searches = await store.listSearches();
-    await selectSearch((state.current && state.searches.find((s) => s.id === state.current.id)) ? state.current.id : state.searches[0].id);
-  } else {
-    render(); // repaint with sample availability known
-  }
-  if (!sample) { aiHidden = true; render(); }
-})();
+    if (!state.searches.length) {
+      await store.saveSearch(EXAMPLE_SEARCH);
+      state.searches = [EXAMPLE_SEARCH];
+    }
+    await selectSearch(state.searches[0].id);
+
+    const [db, sample] = await Promise.all([
+      window.claude ? claude.use("db") : Promise.resolve(null),
+      window.claude ? claude.use("sample") : Promise.resolve(null),
+    ]);
+    sampleApi = sample;
+    if (db) {
+      dbApi = db;
+      state.storageMode = "db";
+      // Migrate: make sure the example exists in db, then reload from db.
+      const existing = await store.listSearches();
+      if (!existing.length) await store.saveSearch(EXAMPLE_SEARCH);
+      state.searches = await store.listSearches();
+      await selectSearch(
+        state.current && state.searches.find((s) => s.id === state.current.id)
+          ? state.current.id
+          : state.searches[0].id,
+      );
+    } else {
+      render(); // repaint with sample availability known
+    }
+    if (!sample) {
+      aiHidden = true;
+      render();
+    }
+  })();
 </script>

@@ -75,3 +75,11 @@ golden differentiation harness (`pnpm golden`).
 - After every wave: run unit tests + typecheck, fix, update this file.
 - No TODO placeholders in core paths; a module ships working or not at all.
 - New feature ideas go to Phase 2 list, not into the current wave.
+
+## W7 — Crew orchestration (CLOSED 2026-09-01)
+
+Per-search agent crews: `crew_jobs` queue (migration 0001), dependency
+graph, critic + one revision pass, Crew tab, candidate-agent kickoff,
+`pnpm crew:work`. Acceptance: tests/unit/crew.test.ts (6 tests — full mock
+crew run, dependency gating, revision path, persistence, candidate chain,
+restart semantics); full verify green (57 unit tests, build).

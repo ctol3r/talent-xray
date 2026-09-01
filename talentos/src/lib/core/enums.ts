@@ -167,3 +167,17 @@ export const generationMetaSchema = z.object({
   contextHash: z.string(),
 });
 export type GenerationMeta = z.infer<typeof generationMetaSchema>;
+
+// ── W7: crew orchestration ──────────────────────────────────────────────────
+
+export const CREW_JOB_STATUSES = [
+  "queued",
+  "awaiting_model",
+  "critiquing",
+  "revising",
+  "done",
+  "failed",
+  "cancelled",
+] as const;
+export const crewJobStatusSchema = z.enum(CREW_JOB_STATUSES);
+export type CrewJobStatus = z.infer<typeof crewJobStatusSchema>;

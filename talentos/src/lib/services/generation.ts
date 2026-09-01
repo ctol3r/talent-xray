@@ -52,8 +52,12 @@ async function requireCandidate(db: Db, candidateId: string) {
   return candidate;
 }
 
-export async function generateRoleIntelligence(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateRoleIntelligence(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, meta, warnings } = await runAiTask(
     roleIntelligenceTask,
     ctx,
@@ -72,8 +76,12 @@ export async function generateRoleIntelligence(db: Db, projectId: string) {
   return { output, meta, warnings };
 }
 
-export async function generateIntake(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateIntake(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, meta, warnings } = await runAiTask(intakeTask, ctx, {
     db,
     searchProjectId: projectId,
@@ -85,8 +93,12 @@ export async function generateIntake(db: Db, projectId: string) {
   return { session, warnings };
 }
 
-export async function generateSuccessProfile(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateSuccessProfile(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, meta, warnings } = await runAiTask(successProfileTask, ctx, {
     db,
     searchProjectId: projectId,
@@ -101,8 +113,12 @@ export async function generateSuccessProfile(db: Db, projectId: string) {
   return { output, meta, warnings };
 }
 
-export async function generateMarketIntelligence(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateMarketIntelligence(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, meta, warnings } = await runAiTask(
     marketIntelligenceTask,
     ctx,
@@ -118,8 +134,12 @@ export async function generateMarketIntelligence(db: Db, projectId: string) {
   return { output, meta, warnings };
 }
 
-export async function generateSourcingStrategy(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateSourcingStrategy(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, meta, warnings } = await runAiTask(
     sourcingStrategyTask,
     ctx,
@@ -139,8 +159,12 @@ export async function generateSourcingStrategy(db: Db, projectId: string) {
 }
 
 /** Appends model-suggested channels, skipping names that already exist. */
-export async function generateChannels(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateChannels(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, warnings } = await runAiTask(channelsTask, ctx, {
     db,
     searchProjectId: projectId,
@@ -184,8 +208,12 @@ export async function generateChannels(db: Db, projectId: string) {
  * Search String Lab: model expands vocabulary; the deterministic composer
  * builds the platform × breadth matrix; platform-specific extras appended.
  */
-export async function generateSearchStrings(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateSearchStrings(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, warnings } = await runAiTask(stringExpansionTask, ctx, {
     db,
     searchProjectId: projectId,
@@ -236,9 +264,17 @@ export async function generateSearchStrings(db: Db, projectId: string) {
   return { added: rows.length, warnings };
 }
 
-export async function generateEvidenceAlignment(db: Db, candidateId: string) {
+export async function generateEvidenceAlignment(
+  db: Db,
+  candidateId: string,
+  critique?: string[],
+) {
   const candidate = await requireCandidate(db, candidateId);
-  const project = await loadProjectContext(db, candidate.searchProjectId);
+  const project = await loadProjectContext(
+    db,
+    candidate.searchProjectId,
+    critique,
+  );
   const sources = await db
     .select({ url: candidateSources.url })
     .from(candidateSources)
@@ -263,9 +299,17 @@ export async function generateEvidenceAlignment(db: Db, candidateId: string) {
   return { output, meta, warnings };
 }
 
-export async function generateOutreach(db: Db, candidateId: string) {
+export async function generateOutreach(
+  db: Db,
+  candidateId: string,
+  critique?: string[],
+) {
   const candidate = await requireCandidate(db, candidateId);
-  const project = await loadProjectContext(db, candidate.searchProjectId);
+  const project = await loadProjectContext(
+    db,
+    candidate.searchProjectId,
+    critique,
+  );
   const [evidence] = await db
     .select()
     .from(candidateEvidence)
@@ -297,8 +341,12 @@ export async function generateOutreach(db: Db, candidateId: string) {
   return { sequence, warnings };
 }
 
-export async function generateScreenGuide(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateScreenGuide(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, meta, warnings } = await runAiTask(recruiterScreenTask, ctx, {
     db,
     searchProjectId: projectId,
@@ -313,8 +361,12 @@ export async function generateScreenGuide(db: Db, projectId: string) {
   return { output, meta, warnings };
 }
 
-export async function generateInterviewPlan(db: Db, projectId: string) {
-  const ctx = await loadProjectContext(db, projectId);
+export async function generateInterviewPlan(
+  db: Db,
+  projectId: string,
+  critique?: string[],
+) {
+  const ctx = await loadProjectContext(db, projectId, critique);
   const { output, meta, warnings } = await runAiTask(interviewPlanTask, ctx, {
     db,
     searchProjectId: projectId,

@@ -29,11 +29,14 @@ export interface ProjectContext {
   marketResearch?: MarketResearchPayload;
   strategy?: SourcingStrategyPayload;
   channelNames: string[];
+  /** W7 crew: critic findings to address in a revision pass. */
+  critique?: string[];
 }
 
 export async function loadProjectContext(
   db: Db,
   projectId: string,
+  critique?: string[],
 ): Promise<ProjectContext> {
   const [project] = await db
     .select()
@@ -91,6 +94,7 @@ export async function loadProjectContext(
     marketResearch: market?.payload,
     strategy: strategy?.payload,
     channelNames: channels.map((c) => c.name),
+    critique,
   };
 }
 
@@ -163,6 +167,13 @@ export function renderProjectContext(ctx: ProjectContext): string {
     section(
       "Existing sourcing channels",
       ctx.channelNames.length > 0 ? ctx.channelNames.join(", ") : "",
+    ),
+    section(
+      "Critic findings to address (this is a REVISION pass)",
+      ctx.critique && ctx.critique.length > 0
+        ? "A reviewer flagged the previous draft. Produce a full corrected artifact that resolves every finding:\n" +
+            ctx.critique.map((issue) => `- ${issue}`).join("\n")
+        : "",
     ),
   ]
     .filter(Boolean)

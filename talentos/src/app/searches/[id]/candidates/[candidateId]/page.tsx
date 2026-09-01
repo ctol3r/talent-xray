@@ -14,6 +14,7 @@ import {
   generateEvidenceAlignmentAction,
   generateOutreachAction,
 } from "@/lib/actions/generate";
+import { kickoffCandidateCrewAction } from "@/lib/actions/crew";
 import { ArtifactMeta } from "@/components/artifact-meta";
 import {
   CandidateDataControls,
@@ -71,11 +72,19 @@ export default async function CandidatePage({
             .join(" · ") || undefined
         }
         actions={
-          <StageSelect
-            candidateId={candidateId}
-            currentStage={candidate.stage}
-            stages={stages}
-          />
+          <div className="flex items-start gap-3">
+            <GenerateButton
+              action={kickoffCandidateCrewAction}
+              input={{ candidateId }}
+              label="Queue candidate agents"
+              regenerate
+            />
+            <StageSelect
+              candidateId={candidateId}
+              currentStage={candidate.stage}
+              stages={stages}
+            />
+          </div>
         }
       />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
