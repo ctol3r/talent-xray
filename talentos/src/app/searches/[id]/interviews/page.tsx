@@ -65,9 +65,18 @@ export default async function InterviewsPage({
                     </p>
                   )}
                   <div className="mt-3 space-y-3">
-                    <StringList title="Competencies (assessed here, nowhere else)" items={stage.competencies} />
-                    <StringList title="Questions / exercises" items={stage.questions} />
-                    <StringList title="Evidence sought" items={stage.evidenceSought} />
+                    <StringList
+                      title="Competencies (assessed here, nowhere else)"
+                      items={stage.competencies}
+                    />
+                    <StringList
+                      title="Questions / exercises"
+                      items={stage.questions}
+                    />
+                    <StringList
+                      title="Evidence sought"
+                      items={stage.evidenceSought}
+                    />
                   </div>
                   {stage.rubricNotes && (
                     <p className="mt-2 text-[12.5px] text-ink-muted">
@@ -90,7 +99,9 @@ export default async function InterviewsPage({
             <ScorecardForm
               searchProjectId={id}
               candidates={candidates.map((c) => ({ id: c.id, name: c.name }))}
-              stageNames={payload?.stages.map((s) => s.name) ?? ["Recruiter Screen"]}
+              stageNames={
+                payload?.stages.map((s) => s.name) ?? ["Recruiter Screen"]
+              }
             />
           </div>
           {cards.length === 0 ? (
@@ -100,7 +111,10 @@ export default async function InterviewsPage({
           ) : (
             <div className="space-y-3">
               {cards.map((card) => (
-                <details key={card.id} className="rounded border border-edge bg-panel2/50 px-3 py-2">
+                <details
+                  key={card.id}
+                  className="rounded border border-edge bg-panel2/50 px-3 py-2"
+                >
                   <summary className="flex cursor-pointer items-center justify-between gap-2">
                     <span className="text-[13px] font-medium">
                       {candidateNames.get(card.candidateId) ?? "Candidate"} ·{" "}
@@ -113,9 +127,14 @@ export default async function InterviewsPage({
                   </summary>
                   <ul className="mt-2 space-y-2">
                     {card.entries.map((entry) => (
-                      <li key={entry.id} className="rounded border border-edge bg-canvas p-2.5">
+                      <li
+                        key={entry.id}
+                        className="rounded border border-edge bg-canvas p-2.5"
+                      >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[13px] font-medium">{entry.competency}</span>
+                          <span className="text-[13px] font-medium">
+                            {entry.competency}
+                          </span>
                           <Tag
                             tone={
                               entry.rating === "exceptional_evidence" ||
@@ -136,7 +155,9 @@ export default async function InterviewsPage({
                           {entry.observation}
                         </p>
                         <p className="text-[12.5px]">
-                          <span className="text-ink-faint">Interpretation: </span>
+                          <span className="text-ink-faint">
+                            Interpretation:{" "}
+                          </span>
                           {entry.interpretation}
                         </p>
                         <p className="text-[12.5px]">
@@ -147,7 +168,9 @@ export default async function InterviewsPage({
                     ))}
                   </ul>
                   {card.overallNote && (
-                    <p className="mt-2 text-[12.5px] text-ink-muted">{card.overallNote}</p>
+                    <p className="mt-2 text-[12.5px] text-ink-muted">
+                      {card.overallNote}
+                    </p>
                   )}
                 </details>
               ))}

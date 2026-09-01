@@ -1,7 +1,4 @@
-import {
-  intakePayloadSchema,
-  type IntakePayload,
-} from "@/lib/core/payloads";
+import { intakePayloadSchema, type IntakePayload } from "@/lib/core/payloads";
 import { renderProjectContext, type ProjectContext } from "../context";
 import { classifyOccupationForMock } from "../mock-knowledge";
 import { EDITABILITY_REMINDER, systemPrelude } from "../prompts";
@@ -12,7 +9,8 @@ export const intakeTask = defineAiTask<ProjectContext, IntakePayload>({
   schemaName: "IntakeSession",
   schema: intakePayloadSchema,
   maxTokens: 32000,
-  system: () => `${systemPrelude("an elite recruiter preparing a hiring-manager intake interview")}
+  system:
+    () => `${systemPrelude("an elite recruiter preparing a hiring-manager intake interview")}
 
 You are generating the intake interview for THIS specific role — the flagship test of this product is that intakes for different professions are radically different. Generic recruiter questions ("tell me about the team") may appear only where they earn their place.
 
@@ -38,10 +36,12 @@ Generate the complete hiring-manager intake interview for this search, ending wi
           questions: [
             {
               question: `Why does ${ctx.project.companyName ?? "the company"} need this ${ctx.project.roleTitle} now?`,
-              whyItMatters: "Growth vs replacement changes urgency and profile.",
+              whyItMatters:
+                "Growth vs replacement changes urgency and profile.",
             },
             {
-              question: "What happens if the role stays unfilled for two quarters?",
+              question:
+                "What happens if the role stays unfilled for two quarters?",
               whyItMatters: "Reveals true priority and internal alternatives.",
             },
           ],
@@ -73,11 +73,14 @@ Generate the complete hiring-manager intake interview for this search, ending wi
           rationale: "People are better calibration than adjectives.",
           questions: [
             {
-              question: "Who represents the bar — internally or anywhere — and why?",
-              whyItMatters: "Names become sourcing lookalikes and rubric anchors.",
+              question:
+                "Who represents the bar — internally or anywhere — and why?",
+              whyItMatters:
+                "Names become sourcing lookalikes and rubric anchors.",
             },
             {
-              question: "Describe a past hire in this kind of role that did NOT work out. What was missing?",
+              question:
+                "Describe a past hire in this kind of role that did NOT work out. What was missing?",
               whyItMatters: "Negative exemplars expose hidden requirements.",
             },
           ],

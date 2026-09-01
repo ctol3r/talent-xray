@@ -19,7 +19,10 @@ export interface ResearchResult {
 export interface ResearchProvider {
   readonly name: string;
   readonly configured: boolean;
-  search(query: string, options?: { limit?: number }): Promise<ResearchResult[]>;
+  search(
+    query: string,
+    options?: { limit?: number },
+  ): Promise<ResearchResult[]>;
 }
 
 /** The honest default: no provider configured, no fabricated results. */

@@ -108,7 +108,8 @@ export function computeOutreachStats(
 ): OutreachStats {
   const drafted = messages.length;
   const sent = messages.filter(
-    (m) => m.status === "sent" || m.status === "replied" || m.status === "no_reply",
+    (m) =>
+      m.status === "sent" || m.status === "replied" || m.status === "no_reply",
   ).length;
   const replied = messages.filter((m) => m.status === "replied").length;
   return {

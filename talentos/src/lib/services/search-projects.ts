@@ -273,11 +273,18 @@ export async function getNextBestActions(
 export interface DashboardData {
   activeSearches: (typeof searchProjects.$inferSelect)[];
   today: {
-    followUpsDue: { candidate: typeof candidates.$inferSelect; projectName: string }[];
+    followUpsDue: {
+      candidate: typeof candidates.$inferSelect;
+      projectName: string;
+    }[];
     candidatesNeedingReview: number;
     openTasks: (typeof tasks.$inferSelect)[];
   };
-  actionsByProject: { projectId: string; projectName: string; actions: NextBestAction[] }[];
+  actionsByProject: {
+    projectId: string;
+    projectName: string;
+    actions: NextBestAction[];
+  }[];
 }
 
 export async function getDashboardData(db: Db): Promise<DashboardData> {

@@ -14,7 +14,8 @@ export const successProfileTask = defineAiTask<
   task: "success_profile",
   schemaName: "SuccessProfile",
   schema: successProfilePayloadSchema,
-  system: () => `${systemPrelude("an elite recruiter compiling a success profile")}
+  system:
+    () => `${systemPrelude("an elite recruiter compiling a success profile")}
 
 Compile the structured success profile from everything known: JD, role intelligence, and — above all — the hiring-manager intake answers. Where sources conflict, the hiring manager's answers win, and the conflict goes into unresolvedQuestions.
 
@@ -34,8 +35,14 @@ Compile the success profile for this search now.`,
     const occ = classifyOccupationForMock(
       `${ctx.project.roleTitle} ${ctx.project.industry ?? ""}`,
     );
-    const hm = (text: string) => ({ text, provenance: "hiring_manager" as const });
-    const inf = (text: string) => ({ text, provenance: "model_inference" as const });
+    const hm = (text: string) => ({
+      text,
+      provenance: "hiring_manager" as const,
+    });
+    const inf = (text: string) => ({
+      text,
+      provenance: "model_inference" as const,
+    });
     const jd = (text: string) => ({ text, provenance: "jd" as const });
     return {
       mission: `[Mock] Deliver ${ctx.project.businessObjective ?? "the hiring outcome"} as ${ctx.project.roleTitle}.`,
@@ -54,7 +61,9 @@ Compile the success profile for this search now.`,
       alternateTitles: occ.titles.map(inf),
       targetGeographies: [jd(ctx.project.geography ?? "Unspecified")],
       compensationNote: ctx.project.compensationNote ?? undefined,
-      candidateMotivators: [inf(`[Mock] Motivator typical of ${occ.profession}`)],
+      candidateMotivators: [
+        inf(`[Mock] Motivator typical of ${occ.profession}`),
+      ],
       sellingPoints: [hm("[Mock] Selling point from intake")],
       risks: [inf("[Mock] Search risk to monitor")],
       unresolvedQuestions: occ.domainQuestions.slice(0, 2).map(inf),

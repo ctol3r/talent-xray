@@ -84,7 +84,10 @@ await saveJobDescription(db, {
 await generateRoleIntelligence(db, project.id);
 const intel = await getRoleIntelligence(db, project.id);
 assert(intel, "role intelligence persisted");
-assert(intel.payload.hardRequirements.length > 0, "hard requirements extracted");
+assert(
+  intel.payload.hardRequirements.length > 0,
+  "hard requirements extracted",
+);
 
 // 4: recruiter edits a requirement
 intel.payload.hardRequirements[0].text = "EDITED BY RECRUITER";
@@ -126,7 +129,8 @@ const candidate = await createCandidate(
     name: "Test Candidate",
     currentTitle: "Research Engineer",
     currentCompany: "Example Lab",
-    resumeText: "Built distributed training infra; two first-author workshop papers.",
+    resumeText:
+      "Built distributed training infra; two first-author workshop papers.",
     profileUrls: ["https://example.com/profile"],
   }),
 );
@@ -136,7 +140,13 @@ await generateEvidenceAlignment(db, candidate.id);
 await generateOutreach(db, candidate.id);
 
 // 14: pipeline movement
-for (const stage of ["review", "contact_ready", "contacted", "responded", "recruiter_screen"]) {
+for (const stage of [
+  "review",
+  "contact_ready",
+  "contacted",
+  "responded",
+  "recruiter_screen",
+]) {
   await moveCandidateStage(db, { candidateId: candidate.id, toStage: stage });
 }
 
@@ -198,6 +208,15 @@ const snapshot = await buildProjectSnapshot(db, project.id);
 assert(snapshot.candidateCount === 1, "snapshot sees the candidate");
 await getNextBestActions(db, project.id);
 const channels = await listChannels(db, project.id);
-assert(channels.every((c) => c.certainty !== "verified"), "no unverified channel claims 'verified'");
+assert(
+  channels.every((c) => c.certainty !== "verified"),
+  "no unverified channel claims 'verified'",
+);
 
-console.log("Critical path OK: 20 steps completed against", queries.length, "queries,", channels.length, "channels.");
+console.log(
+  "Critical path OK: 20 steps completed against",
+  queries.length,
+  "queries,",
+  channels.length,
+  "channels.",
+);

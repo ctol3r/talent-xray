@@ -27,6 +27,7 @@ export function OfferControls({
           <FieldLabel>Offer status</FieldLabel>
           <select
             value={status ?? ""}
+            aria-label="Offer status"
             disabled={pending}
             onChange={(e) =>
               submit(() =>
@@ -78,7 +79,13 @@ export function OnboardingChecklist({
 }: {
   searchProjectId: string;
   candidateId: string;
-  checklist: { id?: string; label: string; owner?: string; dueOffsetDays?: number; done?: boolean }[];
+  checklist: {
+    id?: string;
+    label: string;
+    owner?: string;
+    dueOffsetDays?: number;
+    done?: boolean;
+  }[];
   startDate: string | null;
   startConfirmed: boolean;
 }) {
@@ -91,7 +98,9 @@ export function OnboardingChecklist({
           <li key={item.id} className="flex items-start gap-2">
             <input
               type="checkbox"
-              checked={Boolean(item.done)}
+              // Optimistic: uncontrolled, remounted when the saved state lands.
+              key={`${item.id}-${String(item.done)}`}
+              defaultChecked={Boolean(item.done)}
               disabled={pending}
               onChange={(e) =>
                 submit(() =>
@@ -105,7 +114,9 @@ export function OnboardingChecklist({
               }
               className="mt-0.5 accent-[#6d9cff]"
             />
-            <span className={`text-[13px] ${item.done ? "text-ink-faint line-through" : ""}`}>
+            <span
+              className={`text-[13px] ${item.done ? "text-ink-faint line-through" : ""}`}
+            >
               {item.label}
               <span className="ml-1 text-[11.5px] text-ink-faint">
                 {item.owner ? `· ${item.owner}` : ""}

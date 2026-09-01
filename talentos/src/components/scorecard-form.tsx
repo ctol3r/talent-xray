@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { RUBRIC_LABELS, RUBRIC_LEVELS, type RubricLevel } from "@/lib/core/enums";
+import {
+  RUBRIC_LABELS,
+  RUBRIC_LEVELS,
+  type RubricLevel,
+} from "@/lib/core/enums";
 import { saveScorecardAction } from "@/lib/actions/workflow";
 import {
   ErrorNote,
@@ -130,13 +134,18 @@ export function ScorecardForm({
         </label>
       </div>
       {entries.map((entry, index) => (
-        <div key={index} className="space-y-2 rounded border border-edge bg-panel2/50 p-3">
+        <div
+          key={index}
+          className="space-y-2 rounded border border-edge bg-panel2/50 p-3"
+        >
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <label>
               <FieldLabel>Competency</FieldLabel>
               <input
                 value={entry.competency}
-                onChange={(e) => setEntry(index, { competency: e.target.value })}
+                onChange={(e) =>
+                  setEntry(index, { competency: e.target.value })
+                }
                 required
                 className={inputClass}
               />
@@ -145,6 +154,7 @@ export function ScorecardForm({
               <FieldLabel>Rating</FieldLabel>
               <select
                 value={entry.rating}
+                aria-label="Rating"
                 onChange={(e) =>
                   setEntry(index, { rating: e.target.value as RubricLevel })
                 }
@@ -159,7 +169,9 @@ export function ScorecardForm({
             </label>
           </div>
           <label className="block">
-            <FieldLabel>Observation (what happened — verbatim, factual)</FieldLabel>
+            <FieldLabel>
+              Observation (what happened — verbatim, factual)
+            </FieldLabel>
             <textarea
               value={entry.observation}
               onChange={(e) => setEntry(index, { observation: e.target.value })}
@@ -171,7 +183,9 @@ export function ScorecardForm({
             <FieldLabel>Interpretation (what you make of it)</FieldLabel>
             <textarea
               value={entry.interpretation}
-              onChange={(e) => setEntry(index, { interpretation: e.target.value })}
+              onChange={(e) =>
+                setEntry(index, { interpretation: e.target.value })
+              }
               rows={2}
               className={`${inputClass} resize-y`}
             />
@@ -183,7 +197,9 @@ export function ScorecardForm({
             </FieldLabel>
             <textarea
               value={entry.evidenceText}
-              onChange={(e) => setEntry(index, { evidenceText: e.target.value })}
+              onChange={(e) =>
+                setEntry(index, { evidenceText: e.target.value })
+              }
               rows={2}
               className={`${inputClass} resize-y`}
             />
@@ -204,7 +220,11 @@ export function ScorecardForm({
         <button type="submit" disabled={pending} className={buttonClass}>
           {pending ? "Saving…" : "Submit scorecard"}
         </button>
-        <button type="button" className={subtleButtonClass} onClick={() => setOpen(false)}>
+        <button
+          type="button"
+          className={subtleButtonClass}
+          onClick={() => setOpen(false)}
+        >
           Cancel
         </button>
       </div>

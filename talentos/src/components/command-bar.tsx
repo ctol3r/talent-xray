@@ -43,8 +43,18 @@ export function CommandBar({ searches }: { searches: ShellSearch[] }) {
 
   const commands = useMemo<Command[]>(() => {
     const list: Command[] = [
-      { id: "new-search", label: "Create search", hint: "new", href: "/searches/new" },
-      { id: "dashboard", label: "What should I do next?", hint: "dashboard", href: "/" },
+      {
+        id: "new-search",
+        label: "Create search",
+        hint: "new",
+        href: "/searches/new",
+      },
+      {
+        id: "dashboard",
+        label: "What should I do next?",
+        hint: "dashboard",
+        href: "/",
+      },
       { id: "candidates", label: "All candidates", href: "/candidates" },
       { id: "tasks", label: "Tasks", href: "/tasks" },
       { id: "settings", label: "Settings", href: "/settings" },

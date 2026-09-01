@@ -106,7 +106,9 @@ function renderIntakeAnswers(intake: IntakePayload | undefined): string {
   for (const category of intake.categories) {
     for (const question of category.questions) {
       if (question.answer && question.answer.trim() !== "") {
-        lines.push(`Q (${category.title}): ${question.question}\nA: ${question.answer}`);
+        lines.push(
+          `Q (${category.title}): ${question.question}\nA: ${question.answer}`,
+        );
       }
     }
   }

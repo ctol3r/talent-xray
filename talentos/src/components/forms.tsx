@@ -10,7 +10,10 @@ export function useAction() {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const submit = (fn: () => Promise<ActionResult<unknown>>, after?: () => void) =>
+  const submit = (
+    fn: () => Promise<ActionResult<unknown>>,
+    after?: () => void,
+  ) =>
     startTransition(async () => {
       setError(null);
       const result = await fn();
@@ -25,7 +28,9 @@ export function useAction() {
 }
 
 export function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="mb-1 block text-[12.5px] text-ink-muted">{children}</span>;
+  return (
+    <span className="mb-1 block text-[12.5px] text-ink-muted">{children}</span>
+  );
 }
 
 export const inputClass =

@@ -29,7 +29,9 @@ export function IntakeAnswer({
   if (!editing) {
     return (
       <div className="mt-1.5 flex items-start gap-2 rounded border border-ok/20 bg-ok-soft/40 px-3 py-2">
-        <p className="flex-1 text-[13px] whitespace-pre-wrap">{existingAnswer}</p>
+        <p className="flex-1 text-[13px] whitespace-pre-wrap">
+          {existingAnswer}
+        </p>
         <button
           type="button"
           onClick={() => setEditing(true)}
@@ -110,7 +112,9 @@ export function CompleteIntakeButton({
         }
         className={buttonClass}
         title={
-          disabled ? "Answer at least one question before completing" : undefined
+          disabled
+            ? "Answer at least one question before completing"
+            : undefined
         }
       >
         {pending ? "Saving…" : "Mark intake complete"}

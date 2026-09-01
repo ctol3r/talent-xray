@@ -76,46 +76,92 @@ export default async function RolePage({
                 ownerId={id}
                 payload={payload}
               />
-              <p className="text-[13.5px] leading-6">{payload.roleHypothesis}</p>
+              <p className="text-[13.5px] leading-6">
+                {payload.roleHypothesis}
+              </p>
             </Card>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card title="Requirements">
                 <div className="space-y-4">
-                  <TracedList title="Hard requirements" items={payload.hardRequirements} />
+                  <TracedList
+                    title="Hard requirements"
+                    items={payload.hardRequirements}
+                  />
                   <TracedList title="Preferences" items={payload.preferences} />
                   <TracedList title="Signals" items={payload.signals} />
                 </div>
               </Card>
               <Card title="What still needs the hiring manager">
                 <div className="space-y-4">
-                  <TracedList title="Assumptions (unconfirmed)" items={payload.assumptions} tone="warn" />
-                  <TracedList title="Unresolved questions" items={payload.unresolvedQuestions} tone="warn" />
+                  <TracedList
+                    title="Assumptions (unconfirmed)"
+                    items={payload.assumptions}
+                    tone="warn"
+                  />
+                  <TracedList
+                    title="Unresolved questions"
+                    items={payload.unresolvedQuestions}
+                    tone="warn"
+                  />
                 </div>
               </Card>
             </div>
             <Card title="Role profile">
               <div className="mb-3 space-y-1.5">
-                <KeyValue label="Canonical title" value={payload.canonicalTitle} />
+                <KeyValue
+                  label="Canonical title"
+                  value={payload.canonicalTitle}
+                />
                 <KeyValue label="Seniority" value={payload.seniority} />
                 <KeyValue label="Profession" value={payload.profession} />
                 <KeyValue label="Function" value={payload.jobFunction} />
                 <KeyValue label="Industry" value={payload.industry} />
                 <KeyValue label="Education" value={payload.education} />
-                <KeyValue label="Experience" value={payload.experienceSummary} />
-                <KeyValue label="Management scope" value={payload.managementScope} />
-                <KeyValue label="Work arrangement" value={payload.workArrangement} />
+                <KeyValue
+                  label="Experience"
+                  value={payload.experienceSummary}
+                />
+                <KeyValue
+                  label="Management scope"
+                  value={payload.managementScope}
+                />
+                <KeyValue
+                  label="Work arrangement"
+                  value={payload.workArrangement}
+                />
                 <KeyValue label="Travel" value={payload.travel} />
-                <KeyValue label="Compensation" value={payload.compensationNote} />
+                <KeyValue
+                  label="Compensation"
+                  value={payload.compensationNote}
+                />
               </div>
               <div className="space-y-4">
-                <StringList title="Alternate titles" items={payload.alternateTitles} />
-                <StringList title="Responsibilities" items={payload.responsibilities} />
-                <StringList title="Business outcomes" items={payload.businessOutcomes} />
+                <StringList
+                  title="Alternate titles"
+                  items={payload.alternateTitles}
+                />
+                <StringList
+                  title="Responsibilities"
+                  items={payload.responsibilities}
+                />
+                <StringList
+                  title="Business outcomes"
+                  items={payload.businessOutcomes}
+                />
                 <StringList title="Technologies" items={payload.technologies} />
-                <StringList title="Domain knowledge" items={payload.domainKnowledge} />
-                <StringList title="Certifications" items={payload.certifications} />
+                <StringList
+                  title="Domain knowledge"
+                  items={payload.domainKnowledge}
+                />
+                <StringList
+                  title="Certifications"
+                  items={payload.certifications}
+                />
                 <StringList title="Licenses" items={payload.licenses} />
-                <StringList title="Likely talent competitors" items={payload.likelyTalentCompetitors} />
+                <StringList
+                  title="Likely talent competitors"
+                  items={payload.likelyTalentCompetitors}
+                />
               </div>
             </Card>
           </>

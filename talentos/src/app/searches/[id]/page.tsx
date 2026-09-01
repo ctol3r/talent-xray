@@ -25,14 +25,38 @@ export default async function OverviewPage({
   ]);
 
   const healthItems: { label: string; done: boolean; href: string }[] = [
-    { label: "Job description", done: snapshot.hasJobDescription, href: "role" },
-    { label: "Role intelligence", done: snapshot.hasRoleIntelligence, href: "role" },
+    {
+      label: "Job description",
+      done: snapshot.hasJobDescription,
+      href: "role",
+    },
+    {
+      label: "Role intelligence",
+      done: snapshot.hasRoleIntelligence,
+      href: "role",
+    },
     { label: "HM intake", done: snapshot.intakeComplete, href: "intake" },
-    { label: "Success profile", done: snapshot.hasSuccessProfile, href: "profile" },
-    { label: "Sourcing strategy", done: snapshot.hasStrategy, href: "strategy" },
-    { label: "Channels mapped", done: snapshot.channelCount > 0, href: "sources" },
+    {
+      label: "Success profile",
+      done: snapshot.hasSuccessProfile,
+      href: "profile",
+    },
+    {
+      label: "Sourcing strategy",
+      done: snapshot.hasStrategy,
+      href: "strategy",
+    },
+    {
+      label: "Channels mapped",
+      done: snapshot.channelCount > 0,
+      href: "sources",
+    },
     { label: "Search strings", done: snapshot.queryCount > 0, href: "strings" },
-    { label: "Candidates", done: snapshot.candidateCount > 0, href: "candidates" },
+    {
+      label: "Candidates",
+      done: snapshot.candidateCount > 0,
+      href: "candidates",
+    },
   ];
 
   return (
@@ -102,10 +126,19 @@ export default async function OverviewPage({
               <KeyValue label="Country" value={project.country} />
               <KeyValue label="Industry" value={project.industry} />
               <KeyValue label="Seniority" value={project.seniority} />
-              <KeyValue label="Employment type" value={project.employmentType} />
-              <KeyValue label="Work arrangement" value={project.workArrangement} />
+              <KeyValue
+                label="Employment type"
+                value={project.employmentType}
+              />
+              <KeyValue
+                label="Work arrangement"
+                value={project.workArrangement}
+              />
               <KeyValue label="Compensation" value={project.compensationNote} />
-              <KeyValue label="Recruiter notes" value={project.recruiterNotes} />
+              <KeyValue
+                label="Recruiter notes"
+                value={project.recruiterNotes}
+              />
             </div>
           </Card>
         </div>

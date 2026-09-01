@@ -175,7 +175,11 @@ export function AddQueryForm({ searchProjectId }: { searchProjectId: string }) {
         <button type="submit" disabled={pending} className={buttonClass}>
           {pending ? "Adding…" : "Add query"}
         </button>
-        <button type="button" className={subtleButtonClass} onClick={() => setOpen(false)}>
+        <button
+          type="button"
+          className={subtleButtonClass}
+          onClick={() => setOpen(false)}
+        >
           Cancel
         </button>
       </div>

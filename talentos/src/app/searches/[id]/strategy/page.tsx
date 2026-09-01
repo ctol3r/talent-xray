@@ -45,7 +45,9 @@ export default async function StrategyPage({
               ownerId={id}
               payload={payload}
             />
-            <p className="text-[13.5px] leading-6">{payload.primaryTargetProfile}</p>
+            <p className="text-[13.5px] leading-6">
+              {payload.primaryTargetProfile}
+            </p>
           </Card>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card title="Secondary profiles">
@@ -63,7 +65,9 @@ export default async function StrategyPage({
                     className="rounded border border-edge bg-panel2/50 px-3 py-2"
                   >
                     <p className="text-[13px] font-medium">{adjacent.text}</p>
-                    <p className="text-[12.5px] text-ink-muted">{adjacent.rationale}</p>
+                    <p className="text-[12.5px] text-ink-muted">
+                      {adjacent.rationale}
+                    </p>
                   </li>
                 ))}
               </ul>
@@ -72,16 +76,33 @@ export default async function StrategyPage({
           <Card title="Targeting">
             <div className="space-y-4">
               <StringList title="Target titles" items={payload.targetTitles} />
-              <StringList title="Excluded titles" items={payload.excludedTitles} />
-              <StringList title="Target companies" items={payload.targetCompanies} />
-              <StringList title="Feeder companies" items={payload.feederCompanies} />
-              <StringList title="Target industries" items={payload.targetIndustries} />
-              <StringList title="Target geographies" items={payload.targetGeographies} />
+              <StringList
+                title="Excluded titles"
+                items={payload.excludedTitles}
+              />
+              <StringList
+                title="Target companies"
+                items={payload.targetCompanies}
+              />
+              <StringList
+                title="Feeder companies"
+                items={payload.feederCompanies}
+              />
+              <StringList
+                title="Target industries"
+                items={payload.targetIndustries}
+              />
+              <StringList
+                title="Target geographies"
+                items={payload.targetGeographies}
+              />
             </div>
           </Card>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card title="Why this strategy">
-              <p className="text-[13px] leading-6 text-ink-muted">{payload.rationale}</p>
+              <p className="text-[13px] leading-6 text-ink-muted">
+                {payload.rationale}
+              </p>
             </Card>
             <Card title="Where it could fail">
               <ul className="list-disc space-y-1 pl-5 text-[13px] text-ink-muted">

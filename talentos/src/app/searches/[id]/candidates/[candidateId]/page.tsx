@@ -26,13 +26,14 @@ import { MessageStatusSelect } from "@/components/outreach-controls";
 import { Card, PageHeader, Tag } from "@/components/ui";
 import type { EvidenceStatus } from "@/lib/core/enums";
 
-const EVIDENCE_TONE: Record<EvidenceStatus, "ok" | "warn" | "neutral" | "bad"> = {
-  strong: "ok",
-  partial: "warn",
-  missing: "neutral",
-  contradictory: "bad",
-  unknown: "neutral",
-};
+const EVIDENCE_TONE: Record<EvidenceStatus, "ok" | "warn" | "neutral" | "bad"> =
+  {
+    strong: "ok",
+    partial: "warn",
+    missing: "neutral",
+    contradictory: "bad",
+    unknown: "neutral",
+  };
 
 export default async function CandidatePage({
   params,
@@ -61,7 +62,11 @@ export default async function CandidatePage({
       <PageHeader
         title={candidate.name}
         description={
-          [candidate.currentTitle, candidate.currentCompany, candidate.geography]
+          [
+            candidate.currentTitle,
+            candidate.currentCompany,
+            candidate.geography,
+          ]
             .filter(Boolean)
             .join(" · ") || undefined
         }
@@ -107,7 +112,10 @@ export default async function CandidatePage({
                 <div className="rounded border border-accent/30 bg-accent-soft/40 px-3 py-2">
                   <div className="flex items-center gap-2">
                     <Tag tone="accent">
-                      {evidence.payload.reviewPriority.suggestion.replaceAll("_", " ")}
+                      {evidence.payload.reviewPriority.suggestion.replaceAll(
+                        "_",
+                        " ",
+                      )}
                     </Tag>
                     <span className="text-[11.5px] text-ink-faint">
                       advisory review priority — you decide
@@ -174,7 +182,9 @@ export default async function CandidatePage({
               <GenerateButton
                 action={generateOutreachAction}
                 input={{ candidateId }}
-                label={sequence ? "Regenerate sequence" : "Draft outreach sequence"}
+                label={
+                  sequence ? "Regenerate sequence" : "Draft outreach sequence"
+                }
                 regenerate={Boolean(sequence)}
               />
             </div>
@@ -199,7 +209,8 @@ export default async function CandidatePage({
                     >
                       <summary className="flex cursor-pointer items-center justify-between gap-2">
                         <span className="text-[13px] font-medium">
-                          {step.kind.replaceAll("_", " ")} · day {step.dayOffset}
+                          {step.kind.replaceAll("_", " ")} · day{" "}
+                          {step.dayOffset}
                         </span>
                         {message && (
                           <MessageStatusSelect
@@ -228,7 +239,8 @@ export default async function CandidatePage({
                           <ul className="mt-1 space-y-0.5 text-[12px] text-ink-faint">
                             {step.citations.map((citation, i) => (
                               <li key={i}>
-                                “{citation.personalization}” ← {citation.evidence}
+                                “{citation.personalization}” ←{" "}
+                                {citation.evidence}
                               </li>
                             ))}
                           </ul>
@@ -260,7 +272,9 @@ export default async function CandidatePage({
           </Card>
           <Card title="Sources">
             {sources.length === 0 ? (
-              <p className="text-[13px] text-ink-muted">No profile URLs saved.</p>
+              <p className="text-[13px] text-ink-muted">
+                No profile URLs saved.
+              </p>
             ) : (
               <ul className="space-y-1">
                 {sources.map((source) => (
@@ -282,16 +296,25 @@ export default async function CandidatePage({
             </p>
           </Card>
           <Card title="Recruiter notes">
-            <NotesForm candidateId={candidateId} notes={candidate.recruiterNotes} />
+            <NotesForm
+              candidateId={candidateId}
+              notes={candidate.recruiterNotes}
+            />
           </Card>
           <Card title="Close & onboarding">
             <p className="text-[13px] text-ink-muted">
               Offer, close plan, and onboarding live in the{" "}
-              <Link href={`/searches/${id}/close`} className="text-accent hover:underline">
+              <Link
+                href={`/searches/${id}/close`}
+                className="text-accent hover:underline"
+              >
                 Close module
               </Link>
               . Interview scorecards live in{" "}
-              <Link href={`/searches/${id}/interviews`} className="text-accent hover:underline">
+              <Link
+                href={`/searches/${id}/interviews`}
+                className="text-accent hover:underline"
+              >
                 Interviews
               </Link>
               .

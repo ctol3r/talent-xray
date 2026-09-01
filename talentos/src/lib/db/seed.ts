@@ -126,8 +126,7 @@ The ideal candidate has served as CFO or deputy CFO of a technology company thro
     industry: "Healthcare",
     seniority: "Band 5/6",
     employmentType: "Permanent, full-time, rotating shifts",
-    businessObjective:
-      "Staff a 12-bed ICU expansion opening in the spring.",
+    businessObjective: "Staff a 12-bed ICU expansion opening in the spring.",
     jd: `St Pancras University Hospital NHS Trust is recruiting Registered Nurses for our expanding Adult Intensive Care Unit in central London (Band 5, with Band 6 opportunities for experienced ICU nurses).
 
 You will deliver level 2 and level 3 critical care: ventilated patients, renal replacement therapy, vasoactive infusions, and post-operative management, working 12.5-hour rotating shifts including nights and weekends.

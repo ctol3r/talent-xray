@@ -49,7 +49,12 @@ interface RunOptions {
 }
 
 function contextHash(system: string, user: string): string {
-  return createHash("sha256").update(system).update("\n").update(user).digest("hex").slice(0, 16);
+  return createHash("sha256")
+    .update(system)
+    .update("\n")
+    .update(user)
+    .digest("hex")
+    .slice(0, 16);
 }
 
 /**

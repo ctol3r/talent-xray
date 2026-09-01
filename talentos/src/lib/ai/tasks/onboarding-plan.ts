@@ -20,7 +20,8 @@ export const onboardingPlanTask = defineAiTask<
   task: "onboarding_plan",
   schemaName: "OnboardingPlan",
   schema: onboardingPlanPayloadSchema,
-  system: () => `${systemPrelude("a recruiting-operations partner planning onboarding")}
+  system:
+    () => `${systemPrelude("a recruiting-operations partner planning onboarding")}
 
 The offer is accepted. Build the plan that gets this person to a strong start:
 - checklist: preboarding items with owner (recruiter / manager / candidate / HR-ops) and dueOffsetDays relative to start date (negative = before day 1). Adapt to this role's realities (licensing/credentialing for clinicians, ITAR/equipment for manufacturing, board logistics for executives, equipment/access for knowledge workers).
@@ -31,26 +32,46 @@ Keep every item concrete and assignable.`,
   user: (ctx) => `${renderProjectContext(ctx.project)}
 ## New hire
 ${JSON.stringify(
-    {
-      name: ctx.candidate.name,
-      role: ctx.project.project.roleTitle,
-      startDate: ctx.startDate ?? "not set",
-    },
-    null,
-    1,
-  )}
+  {
+    name: ctx.candidate.name,
+    role: ctx.project.project.roleTitle,
+    startDate: ctx.startDate ?? "not set",
+  },
+  null,
+  1,
+)}
 ## Task
 Build the onboarding plan now.`,
   mock: (ctx) => ({
     checklist: [
-      { label: `[Mock] Confirm written acceptance from ${ctx.candidate.name}`, owner: "recruiter", dueOffsetDays: -14, done: false },
-      { label: "[Mock] Background/reference checks complete", owner: "HR-ops", dueOffsetDays: -10, done: false },
-      { label: "[Mock] Equipment and access ordered", owner: "manager", dueOffsetDays: -7, done: false },
+      {
+        label: `[Mock] Confirm written acceptance from ${ctx.candidate.name}`,
+        owner: "recruiter",
+        dueOffsetDays: -14,
+        done: false,
+      },
+      {
+        label: "[Mock] Background/reference checks complete",
+        owner: "HR-ops",
+        dueOffsetDays: -10,
+        done: false,
+      },
+      {
+        label: "[Mock] Equipment and access ordered",
+        owner: "manager",
+        dueOffsetDays: -7,
+        done: false,
+      },
     ],
-    recruiterHandoff: ["[Mock] Share close-plan notes (motivations, concerns) with the manager"],
+    recruiterHandoff: [
+      "[Mock] Share close-plan notes (motivations, concerns) with the manager",
+    ],
     managerHandoff: ["[Mock] 30/60/90 expectations drafted before day 1"],
     communicationSchedule: [
-      { day: "Acceptance + 2", touchpoint: "[Mock] Congratulations call; confirm resignation plan" },
+      {
+        day: "Acceptance + 2",
+        touchpoint: "[Mock] Congratulations call; confirm resignation plan",
+      },
       { day: "Start − 7", touchpoint: "[Mock] Logistics check-in" },
       { day: "Day 1", touchpoint: "[Mock] First-day check-in" },
     ],

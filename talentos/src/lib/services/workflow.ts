@@ -68,7 +68,8 @@ export async function getIntakeProgress(db: Db, projectId: string) {
   const questions = session.payload.categories.flatMap((c) => c.questions);
   return {
     total: questions.length,
-    answered: questions.filter((q) => q.answer && q.answer.trim() !== "").length,
+    answered: questions.filter((q) => q.answer && q.answer.trim() !== "")
+      .length,
   };
 }
 
@@ -162,7 +163,13 @@ export async function listCandidateScorecards(db: Db, candidateId: string) {
 export const upsertOfferInput = z.object({
   searchProjectId: z.string(),
   candidateId: z.string(),
-  status: z.enum(["preparing", "extended", "accepted", "declined", "withdrawn"]),
+  status: z.enum([
+    "preparing",
+    "extended",
+    "accepted",
+    "declined",
+    "withdrawn",
+  ]),
   compensationNote: z.string().optional(),
 });
 
@@ -184,7 +191,7 @@ export async function upsertOffer(
     .where(eq(offers.candidateId, input.candidateId));
   const timestamps = {
     extendedAt:
-      input.status === "extended" ? now : existing?.extendedAt ?? undefined,
+      input.status === "extended" ? now : (existing?.extendedAt ?? undefined),
     resolvedAt: ["accepted", "declined", "withdrawn"].includes(input.status)
       ? now
       : undefined,
@@ -336,7 +343,11 @@ export async function updateChannel(
       ...fields,
       // A human verifying a channel upgrades its certainty honestly.
       ...(input.status === "verified"
-        ? { certainty: "verified" as const, verifiedAt: now, provenance: "recruiter" as const }
+        ? {
+            certainty: "verified" as const,
+            verifiedAt: now,
+            provenance: "recruiter" as const,
+          }
         : {}),
       updatedAt: now,
     })
@@ -361,7 +372,10 @@ export const createTaskInput = z.object({
   dueAt: z.string().optional(),
 });
 
-export async function createTask(db: Db, input: z.infer<typeof createTaskInput>) {
+export async function createTask(
+  db: Db,
+  input: z.infer<typeof createTaskInput>,
+) {
   const [task] = await db.insert(tasks).values(input).returning();
   return task;
 }

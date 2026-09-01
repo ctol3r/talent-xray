@@ -49,7 +49,9 @@ export default async function ScreenPage({
               <div className="space-y-5">
                 {section.questions.map((question) => (
                   <div key={question.id}>
-                    <p className="text-[13.5px] font-medium">{question.question}</p>
+                    <p className="text-[13.5px] font-medium">
+                      {question.question}
+                    </p>
                     <p className="mt-0.5 text-[12px] text-ink-faint">
                       Why: {question.why}
                     </p>
@@ -81,7 +83,10 @@ export default async function ScreenPage({
                       </p>
                     )}
                     <div className="mt-2">
-                      <StringList title="Follow-up probes" items={question.followUps} />
+                      <StringList
+                        title="Follow-up probes"
+                        items={question.followUps}
+                      />
                     </div>
                   </div>
                 ))}

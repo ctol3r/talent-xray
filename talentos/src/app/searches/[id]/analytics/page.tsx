@@ -83,7 +83,9 @@ export default async function AnalyticsPage({
         <Card title="Funnel — candidates who ever reached each stage">
           <div className="space-y-1.5">
             {funnel
-              .filter((f) => !["closed", "archived", "onboarding"].includes(f.key))
+              .filter(
+                (f) => !["closed", "archived", "onboarding"].includes(f.key),
+              )
               .map((stage) => (
                 <div key={stage.key} className="flex items-center gap-3">
                   <span className="w-44 shrink-0 text-[12.5px] text-ink-muted">
@@ -92,7 +94,9 @@ export default async function AnalyticsPage({
                   <div className="h-4 flex-1 rounded-sm bg-panel2">
                     <div
                       className="h-4 rounded-sm bg-accent/70"
-                      style={{ width: `${(stage.reached / maxReached) * 100}%` }}
+                      style={{
+                        width: `${(stage.reached / maxReached) * 100}%`,
+                      }}
                     />
                   </div>
                   <span className="w-8 shrink-0 text-right text-[13px] font-medium">
@@ -195,7 +199,8 @@ export default async function AnalyticsPage({
           {diagnosis.insufficientData.length > 0 && (
             <div className="mt-3 border-t border-edge pt-2">
               <p className="text-[12px] text-ink-faint">
-                Withheld for small samples: {diagnosis.insufficientData.join(" ")}
+                Withheld for small samples:{" "}
+                {diagnosis.insufficientData.join(" ")}
               </p>
             </div>
           )}

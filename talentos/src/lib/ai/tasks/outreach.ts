@@ -16,7 +16,10 @@ export interface OutreachContext {
   recruiterTone?: string;
 }
 
-export const outreachTask = defineAiTask<OutreachContext, OutreachSequencePayload>({
+export const outreachTask = defineAiTask<
+  OutreachContext,
+  OutreachSequencePayload
+>({
   task: "outreach_generation",
   schemaName: "OutreachSequence",
   schema: outreachSequencePayloadSchema,
@@ -34,16 +37,16 @@ Non-negotiables:
   user: (ctx) => `${renderProjectContext(ctx.project)}
 ## Candidate
 ${JSON.stringify(
-    {
-      name: ctx.candidate.name,
-      currentTitle: ctx.candidate.currentTitle,
-      currentCompany: ctx.candidate.currentCompany,
-      geography: ctx.candidate.geography,
-      notes: ctx.candidate.recruiterNotes,
-    },
-    null,
-    1,
-  )}
+  {
+    name: ctx.candidate.name,
+    currentTitle: ctx.candidate.currentTitle,
+    currentCompany: ctx.candidate.currentCompany,
+    geography: ctx.candidate.geography,
+    notes: ctx.candidate.recruiterNotes,
+  },
+  null,
+  1,
+)}
 ## Evidence available for personalization
 ${ctx.evidence ? JSON.stringify(ctx.evidence.items, null, 1) : "None recorded — do not fabricate any."}
 ${ctx.recruiterTone ? `## Recruiter tone preference\n${ctx.recruiterTone}` : ""}
@@ -72,19 +75,31 @@ Draft the complete outreach sequence for this candidate now.`,
       kind,
       dayOffset,
       subjectVariants:
-        kind.startsWith("email") || kind.startsWith("follow") || kind === "breakup"
-          ? [`[Mock] ${ctx.project.project.roleTitle} — ${ctx.project.project.companyName ?? "opportunity"}`]
+        kind.startsWith("email") ||
+        kind.startsWith("follow") ||
+        kind === "breakup"
+          ? [
+              `[Mock] ${ctx.project.project.roleTitle} — ${ctx.project.project.companyName ?? "opportunity"}`,
+            ]
           : [],
       body,
       citations: cite,
     });
     return {
       steps: [
-        step("email_1", 0, `[Mock] Hi ${ctx.candidate.name.split(" ")[0]} — outreach draft grounded in ${occ.profession} evidence.`),
+        step(
+          "email_1",
+          0,
+          `[Mock] Hi ${ctx.candidate.name.split(" ")[0]} — outreach draft grounded in ${occ.profession} evidence.`,
+        ),
         step("follow_up_1", 3, "[Mock] Follow-up 1."),
         step("follow_up_2", 7, "[Mock] Follow-up 2."),
         step("follow_up_3", 12, "[Mock] Follow-up 3."),
-        step("breakup", 20, "[Mock] Closing the loop — happy to reconnect later; say the word and I won't follow up again."),
+        step(
+          "breakup",
+          20,
+          "[Mock] Closing the loop — happy to reconnect later; say the word and I won't follow up again.",
+        ),
         step("linkedin_connect", 0, "[Mock] Short connection note."),
         step("inmail", 1, "[Mock] InMail draft."),
       ],

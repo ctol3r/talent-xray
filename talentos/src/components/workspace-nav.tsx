@@ -26,7 +26,10 @@ export function WorkspaceNav({ projectId }: { projectId: string }) {
   const pathname = usePathname();
   const base = `/searches/${projectId}`;
   return (
-    <nav className="mb-5 flex flex-wrap gap-0.5 border-b border-edge pb-0">
+    <nav
+      data-testid="workspace-nav"
+      className="mb-5 flex flex-wrap gap-0.5 border-b border-edge pb-0"
+    >
       {MODULES.map((module) => {
         const href = `${base}${module.path}`;
         const active = module.exact

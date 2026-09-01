@@ -129,7 +129,10 @@ export default async function CandidatesPage({
                       {candidate.nextAction ?? "—"}
                       {candidate.nextActionDue && (
                         <span className="block text-[11.5px] text-ink-faint">
-                          due {new Date(candidate.nextActionDue).toLocaleDateString()}
+                          due{" "}
+                          {new Date(
+                            candidate.nextActionDue,
+                          ).toLocaleDateString()}
                         </span>
                       )}
                     </td>

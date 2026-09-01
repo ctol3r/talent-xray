@@ -20,7 +20,9 @@ export function PageHeader({
           </p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex shrink-0 items-center gap-2">{actions}</div>
+      )}
     </div>
   );
 }
@@ -58,8 +60,14 @@ export function EmptyState({
   return (
     <div className="rounded-lg border border-dashed border-edge2 bg-panel/50 px-6 py-10 text-center">
       <p className="text-sm font-medium text-ink">{title}</p>
-      {detail && <p className="mx-auto mt-1 max-w-md text-[13px] text-ink-muted">{detail}</p>}
-      {children && <div className="mt-4 flex justify-center gap-2">{children}</div>}
+      {detail && (
+        <p className="mx-auto mt-1 max-w-md text-[13px] text-ink-muted">
+          {detail}
+        </p>
+      )}
+      {children && (
+        <div className="mt-4 flex justify-center gap-2">{children}</div>
+      )}
     </div>
   );
 }
@@ -125,7 +133,13 @@ export function MockBadge() {
   );
 }
 
-export function KeyValue({ label, value }: { label: string; value: React.ReactNode }) {
+export function KeyValue({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
   if (value === undefined || value === null || value === "") return null;
   return (
     <div className="flex gap-2 text-[13px]">

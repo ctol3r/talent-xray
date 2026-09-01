@@ -7,7 +7,10 @@ import { Card, EmptyState, PageHeader, Tag } from "@/components/ui";
 
 export const metadata = { title: "Search String Lab" };
 
-const BREADTH_TONE: Record<string, "accent" | "neutral" | "warn" | "ok" | "bad"> = {
+const BREADTH_TONE: Record<
+  string,
+  "accent" | "neutral" | "warn" | "ok" | "bad"
+> = {
   narrow: "accent",
   balanced: "ok",
   broad: "warn",
@@ -38,7 +41,9 @@ export default async function StringsPage({
           <GenerateButton
             action={generateSearchStringsAction}
             input={{ searchProjectId: id }}
-            label={queries.length > 0 ? "Regenerate strings" : "Generate strings"}
+            label={
+              queries.length > 0 ? "Regenerate strings" : "Generate strings"
+            }
             regenerate={queries.length > 0}
           />
         }

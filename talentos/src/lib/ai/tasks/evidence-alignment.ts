@@ -21,7 +21,9 @@ function renderCandidate(ctx: EvidenceContext): string {
     c.currentTitle ? `Current title: ${c.currentTitle}` : "",
     c.currentCompany ? `Current company: ${c.currentCompany}` : "",
     c.geography ? `Geography: ${c.geography}` : "",
-    ctx.sourceUrls.length > 0 ? `Profile URLs: ${ctx.sourceUrls.join(", ")}` : "",
+    ctx.sourceUrls.length > 0
+      ? `Profile URLs: ${ctx.sourceUrls.join(", ")}`
+      : "",
     c.recruiterNotes ? `Recruiter notes: ${c.recruiterNotes}` : "",
     c.resumeText ? `Resume / pasted profile text:\n${c.resumeText}` : "",
     `Structured profile: ${JSON.stringify(c.profile)}`,
@@ -37,7 +39,8 @@ export const evidenceAlignmentTask = defineAiTask<
   task: "evidence_alignment",
   schemaName: "EvidenceAlignment",
   schema: evidenceAlignmentPayloadSchema,
-  system: () => `${systemPrelude("a talent researcher performing evidence alignment")}
+  system:
+    () => `${systemPrelude("a talent researcher performing evidence alignment")}
 
 This is recruiter decision support, NOT candidate selection. Compare the candidate's observable, job-related professional evidence against the search's success-profile criteria.
 
@@ -65,7 +68,9 @@ Align this candidate's evidence against the success profile now.`,
         criterion,
         criterionProvenance: "model_inference" as const,
         status:
-          hasResume && index === 0 ? ("partial" as const) : ("unknown" as const),
+          hasResume && index === 0
+            ? ("partial" as const)
+            : ("unknown" as const),
         evidenceText: hasResume
           ? `[Mock] Assessed against pasted material for ${ctx.candidate.name}.`
           : "[Mock] No public evidence provided yet.",

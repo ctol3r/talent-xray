@@ -57,32 +57,73 @@ export default async function ProfilePage({
                 <TracedList title="Preferred" items={payload.preferred} />
                 <TracedList title="Trainable" items={payload.trainable} />
                 <TracedList title="Outcomes" items={payload.outcomes} />
-                <TracedList title="Responsibilities" items={payload.responsibilities} />
+                <TracedList
+                  title="Responsibilities"
+                  items={payload.responsibilities}
+                />
               </div>
             </Card>
             <Card title="Evidence model">
               <div className="space-y-4">
-                <TracedList title="Evidence signals" items={payload.evidenceSignals} />
-                <TracedList title="Negative signals" items={payload.negativeSignals} tone="warn" />
-                <TracedList title="Adjacent backgrounds" items={payload.adjacentBackgrounds} />
-                <TracedList title="Exemplar people" items={payload.exemplarPeople} />
-                <TracedList title="Exemplar companies" items={payload.exemplarCompanies} />
+                <TracedList
+                  title="Evidence signals"
+                  items={payload.evidenceSignals}
+                />
+                <TracedList
+                  title="Negative signals"
+                  items={payload.negativeSignals}
+                  tone="warn"
+                />
+                <TracedList
+                  title="Adjacent backgrounds"
+                  items={payload.adjacentBackgrounds}
+                />
+                <TracedList
+                  title="Exemplar people"
+                  items={payload.exemplarPeople}
+                />
+                <TracedList
+                  title="Exemplar companies"
+                  items={payload.exemplarCompanies}
+                />
               </div>
             </Card>
             <Card title="Targeting">
               <div className="space-y-4">
-                <TracedList title="Alternate titles" items={payload.alternateTitles} />
-                <TracedList title="Target industries" items={payload.targetIndustries} />
-                <TracedList title="Target companies" items={payload.targetCompanies} />
-                <TracedList title="Target geographies" items={payload.targetGeographies} />
+                <TracedList
+                  title="Alternate titles"
+                  items={payload.alternateTitles}
+                />
+                <TracedList
+                  title="Target industries"
+                  items={payload.targetIndustries}
+                />
+                <TracedList
+                  title="Target companies"
+                  items={payload.targetCompanies}
+                />
+                <TracedList
+                  title="Target geographies"
+                  items={payload.targetGeographies}
+                />
               </div>
             </Card>
             <Card title="Closing inputs">
               <div className="space-y-4">
-                <TracedList title="Candidate motivators" items={payload.candidateMotivators} />
-                <TracedList title="Selling points" items={payload.sellingPoints} />
+                <TracedList
+                  title="Candidate motivators"
+                  items={payload.candidateMotivators}
+                />
+                <TracedList
+                  title="Selling points"
+                  items={payload.sellingPoints}
+                />
                 <TracedList title="Risks" items={payload.risks} tone="warn" />
-                <TracedList title="Unresolved questions" items={payload.unresolvedQuestions} tone="warn" />
+                <TracedList
+                  title="Unresolved questions"
+                  items={payload.unresolvedQuestions}
+                  tone="warn"
+                />
               </div>
             </Card>
           </div>

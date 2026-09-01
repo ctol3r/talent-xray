@@ -75,7 +75,19 @@ export default async function ClosePage({
                   >
                     {candidate.name}
                   </Link>
-                  {offer && <Tag tone={offer.status === "accepted" ? "ok" : offer.status === "declined" ? "bad" : "warn"}>offer {offer.status}</Tag>}
+                  {offer && (
+                    <Tag
+                      tone={
+                        offer.status === "accepted"
+                          ? "ok"
+                          : offer.status === "declined"
+                            ? "bad"
+                            : "warn"
+                      }
+                    >
+                      offer {offer.status}
+                    </Tag>
+                  )}
                 </span>
               }
             >
@@ -112,25 +124,53 @@ export default async function ClosePage({
                       />
                       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                         <div className="space-y-3">
-                          <StringList title="Motivations" items={closePlan.payload.motivations} />
-                          <StringList title="Concerns" items={closePlan.payload.concerns} />
-                          <StringList title="Decision criteria" items={closePlan.payload.decisionCriteria} />
-                          <StringList title="Competing opportunities" items={closePlan.payload.competingOpportunities} />
-                          <StringList title="Stakeholders" items={closePlan.payload.stakeholders} />
+                          <StringList
+                            title="Motivations"
+                            items={closePlan.payload.motivations}
+                          />
+                          <StringList
+                            title="Concerns"
+                            items={closePlan.payload.concerns}
+                          />
+                          <StringList
+                            title="Decision criteria"
+                            items={closePlan.payload.decisionCriteria}
+                          />
+                          <StringList
+                            title="Competing opportunities"
+                            items={closePlan.payload.competingOpportunities}
+                          />
+                          <StringList
+                            title="Stakeholders"
+                            items={closePlan.payload.stakeholders}
+                          />
                         </div>
                         <div className="space-y-3">
                           <div className="rounded border border-warn/30 bg-warn-soft/40 px-3 py-2">
                             <p className="text-[12.5px] font-medium text-warn">
-                              Risk of decline: {closePlan.payload.riskOfDecline.level}
+                              Risk of decline:{" "}
+                              {closePlan.payload.riskOfDecline.level}
                             </p>
                             <p className="text-[12.5px] text-ink-muted">
                               {closePlan.payload.riskOfDecline.rationale}
                             </p>
                           </div>
-                          <StringList title="Missing information (go get it)" items={closePlan.payload.missingInformation} />
-                          <StringList title="Recommended topics" items={closePlan.payload.recommendedTopics} />
-                          <StringList title="HM involvement" items={closePlan.payload.hmInvolvement} />
-                          <StringList title="Offer-call prep" items={closePlan.payload.offerCallPrep} />
+                          <StringList
+                            title="Missing information (go get it)"
+                            items={closePlan.payload.missingInformation}
+                          />
+                          <StringList
+                            title="Recommended topics"
+                            items={closePlan.payload.recommendedTopics}
+                          />
+                          <StringList
+                            title="HM involvement"
+                            items={closePlan.payload.hmInvolvement}
+                          />
+                          <StringList
+                            title="Offer-call prep"
+                            items={closePlan.payload.offerCallPrep}
+                          />
                         </div>
                       </div>
                       {closePlan.payload.likelyObjections.length > 0 && (
@@ -139,14 +179,21 @@ export default async function ClosePage({
                             Likely objections
                           </h4>
                           <ul className="space-y-1.5">
-                            {closePlan.payload.likelyObjections.map((objection, i) => (
-                              <li key={i} className="rounded border border-edge bg-panel2/50 px-3 py-2 text-[13px]">
-                                <span className="font-medium">{objection.objection}</span>
-                                <span className="block text-[12.5px] text-ink-muted">
-                                  {objection.suggestedResponse}
-                                </span>
-                              </li>
-                            ))}
+                            {closePlan.payload.likelyObjections.map(
+                              (objection, i) => (
+                                <li
+                                  key={i}
+                                  className="rounded border border-edge bg-panel2/50 px-3 py-2 text-[13px]"
+                                >
+                                  <span className="font-medium">
+                                    {objection.objection}
+                                  </span>
+                                  <span className="block text-[12.5px] text-ink-muted">
+                                    {objection.suggestedResponse}
+                                  </span>
+                                </li>
+                              ),
+                            )}
                           </ul>
                         </div>
                       )}
@@ -161,7 +208,11 @@ export default async function ClosePage({
                       <GenerateButton
                         action={generateOnboardingPlanAction}
                         input={{ candidateId: candidate.id }}
-                        label={onboarding ? "Regenerate plan" : "Generate onboarding plan"}
+                        label={
+                          onboarding
+                            ? "Regenerate plan"
+                            : "Generate onboarding plan"
+                        }
                         regenerate={Boolean(onboarding)}
                       />
                     </div>
@@ -180,23 +231,40 @@ export default async function ClosePage({
                           startConfirmed={onboarding.startConfirmed}
                         />
                         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                          <StringList title="Recruiter handoff" items={onboarding.payload.recruiterHandoff} />
-                          <StringList title="Manager handoff" items={onboarding.payload.managerHandoff} />
-                          <StringList title="Day-1 prep" items={onboarding.payload.day1Prep} />
-                          <StringList title="30-day follow-up" items={onboarding.payload.day30FollowUp} />
+                          <StringList
+                            title="Recruiter handoff"
+                            items={onboarding.payload.recruiterHandoff}
+                          />
+                          <StringList
+                            title="Manager handoff"
+                            items={onboarding.payload.managerHandoff}
+                          />
+                          <StringList
+                            title="Day-1 prep"
+                            items={onboarding.payload.day1Prep}
+                          />
+                          <StringList
+                            title="30-day follow-up"
+                            items={onboarding.payload.day30FollowUp}
+                          />
                         </div>
-                        {onboarding.payload.communicationSchedule.length > 0 && (
+                        {onboarding.payload.communicationSchedule.length >
+                          0 && (
                           <div>
                             <h4 className="mb-1.5 text-[11.5px] font-semibold tracking-wider text-ink-faint uppercase">
                               Candidate communication schedule
                             </h4>
                             <ul className="space-y-1 text-[13px]">
-                              {onboarding.payload.communicationSchedule.map((touch, i) => (
-                                <li key={i}>
-                                  <span className="text-ink-faint">{touch.day}: </span>
-                                  {touch.touchpoint}
-                                </li>
-                              ))}
+                              {onboarding.payload.communicationSchedule.map(
+                                (touch, i) => (
+                                  <li key={i}>
+                                    <span className="text-ink-faint">
+                                      {touch.day}:{" "}
+                                    </span>
+                                    {touch.touchpoint}
+                                  </li>
+                                ),
+                              )}
                             </ul>
                           </div>
                         )}

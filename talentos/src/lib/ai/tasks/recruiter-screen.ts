@@ -7,12 +7,16 @@ import { classifyOccupationForMock } from "../mock-knowledge";
 import { systemPrelude } from "../prompts";
 import { defineAiTask } from "../run";
 
-export const recruiterScreenTask = defineAiTask<ProjectContext, ScreenGuidePayload>({
+export const recruiterScreenTask = defineAiTask<
+  ProjectContext,
+  ScreenGuidePayload
+>({
   task: "recruiter_screen",
   schemaName: "ScreenGuide",
   schema: screenGuidePayloadSchema,
   maxTokens: 24000,
-  system: () => `${systemPrelude("an elite recruiter designing a phone-screen guide")}
+  system:
+    () => `${systemPrelude("an elite recruiter designing a phone-screen guide")}
 
 Build the recruiter prescreen for THIS search from the success profile. Sections in interview order: opening, motivation, experience walk-through, functional/technical depth (the differentiating section — derive it from this profession's real evidence bar), outcomes, logistics (location/work arrangement/timing), compensation, candidate questions, close/next steps — adapted to this role.
 
@@ -39,7 +43,9 @@ Generate the recruiter screen guide for this search now.`,
             {
               question: `[Mock] What prompted you to take this call about the ${ctx.project.roleTitle} role?`,
               why: "Separates active interest from courtesy.",
-              strongEvidence: ["[Mock] Specific pull toward the mission or work"],
+              strongEvidence: [
+                "[Mock] Specific pull toward the mission or work",
+              ],
               weakEvidence: ["[Mock] Vague openness to 'hearing about things'"],
               redFlags: [],
               followUps: ["[Mock] What would make you actually move?"],
@@ -51,7 +57,9 @@ Generate the recruiter screen guide for this search now.`,
           questions: occ.domainQuestions.slice(0, 3).map((question) => ({
             question: `[Mock screen] ${question}`,
             why: `Tests the ${occ.profession} evidence bar.`,
-            strongEvidence: occ.evidenceSignals.slice(0, 2).map((s) => `[Mock] ${s}`),
+            strongEvidence: occ.evidenceSignals
+              .slice(0, 2)
+              .map((s) => `[Mock] ${s}`),
             weakEvidence: ["[Mock] Generic claims without specifics"],
             redFlags: ["[Mock] Cannot describe own work concretely"],
             followUps: ["[Mock] Walk me through a concrete example."],

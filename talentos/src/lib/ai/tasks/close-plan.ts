@@ -28,19 +28,19 @@ Hard rules:
   user: (ctx) => `${renderProjectContext(ctx.project)}
 ## Candidate
 ${JSON.stringify(
-    {
-      name: ctx.candidate.name,
-      currentTitle: ctx.candidate.currentTitle,
-      currentCompany: ctx.candidate.currentCompany,
-      geography: ctx.candidate.geography,
-      compensationNote: ctx.candidate.compensationNote,
-      recruiterNotes: ctx.candidate.recruiterNotes,
-      motivations: ctx.candidate.profile.motivations,
-      concerns: ctx.candidate.profile.concerns,
-    },
-    null,
-    1,
-  )}
+  {
+    name: ctx.candidate.name,
+    currentTitle: ctx.candidate.currentTitle,
+    currentCompany: ctx.candidate.currentCompany,
+    geography: ctx.candidate.geography,
+    compensationNote: ctx.candidate.compensationNote,
+    recruiterNotes: ctx.candidate.recruiterNotes,
+    motivations: ctx.candidate.profile.motivations,
+    concerns: ctx.candidate.profile.concerns,
+  },
+  null,
+  1,
+)}
 ${ctx.knownMotivations ? `## Additional close intel\n${ctx.knownMotivations}` : ""}
 ## Task
 Build the close plan for this candidate now.`,
@@ -60,7 +60,8 @@ Build the close plan for this candidate now.`,
     likelyObjections: [
       {
         objection: "[Mock] Compensation vs current package",
-        suggestedResponse: "[Mock] Compare total package honestly; no pressure tactics.",
+        suggestedResponse:
+          "[Mock] Compare total package honestly; no pressure tactics.",
       },
     ],
     missingInformation: [

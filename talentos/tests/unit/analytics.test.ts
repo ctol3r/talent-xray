@@ -16,12 +16,42 @@ const stages: StageRecord[] = [
 ];
 
 const events: StageEventRecord[] = [
-  { candidateId: "a", fromStage: null, toStage: "identified", occurredAt: "2026-08-01T00:00:00Z" },
-  { candidateId: "a", fromStage: "identified", toStage: "contacted", occurredAt: "2026-08-03T00:00:00Z" },
-  { candidateId: "a", fromStage: "contacted", toStage: "recruiter_screen", occurredAt: "2026-08-07T00:00:00Z" },
-  { candidateId: "b", fromStage: null, toStage: "identified", occurredAt: "2026-08-02T00:00:00Z" },
-  { candidateId: "b", fromStage: "identified", toStage: "contacted", occurredAt: "2026-08-04T00:00:00Z" },
-  { candidateId: "c", fromStage: null, toStage: "identified", occurredAt: "2026-08-05T00:00:00Z" },
+  {
+    candidateId: "a",
+    fromStage: null,
+    toStage: "identified",
+    occurredAt: "2026-08-01T00:00:00Z",
+  },
+  {
+    candidateId: "a",
+    fromStage: "identified",
+    toStage: "contacted",
+    occurredAt: "2026-08-03T00:00:00Z",
+  },
+  {
+    candidateId: "a",
+    fromStage: "contacted",
+    toStage: "recruiter_screen",
+    occurredAt: "2026-08-07T00:00:00Z",
+  },
+  {
+    candidateId: "b",
+    fromStage: null,
+    toStage: "identified",
+    occurredAt: "2026-08-02T00:00:00Z",
+  },
+  {
+    candidateId: "b",
+    fromStage: "identified",
+    toStage: "contacted",
+    occurredAt: "2026-08-04T00:00:00Z",
+  },
+  {
+    candidateId: "c",
+    fromStage: null,
+    toStage: "identified",
+    occurredAt: "2026-08-05T00:00:00Z",
+  },
 ];
 
 describe("computeFunnel", () => {
@@ -69,7 +99,9 @@ describe("computeOutreachStats", () => {
     expect(stats.responseRate).toBeCloseTo(1 / 3);
   });
   it("returns null response rate with zero sent", () => {
-    expect(computeOutreachStats([{ status: "drafted" }]).responseRate).toBeNull();
+    expect(
+      computeOutreachStats([{ status: "drafted" }]).responseRate,
+    ).toBeNull();
   });
 });
 

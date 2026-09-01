@@ -36,7 +36,9 @@ export default async function SourcesPage({
           <GenerateButton
             action={generateChannelsAction}
             input={{ searchProjectId: id }}
-            label={channels.length > 0 ? "Discover more channels" : "Map channels"}
+            label={
+              channels.length > 0 ? "Discover more channels" : "Map channels"
+            }
             regenerate={channels.length > 0}
           />
         }
@@ -49,11 +51,16 @@ export default async function SourcesPage({
       ) : (
         <div className="space-y-2.5">
           {sorted.map((channel) => (
-            <Card key={channel.id} className={channel.status === "rejected" ? "opacity-50" : ""}>
+            <Card
+              key={channel.id}
+              className={channel.status === "rejected" ? "opacity-50" : ""}
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[13.5px] font-medium">{channel.name}</span>
+                    <span className="text-[13.5px] font-medium">
+                      {channel.name}
+                    </span>
                     <Tag>{channel.kind.replace("_", " ")}</Tag>
                     <Tag
                       tone={
@@ -67,7 +74,9 @@ export default async function SourcesPage({
                       {channel.priority}
                     </Tag>
                     <CertaintyBadge certainty={channel.certainty} />
-                    <Tag tone={channel.costModel === "paid" ? "warn" : "neutral"}>
+                    <Tag
+                      tone={channel.costModel === "paid" ? "warn" : "neutral"}
+                    >
                       {channel.costModel}
                     </Tag>
                   </div>
@@ -75,7 +84,9 @@ export default async function SourcesPage({
                     {channel.whyRelevant}
                   </p>
                   {channel.note && (
-                    <p className="mt-0.5 text-[12px] text-ink-faint">{channel.note}</p>
+                    <p className="mt-0.5 text-[12px] text-ink-faint">
+                      {channel.note}
+                    </p>
                   )}
                   {channel.url && (
                     <a

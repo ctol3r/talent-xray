@@ -131,7 +131,10 @@ export async function listAllCandidates(db: Db) {
   return db
     .select({ candidate: candidates, projectName: searchProjects.name })
     .from(candidates)
-    .innerJoin(searchProjects, eq(candidates.searchProjectId, searchProjects.id))
+    .innerJoin(
+      searchProjects,
+      eq(candidates.searchProjectId, searchProjects.id),
+    )
     .orderBy(desc(candidates.updatedAt));
 }
 
@@ -213,18 +216,42 @@ export async function deleteCandidate(db: Db, candidateId: string) {
 export async function exportCandidate(db: Db, candidateId: string) {
   const candidate = await getCandidate(db, candidateId);
   if (!candidate) throw new Error("Candidate not found");
-  const [sources, evidence, sequences, messages, cards, candidateOffers, close, onboarding, events] =
-    await Promise.all([
-      getCandidateSources(db, candidateId),
-      db.select().from(candidateEvidence).where(eq(candidateEvidence.candidateId, candidateId)),
-      db.select().from(outreachSequences).where(eq(outreachSequences.candidateId, candidateId)),
-      db.select().from(outreachMessages).where(eq(outreachMessages.candidateId, candidateId)),
-      db.select().from(scorecards).where(eq(scorecards.candidateId, candidateId)),
-      db.select().from(offers).where(eq(offers.candidateId, candidateId)),
-      db.select().from(closePlans).where(eq(closePlans.candidateId, candidateId)),
-      db.select().from(onboardingPlans).where(eq(onboardingPlans.candidateId, candidateId)),
-      db.select().from(pipelineEvents).where(eq(pipelineEvents.candidateId, candidateId)),
-    ]);
+  const [
+    sources,
+    evidence,
+    sequences,
+    messages,
+    cards,
+    candidateOffers,
+    close,
+    onboarding,
+    events,
+  ] = await Promise.all([
+    getCandidateSources(db, candidateId),
+    db
+      .select()
+      .from(candidateEvidence)
+      .where(eq(candidateEvidence.candidateId, candidateId)),
+    db
+      .select()
+      .from(outreachSequences)
+      .where(eq(outreachSequences.candidateId, candidateId)),
+    db
+      .select()
+      .from(outreachMessages)
+      .where(eq(outreachMessages.candidateId, candidateId)),
+    db.select().from(scorecards).where(eq(scorecards.candidateId, candidateId)),
+    db.select().from(offers).where(eq(offers.candidateId, candidateId)),
+    db.select().from(closePlans).where(eq(closePlans.candidateId, candidateId)),
+    db
+      .select()
+      .from(onboardingPlans)
+      .where(eq(onboardingPlans.candidateId, candidateId)),
+    db
+      .select()
+      .from(pipelineEvents)
+      .where(eq(pipelineEvents.candidateId, candidateId)),
+  ]);
   return {
     exportedAt: new Date().toISOString(),
     candidate,

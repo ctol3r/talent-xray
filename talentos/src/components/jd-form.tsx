@@ -52,7 +52,9 @@ export function JdForm({
       }}
       className="space-y-2"
     >
-      <FieldLabel>Paste the job description (or a manual role brief)</FieldLabel>
+      <FieldLabel>
+        Paste the job description (or a manual role brief)
+      </FieldLabel>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -63,7 +65,11 @@ export function JdForm({
         name="jd"
       />
       <ErrorNote error={error} />
-      <button type="submit" disabled={pending || text.trim() === ""} className={buttonClass}>
+      <button
+        type="submit"
+        disabled={pending || text.trim() === ""}
+        className={buttonClass}
+      >
         {pending ? "Saving…" : "Save job description"}
       </button>
     </form>

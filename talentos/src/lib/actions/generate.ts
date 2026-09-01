@@ -45,7 +45,10 @@ export async function generateRoleIntelligenceAction(
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { warnings } = await generateRoleIntelligence(getDb(), searchProjectId);
+    const { warnings } = await generateRoleIntelligence(
+      getDb(),
+      searchProjectId,
+    );
     revalidateProject(searchProjectId);
     return { warnings };
   });
@@ -78,7 +81,10 @@ export async function generateMarketIntelligenceAction(
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { warnings } = await generateMarketIntelligence(getDb(), searchProjectId);
+    const { warnings } = await generateMarketIntelligence(
+      getDb(),
+      searchProjectId,
+    );
     revalidateProject(searchProjectId);
     return { warnings };
   });
@@ -89,7 +95,10 @@ export async function generateSourcingStrategyAction(
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { warnings } = await generateSourcingStrategy(getDb(), searchProjectId);
+    const { warnings } = await generateSourcingStrategy(
+      getDb(),
+      searchProjectId,
+    );
     revalidateProject(searchProjectId);
     return { warnings };
   });
@@ -100,9 +109,15 @@ export async function generateChannelsAction(
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { added, warnings } = await generateChannels(getDb(), searchProjectId);
+    const { added, warnings } = await generateChannels(
+      getDb(),
+      searchProjectId,
+    );
     revalidateProject(searchProjectId);
-    return { warnings, note: `${added} new channel${added === 1 ? "" : "s"} added` };
+    return {
+      warnings,
+      note: `${added} new channel${added === 1 ? "" : "s"} added`,
+    };
   });
 }
 
@@ -111,9 +126,15 @@ export async function generateSearchStringsAction(
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { added, warnings } = await generateSearchStrings(getDb(), searchProjectId);
+    const { added, warnings } = await generateSearchStrings(
+      getDb(),
+      searchProjectId,
+    );
     revalidateProject(searchProjectId);
-    return { warnings, note: `${added} quer${added === 1 ? "y" : "ies"} added` };
+    return {
+      warnings,
+      note: `${added} quer${added === 1 ? "y" : "ies"} added`,
+    };
   });
 }
 
@@ -194,8 +215,14 @@ export async function synthesizeLearningsAction(
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { added, summary } = await synthesizeLearnings(getDb(), searchProjectId);
+    const { added, summary } = await synthesizeLearnings(
+      getDb(),
+      searchProjectId,
+    );
     revalidateProject(searchProjectId);
-    return { warnings: [], note: `${added} learning${added === 1 ? "" : "s"} synthesized. ${summary}` };
+    return {
+      warnings: [],
+      note: `${added} learning${added === 1 ? "" : "s"} synthesized. ${summary}`,
+    };
   });
 }

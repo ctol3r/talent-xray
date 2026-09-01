@@ -110,7 +110,9 @@ export default async function DashboardPage() {
                 </Tag>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-ink-muted">Candidates awaiting review</span>
+                <span className="text-ink-muted">
+                  Candidates awaiting review
+                </span>
                 <Tag tone={candidatesNeedingReview > 0 ? "warn" : "neutral"}>
                   {candidatesNeedingReview}
                 </Tag>
@@ -148,7 +150,10 @@ export default async function DashboardPage() {
             ) : (
               <ul className="space-y-1 text-[13px]">
                 {openTasks.slice(0, 8).map((task) => (
-                  <li key={task.id} className="flex items-center justify-between gap-2">
+                  <li
+                    key={task.id}
+                    className="flex items-center justify-between gap-2"
+                  >
                     <span className="truncate">{task.title}</span>
                     {task.dueAt && (
                       <span className="shrink-0 text-[11.5px] text-ink-faint">

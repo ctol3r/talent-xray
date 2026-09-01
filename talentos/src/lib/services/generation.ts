@@ -54,10 +54,14 @@ async function requireCandidate(db: Db, candidateId: string) {
 
 export async function generateRoleIntelligence(db: Db, projectId: string) {
   const ctx = await loadProjectContext(db, projectId);
-  const { output, meta, warnings } = await runAiTask(roleIntelligenceTask, ctx, {
-    db,
-    searchProjectId: projectId,
-  });
+  const { output, meta, warnings } = await runAiTask(
+    roleIntelligenceTask,
+    ctx,
+    {
+      db,
+      searchProjectId: projectId,
+    },
+  );
   await db
     .insert(roleIntelligence)
     .values({ searchProjectId: projectId, payload: output, meta })
@@ -116,10 +120,14 @@ export async function generateMarketIntelligence(db: Db, projectId: string) {
 
 export async function generateSourcingStrategy(db: Db, projectId: string) {
   const ctx = await loadProjectContext(db, projectId);
-  const { output, meta, warnings } = await runAiTask(sourcingStrategyTask, ctx, {
-    db,
-    searchProjectId: projectId,
-  });
+  const { output, meta, warnings } = await runAiTask(
+    sourcingStrategyTask,
+    ctx,
+    {
+      db,
+      searchProjectId: projectId,
+    },
+  );
   await db
     .insert(sourcingStrategies)
     .values({ searchProjectId: projectId, payload: output, meta })
@@ -165,7 +173,11 @@ export async function generateChannels(db: Db, projectId: string) {
       })),
     );
   }
-  return { added: fresh.length, reasoningSummary: output.reasoningSummary, warnings };
+  return {
+    added: fresh.length,
+    reasoningSummary: output.reasoningSummary,
+    warnings,
+  };
 }
 
 /**
@@ -380,7 +392,9 @@ export async function synthesizeLearnings(db: Db, projectId: string) {
     .from(searchLearnings)
     .where(eq(searchLearnings.searchProjectId, projectId))
     .orderBy(desc(searchLearnings.createdAt));
-  const recruiterEntered = raw.filter((l) => l.provenance !== "model_inference");
+  const recruiterEntered = raw.filter(
+    (l) => l.provenance !== "model_inference",
+  );
   if (recruiterEntered.length === 0) {
     return { added: 0, summary: "No recorded outcomes to synthesize yet." };
   }
@@ -401,7 +415,9 @@ export async function synthesizeLearnings(db: Db, projectId: string) {
       output.learnings.map((l) => ({
         searchProjectId: projectId,
         kind: l.kind,
-        text: l.smallSampleWarning ? `${l.text} (small sample — treat as a hypothesis)` : l.text,
+        text: l.smallSampleWarning
+          ? `${l.text} (small sample — treat as a hypothesis)`
+          : l.text,
         sampleSize: l.sampleSize,
         provenance: "model_inference" as const,
       })),

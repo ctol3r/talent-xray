@@ -37,30 +37,30 @@ workspace and share its context.
 
 ## Search workspace modules
 
-| #   | Module            | Route          | Phase 1 scope                                                                                                     |
-| --- | ----------------- | -------------- | ----------------------------------------------------------------------------------------------------------------- |
-| 01  | Overview          | `/searches/id` | Status, role hypothesis, next best actions, health                                                                 |
-| 02  | Role Intelligence | `…/role`       | JD paste/type → extraction into hard req / preference / signal / assumption / open question; editable; hypothesis  |
-| 03  | HM Intake         | `…/intake`     | Role-adaptive intake interview generation; answer capture; "recruiter playback" summary + "what did I get wrong?"  |
-| 04  | Success Profile   | `…/profile`    | Structured profile compiled from intake + role intel, per-criterion provenance, editable                           |
-| 05  | Market Intel      | `…/market`     | Synthesis with mandatory certainty labels; "reliable exact data unavailable" honesty; Phase 2 adds live research   |
-| 06  | Sourcing Strategy | `…/strategy`   | Search strategy brief: target/adjacent profiles, titles, companies, geos, ranked with rationale                    |
-| 07  | Source Channels   | `…/sources`    | Profession-specific channel discovery, priority-ranked (high/medium/experimental) with reasons                     |
-| 08  | Search Strings    | `…/strings`    | Deterministic boolean/x-ray composer + AI synonym/title expansion; narrow/balanced/broad/adjacent variants; all editable |
-| 09  | Candidates        | `…/candidates` | Candidate records (manual add + paste import), sources, profile URLs, notes                                        |
-| 10  | Evidence          | `…/candidates/[cid]` | Per-criterion alignment: strong/partial/missing/contradictory/unknown + advisory review priority             |
-| 11  | Review queue      | `…/candidates` | "Candidates to review first based on currently available job-related evidence"                                     |
-| 12  | Outreach          | `…/outreach`   | Personalized sequences (email 1 → breakup, LinkedIn), evidence-cited personalization, cadence, tracking            |
-| 13  | Recruiter Screen  | `…/screen`     | Screen guide from success profile: question + why + strong/weak evidence + follow-ups                              |
-| 14  | Interview Plan    | `…/interviews` | Stage architecture per profession; purpose/competencies/questions/rubric per stage; anti-duplication               |
-| 15  | Scorecards        | `…/interviews` | Structured evidence capture; rating requires written evidence; observation ≠ interpretation ≠ rating               |
-| 16  | Pipeline          | `…/pipeline`   | Kanban + table, customizable stages, event log                                                                     |
-| 17  | Next Best Action  | dashboard + overview | Deterministic rules over live state ("4 follow-ups due", "intake has 3 unresolved requirements")             |
-| 18  | Analytics         | `…/analytics`  | Funnel counts + conversion rates + time-in-stage from pipeline events                                              |
-| 19  | Diagnosis         | `…/analytics`  | Rule-based failure-mode analysis with suggested experiments                                                        |
-| 20  | Close / Offer     | `…/close`      | Motivations, competing offers, concerns, ClosePlan, offer-call prep; no manipulation/deceptive tactics             |
-| 21  | Onboarding        | `…/close`      | Post-accept checklist, handoffs, comms schedule, start confirmation                                                |
-| 22  | Search Learnings  | `…/learnings`  | Outcome capture → generalized learnings, with small-sample warnings                                                |
+| #   | Module            | Route                | Phase 1 scope                                                                                                            |
+| --- | ----------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 01  | Overview          | `/searches/id`       | Status, role hypothesis, next best actions, health                                                                       |
+| 02  | Role Intelligence | `…/role`             | JD paste/type → extraction into hard req / preference / signal / assumption / open question; editable; hypothesis        |
+| 03  | HM Intake         | `…/intake`           | Role-adaptive intake interview generation; answer capture; "recruiter playback" summary + "what did I get wrong?"        |
+| 04  | Success Profile   | `…/profile`          | Structured profile compiled from intake + role intel, per-criterion provenance, editable                                 |
+| 05  | Market Intel      | `…/market`           | Synthesis with mandatory certainty labels; "reliable exact data unavailable" honesty; Phase 2 adds live research         |
+| 06  | Sourcing Strategy | `…/strategy`         | Search strategy brief: target/adjacent profiles, titles, companies, geos, ranked with rationale                          |
+| 07  | Source Channels   | `…/sources`          | Profession-specific channel discovery, priority-ranked (high/medium/experimental) with reasons                           |
+| 08  | Search Strings    | `…/strings`          | Deterministic boolean/x-ray composer + AI synonym/title expansion; narrow/balanced/broad/adjacent variants; all editable |
+| 09  | Candidates        | `…/candidates`       | Candidate records (manual add + paste import), sources, profile URLs, notes                                              |
+| 10  | Evidence          | `…/candidates/[cid]` | Per-criterion alignment: strong/partial/missing/contradictory/unknown + advisory review priority                         |
+| 11  | Review queue      | `…/candidates`       | "Candidates to review first based on currently available job-related evidence"                                           |
+| 12  | Outreach          | `…/outreach`         | Personalized sequences (email 1 → breakup, LinkedIn), evidence-cited personalization, cadence, tracking                  |
+| 13  | Recruiter Screen  | `…/screen`           | Screen guide from success profile: question + why + strong/weak evidence + follow-ups                                    |
+| 14  | Interview Plan    | `…/interviews`       | Stage architecture per profession; purpose/competencies/questions/rubric per stage; anti-duplication                     |
+| 15  | Scorecards        | `…/interviews`       | Structured evidence capture; rating requires written evidence; observation ≠ interpretation ≠ rating                     |
+| 16  | Pipeline          | `…/pipeline`         | Kanban + table, customizable stages, event log                                                                           |
+| 17  | Next Best Action  | dashboard + overview | Deterministic rules over live state ("4 follow-ups due", "intake has 3 unresolved requirements")                         |
+| 18  | Analytics         | `…/analytics`        | Funnel counts + conversion rates + time-in-stage from pipeline events                                                    |
+| 19  | Diagnosis         | `…/analytics`        | Rule-based failure-mode analysis with suggested experiments                                                              |
+| 20  | Close / Offer     | `…/close`            | Motivations, competing offers, concerns, ClosePlan, offer-call prep; no manipulation/deceptive tactics                   |
+| 21  | Onboarding        | `…/close`            | Post-accept checklist, handoffs, comms schedule, start confirmation                                                      |
+| 22  | Search Learnings  | `…/learnings`        | Outcome capture → generalized learnings, with small-sample warnings                                                      |
 
 ## Module contracts (what "good" means)
 

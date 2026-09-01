@@ -18,7 +18,11 @@ import {
   useAction,
 } from "./forms";
 
-export function AddCandidateForm({ searchProjectId }: { searchProjectId: string }) {
+export function AddCandidateForm({
+  searchProjectId,
+}: {
+  searchProjectId: string;
+}) {
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState({
     name: "",
@@ -32,7 +36,11 @@ export function AddCandidateForm({ searchProjectId }: { searchProjectId: string 
 
   if (!open) {
     return (
-      <button type="button" className={buttonClass} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={buttonClass}
+        onClick={() => setOpen(true)}
+      >
         Add candidate
       </button>
     );
@@ -83,7 +91,9 @@ export function AddCandidateForm({ searchProjectId }: { searchProjectId: string 
           <FieldLabel>Current title</FieldLabel>
           <input
             value={values.currentTitle}
-            onChange={(e) => setValues((v) => ({ ...v, currentTitle: e.target.value }))}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, currentTitle: e.target.value }))
+            }
             className={inputClass}
           />
         </label>
@@ -91,7 +101,9 @@ export function AddCandidateForm({ searchProjectId }: { searchProjectId: string 
           <FieldLabel>Current company</FieldLabel>
           <input
             value={values.currentCompany}
-            onChange={(e) => setValues((v) => ({ ...v, currentCompany: e.target.value }))}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, currentCompany: e.target.value }))
+            }
             className={inputClass}
           />
         </label>
@@ -99,7 +111,9 @@ export function AddCandidateForm({ searchProjectId }: { searchProjectId: string 
           <FieldLabel>Geography</FieldLabel>
           <input
             value={values.geography}
-            onChange={(e) => setValues((v) => ({ ...v, geography: e.target.value }))}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, geography: e.target.value }))
+            }
             className={inputClass}
           />
         </label>
@@ -107,7 +121,9 @@ export function AddCandidateForm({ searchProjectId }: { searchProjectId: string 
           <FieldLabel>Profile URL</FieldLabel>
           <input
             value={values.profileUrl}
-            onChange={(e) => setValues((v) => ({ ...v, profileUrl: e.target.value }))}
+            onChange={(e) =>
+              setValues((v) => ({ ...v, profileUrl: e.target.value }))
+            }
             placeholder="https://…"
             className={inputClass}
           />
@@ -117,7 +133,9 @@ export function AddCandidateForm({ searchProjectId }: { searchProjectId: string 
         <FieldLabel>Pasted profile / resume text (optional)</FieldLabel>
         <textarea
           value={values.resumeText}
-          onChange={(e) => setValues((v) => ({ ...v, resumeText: e.target.value }))}
+          onChange={(e) =>
+            setValues((v) => ({ ...v, resumeText: e.target.value }))
+          }
           rows={4}
           className={`${inputClass} resize-y`}
           placeholder="Paste public profile text or a resume — this is what evidence alignment reads."
@@ -128,7 +146,11 @@ export function AddCandidateForm({ searchProjectId }: { searchProjectId: string 
         <button type="submit" disabled={pending} className={buttonClass}>
           {pending ? "Adding…" : "Add candidate"}
         </button>
-        <button type="button" className={subtleButtonClass} onClick={() => setOpen(false)}>
+        <button
+          type="button"
+          className={subtleButtonClass}
+          onClick={() => setOpen(false)}
+        >
           Cancel
         </button>
       </div>
@@ -256,7 +278,11 @@ export function NotesForm({
   );
 }
 
-export function CandidateDataControls({ candidateId }: { candidateId: string }) {
+export function CandidateDataControls({
+  candidateId,
+}: {
+  candidateId: string;
+}) {
   const router = useRouter();
   const { pending, error, submit } = useAction();
   const [confirming, setConfirming] = useState(false);

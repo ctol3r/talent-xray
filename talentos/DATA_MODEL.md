@@ -17,14 +17,23 @@ Two storage shapes, chosen per entity:
 ## Shared vocabulary
 
 ```ts
-ProvenanceSource = "jd" | "hiring_manager" | "recruiter" | "market_research"
-                 | "model_inference" | "source_verified"
-Certainty       = "verified" | "estimated" | "inferred" | "unknown"
-EvidenceStatus  = "strong" | "partial" | "missing" | "contradictory" | "unknown"
-RubricLevel     = "insufficient_evidence" | "below_requirement"
-                | "meets_requirement" | "strong_evidence" | "exceptional_evidence"
-Breadth         = "narrow" | "balanced" | "broad" | "adjacent" | "experimental"
-ChannelPriority = "high" | "medium" | "experimental"
+ProvenanceSource =
+  "jd" |
+  "hiring_manager" |
+  "recruiter" |
+  "market_research" |
+  "model_inference" |
+  "source_verified";
+Certainty = "verified" | "estimated" | "inferred" | "unknown";
+EvidenceStatus = "strong" | "partial" | "missing" | "contradictory" | "unknown";
+RubricLevel =
+  "insufficient_evidence" |
+  "below_requirement" |
+  "meets_requirement" |
+  "strong_evidence" |
+  "exceptional_evidence";
+Breadth = "narrow" | "balanced" | "broad" | "adjacent" | "experimental";
+ChannelPriority = "high" | "medium" | "experimental";
 ```
 
 Generated artifacts carry a `meta` column:
@@ -35,69 +44,69 @@ model output (plus a row in `ai_generations`).
 
 ### Identity & context
 
-| Table             | Purpose / notable columns                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------- |
-| `users`           | Single row for the owner (name, email). Exists for schema completeness; no auth in Phase 1.    |
-| `companies`       | Hiring company registry: name, url, industry, notes.                                          |
-| `search_projects` | **The primary object.** name, companyId→companies, roleTitle, geography, country, region, workArrangement, employmentType, industry, seniority, compensationNote, businessObjective, status `open\|on_hold\|closed`, recruiterNotes. |
-| `job_descriptions`| searchProjectId, source `pasted\|uploaded\|manual\|url`, rawText, url.                        |
-| `hiring_managers` | searchProjectId, name, title, email, styleNotes.                                              |
+| Table              | Purpose / notable columns                                                                                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `users`            | Single row for the owner (name, email). Exists for schema completeness; no auth in Phase 1.                                                                                                                                          |
+| `companies`        | Hiring company registry: name, url, industry, notes.                                                                                                                                                                                 |
+| `search_projects`  | **The primary object.** name, companyId→companies, roleTitle, geography, country, region, workArrangement, employmentType, industry, seniority, compensationNote, businessObjective, status `open\|on_hold\|closed`, recruiterNotes. |
+| `job_descriptions` | searchProjectId, source `pasted\|uploaded\|manual\|url`, rawText, url.                                                                                                                                                               |
+| `hiring_managers`  | searchProjectId, name, title, email, styleNotes.                                                                                                                                                                                     |
 
 ### Role understanding (Modules 1–5)
 
-| Table               | Payload (zod-typed JSON)                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Table               | Payload (zod-typed JSON)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `role_intelligence` | canonicalTitle, alternateTitles[], seniority, profession, occupationFamily, industry, function, responsibilities[], businessOutcomes[], technologies[], domainKnowledge[], certifications[], licenses[], education, experienceYears, travel, workArrangement, managementScope, compensation, likelyTalentCompetitors[], **hardRequirements[] / preferences[] / signals[] / assumptions[] / unresolvedQuestions[]** (each item: id, text, provenance), roleHypothesis. One row per search project; every item editable. |
-| `intake_sessions`   | status `draft\|in_progress\|complete`; categories[] `{id, title, rationale, questions[]: {id, question, whyItMatters, answer?, answeredAt?}}`; playback `{target, hardRequirements[], flexibleRequirements[], idealPhenotype, adjacentPhenotypes[], disqualifiers[], unresolvedQuestions[]}` — the "what did I get wrong?" step edits this. |
-| `success_profiles`  | mission, outcomes[], responsibilities[], mustHave[], preferred[], trainable[], evidenceSignals[], negativeSignals[], adjacentBackgrounds[], exemplarPeople[], exemplarCompanies[], targetIndustries[], targetCompanies[], alternateTitles[], targetGeographies[], compensation, candidateMotivators[], sellingPoints[], risks[], unresolvedQuestions[]. Every criterion item: `{id, text, provenance}`. |
-| `role_knowledge`    | Reusable, employer-agnostic occupation knowledge keyed by occupationKey: vocabulary[], commonTitles[], adjacentTitles[], evidenceSignals[], typicalQualifications[], ecosystems[] (where these people exist), notes. **Never stores one employer's preferences as occupational truth** — those live in success_profiles. |
-| `market_research`   | difficulty `{rating: 1–5, rationale}`; sections[] `{id, title, claims[]: {id, text, certainty, sourceUrl?, note?}}`. Schema forces `certainty` on every claim; "reliable exact data unavailable" is a legal value of a claim. |
+| `intake_sessions`   | status `draft\|in_progress\|complete`; categories[] `{id, title, rationale, questions[]: {id, question, whyItMatters, answer?, answeredAt?}}`; playback `{target, hardRequirements[], flexibleRequirements[], idealPhenotype, adjacentPhenotypes[], disqualifiers[], unresolvedQuestions[]}` — the "what did I get wrong?" step edits this.                                                                                                                                                                            |
+| `success_profiles`  | mission, outcomes[], responsibilities[], mustHave[], preferred[], trainable[], evidenceSignals[], negativeSignals[], adjacentBackgrounds[], exemplarPeople[], exemplarCompanies[], targetIndustries[], targetCompanies[], alternateTitles[], targetGeographies[], compensation, candidateMotivators[], sellingPoints[], risks[], unresolvedQuestions[]. Every criterion item: `{id, text, provenance}`.                                                                                                                |
+| `role_knowledge`    | Reusable, employer-agnostic occupation knowledge keyed by occupationKey: vocabulary[], commonTitles[], adjacentTitles[], evidenceSignals[], typicalQualifications[], ecosystems[] (where these people exist), notes. **Never stores one employer's preferences as occupational truth** — those live in success_profiles.                                                                                                                                                                                               |
+| `market_research`   | difficulty `{rating: 1–5, rationale}`; sections[] `{id, title, claims[]: {id, text, certainty, sourceUrl?, note?}}`. Schema forces `certainty` on every claim; "reliable exact data unavailable" is a legal value of a claim.                                                                                                                                                                                                                                                                                          |
 
 ### Sourcing (Modules 5–8)
 
-| Table             | Shape                                                                                                              |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `sourcing_strategies` | primaryTargetProfile, secondaryTargetProfiles[], adjacentPossibilities[], targetTitles[], excludedTitles[], targetCompanies[], feederCompanies[], targetIndustries[], targetGeographies[], rationale. |
-| `source_channels` | First-class rows: name, kind (job_board, community, registry, social, search_engine, conference, university, association, directory, portfolio, open_source, database, alumni, referral, event, other), url?, audience?, whyRelevant, geography?, costModel `free\|paid\|unknown`, priority (high/medium/experimental), certainty, status `suggested\|verified\|rejected`, verifiedAt?, provenance. Model-suggested venues are `inferred` until verified — **no invented boards presented as fact**. |
-| `search_queries`  | platform, query, purpose, breadth, expectedPrecision?, targetPhenotype?, provenance, archived. Always visible, always editable. |
+| Table                 | Shape                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sourcing_strategies` | primaryTargetProfile, secondaryTargetProfiles[], adjacentPossibilities[], targetTitles[], excludedTitles[], targetCompanies[], feederCompanies[], targetIndustries[], targetGeographies[], rationale.                                                                                                                                                                                                                                                                                                |
+| `source_channels`     | First-class rows: name, kind (job_board, community, registry, social, search_engine, conference, university, association, directory, portfolio, open_source, database, alumni, referral, event, other), url?, audience?, whyRelevant, geography?, costModel `free\|paid\|unknown`, priority (high/medium/experimental), certainty, status `suggested\|verified\|rejected`, verifiedAt?, provenance. Model-suggested venues are `inferred` until verified — **no invented boards presented as fact**. |
+| `search_queries`      | platform, query, purpose, breadth, expectedPrecision?, targetPhenotype?, provenance, archived. Always visible, always editable.                                                                                                                                                                                                                                                                                                                                                                      |
 
 ### Candidates (Modules 9–11)
 
-| Table                | Shape                                                                                                            |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Table                | Shape                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `candidates`         | searchProjectId, name, currentTitle, currentCompany, geography, stage (→ pipeline_stages.key), disposition, nextAction?, nextActionDue?, resumeText?, recruiterNotes?, compensationNote?, profile JSON `{experience[], education[], publications[], projects[], skills[], licenses[], certifications[], motivations[], concerns[]}`. **No column, JSON key, or free-text template for protected characteristics** — enforced by test. |
-| `candidate_sources`  | candidateId, url, sourceType, label, addedVia. Links out only; page content is never fetched or stored.            |
-| `candidate_evidence` | Per candidate per search: items[] `{id, criterion, criterionProvenance, status: EvidenceStatus, evidenceText, sourceUrl?}`; reviewPriority `{suggestion, rationale}` — **advisory only**, rendered as "candidates to review first based on currently available job-related evidence"; questionsToValidate[], outreachAngle?. recruiterOverride column records the human call. |
+| `candidate_sources`  | candidateId, url, sourceType, label, addedVia. Links out only; page content is never fetched or stored.                                                                                                                                                                                                                                                                                                                               |
+| `candidate_evidence` | Per candidate per search: items[] `{id, criterion, criterionProvenance, status: EvidenceStatus, evidenceText, sourceUrl?}`; reviewPriority `{suggestion, rationale}` — **advisory only**, rendered as "candidates to review first based on currently available job-related evidence"; questionsToValidate[], outreachAngle?. recruiterOverride column records the human call.                                                         |
 
 ### Engagement (Modules 12–15)
 
-| Table                | Shape                                                                                                            |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Table                | Shape                                                                                                                                                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `outreach_sequences` | candidateId; steps[] `{id, kind (email_1, follow_up_1..3, breakup, linkedin_connect, inmail, linkedin_follow_up, sms, voicemail), dayOffset, subjectVariants[], body, citations[]: {evidenceText, source}}`; cadenceRationale. Personalization must cite evidence; drafts only — nothing sends automatically. |
-| `outreach_messages`  | Tracking rows: candidateId, sequenceId?, kind, subject?, body, status `drafted\|sent\|replied\|no_reply`, sentAt?, repliedAt?. Status changes are manual recruiter actions in Phase 1. |
-| `screen_guides`      | sections[] `{id, title, questions[]: {id, question, why, strongEvidence[], weakEvidence[], redFlags[], followUps[]}}`. |
-| `interview_plans`    | stages[] `{id, name, purpose, interviewer?, competencies[], questions[], evidenceSought[], rubricNotes, doNotDuplicate}`. |
-| `scorecards`         | candidateId, stageName, interviewer?, status `draft\|submitted`; entries[] `{id, competency, observation, interpretation, rating: RubricLevel, evidenceText}` — a rating without evidenceText fails validation. |
+| `outreach_messages`  | Tracking rows: candidateId, sequenceId?, kind, subject?, body, status `drafted\|sent\|replied\|no_reply`, sentAt?, repliedAt?. Status changes are manual recruiter actions in Phase 1.                                                                                                                        |
+| `screen_guides`      | sections[] `{id, title, questions[]: {id, question, why, strongEvidence[], weakEvidence[], redFlags[], followUps[]}}`.                                                                                                                                                                                        |
+| `interview_plans`    | stages[] `{id, name, purpose, interviewer?, competencies[], questions[], evidenceSought[], rubricNotes, doNotDuplicate}`.                                                                                                                                                                                     |
+| `scorecards`         | candidateId, stageName, interviewer?, status `draft\|submitted`; entries[] `{id, competency, observation, interpretation, rating: RubricLevel, evidenceText}` — a rating without evidenceText fails validation.                                                                                               |
 
 ### Workflow (Modules 16–22)
 
-| Table              | Shape                                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `pipeline_stages`  | Per-project, customizable: key, label, position, isTerminal. Seeded with the 16 default stages (Research → Archived). |
-| `pipeline_events`  | candidateId, fromStage?, toStage, occurredAt, note. **Every stage change writes one** — the analytics substrate.    |
-| `offers`           | candidateId, status `preparing\|extended\|accepted\|declined\|withdrawn`, compensationNote?, extendedAt?, resolvedAt?. |
+| Table              | Shape                                                                                                                                                                                                                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pipeline_stages`  | Per-project, customizable: key, label, position, isTerminal. Seeded with the 16 default stages (Research → Archived).                                                                                                                                                                                                            |
+| `pipeline_events`  | candidateId, fromStage?, toStage, occurredAt, note. **Every stage change writes one** — the analytics substrate.                                                                                                                                                                                                                 |
+| `offers`           | candidateId, status `preparing\|extended\|accepted\|declined\|withdrawn`, compensationNote?, extendedAt?, resolvedAt?.                                                                                                                                                                                                           |
 | `close_plans`      | motivations[], competingOpportunities[], compensationExpectations, decisionCriteria[], concerns[], relocation?, timing?, counterofferRisk, stakeholders[], likelyObjections[] `{objection, suggestedResponse}`, missingInformation[], recommendedTopics[], hmInvolvement[], riskOfDecline `{level, rationale}`, offerCallPrep[]. |
-| `onboarding_plans` | checklist[] `{id, label, owner?, dueOffsetDays?, done}`, recruiterHandoff[], managerHandoff[], communicationSchedule[] `{day, touchpoint}`, day1Prep[], day30FollowUp[], hmFollowUp[], startDate?, startConfirmed. |
-| `search_learnings` | kind `why_responded\|why_declined\|why_hm_passed\|why_interview_failed\|why_offer_lost\|why_offer_won\|general`, text, sampleSize?, candidateId?, provenance. UI warns when generalizing from sampleSize < 5. |
-| `tasks`            | searchProjectId?, candidateId?, title, kind?, dueAt?, status `open\|done`.                                          |
+| `onboarding_plans` | checklist[] `{id, label, owner?, dueOffsetDays?, done}`, recruiterHandoff[], managerHandoff[], communicationSchedule[] `{day, touchpoint}`, day1Prep[], day30FollowUp[], hmFollowUp[], startDate?, startConfirmed.                                                                                                               |
+| `search_learnings` | kind `why_responded\|why_declined\|why_hm_passed\|why_interview_failed\|why_offer_lost\|why_offer_won\|general`, text, sampleSize?, candidateId?, provenance. UI warns when generalizing from sampleSize < 5.                                                                                                                    |
+| `tasks`            | searchProjectId?, candidateId?, title, kind?, dueAt?, status `open\|done`.                                                                                                                                                                                                                                                       |
 
 ### Research & audit
 
-| Table              | Shape                                                                                          |
-| ------------------ | ----------------------------------------------------------------------------------------------- |
+| Table              | Shape                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `research_sources` | url, title?, source?, snippet?, query?, retrievedAt, relevance?, searchProjectId?. Every future ResearchProvider result lands here; `source_verified` provenance points at these rows. |
-| `ai_generations`   | Audit log: task, provider, model, status `ok\|failed\|refused`, contextHash, durationMs, error?, searchProjectId?, candidateId?. |
-| `settings`         | key/value JSON (provider prefs, UI prefs).                                                      |
+| `ai_generations`   | Audit log: task, provider, model, status `ok\|failed\|refused`, contextHash, durationMs, error?, searchProjectId?, candidateId?.                                                       |
+| `settings`         | key/value JSON (provider prefs, UI prefs).                                                                                                                                             |
 
 ## Deliberately absent
 

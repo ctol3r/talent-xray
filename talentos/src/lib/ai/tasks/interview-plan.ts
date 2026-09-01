@@ -7,7 +7,10 @@ import { classifyOccupationForMock } from "../mock-knowledge";
 import { systemPrelude } from "../prompts";
 import { defineAiTask } from "../run";
 
-export const interviewPlanTask = defineAiTask<ProjectContext, InterviewPlanPayload>({
+export const interviewPlanTask = defineAiTask<
+  ProjectContext,
+  InterviewPlanPayload
+>({
   task: "interview_plan",
   schemaName: "InterviewPlan",
   schema: interviewPlanPayloadSchema,
@@ -41,7 +44,9 @@ Design the interview plan for this search now.`,
         evidenceSought: [`[Mock] Observable pass signal for ${name}.`],
         rubricNotes: "[Mock] Anchor ratings to written evidence.",
         doNotDuplicate:
-          index > 0 ? `[Mock] Covered in ${occ.interviewStages[index - 1]}.` : undefined,
+          index > 0
+            ? `[Mock] Covered in ${occ.interviewStages[index - 1]}.`
+            : undefined,
       })),
     };
   },

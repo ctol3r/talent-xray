@@ -32,8 +32,7 @@ function CandidateCard({
 }) {
   const { pending, submit } = useAction();
   const due =
-    candidate.nextActionDue &&
-    new Date(candidate.nextActionDue) <= new Date();
+    candidate.nextActionDue && new Date(candidate.nextActionDue) <= new Date();
   return (
     <div className="rounded border border-edge bg-panel p-2.5">
       <Link
@@ -48,7 +47,9 @@ function CandidateCard({
           .join(" · ") || "—"}
       </p>
       {candidate.nextAction && (
-        <p className={`mt-1 text-[11.5px] ${due ? "text-bad" : "text-ink-faint"}`}>
+        <p
+          className={`mt-1 text-[11.5px] ${due ? "text-bad" : "text-ink-faint"}`}
+        >
           → {candidate.nextAction}
           {candidate.nextActionDue &&
             ` (${new Date(candidate.nextActionDue).toLocaleDateString()})`}
@@ -102,7 +103,9 @@ export function PipelineBoard({
               <span className="text-[12px] font-semibold text-ink-muted">
                 {stage.label}
               </span>
-              <span className="text-[11.5px] text-ink-faint">{inStage.length}</span>
+              <span className="text-[11.5px] text-ink-faint">
+                {inStage.length}
+              </span>
             </div>
             <div className="space-y-2 rounded-lg border border-edge bg-panel2/30 p-2">
               {inStage.length === 0 ? (

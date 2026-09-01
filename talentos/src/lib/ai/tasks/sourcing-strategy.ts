@@ -14,7 +14,8 @@ export const sourcingStrategyTask = defineAiTask<
   task: "sourcing_strategy",
   schemaName: "SourcingStrategy",
   schema: sourcingStrategyPayloadSchema,
-  system: () => `${systemPrelude("an elite sourcer writing a search strategy brief")}
+  system:
+    () => `${systemPrelude("an elite sourcer writing a search strategy brief")}
 
 Produce the search strategy brief for THIS search:
 - primaryTargetProfile: one tight paragraph describing the phenotype most likely to succeed and be closeable.

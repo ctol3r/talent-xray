@@ -28,7 +28,9 @@ export default async function TasksPage() {
                   className="flex items-center justify-between gap-3 py-2"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-[13px]">{task.title}</span>
+                    <span className="block truncate text-[13px]">
+                      {task.title}
+                    </span>
                     {task.dueAt && (
                       <span
                         className={`text-[11.5px] ${

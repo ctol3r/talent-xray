@@ -7,7 +7,11 @@ import {
 
 export type ActionResult<T = undefined> =
   | { ok: true; data: T }
-  | { ok: false; error: string; kind: "validation" | "provider" | "refused" | "error" };
+  | {
+      ok: false;
+      error: string;
+      kind: "validation" | "provider" | "refused" | "error";
+    };
 
 /** Uniform error envelope so the UI can render failures honestly. */
 export async function act<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {

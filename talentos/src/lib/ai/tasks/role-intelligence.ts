@@ -40,7 +40,9 @@ Extract complete role intelligence for this search now.`,
       occupationFamily: occ.profession,
       industry: ctx.project.industry ?? "Unspecified",
       jobFunction: occ.profession,
-      responsibilities: occ.vocabulary.slice(0, 3).map((v) => `Work involving ${v}`),
+      responsibilities: occ.vocabulary
+        .slice(0, 3)
+        .map((v) => `Work involving ${v}`),
       businessOutcomes: [ctx.project.businessObjective ?? "Fill the role"],
       technologies: occ.vocabulary,
       domainKnowledge: occ.vocabulary.slice(0, 2),

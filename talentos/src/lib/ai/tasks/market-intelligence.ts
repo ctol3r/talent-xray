@@ -60,8 +60,12 @@ Produce the market-intelligence assessment for this search now.`,
           ],
         },
       ],
-      assumptions: [`[Mock] Assumes the ${ctx.project.roleTitle} JD reflects the real bar.`],
-      missingInformation: ["Live labor-market data (research provider not configured)."],
+      assumptions: [
+        `[Mock] Assumes the ${ctx.project.roleTitle} JD reflects the real bar.`,
+      ],
+      missingInformation: [
+        "Live labor-market data (research provider not configured).",
+      ],
     };
   },
 });

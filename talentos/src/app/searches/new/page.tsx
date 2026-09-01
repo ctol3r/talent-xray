@@ -11,17 +11,51 @@ const FIELDS: {
   placeholder: string;
   required?: boolean;
 }[] = [
-  { key: "name", label: "Search name", placeholder: "Acme — Staff Platform Engineer", required: true },
-  { key: "roleTitle", label: "Role title", placeholder: "Staff Platform Engineer", required: true },
+  {
+    key: "name",
+    label: "Search name",
+    placeholder: "Acme — Staff Platform Engineer",
+    required: true,
+  },
+  {
+    key: "roleTitle",
+    label: "Role title",
+    placeholder: "Staff Platform Engineer",
+    required: true,
+  },
   { key: "companyName", label: "Company", placeholder: "Acme" },
-  { key: "geography", label: "Geography", placeholder: "Denver, CO / Remote US" },
+  {
+    key: "geography",
+    label: "Geography",
+    placeholder: "Denver, CO / Remote US",
+  },
   { key: "country", label: "Country", placeholder: "United States" },
   { key: "industry", label: "Industry", placeholder: "B2B SaaS" },
-  { key: "seniority", label: "Seniority", placeholder: "Staff / Senior / Executive…" },
-  { key: "employmentType", label: "Employment type", placeholder: "Permanent, full-time" },
-  { key: "workArrangement", label: "Work arrangement", placeholder: "Hybrid, 3 days on-site" },
-  { key: "compensationNote", label: "Compensation", placeholder: "$180k–$220k + equity" },
-  { key: "businessObjective", label: "Business objective", placeholder: "Why this hire, why now" },
+  {
+    key: "seniority",
+    label: "Seniority",
+    placeholder: "Staff / Senior / Executive…",
+  },
+  {
+    key: "employmentType",
+    label: "Employment type",
+    placeholder: "Permanent, full-time",
+  },
+  {
+    key: "workArrangement",
+    label: "Work arrangement",
+    placeholder: "Hybrid, 3 days on-site",
+  },
+  {
+    key: "compensationNote",
+    label: "Compensation",
+    placeholder: "$180k–$220k + equity",
+  },
+  {
+    key: "businessObjective",
+    label: "Business objective",
+    placeholder: "Why this hire, why now",
+  },
 ];
 
 export default function NewSearchPage() {

@@ -94,7 +94,9 @@ export const jobDescriptions = sqliteTable("job_descriptions", {
   searchProjectId: text("search_project_id")
     .notNull()
     .references(() => searchProjects.id),
-  source: text("source").notNull().$type<"pasted" | "uploaded" | "manual" | "url">(),
+  source: text("source")
+    .notNull()
+    .$type<"pasted" | "uploaded" | "manual" | "url">(),
   rawText: text("raw_text").notNull(),
   url: text("url"),
   createdAt: createdAt(),
@@ -503,15 +505,14 @@ export const searchLearnings = sqliteTable("search_learnings", {
 
 export const tasks = sqliteTable("tasks", {
   id: uuid(),
-  searchProjectId: text("search_project_id").references(() => searchProjects.id),
+  searchProjectId: text("search_project_id").references(
+    () => searchProjects.id,
+  ),
   candidateId: text("candidate_id").references(() => candidates.id),
   title: text("title").notNull(),
   kind: text("kind"),
   dueAt: text("due_at"),
-  status: text("status")
-    .notNull()
-    .$type<"open" | "done">()
-    .default("open"),
+  status: text("status").notNull().$type<"open" | "done">().default("open"),
   createdAt: createdAt(),
   completedAt: text("completed_at"),
 });
@@ -520,7 +521,9 @@ export const tasks = sqliteTable("tasks", {
 
 export const researchSources = sqliteTable("research_sources", {
   id: uuid(),
-  searchProjectId: text("search_project_id").references(() => searchProjects.id),
+  searchProjectId: text("search_project_id").references(
+    () => searchProjects.id,
+  ),
   url: text("url").notNull(),
   title: text("title"),
   source: text("source"),
@@ -542,7 +545,9 @@ export const aiGenerations = sqliteTable("ai_generations", {
   contextHash: text("context_hash").notNull(),
   durationMs: integer("duration_ms").notNull(),
   error: text("error"),
-  searchProjectId: text("search_project_id").references(() => searchProjects.id),
+  searchProjectId: text("search_project_id").references(
+    () => searchProjects.id,
+  ),
   candidateId: text("candidate_id").references(() => candidates.id),
   createdAt: createdAt(),
 });

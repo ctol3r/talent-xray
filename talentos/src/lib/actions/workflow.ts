@@ -61,57 +61,103 @@ import {
 } from "@/lib/services/workflow";
 import { act, type ActionResult } from "./helpers";
 
-const PROJECT_ARTIFACTS = {
-  role_intelligence: {
-    schema: roleIntelligencePayloadSchema,
-    get: getRoleIntelligence,
-    save: updateRoleIntelligencePayload,
-  },
-  success_profile: {
-    schema: successProfilePayloadSchema,
-    get: getSuccessProfile,
-    save: updateSuccessProfilePayload,
-  },
-  market_research: {
-    schema: marketResearchPayloadSchema,
-    get: getMarketResearch,
-    save: updateMarketResearchPayload,
-  },
-  sourcing_strategy: {
-    schema: sourcingStrategyPayloadSchema,
-    get: getSourcingStrategy,
-    save: updateSourcingStrategyPayload,
-  },
-  screen_guide: {
-    schema: screenGuidePayloadSchema,
-    get: getScreenGuide,
-    save: updateScreenGuidePayload,
-  },
-  interview_plan: {
-    schema: interviewPlanPayloadSchema,
-    get: getInterviewPlan,
-    save: updateInterviewPlanPayload,
-  },
-} as const;
+type ArtifactHandler = (
+  db: ReturnType<typeof getDb>,
+  ownerId: string,
+  raw: unknown,
+) => Promise<{ exists: boolean }>;
 
-const CANDIDATE_ARTIFACTS = {
-  evidence: {
-    schema: evidenceAlignmentPayloadSchema,
-    get: getCandidateEvidence,
-    save: updateCandidateEvidencePayload,
+/**
+ * One type-safe handler per artifact kind: the kind's own zod schema
+ * validates the raw JSON, then the matching typed save runs. Project
+ * artifacts key by searchProjectId; candidate artifacts by candidateId.
+ */
+const PROJECT_ARTIFACTS: Record<string, ArtifactHandler> = {
+  role_intelligence: async (db, ownerId, raw) => {
+    if (!(await getRoleIntelligence(db, ownerId))) return { exists: false };
+    await updateRoleIntelligencePayload(
+      db,
+      ownerId,
+      roleIntelligencePayloadSchema.parse(raw),
+    );
+    return { exists: true };
   },
-  close_plan: {
-    schema: closePlanPayloadSchema,
-    get: getClosePlan,
-    save: updateClosePlanPayload,
+  success_profile: async (db, ownerId, raw) => {
+    if (!(await getSuccessProfile(db, ownerId))) return { exists: false };
+    await updateSuccessProfilePayload(
+      db,
+      ownerId,
+      successProfilePayloadSchema.parse(raw),
+    );
+    return { exists: true };
   },
-  onboarding_plan: {
-    schema: onboardingPlanPayloadSchema,
-    get: getOnboardingPlan,
-    save: (db: ReturnType<typeof getDb>, id: string, payload: z.infer<typeof onboardingPlanPayloadSchema>) =>
-      updateOnboardingPlan(db, id, payload),
+  market_research: async (db, ownerId, raw) => {
+    if (!(await getMarketResearch(db, ownerId))) return { exists: false };
+    await updateMarketResearchPayload(
+      db,
+      ownerId,
+      marketResearchPayloadSchema.parse(raw),
+    );
+    return { exists: true };
   },
-} as const;
+  sourcing_strategy: async (db, ownerId, raw) => {
+    if (!(await getSourcingStrategy(db, ownerId))) return { exists: false };
+    await updateSourcingStrategyPayload(
+      db,
+      ownerId,
+      sourcingStrategyPayloadSchema.parse(raw),
+    );
+    return { exists: true };
+  },
+  screen_guide: async (db, ownerId, raw) => {
+    if (!(await getScreenGuide(db, ownerId))) return { exists: false };
+    await updateScreenGuidePayload(
+      db,
+      ownerId,
+      screenGuidePayloadSchema.parse(raw),
+    );
+    return { exists: true };
+  },
+  interview_plan: async (db, ownerId, raw) => {
+    if (!(await getInterviewPlan(db, ownerId))) return { exists: false };
+    await updateInterviewPlanPayload(
+      db,
+      ownerId,
+      interviewPlanPayloadSchema.parse(raw),
+    );
+    return { exists: true };
+  },
+};
+
+const CANDIDATE_ARTIFACTS: Record<string, ArtifactHandler> = {
+  evidence: async (db, ownerId, raw) => {
+    if (!(await getCandidateEvidence(db, ownerId))) return { exists: false };
+    await updateCandidateEvidencePayload(
+      db,
+      ownerId,
+      evidenceAlignmentPayloadSchema.parse(raw),
+    );
+    return { exists: true };
+  },
+  close_plan: async (db, ownerId, raw) => {
+    if (!(await getClosePlan(db, ownerId))) return { exists: false };
+    await updateClosePlanPayload(
+      db,
+      ownerId,
+      closePlanPayloadSchema.parse(raw),
+    );
+    return { exists: true };
+  },
+  onboarding_plan: async (db, ownerId, raw) => {
+    if (!(await getOnboardingPlan(db, ownerId))) return { exists: false };
+    await updateOnboardingPlan(
+      db,
+      ownerId,
+      onboardingPlanPayloadSchema.parse(raw),
+    );
+    return { exists: true };
+  },
+};
 
 const saveArtifactInput = z.object({
   kind: z.enum([
@@ -151,23 +197,19 @@ export async function saveArtifactJsonAction(
       return undefined;
     }
 
-    if (parsed.kind in PROJECT_ARTIFACTS) {
-      const artifact =
-        PROJECT_ARTIFACTS[parsed.kind as keyof typeof PROJECT_ARTIFACTS];
-      const existing = await artifact.get(db, parsed.ownerId);
-      if (!existing) throw new Error("Nothing generated yet to edit");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- narrowed per-kind by the schema parse on the line above
-      await artifact.save(db, parsed.ownerId, artifact.schema.parse(raw) as any);
+    const projectHandler = PROJECT_ARTIFACTS[parsed.kind];
+    if (projectHandler) {
+      const { exists } = await projectHandler(db, parsed.ownerId, raw);
+      if (!exists) throw new Error("Nothing generated yet to edit");
       revalidatePath(`/searches/${parsed.ownerId}`, "layout");
       return undefined;
     }
 
-    const artifact =
-      CANDIDATE_ARTIFACTS[parsed.kind as keyof typeof CANDIDATE_ARTIFACTS];
-    const existing = await artifact.get(db, parsed.ownerId);
-    if (!existing) throw new Error("Nothing generated yet to edit");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- narrowed per-kind by the schema parse on the line above
-    await artifact.save(db, parsed.ownerId, artifact.schema.parse(raw) as any);
+    const candidateHandler = CANDIDATE_ARTIFACTS[parsed.kind];
+    if (!candidateHandler)
+      throw new Error(`Unknown artifact kind ${parsed.kind}`);
+    const { exists } = await candidateHandler(db, parsed.ownerId, raw);
+    if (!exists) throw new Error("Nothing generated yet to edit");
     const candidate = await getCandidate(db, parsed.ownerId);
     if (candidate) {
       revalidatePath(`/searches/${candidate.searchProjectId}`, "layout");

@@ -52,11 +52,21 @@ const TEXT_SCAN_PATTERNS: { trait: string; pattern: RegExp }[] = [
   { trait: "race/ethnicity", pattern: /\brace\b|\bethnicit/i },
   { trait: "religion", pattern: /\breligio(n|us)\b/i },
   { trait: "age", pattern: /\bage\b|\byears?\s+old\b/i },
-  { trait: "disability/health", pattern: /\bdisabilit|\bdisabled\b|\bmedical condition\b|\bhealth condition\b/i },
+  {
+    trait: "disability/health",
+    pattern:
+      /\bdisabilit|\bdisabled\b|\bmedical condition\b|\bhealth condition\b/i,
+  },
   { trait: "national origin", pattern: /\bnational origin\b/i },
   { trait: "sexual orientation", pattern: /\bsexual orientation\b/i },
-  { trait: "pregnancy/family status", pattern: /\bpregnan|\bmarital\b|\bfamily status\b/i },
-  { trait: "political affiliation", pattern: /\bpolitical (affiliation|beliefs?|views?)\b/i },
+  {
+    trait: "pregnancy/family status",
+    pattern: /\bpregnan|\bmarital\b|\bfamily status\b/i,
+  },
+  {
+    trait: "political affiliation",
+    pattern: /\bpolitical (affiliation|beliefs?|views?)\b/i,
+  },
   { trait: "veteran status", pattern: /\bveteran status\b/i },
 ];
 
@@ -84,7 +94,9 @@ export function scanTextForProtectedTraits(text: string): TraitScanHit[] {
 }
 
 /** Scan an arbitrary JSON-serializable payload. */
-export function scanPayloadForProtectedTraits(payload: unknown): TraitScanHit[] {
+export function scanPayloadForProtectedTraits(
+  payload: unknown,
+): TraitScanHit[] {
   return scanTextForProtectedTraits(JSON.stringify(payload ?? ""));
 }
 

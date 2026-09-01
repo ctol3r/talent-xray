@@ -110,10 +110,26 @@ interface VariantSpec {
 }
 
 export const VARIANT_SPECS: VariantSpec[] = [
-  { breadth: "narrow", expectedPrecision: "high", description: "Primary titles + all requirements" },
-  { breadth: "balanced", expectedPrecision: "medium", description: "Titles incl. alternates + core requirements" },
-  { breadth: "broad", expectedPrecision: "low", description: "All titles, requirements relaxed to an OR group" },
-  { breadth: "adjacent", expectedPrecision: "low", description: "Adjacent-population titles + core skills" },
+  {
+    breadth: "narrow",
+    expectedPrecision: "high",
+    description: "Primary titles + all requirements",
+  },
+  {
+    breadth: "balanced",
+    expectedPrecision: "medium",
+    description: "Titles incl. alternates + core requirements",
+  },
+  {
+    breadth: "broad",
+    expectedPrecision: "low",
+    description: "All titles, requirements relaxed to an OR group",
+  },
+  {
+    breadth: "adjacent",
+    expectedPrecision: "low",
+    description: "Adjacent-population titles + core skills",
+  },
 ];
 
 function variantParts(input: StringLabInput, breadth: Breadth): string[] {

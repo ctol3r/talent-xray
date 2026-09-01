@@ -3,10 +3,7 @@ import { getLatestIntakeSession } from "@/lib/services/artifacts";
 import { generateIntakeAction } from "@/lib/actions/generate";
 import { ArtifactMeta } from "@/components/artifact-meta";
 import { GenerateButton } from "@/components/generate-button";
-import {
-  CompleteIntakeButton,
-  IntakeAnswer,
-} from "@/components/intake-answer";
+import { CompleteIntakeButton, IntakeAnswer } from "@/components/intake-answer";
 import { StringList } from "@/components/traced-list";
 import { Card, EmptyState, PageHeader, Tag } from "@/components/ui";
 
@@ -75,7 +72,9 @@ export default async function IntakePage({
               <div className="space-y-4">
                 {category.questions.map((question) => (
                   <div key={question.id}>
-                    <p className="text-[13.5px] font-medium">{question.question}</p>
+                    <p className="text-[13.5px] font-medium">
+                      {question.question}
+                    </p>
                     <p className="mt-0.5 text-[12px] text-ink-faint">
                       Why it matters: {question.whyItMatters}
                     </p>
@@ -93,17 +92,34 @@ export default async function IntakePage({
             <Card title="Recruiter playback — “Let me summarize the search as I now understand it.”">
               <div className="space-y-4">
                 <p className="text-[13.5px]">{payload.playback.target}</p>
-                <StringList title="Hard requirements" items={payload.playback.hardRequirements} />
-                <StringList title="Flexible requirements" items={payload.playback.flexibleRequirements} />
+                <StringList
+                  title="Hard requirements"
+                  items={payload.playback.hardRequirements}
+                />
+                <StringList
+                  title="Flexible requirements"
+                  items={payload.playback.flexibleRequirements}
+                />
                 <div>
                   <h3 className="mb-1.5 text-[11.5px] font-semibold tracking-wider text-ink-faint uppercase">
                     Ideal phenotype
                   </h3>
-                  <p className="text-[13px]">{payload.playback.idealPhenotype}</p>
+                  <p className="text-[13px]">
+                    {payload.playback.idealPhenotype}
+                  </p>
                 </div>
-                <StringList title="Adjacent phenotypes" items={payload.playback.adjacentPhenotypes} />
-                <StringList title="Disqualifiers" items={payload.playback.disqualifiers} />
-                <StringList title="Unresolved questions" items={payload.playback.unresolvedQuestions} />
+                <StringList
+                  title="Adjacent phenotypes"
+                  items={payload.playback.adjacentPhenotypes}
+                />
+                <StringList
+                  title="Disqualifiers"
+                  items={payload.playback.disqualifiers}
+                />
+                <StringList
+                  title="Unresolved questions"
+                  items={payload.playback.unresolvedQuestions}
+                />
                 <p className="rounded border border-accent/30 bg-accent-soft/50 px-3 py-2 text-[13px] font-medium text-accent">
                   Ask the hiring manager: “What did I get wrong?” — then edit
                   this playback and the requirements to match reality.

@@ -66,7 +66,8 @@ Produce the query-expansion vocabulary and platform-specific extra queries for t
       extraQueries: [
         {
           platform: occ.channels[0]?.name ?? "Google",
-          query: `[Mock] ${ctx.project.roleTitle} ${occ.vocabulary[0] ?? ""}`.trim(),
+          query:
+            `[Mock] ${ctx.project.roleTitle} ${occ.vocabulary[0] ?? ""}`.trim(),
           purpose: `[Mock] Platform-specific probe for ${occ.profession}`,
           breadth: "experimental" as const,
           expectedPrecision: "medium" as const,

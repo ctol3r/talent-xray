@@ -54,13 +54,28 @@ export default function SettingsPage() {
         </Card>
         <Card title="Data">
           <div className="space-y-1.5">
-            <KeyValue label="Database file" value={<code className="font-mono text-[12px]">{dbPath}</code>} />
+            <KeyValue
+              label="Database file"
+              value={<code className="font-mono text-[12px]">{dbPath}</code>}
+            />
           </div>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-[13px] text-ink-muted">
-            <li>Back up by copying the database file (WAL checkpoint happens on close).</li>
-            <li>Per-candidate export and permanent deletion live on each candidate page.</li>
-            <li>Result pages are never fetched or scraped; profile URLs only link out.</li>
-            <li>No fields for protected characteristics exist anywhere in the schema — enforced by a build-failing test.</li>
+            <li>
+              Back up by copying the database file (WAL checkpoint happens on
+              close).
+            </li>
+            <li>
+              Per-candidate export and permanent deletion live on each candidate
+              page.
+            </li>
+            <li>
+              Result pages are never fetched or scraped; profile URLs only link
+              out.
+            </li>
+            <li>
+              No fields for protected characteristics exist anywhere in the
+              schema — enforced by a build-failing test.
+            </li>
           </ul>
         </Card>
       </div>

@@ -91,7 +91,9 @@ export default async function MarketPage({
                         </a>
                       )}
                       {claim.note && (
-                        <p className="text-[12px] text-ink-faint">{claim.note}</p>
+                        <p className="text-[12px] text-ink-faint">
+                          {claim.note}
+                        </p>
                       )}
                     </div>
                     <span className="mt-0.5 shrink-0">
@@ -105,7 +107,10 @@ export default async function MarketPage({
           <Card title="Honesty ledger">
             <div className="space-y-4">
               <StringList title="Assumptions" items={payload.assumptions} />
-              <StringList title="Missing information" items={payload.missingInformation} />
+              <StringList
+                title="Missing information"
+                items={payload.missingInformation}
+              />
             </div>
           </Card>
         </div>
