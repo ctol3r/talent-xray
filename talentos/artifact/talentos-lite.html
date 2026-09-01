@@ -1249,6 +1249,108 @@ ${task.shape}`;
     };
   }
 
+  /* ── W10: virtual crew — critic pass + full-search crew runner ────────── */
+
+  async function runCritic(taskLabel, artifactJson, ui) {
+    const prompt = `${systemPrelude("an elite recruiting-deliverables reviewer (the crew's critic)")}
+
+Review ONE generated artifact against the bar "would an elite recruiter run this search off this document?":
+- Is it specific to THIS role, company, seniority, geography, and market — or generic recruiting boilerplate?
+- Does it contradict the JD, the hiring-manager intake answers, or earlier artifacts?
+- Are requirements/claims honestly labeled (provenance, certainty) with no invented facts, venues, or people?
+- Is anything load-bearing missing that this artifact type must carry?
+- Flag any protected-characteristic reference as a blocking issue.
+Verdict rules: "accept" when genuinely usable as-is (minor notes go in strengths); "revise" only for concrete, fixable defects a generator can resolve in one pass — 3–6 actionable issues max.
+
+${renderContext(state.current, state.artifacts)}
+
+## Artifact under review: ${taskLabel}
+${clip(artifactJson, 8000)}
+
+## Output format
+Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": string[], "issues": string[]}`;
+    const ctl = new AbortController();
+    if (ui && ui.bindStop) ui.bindStop(ctl);
+    const critique = await sampleApi.json(prompt, {
+      signal: ctl.signal,
+      cache: false,
+    });
+    if (critique.verdict !== "accept" && critique.verdict !== "revise")
+      throw { code: "invalid_json", message: "bad critic verdict" };
+    critique.strengths = Array.isArray(critique.strengths)
+      ? critique.strengths
+      : [];
+    critique.issues = Array.isArray(critique.issues) ? critique.issues : [];
+    return critique;
+  }
+
+  /* Generate one module with the crew treatment: generate → critic →
+   (one revision pass with the critique in context). */
+  async function generateWithCritic(key, ui) {
+    const task = TASKS[key];
+    const regenerate = Boolean(state.artifacts[key]);
+    let result = await runTask(
+      key,
+      renderContext(state.current, state.artifacts),
+      ui,
+      { regenerate },
+    );
+    state.artifacts[key] = result;
+    await store.saveArtifact(state.current.id, key, result);
+
+    if (ui.step) ui.step(`critic reviewing ${task.label.toLowerCase()}`);
+    const critique = await runCritic(
+      task.label,
+      JSON.stringify(result.payload),
+      ui,
+    );
+    result.critique = critique;
+    if (critique.verdict === "revise" && critique.issues.length > 0) {
+      if (ui.step)
+        ui.step(
+          `revising ${task.label.toLowerCase()} (${critique.issues.length} findings)`,
+        );
+      const revisionContext =
+        renderContext(state.current, state.artifacts) +
+        `\n## Critic findings to address (this is a REVISION pass)\nA reviewer flagged the previous draft. Produce a full corrected artifact that resolves every finding:\n` +
+        critique.issues.map((issue) => `- ${issue}`).join("\n");
+      result = await runTask(key, revisionContext, ui, { regenerate: true });
+      result.critique = { ...critique, revised: true };
+    }
+    state.artifacts[key] = result;
+    await store.saveArtifact(state.current.id, key, result);
+    return result;
+  }
+
+  const CREW_ORDER = [
+    "role_intelligence",
+    "intake",
+    "success_profile",
+    "market_intelligence",
+    "sourcing_strategy",
+    "channels",
+    "search_strings",
+  ];
+
+  /* The full-search virtual crew: every module in dependency order, each
+   with a critic pass. Intake answers stay the human's job — the crew
+   generates the questions and moves on. */
+  async function runCrewForSearch(ui) {
+    for (const key of CREW_ORDER) {
+      ui.step(`${TASKS[key].label} agent`);
+      await generateWithCritic(key, ui);
+    }
+  }
+
+  async function runCandidateAgents(cand, ui) {
+    ui.step("evidence agent");
+    cand.evidence = await runCandidateTask("evidence", cand, ui);
+    await store.saveCandidate(state.current.id, cand);
+    ui.step("outreach agent");
+    cand.outreach = await runCandidateTask("outreach", cand, ui);
+    await store.saveCandidate(state.current.id, cand);
+  }
+
   /* ── App state ────────────────────────────────────────────────────────── */
   const state = {
     searches: [],
@@ -1419,6 +1521,14 @@ ${task.shape}`;
       body.append(
         el(
           `<div class="notice warning"><strong>Review required:</strong> the output mentions ${esc(rec.traitWarnings.join(", "))}. Protected characteristics must never drive evaluation — edit before use.</div>`,
+        ),
+      );
+    }
+    if (rec.critique) {
+      const verdictGood = rec.critique.verdict === "accept";
+      body.append(
+        el(
+          `<div class="notice" style="border-left-color:${verdictGood ? "var(--ok)" : "var(--warn)"}"><strong>Critic: ${verdictGood ? "accept" : "revise"}${rec.critique.revised ? " → revised once" : ""}.</strong>${(rec.critique.issues || []).length ? `<ul style="margin:6px 0 0;padding-left:18px">${rec.critique.issues.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}</div>`,
         ),
       );
     }
@@ -1805,6 +1915,53 @@ ${task.shape}`;
     const done = MODULE_ORDER.filter(
       (k) => k !== "overview" && k !== "candidates" && state.artifacts[k],
     ).length;
+    if (sampleApi && !aiHidden) {
+      const crewPanel = el(`<div class="panel"><h3>Crew</h3>
+        <p class="why">Run the full agent crew: each module generated by a role-scoped specialist, reviewed by a critic, and revised once when the critic finds concrete defects (~${CREW_ORDER.length * 2} Claude calls). Intake answers stay yours. Agents draft — you decide.</p></div>`);
+      const crewBtn = el(
+        `<button class="btn primary">Run crew on this search</button>`,
+      );
+      const crewStop = el(`<button class="btn small" hidden>Stop</button>`);
+      crewPanel.append(crewBtn, crewStop);
+      let stopCtl = null;
+      crewStop.onclick = () => stopCtl && stopCtl.abort();
+      crewBtn.onclick = async () => {
+        crewBtn.disabled = true;
+        crewStop.hidden = false;
+        const progress = el(
+          `<div style="margin-top:10px"><ul class="run-log" style="margin:0;padding-left:18px"></ul><div class="stream"></div></div>`,
+        );
+        crewPanel.append(progress);
+        const log = progress.querySelector(".run-log");
+        const streamEl = progress.querySelector(".stream");
+        try {
+          await runCrewForSearch({
+            bindStop: (c) => {
+              stopCtl = c;
+            },
+            step: (name) => {
+              log.append(el(`<li>${esc(name)}</li>`));
+            },
+            onText: ({ text }) => {
+              streamEl.textContent = text.slice(-1000);
+              streamEl.scrollTop = streamEl.scrollHeight;
+            },
+          });
+          render();
+        } catch (e) {
+          if (e && (e.code === "not_granted" || e.code === "sampling_disabled"))
+            aiHidden = true;
+          progress.append(
+            el(
+              `<div class="notice error"><strong>Crew stopped.</strong> ${esc(copyFor(e && e.code))} Finished modules are saved.</div>`,
+            ),
+          );
+          crewBtn.disabled = false;
+          crewStop.hidden = true;
+        }
+      };
+      main.append(crewPanel);
+    }
     main.append(
       el(`<div class="panel"><h3>Pipeline</h3><p class="num">${done} of ${MODULE_ORDER.length - 2} modules generated · ${state.candidates.length} candidate${state.candidates.length === 1 ? "" : "s"}</p>
     <p class="why">Suggested order: Role Intelligence → HM Intake (answer the questions) → Success Profile → Market Intel → Strategy → Channels → Search Strings → Candidates.</p></div>`),
@@ -2065,6 +2222,30 @@ ${task.shape}`;
       };
       evBtn.onclick = () => run("evidence", evBtn);
       orBtn.onclick = () => run("outreach", orBtn);
+      const crewBtn2 = el(`<button class="btn small">Run agents</button>`);
+      head.insertBefore(crewBtn2, evBtn);
+      crewBtn2.onclick = async () => {
+        if (!state.artifacts.success_profile) {
+          status.textContent = "Generate the Success Profile first.";
+          return;
+        }
+        crewBtn2.disabled = true;
+        try {
+          await runCandidateAgents(cand, {
+            step: (name) => {
+              status.textContent = name + "…";
+            },
+          });
+          status.textContent = "";
+          crewBtn2.disabled = false;
+          paint();
+        } catch (e) {
+          if (e && (e.code === "not_granted" || e.code === "sampling_disabled"))
+            aiHidden = true;
+          status.textContent = copyFor(e && e.code);
+          crewBtn2.disabled = false;
+        }
+      };
     }
     return card;
   }

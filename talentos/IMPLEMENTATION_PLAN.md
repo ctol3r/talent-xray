@@ -104,3 +104,13 @@ with its thread plus four new guidance rules. Migration 0002 (hm_briefs,
 candidate_packets, candidates.hm_feedback). Acceptance:
 tests/unit/guidance.test.ts (4 tests) + W9 thread tests in
 next-best-action.test.ts; full verify green (71 unit tests, build).
+
+## W10 — Virtual crew in the Lite artifact (CLOSED 2026-09-01)
+
+TalentOS Lite gains the crew treatment: "Run crew on this search"
+generates every module in dependency order with a critic review per
+artifact and one revision pass when the critic finds concrete defects
+(critic verdicts + findings rendered on each module); per-candidate
+"Run agents" chains evidence → outreach. Runs on the viewer's Claude
+account; intake answers stay human. Republished to the same artifact URL;
+script syntax + headless boot verified.
