@@ -16,6 +16,7 @@
     "db:seed": "tsx src/lib/db/seed-cli.ts",
     "e2e": "playwright test",
     "smoke": "tsx scripts/critical-path.mts",
+    "golden:cais": "tsx scripts/golden-cais.mts",
     "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },
   "dependencies": {
