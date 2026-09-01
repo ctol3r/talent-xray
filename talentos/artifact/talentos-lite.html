@@ -261,13 +261,20 @@ function scanForProtectedTraits(value) {
   return PROTECTED_TRAITS.filter((t) => text.includes(t));
 }
 
-/* Model output may never claim "verified" (NO FAKE DATA). */
+/* Model output may never claim "verified" (NO FAKE DATA). Returns how many
+   labels had to be downgraded — the golden test treats any as a guardrail hit. */
 function downgradeVerified(node) {
-  if (Array.isArray(node)) { node.forEach(downgradeVerified); return; }
+  let count = 0;
+  if (Array.isArray(node)) { for (const child of node) count += downgradeVerified(child); return count; }
   if (node && typeof node === "object") {
-    if (node.certainty === "verified") { node.certainty = "inferred"; node.note = ((node.note || "") + " [downgraded from 'verified' — model output cannot verify]").trim(); }
-    Object.values(node).forEach(downgradeVerified);
+    if (node.certainty === "verified") {
+      node.certainty = "inferred";
+      node.note = ((node.note || "") + " [downgraded from 'verified' — model output cannot verify]").trim();
+      count += 1;
+    }
+    for (const child of Object.values(node)) count += downgradeVerified(child);
   }
+  return count;
 }
 
 /* ── Deterministic composer (ported from lib/domain/search-strings) ───── */
@@ -590,7 +597,7 @@ All terms must be real search tokens (short, quotable), not sentences.`,
     render: renderStrings,
   },
 };
-const MODULE_ORDER = ["overview", "role_intelligence", "intake", "success_profile", "market_intelligence", "sourcing_strategy", "channels", "search_strings", "candidates"];
+const MODULE_ORDER = ["overview", "role_intelligence", "intake", "success_profile", "market_intelligence", "sourcing_strategy", "channels", "search_strings", "candidates", "golden_test"];
 
 /* ── Sample plumbing ──────────────────────────────────────────────────── */
 let sampleApi = null; // resolved sample fn or null
@@ -632,10 +639,10 @@ ${task.shape}`;
   });
   const err = task.check(payload);
   if (err) { const e = { code: "invalid_json", message: "shape: " + err, text: JSON.stringify(payload) }; throw e; }
-  downgradeVerified(payload);
+  const downgrades = downgradeVerified(payload);
   return {
     payload,
-    meta: { provider: "claude-artifact", generatedAt: new Date().toISOString() },
+    meta: { provider: "claude-artifact", generatedAt: new Date().toISOString(), downgrades },
     traitWarnings: scanForProtectedTraits(payload),
   };
 }
@@ -676,7 +683,7 @@ function renderRail() {
   nav.innerHTML = "";
   if (!state.current) return;
   for (const key of MODULE_ORDER) {
-    const label = key === "overview" ? "Overview" : key === "candidates" ? "Candidates" : TASKS[key].label;
+    const label = key === "overview" ? "Overview" : key === "candidates" ? "Candidates" : key === "golden_test" ? "Golden Test" : TASKS[key].label;
     const done = key === "overview" ? true : key === "candidates" ? state.candidates.length > 0 : Boolean(state.artifacts[key]);
     const item = el(`<button class="mod-item ${state.module === key ? "active" : ""}"><span class="dot ${done ? "done" : ""}"></span>${esc(label)}</button>`);
     item.onclick = () => { state.module = key; render(); };
@@ -693,6 +700,7 @@ function renderMain() {
   if (!state.current) { main.append(renderNewSearchForm(true)); return; }
   if (state.module === "overview") return renderOverview(main);
   if (state.module === "candidates") return renderCandidates(main);
+  if (state.module === "golden_test") return renderGolden(main);
   renderTaskModule(main, state.module);
 }
 
@@ -1032,8 +1040,8 @@ ${task.shape}`;
   const payload = await sampleApi.json(prompt, { signal: ctl.signal, cache: false, onText: ui && ui.onText });
   const err = task.check(payload);
   if (err) throw { code: "invalid_json", message: err };
-  downgradeVerified(payload);
-  return { payload, meta: { provider: "claude-artifact", generatedAt: new Date().toISOString() }, traitWarnings: scanForProtectedTraits(payload) };
+  const downgrades = downgradeVerified(payload);
+  return { payload, meta: { provider: "claude-artifact", generatedAt: new Date().toISOString(), downgrades }, traitWarnings: scanForProtectedTraits(payload) };
 }
 
 function renderCandidates(main) {
@@ -1130,6 +1138,187 @@ function renderCandidateCard(cand) {
     orBtn.onclick = () => run("outreach", orBtn);
   }
   return card;
+}
+
+/* ── CAIS golden test (ported from scripts/golden-shared.mts) ─────────── */
+const GOLDEN_THRESHOLD = 12;
+const GOLDEN_CONCEPTS = [
+  { concept: "Why the position exists now", pattern: /why (now|the role|the position|does this role exist)|exists now|why now/i },
+  { concept: "Capacity- vs capability-driven hiring", pattern: /capacit\w+[\s\S]{0,80}capabilit\w+|capabilit\w+[\s\S]{0,80}capacit\w+/i },
+  { concept: "Dream researchers / exemplars", pattern: /dream (candidate|researcher|hire)|exemplar|represents the bar/i },
+  { concept: "Research Scientist vs Research Engineer distinction", pattern: /research scientist[\s\S]{0,80}research engineer|scientist (vs\.?|versus|or) (research )?engineer|RS[\s\S]{0,20}RE\b/i },
+  { concept: "Publication quality", pattern: /publication|venue|paper/i },
+  { concept: "First-author significance", pattern: /first[- ]author/i },
+  { concept: "Empirical vs theoretical orientation", pattern: /empirical[\s\S]{0,120}theor|theor\w+[\s\S]{0,120}empirical/i },
+  { concept: "Research taste", pattern: /research taste|taste in (problems|research)|problem selection/i },
+  { concept: "Experimental execution", pattern: /experiment\w* (execution|velocity|design)|run\w* (experiments|ablations)|ablation/i },
+  { concept: "Distributed training / training scale", pattern: /distributed training|training scale|large[- ]scale (training|experiments?)|GPU|cluster/i },
+  { concept: "Frontier-lab experience", pattern: /frontier[- ](lab|scale|model)/i },
+  { concept: "Research lineages / labs / advisors", pattern: /lineage|advisor|(from|which|target) labs?\b|research group/i },
+  { concept: "Conferences (NeurIPS / ICML / ICLR)", pattern: /NeurIPS|ICML|ICLR/i },
+  { concept: "Mission alignment vs skepticism", pattern: /mission|safety motivation|skeptic/i },
+  { concept: "Candidate selling points / closing dynamics", pattern: /selling point|sell (the|this)|closing|why would (a|the|top)|counter[- ]?offer|compete for/i },
+  { concept: "Competitive labs / talent competitors", pattern: /compet\w+ (lab|employer|offer)|competing|lose (candidates|people) to|who else is hiring/i },
+];
+const GOLDEN_HM_ANSWERS = [
+  "[Golden-test HM answer] Capability-driven: we are standing up a dangerous-capability evaluations workstream and nobody on staff owns benchmark construction end to end.",
+  "[Golden-test HM answer] The bar is a researcher who has shipped a first-author empirical paper AND built the infrastructure behind it themselves; engineering-heavy backgrounds welcome.",
+  "[Golden-test HM answer] We lose finalists to frontier labs on compensation; we win on mission, autonomy, and publication freedom.",
+];
+const GOLDEN_CANDIDATE = {
+  name: "Synthetic Benchmark Candidate", currentTitle: "Member of Technical Staff",
+  currentCompany: "Example AI Lab (synthetic)", geography: "",
+  profileUrls: ["https://example.com/synthetic-profile"], notes: "",
+  pastedText: "SYNTHETIC PROFILE FOR BENCHMARKING — not a real person. Two first-author workshop papers on adversarial robustness (NeurIPS SafeML workshop). Built the distributed evaluation harness used across the lab (PyTorch, Ray, 256-GPU runs). Maintains a popular open-source jailbreak-evaluation benchmark. BS in CS; no PhD. Blogs about AI risk; previously a platform engineer at a fintech.",
+};
+
+function intakeFullText(payload) {
+  const parts = [];
+  for (const cat of payload.categories || []) {
+    parts.push(cat.title, cat.rationale);
+    for (const q of cat.questions || []) parts.push(q.question, q.whyItMatters);
+  }
+  if (payload.playback) parts.push(JSON.stringify(payload.playback));
+  return parts.join("\n");
+}
+
+function scoreGolden(artifacts, candidate) {
+  const intake = artifacts.intake.payload;
+  const text = intakeFullText(intake);
+  const hits = GOLDEN_CONCEPTS.map((c) => ({ concept: c.concept, hit: c.pattern.test(text) }));
+  const hitCount = hits.filter((h) => h.hit).length;
+  const sp = artifacts.search_strings.payload;
+  const composed = composeQueries({
+    titles: sp.titles || [], alternateTitles: sp.alternateTitles || [], adjacentTitles: sp.adjacentTitles || [],
+    mustHave: sp.mustHave || [], anyOf: sp.anyOf || [], credentials: sp.credentials || [],
+    locations: sp.locations || [], companies: sp.companies || [], exclusions: sp.exclusions || [],
+  }, ["general", ...(sp.relevantPlatforms || [])]);
+  const records = ["role_intelligence", "intake", "success_profile", "market_intelligence", "sourcing_strategy", "channels", "search_strings"]
+    .map((k) => artifacts[k]).concat([candidate.evidence, candidate.outreach]).filter(Boolean);
+  const downgrades = records.reduce((n, r) => n + ((r.meta && r.meta.downgrades) || 0), 0);
+  const traitWarnings = records.flatMap((r) => r.traitWarnings || []);
+  const guardrails = [
+    { name: "Intake ends with a playback summary", ok: intake.playback != null },
+    { name: "Model never emitted a 'verified' certainty label", ok: downgrades === 0 },
+    { name: "X-ray queries composed (site: operators present)", ok: composed.some((q) => q.query.includes("site:")) },
+    { name: "Evidence alignment includes gaps, not just matches", ok: (candidate.evidence.payload.items || []).some((i) => i.status === "missing" || i.status === "unknown") },
+    { name: "No protected-trait references in any generated payload", ok: traitWarnings.length === 0 },
+  ];
+  const pass = hitCount >= GOLDEN_THRESHOLD && guardrails.every((g) => g.ok);
+  return { hits, hitCount, total: GOLDEN_CONCEPTS.length, threshold: GOLDEN_THRESHOLD, guardrails, verdict: pass ? "PASS" : "FAIL" };
+}
+
+async function runGoldenTest(ui) {
+  // The benchmark always runs against the bundled CAIS example search.
+  // Load its state directly — no re-render, so the progress panel survives.
+  if (!state.current || state.current.id !== EXAMPLE_SEARCH.id) {
+    state.current = state.searches.find((s) => s.id === EXAMPLE_SEARCH.id) || EXAMPLE_SEARCH;
+    state.artifacts = await store.loadArtifacts(EXAMPLE_SEARCH.id);
+    state.candidates = await store.listCandidates(EXAMPLE_SEARCH.id);
+    renderRail();
+  }
+  state.module = "golden_test";
+  const timings = [];
+  const startedAt = new Date().toISOString();
+  let currentCtl = null;
+  ui.bindStop(() => currentCtl && currentCtl.abort());
+
+  const stepUi = { bindStop: (c) => { currentCtl = c; }, onText: ui.onText };
+  const genSteps = ["role_intelligence", "intake", "success_profile", "market_intelligence", "sourcing_strategy", "channels", "search_strings"];
+  for (const key of genSteps) {
+    ui.step(TASKS[key].label);
+    const t0 = Date.now();
+    const result = await runTask(key, renderContext(state.current, state.artifacts), stepUi, { regenerate: Boolean(state.artifacts[key]) });
+    state.artifacts[key] = result;
+    await store.saveArtifact(state.current.id, key, result);
+    timings.push({ step: key, ms: Date.now() - t0 });
+    if (key === "intake") {
+      ui.step("Answering intake as the hiring manager");
+      const cats = result.payload.categories || [];
+      let answered = 0;
+      for (const cat of cats) {
+        if (answered >= GOLDEN_HM_ANSWERS.length) break;
+        const q = (cat.questions || [])[0];
+        if (!q) continue;
+        q.answer = GOLDEN_HM_ANSWERS[answered];
+        answered += 1;
+      }
+      await store.saveArtifact(state.current.id, "intake", result);
+    }
+  }
+
+  ui.step("Creating synthetic benchmark candidate");
+  let cand = state.candidates.find((c) => c.name === GOLDEN_CANDIDATE.name);
+  if (!cand) {
+    cand = { id: uid(), createdAt: new Date().toISOString(), ...GOLDEN_CANDIDATE };
+    state.candidates.push(cand);
+  }
+  for (const key of ["evidence", "outreach"]) {
+    ui.step(key === "evidence" ? "Evidence alignment" : "Outreach drafts");
+    const t0 = Date.now();
+    cand[key] = await runCandidateTask(key, cand, stepUi);
+    timings.push({ step: key, ms: Date.now() - t0 });
+  }
+  await store.saveCandidate(state.current.id, cand);
+
+  ui.step("Scoring");
+  const score = scoreGolden(state.artifacts, cand);
+  const record = {
+    payload: score,
+    meta: { provider: "claude-artifact", startedAt, generatedAt: new Date().toISOString(), timings },
+  };
+  state.artifacts.golden_test = record;
+  await store.saveArtifact(state.current.id, "golden_test", record);
+  return record;
+}
+
+function renderGolden(main) {
+  main.append(el(`<div class="mod-head"><h2>CAIS Golden Test</h2><span class="spacer"></span></div>`));
+  main.append(el(`<p class="mod-desc">The product's live benchmark: generate every module for the bundled CAIS Research Scientist / Research Engineer search on your Claude account, then score the intake for 16 ML-research domain concepts plus five honesty and fair-hiring guardrails. About 9 Claude calls; expect 5–15 minutes. Progress is saved as it goes.</p>`));
+  const rec = state.artifacts.golden_test;
+
+  if (aiHidden || !sampleApi) { main.append(el(`<div class="notice warning">${esc(copyFor("not_granted"))}</div>`)); }
+  else {
+    const head = $(".mod-head", main);
+    const runBtn = el(`<button class="btn ${rec ? "" : "primary"}">${rec ? "Run again" : "Run the golden test"}</button>`);
+    const stopBtn = el(`<button class="btn small" hidden>Stop</button>`);
+    head.append(runBtn, stopBtn);
+    runBtn.onclick = async () => {
+      runBtn.disabled = true; stopBtn.hidden = false;
+      const progress = el(`<div class="panel"><h3>Running…</h3><ul class="run-log"></ul><div class="stream"></div></div>`);
+      main.insertBefore(progress, main.children[2] || null);
+      const log = $(".run-log", progress);
+      const streamEl = $(".stream", progress);
+      let stopFn = null;
+      stopBtn.onclick = () => stopFn && stopFn();
+      try {
+        await runGoldenTest({
+          bindStop: (fn) => { stopFn = fn; },
+          step: (name) => { log.append(el(`<li>${esc(name)}</li>`)); },
+          onText: ({ text }) => { streamEl.textContent = text.slice(-1200); streamEl.scrollTop = streamEl.scrollHeight; },
+        });
+        render();
+      } catch (e) {
+        if (e && (e.code === "not_granted" || e.code === "sampling_disabled")) aiHidden = true;
+        progress.append(el(`<div class="notice error"><strong>Run stopped.</strong> ${esc(copyFor(e && e.code))} Completed steps are saved — “Run again” resumes by regenerating from the top with the saved context.</div>`));
+        runBtn.disabled = false; stopBtn.hidden = true;
+      }
+    };
+  }
+
+  if (rec) {
+    const s = rec.payload;
+    main.append(el(`<div class="notice ${s.verdict === "PASS" ? "" : "error"}" style="border-left-color:${s.verdict === "PASS" ? "var(--ok)" : "var(--bad)"}">
+      <strong>Verdict: ${esc(s.verdict)}</strong> — ${esc(String(s.hitCount))}/${esc(String(s.total))} intake domain concepts present (threshold ${esc(String(s.threshold))}). Finished ${esc(rec.meta.generatedAt || "")}.</div>`));
+    main.append(el(`<div class="panel"><h3>Intake concept scorecard <span class="why num">${esc(String(s.hitCount))}/${esc(String(s.total))}</span></h3>
+      <ul>${s.hits.map((h) => `<li>${h.hit ? "✅" : "❌"} ${esc(h.concept)}</li>`).join("")}</ul></div>`));
+    main.append(el(`<div class="panel"><h3>Guardrails</h3>
+      <ul>${s.guardrails.map((g) => `<li>${g.ok ? "✅" : "❌"} ${esc(g.name)}</li>`).join("")}</ul></div>`));
+    if (rec.meta.timings) main.append(el(`<div class="panel"><h3>Step timings</h3><ul class="num">${rec.meta.timings.map((t) => `<li>${esc(t.step)}: ${(t.ms / 1000).toFixed(1)}s</li>`).join("")}</ul></div>`));
+    main.append(el(`<p class="why">The generated artifacts themselves are in the modules on the left — the scorecard only measures them.</p>`));
+  } else if (!aiHidden && sampleApi) {
+    main.append(el(`<div class="panel"><p class="why">Not run yet. The run regenerates Role Intelligence → Intake (auto-answered with three hiring-manager answers, labelled as test input) → Success Profile → Market Intel → Strategy → Channels → Search Strings, adds a clearly-synthetic candidate, runs Evidence and Outreach, then scores everything. Your Claude account does the generating; the first call asks permission.</p></div>`));
+  }
 }
 
 /* ── Boot ─────────────────────────────────────────────────────────────── */
