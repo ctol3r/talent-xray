@@ -1205,6 +1205,9 @@ All terms must be real search tokens (short, quotable), not sentences.`,
 
   /* ── Sample plumbing ──────────────────────────────────────────────────── */
   let sampleApi = null; // resolved sample fn or null
+  /* Generation quality knob: "complex" = most capable tier (slower; the
+     platform substitutes a nearby tier if the plan lacks it). */
+  const MODEL_TIER = "complex";
   let aiHidden = false; // set true on not_granted / sampling_disabled
 
   const ERROR_COPY = {
@@ -1247,6 +1250,7 @@ ${task.shape}`;
       signal: ctl.signal,
       cache: opts && opts.regenerate ? false : true,
       onText: ui && ui.onText,
+      modelTier: MODEL_TIER,
     });
     const err = task.check(payload);
     if (err) {
@@ -1294,6 +1298,7 @@ Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": str
     const critique = await sampleApi.json(prompt, {
       signal: ctl.signal,
       cache: false,
+      modelTier: MODEL_TIER,
     });
     if (critique.verdict !== "accept" && critique.verdict !== "revise")
       throw { code: "invalid_json", message: "bad critic verdict" };
@@ -2064,6 +2069,7 @@ ${task.shape}`;
       signal: ctl.signal,
       cache: false,
       onText: ui && ui.onText,
+      modelTier: MODEL_TIER,
     });
     const err = task.check(payload);
     if (err) throw { code: "invalid_json", message: err };
