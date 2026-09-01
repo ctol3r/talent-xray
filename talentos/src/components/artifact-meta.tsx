@@ -13,6 +13,7 @@ export type ArtifactKind =
   | "sourcing_strategy"
   | "screen_guide"
   | "interview_plan"
+  | "hm_brief"
   | "intake"
   | "evidence"
   | "close_plan"

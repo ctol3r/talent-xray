@@ -5,6 +5,7 @@ import { z } from "zod";
 import {
   closePlanPayloadSchema,
   evidenceAlignmentPayloadSchema,
+  hmBriefPayloadSchema,
   intakePayloadSchema,
   interviewPlanPayloadSchema,
   marketResearchPayloadSchema,
@@ -59,6 +60,7 @@ import {
   upsertQuery,
   upsertQueryInput,
 } from "@/lib/services/workflow";
+import { getHmBrief, updateHmBriefPayload } from "@/lib/services/guidance";
 import { act, type ActionResult } from "./helpers";
 
 type ArtifactHandler = (
@@ -118,6 +120,11 @@ const PROJECT_ARTIFACTS: Record<string, ArtifactHandler> = {
     );
     return { exists: true };
   },
+  hm_brief: async (db, ownerId, raw) => {
+    if (!(await getHmBrief(db, ownerId))) return { exists: false };
+    await updateHmBriefPayload(db, ownerId, hmBriefPayloadSchema.parse(raw));
+    return { exists: true };
+  },
   interview_plan: async (db, ownerId, raw) => {
     if (!(await getInterviewPlan(db, ownerId))) return { exists: false };
     await updateInterviewPlanPayload(
@@ -167,6 +174,7 @@ const saveArtifactInput = z.object({
     "sourcing_strategy",
     "screen_guide",
     "interview_plan",
+    "hm_brief",
     "intake",
     "evidence",
     "close_plan",

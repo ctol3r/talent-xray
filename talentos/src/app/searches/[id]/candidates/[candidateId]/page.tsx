@@ -10,6 +10,10 @@ import {
   getPipelineStages,
 } from "@/lib/services/candidates";
 import { listCandidateMessages } from "@/lib/services/workflow";
+import { listCandidatePackets } from "@/lib/services/guidance";
+import { generateCandidatePacketAction } from "@/lib/actions/guidance";
+import { HmFeedbackForm } from "@/components/hm-feedback-form";
+import { PACKET_KINDS, PACKET_KIND_LABELS } from "@/lib/core/enums";
 import {
   generateEvidenceAlignmentAction,
   generateOutreachAction,
@@ -45,11 +49,12 @@ export default async function CandidatePage({
   const db = getDb();
   const candidate = await getCandidate(db, candidateId);
   if (!candidate || candidate.searchProjectId !== id) notFound();
-  const [stages, sources, evidence, messages] = await Promise.all([
+  const [stages, sources, evidence, messages, packets] = await Promise.all([
     getPipelineStages(db, id),
     getCandidateSources(db, candidateId),
     getCandidateEvidence(db, candidateId),
     listCandidateMessages(db, candidateId),
+    listCandidatePackets(db, candidateId),
   ]);
   const [sequence] = await db
     .select()
@@ -309,6 +314,77 @@ export default async function CandidatePage({
               candidateId={candidateId}
               notes={candidate.recruiterNotes}
             />
+          </Card>
+          <Card title="Candidate packets">
+            <p className="text-[12.5px] text-ink-muted">
+              Candidate-facing drafts you share manually — process transparency,
+              interview prep, offer explainers. Nothing sends automatically.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {PACKET_KINDS.map((kind) => (
+                <GenerateButton
+                  key={kind}
+                  action={generateCandidatePacketAction}
+                  input={{ candidateId, kind }}
+                  label={
+                    packets.some((p) => p.kind === kind)
+                      ? `Redraft ${PACKET_KIND_LABELS[kind].toLowerCase()}`
+                      : `Draft ${PACKET_KIND_LABELS[kind].toLowerCase()}`
+                  }
+                  regenerate={packets.some((p) => p.kind === kind)}
+                />
+              ))}
+            </div>
+            {packets.map((packet) => (
+              <div
+                key={packet.id}
+                className="mt-3 rounded border border-edge2 bg-canvas p-3"
+              >
+                <p className="text-[13px] font-semibold">
+                  {packet.payload.title}{" "}
+                  <span className="ml-1 text-[11px] font-normal text-ink-faint">
+                    {PACKET_KIND_LABELS[packet.kind]} ·{" "}
+                    {packet.meta?.provider ?? "draft"}
+                  </span>
+                </p>
+                {packet.payload.sections.map((section) => (
+                  <div key={section.title} className="mt-2">
+                    <p className="text-[12px] font-semibold text-ink-muted">
+                      {section.title}
+                    </p>
+                    <p className="whitespace-pre-wrap text-[12.5px]">
+                      {section.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </Card>
+          <Card title="Hiring-manager feedback">
+            {(candidate.hmFeedback ?? []).length > 0 && (
+              <ul className="mb-3 space-y-1.5">
+                {(candidate.hmFeedback ?? []).map((entry) => (
+                  <li key={entry.at} className="text-[12.5px]">
+                    <Tag
+                      tone={
+                        entry.decision === "advance"
+                          ? "ok"
+                          : entry.decision === "hold"
+                            ? "warn"
+                            : "bad"
+                      }
+                    >
+                      {entry.decision}
+                    </Tag>{" "}
+                    <span className="text-ink-muted">{entry.evidenceNote}</span>
+                    <span className="ml-1 text-[11px] text-ink-faint">
+                      {entry.at.slice(0, 10)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <HmFeedbackForm candidateId={candidateId} />
           </Card>
           <Card title="Close & onboarding">
             <p className="text-[13px] text-ink-muted">

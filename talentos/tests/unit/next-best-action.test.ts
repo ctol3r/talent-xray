@@ -25,6 +25,10 @@ function snapshot(overrides: Partial<ProjectSnapshot> = {}): ProjectSnapshot {
     stalledCandidateCount: 0,
     stalledThresholdDays: 7,
     openTaskCount: 0,
+    hasHmBrief: true,
+    hmReviewPendingCount: 0,
+    offersWithoutClosePlanCount: 0,
+    interviewingWithoutPrepCount: 0,
     ...overrides,
   };
 }
@@ -94,5 +98,41 @@ describe("computeNextBestActions", () => {
     );
     const priorities = actions.map((a) => a.priority);
     expect(priorities).toEqual([...priorities].sort((a, b) => a - b));
+  });
+});
+
+describe("W9 guidance threads", () => {
+  it("tags every action with a thread", () => {
+    const actions = computeNextBestActions(
+      snapshot({ hasHmBrief: false, followUpsDueCount: 2 }),
+    );
+    expect(actions.every((a) => Boolean(a.thread))).toBe(true);
+  });
+
+  it("raises HM-thread actions for brief and pending feedback", () => {
+    const actions = computeNextBestActions(
+      snapshot({ hasHmBrief: false, hmReviewPendingCount: 3 }),
+    );
+    const hm = actions.filter((a) => a.thread === "hiring_manager");
+    expect(hm.map((a) => a.id)).toContain("generate_hm_brief");
+    expect(hm.map((a) => a.id)).toContain("collect_hm_feedback");
+    expect(hm.find((a) => a.id === "collect_hm_feedback")?.priority).toBe(1);
+  });
+
+  it("raises candidate-thread actions for prep packets and close plans", () => {
+    const actions = computeNextBestActions(
+      snapshot({
+        interviewingWithoutPrepCount: 1,
+        offersWithoutClosePlanCount: 2,
+      }),
+    );
+    const candidate = actions.filter((a) => a.thread === "candidate");
+    expect(candidate.map((a) => a.id)).toContain("send_interview_prep");
+    expect(candidate.map((a) => a.id)).toContain("create_close_plan");
+  });
+
+  it("stays quiet when both threads are healthy", () => {
+    const actions = computeNextBestActions(snapshot());
+    expect(actions.filter((a) => a.thread === "hiring_manager")).toEqual([]);
   });
 });

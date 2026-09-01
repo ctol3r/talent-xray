@@ -23,7 +23,20 @@ export interface ProjectSnapshot {
   stalledCandidateCount: number;
   stalledThresholdDays: number;
   openTaskCount: number;
+  // W9 — two-sided guidance threads
+  hasHmBrief: boolean;
+  hmReviewPendingCount: number;
+  offersWithoutClosePlanCount: number;
+  interviewingWithoutPrepCount: number;
 }
+
+export type ActionThread = "pipeline" | "hiring_manager" | "candidate";
+
+export const THREAD_LABELS: Record<ActionThread, string> = {
+  pipeline: "Pipeline",
+  hiring_manager: "Hiring manager",
+  candidate: "Candidates",
+};
 
 export interface NextBestAction {
   id: string;
@@ -31,6 +44,8 @@ export interface NextBestAction {
   title: string;
   detail: string;
   href: string;
+  /** Which relationship this move advances. */
+  thread: ActionThread;
 }
 
 export function computeNextBestActions(s: ProjectSnapshot): NextBestAction[] {
@@ -42,7 +57,16 @@ export function computeNextBestActions(s: ProjectSnapshot): NextBestAction[] {
     title: string,
     detail: string,
     path: string,
-  ) => actions.push({ id, priority, title, detail, href: `${base}${path}` });
+    thread: ActionThread = "pipeline",
+  ) =>
+    actions.push({
+      id,
+      priority,
+      title,
+      detail,
+      href: `${base}${path}`,
+      thread,
+    });
 
   // Foundation gaps first — everything downstream depends on them.
   if (!s.hasJobDescription) {
@@ -79,6 +103,7 @@ export function computeNextBestActions(s: ProjectSnapshot): NextBestAction[] {
       `Capture ${s.unansweredIntakeCount} open intake answer${s.unansweredIntakeCount === 1 ? "" : "s"}`,
       "Unanswered intake questions become bad sourcing assumptions.",
       "/intake",
+      "hiring_manager",
     );
   }
   if (s.hasRoleIntelligence && s.unresolvedQuestionCount > 0) {
@@ -88,6 +113,7 @@ export function computeNextBestActions(s: ProjectSnapshot): NextBestAction[] {
       `Resolve ${s.unresolvedQuestionCount} unresolved requirement question${s.unresolvedQuestionCount === 1 ? "" : "s"}`,
       "These are flagged in role intelligence; take them to the hiring manager.",
       "/role",
+      "hiring_manager",
     );
   }
   if (s.intakeComplete && !s.hasSuccessProfile) {
@@ -135,6 +161,7 @@ export function computeNextBestActions(s: ProjectSnapshot): NextBestAction[] {
       `${s.followUpsDueCount} follow-up${s.followUpsDueCount === 1 ? "" : "s"} due`,
       "Candidates with a next action due today or overdue.",
       "/candidates",
+      "candidate",
     );
   }
   if (s.candidatesNeedingReview > 0) {
@@ -171,6 +198,7 @@ export function computeNextBestActions(s: ProjectSnapshot): NextBestAction[] {
       `${s.stalledCandidateCount} candidate${s.stalledCandidateCount === 1 ? "" : "s"} stalled > ${s.stalledThresholdDays} days`,
       "No pipeline movement recently — advance, park, or archive them.",
       "/pipeline",
+      "candidate",
     );
   }
   if (s.openTaskCount > 0) {
@@ -180,6 +208,50 @@ export function computeNextBestActions(s: ProjectSnapshot): NextBestAction[] {
       `${s.openTaskCount} open task${s.openTaskCount === 1 ? "" : "s"}`,
       "Review the task list for this search.",
       "/../../tasks",
+    );
+  }
+
+  // W9 — hiring-manager thread.
+  if (s.intakeComplete && !s.hasHmBrief) {
+    add(
+      "generate_hm_brief",
+      2,
+      "Generate the hiring-manager brief",
+      "A three-minute brief that keeps the HM calibrated and teaches evidence-anchored feedback.",
+      "/guide",
+      "hiring_manager",
+    );
+  }
+  if (s.hmReviewPendingCount > 0) {
+    add(
+      "collect_hm_feedback",
+      1,
+      `${s.hmReviewPendingCount} candidate${s.hmReviewPendingCount === 1 ? "" : "s"} awaiting HM feedback`,
+      "Collect an evidence-anchored advance/hold/pass — every pass calibrates the search.",
+      "/guide",
+      "hiring_manager",
+    );
+  }
+
+  // W9 — candidate thread.
+  if (s.interviewingWithoutPrepCount > 0) {
+    add(
+      "send_interview_prep",
+      2,
+      `${s.interviewingWithoutPrepCount} interviewing candidate${s.interviewingWithoutPrepCount === 1 ? "" : "s"} without a prep packet`,
+      "Draft the interview-prep packet so they can show their real work well.",
+      "/candidates",
+      "candidate",
+    );
+  }
+  if (s.offersWithoutClosePlanCount > 0) {
+    add(
+      "create_close_plan",
+      1,
+      `${s.offersWithoutClosePlanCount} offer${s.offersWithoutClosePlanCount === 1 ? "" : "s"} without a close plan`,
+      "Motivations, concerns, competing processes — before the offer conversation, not after.",
+      "/close",
+      "candidate",
     );
   }
 

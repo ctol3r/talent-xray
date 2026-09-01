@@ -9,11 +9,15 @@ import {
 import { DEFAULT_PIPELINE_STAGES } from "@/lib/domain/pipeline";
 import type { Db } from "@/lib/db/client";
 import {
+  candidatePackets,
   candidates,
+  closePlans,
   companies,
   hiringManagers,
+  hmBriefs,
   intakeSessions,
   jobDescriptions,
+  offers,
   outreachMessages,
   pipelineEvents,
   pipelineStages,
@@ -204,6 +208,27 @@ export async function buildProjectSnapshot(
     .select({ id: tasks.id })
     .from(tasks)
     .where(and(eq(tasks.searchProjectId, projectId), eq(tasks.status, "open")));
+  const [hmBrief] = await db
+    .select({ id: hmBriefs.id })
+    .from(hmBriefs)
+    .where(eq(hmBriefs.searchProjectId, projectId));
+  const projectOffers = await db
+    .select()
+    .from(offers)
+    .where(eq(offers.searchProjectId, projectId));
+  const closePlanRows = await db
+    .select({ candidateId: closePlans.candidateId })
+    .from(closePlans)
+    .where(eq(closePlans.searchProjectId, projectId));
+  const prepPackets = await db
+    .select({ candidateId: candidatePackets.candidateId })
+    .from(candidatePackets)
+    .where(
+      and(
+        eq(candidatePackets.searchProjectId, projectId),
+        eq(candidatePackets.kind, "interview_prep"),
+      ),
+    );
 
   const now = new Date();
   const todayIso = now.toISOString();
@@ -236,6 +261,27 @@ export async function buildProjectSnapshot(
 
   const outreach = computeOutreachStats(messages);
 
+  // W9 — guidance-thread metrics.
+  const hmReviewPendingCount = projectCandidates.filter(
+    (c) =>
+      c.stage === "hm_review" &&
+      c.disposition === "active" &&
+      (c.hmFeedback ?? []).length === 0,
+  ).length;
+  const closePlanned = new Set(closePlanRows.map((r) => r.candidateId));
+  const offersWithoutClosePlanCount = projectOffers.filter(
+    (o) =>
+      (o.status === "preparing" || o.status === "extended") &&
+      !closePlanned.has(o.candidateId),
+  ).length;
+  const prepped = new Set(prepPackets.map((r) => r.candidateId));
+  const interviewingWithoutPrepCount = projectCandidates.filter(
+    (c) =>
+      (c.stage === "interviewing" || c.stage === "final") &&
+      c.disposition === "active" &&
+      !prepped.has(c.id),
+  ).length;
+
   return {
     projectId,
     hasJobDescription: Boolean(jd),
@@ -260,6 +306,10 @@ export async function buildProjectSnapshot(
     stalledCandidateCount,
     stalledThresholdDays,
     openTaskCount: openTasks.length,
+    hasHmBrief: Boolean(hmBrief),
+    hmReviewPendingCount,
+    offersWithoutClosePlanCount,
+    interviewingWithoutPrepCount,
   };
 }
 

@@ -15,6 +15,13 @@
       "when": 1788294022391,
       "tag": "0001_free_ultimatum",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788294772842,
+      "tag": "0002_happy_saracen",
+      "breakpoints": true
     }
   ]
 }

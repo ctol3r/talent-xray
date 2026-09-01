@@ -8,6 +8,7 @@ import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type {
   Breadth,
   CrewJobStatus,
+  PacketKind,
   Certainty,
   ChannelKind,
   ChannelPriority,
@@ -24,8 +25,11 @@ import type {
 } from "@/lib/core/enums";
 import type {
   CandidateProfilePayload,
+  CandidatePacketPayload,
   ClosePlanPayload,
   CritiquePayload,
+  HmBriefPayload,
+  HmFeedbackEntry,
   EvidenceAlignmentPayload,
   IntakePayload,
   InterviewPlanPayload,
@@ -269,6 +273,11 @@ export const candidates = sqliteTable("candidates", {
     .notNull()
     .$type<Disposition>()
     .default("active"),
+  /** Evidence-anchored feedback entries recorded from the hiring manager. */
+  hmFeedback: text("hm_feedback", { mode: "json" })
+    .notNull()
+    .$type<HmFeedbackEntry[]>()
+    .default([]),
   nextAction: text("next_action"),
   nextActionDue: text("next_action_due"),
   resumeText: text("resume_text"),
@@ -552,6 +561,37 @@ export const aiGenerations = sqliteTable("ai_generations", {
   ),
   candidateId: text("candidate_id").references(() => candidates.id),
   createdAt: createdAt(),
+});
+
+// ── W9: two-sided guidance ──────────────────────────────────────────────────
+
+export const hmBriefs = sqliteTable("hm_briefs", {
+  id: uuid(),
+  searchProjectId: text("search_project_id")
+    .notNull()
+    .unique()
+    .references(() => searchProjects.id),
+  payload: text("payload", { mode: "json" }).notNull().$type<HmBriefPayload>(),
+  meta: text("meta", { mode: "json" }).$type<GenerationMeta>(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+export const candidatePackets = sqliteTable("candidate_packets", {
+  id: uuid(),
+  candidateId: text("candidate_id")
+    .notNull()
+    .references(() => candidates.id),
+  searchProjectId: text("search_project_id")
+    .notNull()
+    .references(() => searchProjects.id),
+  kind: text("kind").notNull().$type<PacketKind>(),
+  payload: text("payload", { mode: "json" })
+    .notNull()
+    .$type<CandidatePacketPayload>(),
+  meta: text("meta", { mode: "json" }).$type<GenerationMeta>(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 // ── W7: crew orchestration ──────────────────────────────────────────────────

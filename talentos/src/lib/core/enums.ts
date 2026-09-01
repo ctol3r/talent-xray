@@ -181,3 +181,24 @@ export const CREW_JOB_STATUSES = [
 ] as const;
 export const crewJobStatusSchema = z.enum(CREW_JOB_STATUSES);
 export type CrewJobStatus = z.infer<typeof crewJobStatusSchema>;
+
+// ── W9: two-sided guidance ──────────────────────────────────────────────────
+
+export const PACKET_KINDS = [
+  "process_guide",
+  "interview_prep",
+  "offer_explainer",
+] as const;
+export const packetKindSchema = z.enum(PACKET_KINDS);
+export type PacketKind = z.infer<typeof packetKindSchema>;
+
+export const PACKET_KIND_LABELS: Record<PacketKind, string> = {
+  process_guide: "Process guide",
+  interview_prep: "Interview prep",
+  offer_explainer: "Offer explainer",
+};
+
+/** A human hiring manager's recorded decision on a candidate. */
+export const HM_DECISIONS = ["advance", "hold", "pass"] as const;
+export const hmDecisionSchema = z.enum(HM_DECISIONS);
+export type HmDecision = z.infer<typeof hmDecisionSchema>;

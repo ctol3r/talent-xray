@@ -92,3 +92,15 @@ with per-result explicit save (URL or candidate). Result pages never
 fetched; nothing persists without a save. Acceptance:
 tests/unit/discovery.test.ts (6 tests); full verify green (63 unit tests,
 build).
+
+## W9 — Two-sided guidance (CLOSED 2026-09-01)
+
+HM thread + candidate thread join the pipeline: HM brief artifact
+(generated, editable, provenance-tracked), evidence-anchored HM feedback
+capture (appended verbatim, never auto-moves stage), candidate-facing
+packets (process guide / interview prep / offer explainer — drafts the
+recruiter shares manually), and Next Best Action v2 tagging every action
+with its thread plus four new guidance rules. Migration 0002 (hm_briefs,
+candidate_packets, candidates.hm_feedback). Acceptance:
+tests/unit/guidance.test.ts (4 tests) + W9 thread tests in
+next-best-action.test.ts; full verify green (71 unit tests, build).

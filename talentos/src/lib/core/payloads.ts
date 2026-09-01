@@ -526,3 +526,35 @@ export const critiquePayloadSchema = z.object({
   issues: z.array(z.string()),
 });
 export type CritiquePayload = z.infer<typeof critiquePayloadSchema>;
+
+// ── W9: two-sided guidance ──────────────────────────────────────────────────
+
+/** HM-facing search brief: what we're hunting, how to calibrate, how to review. */
+export const hmBriefPayloadSchema = z.object({
+  headline: z.string(),
+  whatWeAreLookingFor: z.array(tracedItemSchema),
+  calibrationQuestions: z.array(
+    z.object({ question: z.string(), whyItMatters: z.string() }),
+  ),
+  reviewInstructions: z.string(),
+  processExpectations: z.array(z.string()),
+  openQuestions: z.array(z.string()),
+});
+export type HmBriefPayload = z.infer<typeof hmBriefPayloadSchema>;
+
+/** Candidate-facing packet the recruiter shares manually. */
+export const candidatePacketPayloadSchema = z.object({
+  title: z.string(),
+  sections: z.array(z.object({ title: z.string(), body: z.string() })),
+});
+export type CandidatePacketPayload = z.infer<
+  typeof candidatePacketPayloadSchema
+>;
+
+/** One evidence-anchored HM feedback entry (human input, appended). */
+export const hmFeedbackEntrySchema = z.object({
+  at: z.string(),
+  decision: z.enum(["advance", "hold", "pass"]),
+  evidenceNote: z.string(),
+});
+export type HmFeedbackEntry = z.infer<typeof hmFeedbackEntrySchema>;

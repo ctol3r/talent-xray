@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const MODULES: { path: string; label: string; exact?: boolean }[] = [
   { path: "", label: "Overview", exact: true },
   { path: "/crew", label: "Crew" },
+  { path: "/guide", label: "Guide" },
   { path: "/role", label: "Role" },
   { path: "/intake", label: "Intake" },
   { path: "/profile", label: "Profile" },
