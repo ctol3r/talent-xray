@@ -85,8 +85,11 @@ system Chromium if Playwright's own download isn't available.
 
 ## Relationship to Talent X-Ray
 
-This directory is a self-contained app inside the `talent-xray` repository
-(own lockfile, own toolchain — see docs/DECISIONS.md D-001). The Talent X-Ray
-product at the repo root is untouched; its validated query-composer semantics
-are ported into `src/lib/domain/search-strings.ts`, and its search engines
-are a natural Phase-2 `ResearchProvider`.
+This directory is a **temporary incubation location** inside the
+`talent-xray` repository (own lockfile, own toolchain — see
+docs/DECISIONS.md D-001 and docs/ADR-001-talentos-incubation.md; extraction
+to its own repository is planned once the IR boundary is stable). The Talent
+X-Ray product at the repo root is untouched; its validated query-composer
+semantics are ported into `src/lib/domain/search-strings.ts`, and its two
+live people-only engines power `TalentXRayCandidateDiscoveryProvider` —
+candidate discovery, deliberately never the general research path (D-010).

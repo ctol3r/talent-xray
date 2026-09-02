@@ -34,6 +34,7 @@ RubricLevel =
   "exceptional_evidence";
 Breadth = "narrow" | "balanced" | "broad" | "adjacent" | "experimental";
 ChannelPriority = "high" | "medium" | "experimental";
+VerificationStatus = "unverified" | "recruiter_verified"; // source evidence
 ```
 
 Generated artifacts carry a `meta` column:
@@ -72,11 +73,12 @@ model output (plus a row in `ai_generations`).
 
 ### Candidates (Modules 9–11)
 
-| Table                | Shape                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `candidates`         | searchProjectId, name, currentTitle, currentCompany, geography, stage (→ pipeline_stages.key), disposition, nextAction?, nextActionDue?, resumeText?, recruiterNotes?, compensationNote?, profile JSON `{experience[], education[], publications[], projects[], skills[], licenses[], certifications[], motivations[], concerns[]}`. **No column, JSON key, or free-text template for protected characteristics** — enforced by test. |
-| `candidate_sources`  | candidateId, url, sourceType, label, addedVia. Links out only; page content is never fetched or stored.                                                                                                                                                                                                                                                                                                                               |
-| `candidate_evidence` | Per candidate per search: items[] `{id, criterion, criterionProvenance, status: EvidenceStatus, evidenceText, sourceUrl?}`; reviewPriority `{suggestion, rationale}` — **advisory only**, rendered as "candidates to review first based on currently available job-related evidence"; questionsToValidate[], outreachAngle?. recruiterOverride column records the human call.                                                         |
+| Table                       | Shape                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `candidates`                | searchProjectId, name, currentTitle, currentCompany, geography, stage (→ pipeline_stages.key), disposition, nextAction?, nextActionDue?, resumeText?, recruiterNotes?, compensationNote?, profile JSON `{experience[], education[], publications[], projects[], skills[], licenses[], certifications[], motivations[], concerns[]}`. **`resumeText` holds candidate-supplied or recruiter-pasted material only — never a search-result snippet** (those are `candidate_source_evidence`). **No column, JSON key, or free-text template for protected characteristics** — enforced by test. |
+| `candidate_sources`         | candidateId, url, sourceType, label, addedVia. Links out only; page content is never fetched or stored.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `candidate_source_evidence` | Explicit evidence about where a candidate was found (D-010): candidateId, searchProjectId, sourceUrl, sourceType (e.g. `search_result`), title?, snippet?, retrievedAt, query?, provider? (e.g. `talent-xray`), providerRank? (1-based result position — never a synthetic relevance score), verificationStatus (`unverified` until a recruiter checks the source), provenance (`search_result \| recruiter_added \| candidate_provided`). Rendered with an "unverified" badge everywhere the snippet appears.                                                                             |
+| `candidate_evidence`        | Per candidate per search: items[] `{id, criterion, criterionProvenance, status: EvidenceStatus, evidenceText, sourceUrl?}`; reviewPriority `{suggestion, rationale}` — **advisory only**, rendered as "candidates to review first based on currently available job-related evidence"; questionsToValidate[], outreachAngle?. recruiterOverride column records the human call.                                                                                                                                                                                                              |
 
 ### Engagement (Modules 12–15)
 
@@ -102,11 +104,12 @@ model output (plus a row in `ai_generations`).
 
 ### Research & audit
 
-| Table              | Shape                                                                                                                                                                                  |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `research_sources` | url, title?, source?, snippet?, query?, retrievedAt, relevance?, searchProjectId?. Every future ResearchProvider result lands here; `source_verified` provenance points at these rows. |
-| `ai_generations`   | Audit log: task, provider, model, status `ok\|failed\|refused`, contextHash, durationMs, error?, searchProjectId?, candidateId?.                                                       |
-| `settings`         | key/value JSON (provider prefs, UI prefs).                                                                                                                                             |
+| Table                 | Shape                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `research_sources`    | url, title?, source?, snippet?, query?, retrievedAt, searchProjectId?. **General research** (ResearchProvider) findings and explicitly saved discovery URLs land here; `source_verified` provenance points at these rows. The `relevance` column was dropped in migration 0003 — provider result order is preserved as `providerRank` on evidence rows, never mapped to a fabricated score. |
+| `hiring_intelligence` | One row per search: the canonical IR document (D-011) — `{intent: HiringIntentIR, success?: SuccessIR, evidence?: EvidenceIR, population?: TalentPopulationIR, searchPlan?: SearchPlanIR}` — zod-typed by `src/lib/core/ir.ts`, plus meta + revision counter. `intent.statements` is the append-only verbatim ManagerStatement log (service-owned; model output never rewrites it).         |
+| `ai_generations`      | Audit log: task, provider, model, status `ok\|failed\|refused`, contextHash, durationMs, error?, searchProjectId?, candidateId?.                                                                                                                                                                                                                                                            |
+| `settings`            | key/value JSON (provider prefs, UI prefs).                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Deliberately absent
 
@@ -115,8 +118,13 @@ model output (plus a row in `ai_generations`).
   status, political affiliation, veteran status — anywhere, including JSON
   payload schemas. `tests/unit/fair-hiring.test.ts` greps schema + zod
   payloads and fails on a match.
-- SERP/page-content storage. `candidate_sources.url` and
-  `research_sources.snippet` (provider-returned snippet only) are the maximum.
+- SERP/page-content storage. Provider-returned title + snippet on an
+  explicitly saved row (`research_sources`, `candidate_source_evidence`) is
+  the maximum; result pages are never fetched, and unsaved results are never
+  persisted.
+- Synthetic relevance scores. Result position is stored as `providerRank`;
+  any future candidate-relevance computation will be a separate transparent
+  evaluation against `SearchPlanIR`/`EvidenceIR`.
 - Multi-tenancy. Single user, no orgs, no RLS — revisit only if this stops
   being a personal tool.
 

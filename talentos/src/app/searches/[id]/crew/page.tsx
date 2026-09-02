@@ -69,7 +69,7 @@ export default async function CrewPage({
       {latestRun.length === 0 ? (
         <EmptyState
           title="No crew yet"
-          detail="Kick off the crew to queue the nine project agents (role intelligence through interview plan). Candidate agents queue from each candidate's page."
+          detail="Kick off the crew to queue the ten project agents — the canonical hiring-intelligence IR first, then role intelligence through interview plan, all reasoning over that shared IR. Candidate agents queue from each candidate's page."
         />
       ) : (
         <div className="mt-4 space-y-2">

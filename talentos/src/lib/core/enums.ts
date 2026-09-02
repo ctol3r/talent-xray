@@ -202,3 +202,30 @@ export const PACKET_KIND_LABELS: Record<PacketKind, string> = {
 export const HM_DECISIONS = ["advance", "hold", "pass"] as const;
 export const hmDecisionSchema = z.enum(HM_DECISIONS);
 export type HmDecision = z.infer<typeof hmDecisionSchema>;
+
+// ── W8.5: candidate source evidence (D-010) ─────────────────────────────────
+
+/**
+ * A search-result snippet is unverified until a recruiter checks the source
+ * page. Only a human can flip this — no model or provider path sets
+ * "recruiter_verified".
+ */
+export const VERIFICATION_STATUSES = [
+  "unverified",
+  "recruiter_verified",
+] as const;
+export const verificationStatusSchema = z.enum(VERIFICATION_STATUSES);
+export type VerificationStatus = z.infer<typeof verificationStatusSchema>;
+
+/** Where a candidate_source_evidence row came from. */
+export const SOURCE_EVIDENCE_PROVENANCES = [
+  "search_result",
+  "recruiter_added",
+  "candidate_provided",
+] as const;
+export const sourceEvidenceProvenanceSchema = z.enum(
+  SOURCE_EVIDENCE_PROVENANCES,
+);
+export type SourceEvidenceProvenance = z.infer<
+  typeof sourceEvidenceProvenanceSchema
+>;

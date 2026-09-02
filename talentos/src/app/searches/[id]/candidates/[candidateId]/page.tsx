@@ -10,6 +10,7 @@ import {
   getPipelineStages,
 } from "@/lib/services/candidates";
 import { listCandidateMessages } from "@/lib/services/workflow";
+import { listCandidateSourceEvidence } from "@/lib/services/discovery";
 import { listCandidatePackets } from "@/lib/services/guidance";
 import { generateCandidatePacketAction } from "@/lib/actions/guidance";
 import { HmFeedbackForm } from "@/components/hm-feedback-form";
@@ -49,13 +50,15 @@ export default async function CandidatePage({
   const db = getDb();
   const candidate = await getCandidate(db, candidateId);
   if (!candidate || candidate.searchProjectId !== id) notFound();
-  const [stages, sources, evidence, messages, packets] = await Promise.all([
-    getPipelineStages(db, id),
-    getCandidateSources(db, candidateId),
-    getCandidateEvidence(db, candidateId),
-    listCandidateMessages(db, candidateId),
-    listCandidatePackets(db, candidateId),
-  ]);
+  const [stages, sources, sourceEvidence, evidence, messages, packets] =
+    await Promise.all([
+      getPipelineStages(db, id),
+      getCandidateSources(db, candidateId),
+      listCandidateSourceEvidence(db, candidateId),
+      getCandidateEvidence(db, candidateId),
+      listCandidateMessages(db, candidateId),
+      listCandidatePackets(db, candidateId),
+    ]);
   const [sequence] = await db
     .select()
     .from(outreachSequences)
@@ -309,6 +312,57 @@ export default async function CandidatePage({
               Links open at the source. Pages are never fetched or stored.
             </p>
           </Card>
+          {sourceEvidence.length > 0 && (
+            <Card title="Source evidence">
+              <ul className="space-y-3">
+                {sourceEvidence.map((item) => (
+                  <li key={item.id} className="text-[12.5px]">
+                    <div className="mb-0.5 flex items-center gap-1.5">
+                      <Tag
+                        tone={
+                          item.verificationStatus === "recruiter_verified"
+                            ? "ok"
+                            : "warn"
+                        }
+                      >
+                        {item.verificationStatus === "recruiter_verified"
+                          ? "verified by you"
+                          : "unverified"}
+                      </Tag>
+                      {item.provider && (
+                        <span className="text-[11px] text-ink-faint">
+                          {item.provider}
+                          {item.providerRank ? ` · #${item.providerRank}` : ""}
+                        </span>
+                      )}
+                    </div>
+                    <a
+                      href={item.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="break-all text-accent hover:underline"
+                    >
+                      {item.title ?? item.sourceUrl}
+                    </a>
+                    {item.snippet && (
+                      <p className="mt-0.5 text-[12px] text-ink-muted">
+                        “{item.snippet}”
+                      </p>
+                    )}
+                    {item.query && (
+                      <p className="mt-0.5 font-mono text-[11px] text-ink-faint">
+                        query: {item.query}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-[11.5px] text-ink-faint">
+                Search-result snippets are evidence about a source — not resume
+                content. Verify on the source page before relying on one.
+              </p>
+            </Card>
+          )}
           <Card title="Recruiter notes">
             <NotesForm
               candidateId={candidateId}

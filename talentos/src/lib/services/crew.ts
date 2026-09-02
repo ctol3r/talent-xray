@@ -44,6 +44,7 @@ import {
   getSourcingStrategy,
   getSuccessProfile,
 } from "./artifacts";
+import { deriveHiringNeed, getIntelligence } from "./intelligence";
 import { listChannels, listQueries } from "./workflow";
 
 export interface CrewTaskSpec {
@@ -53,12 +54,23 @@ export interface CrewTaskSpec {
   scope: "project" | "candidate";
 }
 
-/** The project-level crew: dependency-ordered specialist agents. */
+/**
+ * The project-level crew: dependency-ordered specialist agents. The crew
+ * opens by deriving the canonical IR (D-011); every later specialist
+ * receives it in context as the source of truth instead of privately
+ * re-reading the JD.
+ */
 export const CREW_PROJECT_TASKS: CrewTaskSpec[] = [
+  {
+    task: "hiring_need",
+    label: "Hiring Need (IR)",
+    dependsOn: [],
+    scope: "project",
+  },
   {
     task: "role_intelligence",
     label: "Role Intelligence",
-    dependsOn: [],
+    dependsOn: ["hiring_need"],
     scope: "project",
   },
   {
@@ -138,6 +150,7 @@ type Generator = (
 ) => Promise<{ warnings: unknown[] }>;
 
 const PROJECT_GENERATORS: Record<string, Generator> = {
+  hiring_need: deriveHiringNeed,
   role_intelligence: generateRoleIntelligence,
   intake: generateIntake,
   success_profile: generateSuccessProfile,
@@ -161,6 +174,19 @@ async function loadArtifactJson(
   task: string,
 ): Promise<string | null> {
   switch (task) {
+    case "hiring_need": {
+      const row = await getIntelligence(db, projectId);
+      if (!row) return null;
+      // The verbatim statement log is service-owned and not under review.
+      const intent = row.payload.intent;
+      return JSON.stringify({
+        need: intent.need,
+        requirements: intent.requirements,
+        uncertainties: intent.uncertainties,
+        contradictions: intent.contradictions,
+        revision: intent.revision,
+      });
+    }
     case "role_intelligence":
       return JSON.stringify(
         (await getRoleIntelligence(db, projectId))?.payload ?? null,

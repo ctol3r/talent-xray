@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { ResearchResult } from "@/lib/research/provider";
+import type { DiscoveryResult } from "@/lib/research/discovery-provider";
 import {
   runDiscoveryAction,
   saveDiscoveryResultAction,
@@ -32,7 +32,7 @@ export function DiscoveryPanel({
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(queries[0]?.query ?? "");
   const [engine, setEngine] = useState<"core" | "reach">("core");
-  const [results, setResults] = useState<ResearchResult[] | null>(null);
+  const [results, setResults] = useState<DiscoveryResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedUrls, setSavedUrls] = useState<Record<string, string>>({});
 
@@ -49,15 +49,18 @@ export function DiscoveryPanel({
       else setError(r.error);
     });
 
-  const save = (result: ResearchResult, candidateName?: string) =>
+  const save = (result: DiscoveryResult, candidateName?: string) =>
     startTransition(async () => {
       const r = await saveDiscoveryResultAction({
         searchProjectId: projectId,
         url: result.url,
         title: result.title,
         snippet: result.snippet,
-        source: result.source,
+        provider: result.provider,
+        engine: result.engine,
         query: result.query,
+        providerRank: result.providerRank,
+        retrievedAt: result.retrievedAt,
         candidateName: candidateName || undefined,
       });
       if (r.ok) {
@@ -166,9 +169,9 @@ function ResultRow({
   onSave,
   disabled,
 }: {
-  result: ResearchResult;
+  result: DiscoveryResult;
   savedState?: string;
-  onSave: (result: ResearchResult, candidateName?: string) => void;
+  onSave: (result: DiscoveryResult, candidateName?: string) => void;
   disabled: boolean;
 }) {
   const [asCandidate, setAsCandidate] = useState(false);
@@ -191,6 +194,9 @@ function ResultRow({
           </p>
           {result.snippet && (
             <p className="mt-1 text-[12.5px] text-ink-muted">
+              <span className="mr-1.5 rounded border border-edge2 px-1 py-0.5 text-[10px] uppercase tracking-wide text-ink-faint">
+                unverified snippet · #{result.providerRank}
+              </span>
               {result.snippet}
             </p>
           )}

@@ -27,6 +27,7 @@ import {
   successProfiles,
 } from "@/lib/db/schema";
 import { loadProjectContext } from "@/lib/ai/context";
+import { listCandidateSourceEvidence } from "./discovery";
 import { runAiTask } from "@/lib/ai/run";
 import { channelsTask } from "@/lib/ai/tasks/channels";
 import { closePlanTask } from "@/lib/ai/tasks/close-plan";
@@ -279,9 +280,22 @@ export async function generateEvidenceAlignment(
     .select({ url: candidateSources.url })
     .from(candidateSources)
     .where(eq(candidateSources.candidateId, candidateId));
+  const sourceEvidence = await listCandidateSourceEvidence(db, candidateId);
   const { output, meta, warnings } = await runAiTask(
     evidenceAlignmentTask,
-    { project, candidate, sourceUrls: sources.map((s) => s.url) },
+    {
+      project,
+      candidate,
+      sourceUrls: sources.map((s) => s.url),
+      sourceEvidence: sourceEvidence.map((item) => ({
+        sourceUrl: item.sourceUrl,
+        title: item.title,
+        snippet: item.snippet,
+        provider: item.provider,
+        verificationStatus: item.verificationStatus,
+        retrievedAt: item.retrievedAt,
+      })),
+    },
     { db, searchProjectId: candidate.searchProjectId, candidateId },
   );
   await db

@@ -15,13 +15,7 @@ import { generateHmBriefAction } from "@/lib/actions/guidance";
 import { ArtifactMeta } from "@/components/artifact-meta";
 import { GenerateButton } from "@/components/generate-button";
 import { HmFeedbackForm } from "@/components/hm-feedback-form";
-import {
-  ProvenanceBadge,
-  Card,
-  EmptyState,
-  PageHeader,
-  Tag,
-} from "@/components/ui";
+import { ProvenanceBadge, Card, PageHeader, Tag } from "@/components/ui";
 
 export const metadata = { title: "Guide" };
 

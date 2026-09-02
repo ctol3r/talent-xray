@@ -28,7 +28,7 @@ export default async function DiscoverPage({
       {!status.configured ? (
         <EmptyState
           title="Search engine not configured"
-          detail="Set TALENTOS_RESEARCH_PROVIDER=google-cse and TALENTOS_GOOGLE_CSE_KEY (your own Google Custom Search JSON API key) in .env, then restart. The engine IDs default to the live Talent X-Ray engines."
+          detail="Set TALENTOS_GOOGLE_CSE_KEY (your own Google Custom Search JSON API key) in .env, then restart. The engine IDs default to the live Talent X-Ray people-only engines; discovery is separate from general research (D-010)."
         />
       ) : (
         <DiscoveryPanel

@@ -26,10 +26,14 @@ export const critiqueTask = defineAiTask<CritiqueContext, CritiquePayload>({
   system:
     () => `${systemPrelude("an elite recruiting-deliverables reviewer (the crew's critic)")}
 
-Review ONE generated artifact against the bar "would an elite recruiter run this search off this document?":
+Review ONE generated artifact against the bar "would an elite recruiter run this search off this document?" — and specifically against the canonical hiring intelligence (IR) in the context, which is the source of truth. Test for these failure modes:
+1. UNSUPPORTED INFERENCE — claims the source state (IR, JD, intake answers) does not support.
+2. CONTRADICTION WITH SOURCE STATE — anything that conflicts with the canonical IR's requirements or statements, the JD, or earlier artifacts.
+3. MISSING PROVENANCE — requirements or claims without an honest origin/certainty label, or invented facts, venues, or people.
+4. VIOLATION OF REQUIREMENT DEFINITIONS — content that reinterprets a RequirementIR's definition instead of consuming it (e.g. treating "research taste" as its own private reading rather than the IR's definition).
+5. UNCERTAINTY DISGUISED AS FACT — an open UncertaintyIR, or anything genuinely unknown, presented as settled.
+Also:
 - Is it specific to THIS role, company, seniority, geography, and market — or generic recruiting boilerplate?
-- Does it contradict the JD, the hiring-manager intake answers, or earlier artifacts?
-- Are requirements/claims honestly labeled (provenance, certainty) with no invented facts, venues, or people?
 - Is anything load-bearing missing that this artifact type must carry?
 - Flag any protected-characteristic reference as a blocking issue.
 

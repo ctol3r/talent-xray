@@ -1,16 +1,25 @@
-import type { ResearchProvider, ResearchResult } from "./provider";
+import type {
+  CandidateDiscoveryProvider,
+  DiscoveryResult,
+} from "./discovery-provider";
 
 /**
- * Google Programmable Search provider (W8) backed by the two live
- * Talent X-Ray engines — people-only search: profiles, portfolios, CVs,
- * credential registries, rosters. Company marketing pages and job postings
- * are absent by construction of the engines themselves.
+ * TalentXRayCandidateDiscoveryProvider — the two live Talent X-Ray Google
+ * Programmable Search engines. People-only search by construction of the
+ * engines themselves: profiles, portfolios, CVs, credential registries,
+ * rosters; company marketing pages and job postings are absent.
+ *
+ * This is a CANDIDATE DISCOVERY provider (D-010), never the general
+ * ResearchProvider — a people index must not answer market-research
+ * questions.
  *
  * Product rules honored here, not just in the UI:
  * - This calls Google's JSON API; it NEVER fetches, crawls, or scrapes a
  *   result page.
  * - Results are returned in memory only. Persisting anything is a separate,
  *   per-result, user-explicit act (services/discovery.ts).
+ * - Result position is preserved as providerRank (1-based) — no synthetic
+ *   relevance score is derived from it.
  */
 export const CSE_ENGINES = {
   /** "Talent X-Ray · Core" — 50-domain universal spine. */
@@ -19,6 +28,8 @@ export const CSE_ENGINES = {
   reach: "918bc00e18d0c46e5",
 } as const;
 export type CseEngine = keyof typeof CSE_ENGINES;
+
+export const TALENT_XRAY_PROVIDER_NAME = "talent-xray";
 
 interface CseItem {
   link?: string;
@@ -59,7 +70,7 @@ export function mapCseItems(
   payload: CseResponse,
   query: string,
   engine: CseEngine,
-): ResearchResult[] {
+): DiscoveryResult[] {
   const retrievedAt = new Date().toISOString();
   return (payload.items ?? [])
     .filter((item): item is CseItem & { link: string } => Boolean(item.link))
@@ -67,24 +78,25 @@ export function mapCseItems(
       url: item.link,
       title: item.title,
       snippet: item.snippet,
-      source: `google-cse:${engine}`,
+      provider: TALENT_XRAY_PROVIDER_NAME,
+      engine,
       query,
       retrievedAt,
-      relevance: 1 - index * 0.05,
+      providerRank: index + 1,
     }));
 }
 
-export function createGoogleCseProvider(
+export function createTalentXRayDiscoveryProvider(
   fetchImpl: FetchLike = fetch,
-): ResearchProvider {
+): CandidateDiscoveryProvider {
   const key = process.env.TALENTOS_GOOGLE_CSE_KEY ?? "";
   return {
-    name: "google-cse",
+    name: TALENT_XRAY_PROVIDER_NAME,
     configured: key !== "",
     async search(query, options) {
       if (!key) {
         throw new Error(
-          "Google CSE key not configured — set TALENTOS_GOOGLE_CSE_KEY in .env.",
+          "Talent X-Ray discovery key not configured — set TALENTOS_GOOGLE_CSE_KEY in .env.",
         );
       }
       const engine: CseEngine = options?.engine === "reach" ? "reach" : "core";
@@ -94,7 +106,7 @@ export function createGoogleCseProvider(
       const payload = (await response.json()) as CseResponse;
       if (!response.ok) {
         throw new Error(
-          `Google CSE error (HTTP ${response.status}): ${payload.error?.message ?? "unknown"}`,
+          `Talent X-Ray discovery error (HTTP ${response.status}): ${payload.error?.message ?? "unknown"}`,
         );
       }
       return mapCseItems(payload, query, engine);

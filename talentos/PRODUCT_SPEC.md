@@ -29,6 +29,14 @@ evidence**, **how** do I execute, and **what's next**. Output shows source,
 reasoning summary, confidence, assumptions, missing information, and (where
 useful) an alternative interpretation. No unexplained AI output.
 
+The search has **one canonical interpretation** (ARCHITECTURE.md §4): the JD
+and hiring-manager statements are distilled into typed hiring-intelligence
+objects (`HiringNeedIR` → `HiringIntentIR` with explicit `RequirementIR`s →
+`SuccessIR`/`EvidenceIR`/`TalentPopulationIR`/`SearchPlanIR`). Every agent
+and module consumes those objects; vague phrases like "research taste"
+become defined, evidence-specified requirements or open uncertainties — not
+strings each feature reinterprets.
+
 ## Primary object
 
 A **SearchProject** represents one hiring need (e.g. "Center for AI Safety —
@@ -72,7 +80,10 @@ workspace and share its context.
   publication quality and research taste; a physician intake asks about board
   status and call; an AE intake asks about quota and ACV). Sessions end with
   "Let me summarize the search as I now understand it" playback and "What did
-  I get wrong?".
+  I get wrong?". **Live intake is adaptive**: the IntakeReasoner captures each
+  hiring-manager statement verbatim, updates the requirement set, and asks the
+  question that reduces the most consequential open uncertainty next — the
+  full question bank is a resource, not a script.
 - **Success Profile** keeps per-criterion provenance
   (`jd | hiring_manager | recruiter | market_research | model_inference`).
 - **Market Intelligence** never fabricates precise labor-market numbers; the
@@ -156,11 +167,13 @@ the real provider.
 
 **Phase 1 (this build):** everything above, local, manual candidate entry,
 draft-only outreach.
-**Phase 2:** automated web research (ResearchProvider impls: Exa/Tavily/
-Serper/Google CSE — Talent X-Ray's engines are a natural connector), candidate
-discovery connectors, Gmail (explicit-send only), calendar, resume parsing
-improvements, semantic search (pgvector or vector abstraction), browser
-importer.
+**Phase 2:** automated **general** web research (ResearchProvider impls:
+Exa/Tavily/Serper/full-web CSE), further CandidateDiscoveryProvider
+implementations beyond the Talent X-Ray engines, Gmail (explicit-send only),
+calendar, resume parsing improvements, semantic search (pgvector or vector
+abstraction), browser importer. Research and candidate discovery stay
+separate provider boundaries (D-010): a people-only engine never answers
+market-research questions.
 
 ## Ultimate product test
 

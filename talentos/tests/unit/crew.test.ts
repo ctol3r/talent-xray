@@ -56,8 +56,9 @@ describe("crew orchestration (mock provider)", () => {
       await import("@/lib/services/crew");
     const jobs = await kickoffCrew(db, projectId);
     expect(jobs).toHaveLength(CREW_PROJECT_TASKS.length);
+    // The crew opens by deriving the canonical IR; everything else waits.
     const runnable = await runnableJobs(db, projectId);
-    expect(runnable.map((j) => j.task)).toEqual(["role_intelligence"]);
+    expect(runnable.map((j) => j.task)).toEqual(["hiring_need"]);
   });
 
   it("advances the whole crew to done, critiquing every artifact", async () => {
@@ -69,9 +70,9 @@ describe("crew orchestration (mock provider)", () => {
       (j) => j.status !== "cancelled",
     );
     expect(jobs.every((j) => j.status === "done")).toBe(true);
-    // Every reviewable artifact got a critique.
+    // Every reviewable artifact got a critique (incl. the IR itself).
     const critiqued = jobs.filter((j) => j.critique);
-    expect(critiqued.length).toBeGreaterThanOrEqual(7);
+    expect(critiqued.length).toBeGreaterThanOrEqual(8);
   });
 
   it("runs exactly one revision pass when the critic says revise", async () => {
@@ -135,6 +136,6 @@ describe("crew orchestration (mock provider)", () => {
     // Only project-scope jobs are restarted; the candidate run stays done.
     expect(cancelled.length).toBe(0); // previous project jobs were all done
     const queued = jobs.filter((j) => j.status === "queued");
-    expect(queued.length).toBe(9);
+    expect(queued.length).toBe(10);
   });
 });

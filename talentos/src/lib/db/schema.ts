@@ -4,7 +4,7 @@
  * Deliberately absent everywhere (enforced by tests/unit/fair-hiring.test.ts):
  * columns or JSON keys for protected characteristics.
  */
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type {
   Breadth,
   CrewJobStatus,
@@ -22,7 +22,10 @@ import type {
   ProvenanceSource,
   RubricLevel,
   SearchStatus,
+  SourceEvidenceProvenance,
+  VerificationStatus,
 } from "@/lib/core/enums";
+import type { CanonicalIntelligence } from "@/lib/core/ir";
 import type {
   CandidateProfilePayload,
   CandidatePacketPayload,
@@ -302,6 +305,43 @@ export const candidateSources = sqliteTable("candidate_sources", {
   createdAt: createdAt(),
 });
 
+/**
+ * Explicit evidence about where a candidate was found (D-010). A discovery
+ * snippet lands here — labeled unverified — never in candidates.resumeText.
+ * providerRank preserves the provider's result order; it is not a score.
+ */
+export const candidateSourceEvidence = sqliteTable(
+  "candidate_source_evidence",
+  {
+    id: uuid(),
+    candidateId: text("candidate_id")
+      .notNull()
+      .references(() => candidates.id),
+    searchProjectId: text("search_project_id")
+      .notNull()
+      .references(() => searchProjects.id),
+    sourceUrl: text("source_url").notNull(),
+    sourceType: text("source_type"),
+    title: text("title"),
+    snippet: text("snippet"),
+    retrievedAt: text("retrieved_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+    query: text("query"),
+    provider: text("provider"),
+    providerRank: integer("provider_rank"),
+    verificationStatus: text("verification_status")
+      .notNull()
+      .$type<VerificationStatus>()
+      .default("unverified"),
+    provenance: text("provenance")
+      .notNull()
+      .$type<SourceEvidenceProvenance>()
+      .default("search_result"),
+    createdAt: createdAt(),
+  },
+);
+
 export const candidateEvidence = sqliteTable("candidate_evidence", {
   id: uuid(),
   candidateId: text("candidate_id")
@@ -543,8 +583,26 @@ export const researchSources = sqliteTable("research_sources", {
   retrievedAt: text("retrieved_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
-  relevance: real("relevance"),
   createdAt: createdAt(),
+});
+
+/**
+ * Canonical hiring-intelligence document (D-011): one row per search,
+ * zod-typed by src/lib/core/ir.ts. intent.statements is the append-only
+ * verbatim ManagerStatement log, owned by the service layer.
+ */
+export const hiringIntelligence = sqliteTable("hiring_intelligence", {
+  id: uuid(),
+  searchProjectId: text("search_project_id")
+    .notNull()
+    .unique()
+    .references(() => searchProjects.id),
+  payload: text("payload", { mode: "json" })
+    .notNull()
+    .$type<CanonicalIntelligence>(),
+  meta: text("meta", { mode: "json" }).$type<GenerationMeta>(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 export const aiGenerations = sqliteTable("ai_generations", {

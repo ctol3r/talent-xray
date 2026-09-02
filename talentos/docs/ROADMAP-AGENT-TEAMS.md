@@ -78,9 +78,13 @@ draft with the same audit trail as today.
 
 - **W7 — Crew orchestration**: outbox → job queue; crew kickoff UI; worker
   fan-out with critic pass; crew status + coordinator notes per search.
-- **W8 — Discovery execution**: `ResearchProvider` backed by the two
+- **W8 — Discovery execution**: live people search backed by the two
   Talent X-Ray CSEs (BYO Google key); run composed strings in-app, save
-  only user-picked URLs; candidate-from-result flow.
+  only user-picked URLs; candidate-from-result flow. _Corrected 2026-09-02
+  (D-010): the engines are `TalentXRayCandidateDiscoveryProvider`, a
+  separate boundary from the general `ResearchProvider`; saved snippets are
+  unverified `candidate_source_evidence`, never resume text; provider rank
+  is preserved, never mapped to a synthetic relevance score._
 - **W9 — Two-sided guidance**: HM brief page + review queue + feedback
   capture; candidate packet generator; Next Best Action v2 (three
   threads).

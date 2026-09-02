@@ -176,3 +176,91 @@ the human in the loop as the real reviewer).
 **Tradeoffs.** Sequential dependency chain favors context quality over
 wall-clock; the critic doubles per-artifact model calls; outreach has no
 critic pass yet (persists as rows, not a single artifact).
+
+## D-010 — Research and candidate discovery are separate provider boundaries
+
+**Decision.** Two vendor-neutral interfaces, corrected from the first W8 cut
+(owner review, 2026-09-02):
+
+- `ResearchProvider` (`src/lib/research/provider.ts`) searches the
+  **general/public information environment**: profession research, company
+  research, market intelligence, associations, conferences, compensation,
+  regulations, job boards, current facts. Default implementation is the
+  honest `none` provider — no general-research backend is configured yet,
+  and nothing is faked.
+- `CandidateDiscoveryProvider` (`src/lib/research/discovery-provider.ts`)
+  searches **specifically for potential people/candidates**: profiles,
+  portfolios, publications, registries, rosters. The Talent X-Ray Google
+  CSE integration is `TalentXRayCandidateDiscoveryProvider`
+  (`src/lib/research/talent-xray.ts`) — the first implementation, never the
+  general research path.
+
+Three correctness rules land with the split:
+
+1. A discovery-result snippet is **evidence about a source, not a resume**.
+   Saving a result as a candidate writes a `candidate_source_evidence` row
+   (sourceUrl, sourceType, title, snippet, retrievedAt, query, provider,
+   providerRank, verificationStatus, provenance) — never
+   `candidates.resumeText`. Snippets are `unverified` until a recruiter
+   verifies them against the source.
+2. **No synthetic relevance.** Result position is preserved as
+   `providerRank` (1-based). The old `1 - index * 0.05` score fabricated a
+   relevance the provider never asserted; it is removed, along with
+   `research_sources.relevance`. If TalentOS later scores candidate
+   relevance, that will be a separate, transparent evaluation against
+   `SearchPlanIR`/`EvidenceIR` — never a disguised rank.
+3. The engines' people-only construction is a property of the
+   **discovery** provider; general research must not inherit it.
+
+**Alternatives.** One provider interface with a "mode" flag (rejected: the
+type system should make "use the people engine for market research" hard to
+write, not a runtime footgun); mapping rank to a normalized score (rejected:
+fabricated precision).
+
+**Tradeoffs.** General research is honestly unavailable until a real
+`ResearchProvider` (Exa/Tavily/Serper/full-web CSE) is wired; agents record
+that gap as uncertainty instead of pretending.
+
+## D-011 — Canonical hiring-intelligence IR; agents consume it, not the raw JD
+
+**Decision.** One canonical, typed intelligence model per search
+(`src/lib/core/ir.ts`, stored in `hiring_intelligence`):
+`ManagerStatement`, `HiringNeedIR`, `HiringIntentIR`, `RequirementIR`,
+`SuccessIR`, `EvidenceIR`, `TalentPopulationIR`, `SearchPlanIR`,
+`UncertaintyIR`, `ContradictionIR`. The JD is raw input, interpreted
+**once** into the IR; downstream agents (crew specialists included) receive
+the IR as the source of truth in their rendered context and are instructed
+not to re-derive requirements from the JD independently. Vague
+hiring-manager phrases ("research taste") must become explicit
+`RequirementIR` objects — label, verbatim statement, concrete definition,
+evidence spec, status — or an open `UncertaintyIR`, never an unexplained
+string.
+
+Adaptive intake (`IntakeReasoner`, `src/lib/services/intelligence.ts`) runs
+the loop: ManagerStatement → extract claims → update requirements →
+identify ambiguity / contradiction / consequential uncertainty → select the
+highest-information next question → capture the answer verbatim → update
+`HiringIntentIR`. The full generated question bank (D-003 intake sessions)
+remains available; live intake prioritizes reducing consequential
+uncertainty over asking every question. Statements are append-only and
+service-owned — the model never rewrites the statement log.
+
+The crew critic tests every artifact against the IR for: unsupported
+inference, contradiction with source state, missing provenance, violation
+of requirement definitions, and uncertainty disguised as fact.
+
+**Alternatives.** Keep per-artifact reinterpretation of the JD (rejected:
+agents drifted into independent readings of the same phrase); normalize the
+IR into many tables (rejected per D-003: one zod-typed document per search
+is the contract).
+
+**Tradeoffs.** One more generation step (JD → IR) before the crew runs;
+existing artifacts (role intelligence, success profile) overlap with the IR
+until they are re-pointed at it — recorded as migration debt, not hidden.
+
+## D-012 — `/talentos` is a temporary incubation location
+
+See `docs/ADR-001-talentos-incubation.md`: TalentOS is logically
+independent, will be extracted to its own repository once the IR and
+provider boundaries are stable, and Talent X-Ray will then integrate
+exclusively through `CandidateDiscoveryProvider`.

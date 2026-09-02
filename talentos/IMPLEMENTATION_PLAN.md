@@ -105,6 +105,45 @@ candidate_packets, candidates.hm_feedback). Acceptance:
 tests/unit/guidance.test.ts (4 tests) + W9 thread tests in
 next-best-action.test.ts; full verify green (71 unit tests, build).
 
+## W8.5 — Architectural correction: IR boundary (owner stop-order 2026-09-02)
+
+Owner review halted W8 feature expansion at the current safe checkpoint;
+W7 and the Talent X-Ray integration are kept. No W9 continuation or new
+product surfaces until this correction's acceptance tests pass.
+
+- [x] Docs first: ARCHITECTURE.md §§4–5, DATA_MODEL.md, PRODUCT_SPEC.md,
+      DECISIONS.md D-010/D-011/D-012, docs/ADR-001-talentos-incubation.md
+- [x] Provider split: `ResearchProvider` (general information environment,
+      honest `none` default) vs `CandidateDiscoveryProvider` (people
+      search); Talent X-Ray CSEs become `TalentXRayCandidateDiscoveryProvider`
+      — never the general research path; vendor-neutral registries
+- [x] Discovery evidence model: `candidate_source_evidence` (migration 0003) — snippet/title/query/provider/providerRank/verificationStatus/
+      provenance; snippets never written to `candidates.resumeText`;
+      best-effort backfill moves previously masqueraded snippets over
+- [x] Synthetic relevance removed: `providerRank` (1-based position)
+      preserved; `research_sources.relevance` dropped
+- [x] Canonical IR (`src/lib/core/ir.ts` + `hiring_intelligence` table):
+      ManagerStatement, HiringNeedIR, HiringIntentIR, RequirementIR,
+      SuccessIR, EvidenceIR, TalentPopulationIR, SearchPlanIR,
+      UncertaintyIR, ContradictionIR; rendered first in every agent context
+      as the source of truth
+- [x] Adaptive intake: IntakeReasoner loop (statement → claims →
+      requirement updates → ambiguity/contradiction/consequential
+      uncertainty → highest-information next question → verbatim capture →
+      HiringIntentIR revision)
+- [x] Crew: specialists consume the shared IR via context; critic tests
+      unsupported inference, contradiction with source state, missing
+      provenance, requirement-definition violations, uncertainty disguised
+      as fact
+- [x] Acceptance: `tests/unit/ir-pipeline.test.ts` — CAIS golden path
+      JD → HiringNeedIR → HiringIntentIR → (research boundary) → adaptive
+      intake → clarified RequirementIRs ("research taste" becomes an
+      explicit, defined requirement) → SuccessIR → EvidenceIR →
+      TalentPopulationIR → SearchPlanIR → composed discovery queries →
+      TalentXRayCandidateDiscoveryProvider (stubbed fetch) → explicit save
+      with unverified source evidence; plus updated
+      tests/unit/discovery.test.ts
+
 ## W10 — Virtual crew in the Lite artifact (CLOSED 2026-09-01)
 
 TalentOS Lite gains the crew treatment: "Run crew on this search"

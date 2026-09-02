@@ -1,6 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import type { Db } from "@/lib/db/client";
 import {
+  hiringIntelligence,
   hiringManagers,
   intakeSessions,
   jobDescriptions,
@@ -11,6 +12,7 @@ import {
   sourcingStrategies,
   successProfiles,
 } from "@/lib/db/schema";
+import type { CanonicalIntelligence } from "@/lib/core/ir";
 import type {
   IntakePayload,
   MarketResearchPayload,
@@ -23,6 +25,8 @@ export interface ProjectContext {
   project: typeof searchProjects.$inferSelect;
   jdText?: string;
   hiringManagerNames: string[];
+  /** Canonical IR (D-011) — when present, the source of truth for agents. */
+  intelligence?: CanonicalIntelligence;
   roleIntelligence?: RoleIntelligencePayload;
   intake?: IntakePayload;
   successProfile?: SuccessProfilePayload;
@@ -55,6 +59,10 @@ export async function loadProjectContext(
     .select()
     .from(hiringManagers)
     .where(eq(hiringManagers.searchProjectId, projectId));
+  const [intelligence] = await db
+    .select()
+    .from(hiringIntelligence)
+    .where(eq(hiringIntelligence.searchProjectId, projectId));
   const [intel] = await db
     .select()
     .from(roleIntelligence)
@@ -88,6 +96,7 @@ export async function loadProjectContext(
     hiringManagerNames: managers.map((m) =>
       m.title ? `${m.name} (${m.title})` : m.name,
     ),
+    intelligence: intelligence?.payload,
     roleIntelligence: intel?.payload,
     intake: intake?.payload,
     successProfile: profile?.payload,
@@ -146,6 +155,13 @@ export function renderProjectContext(ctx: ProjectContext): string {
 
   return [
     section("Search project", facts),
+    section(
+      "Canonical hiring intelligence (IR) — SOURCE OF TRUTH",
+      ctx.intelligence
+        ? "This is the search's single canonical interpretation (requirements, uncertainties, contradictions, statements — see linked ids). Consume these objects as-is: do NOT re-derive requirements from the raw job description below, which is reference material only. Treat open uncertainties as unknowns, never as facts; a requirement's verbatim `statement` and its `definition` are both binding.\n" +
+            JSON.stringify(ctx.intelligence, null, 1)
+        : "",
+    ),
     section("Job description (verbatim)", ctx.jdText),
     section(
       "Role intelligence (recruiter-reviewed)",

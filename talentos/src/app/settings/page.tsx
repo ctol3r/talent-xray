@@ -2,6 +2,7 @@ import path from "node:path";
 import { PRODUCT_NAME } from "@/lib/product";
 import { getProviderStatus } from "@/lib/ai/provider";
 import { getResearchProvider } from "@/lib/research/provider";
+import { getCandidateDiscoveryProvider } from "@/lib/research/discovery-provider";
 import { Card, KeyValue, PageHeader, Tag } from "@/components/ui";
 
 export const metadata = { title: "Settings" };
@@ -9,6 +10,7 @@ export const metadata = { title: "Settings" };
 export default function SettingsPage() {
   const provider = getProviderStatus();
   const research = getResearchProvider();
+  const discovery = getCandidateDiscoveryProvider();
   const dbPath = path.resolve(
     process.env.TALENTOS_DATABASE_PATH ?? "./data/talentos.db",
   );
@@ -39,17 +41,34 @@ export default function SettingsPage() {
             faked.
           </p>
         </Card>
-        <Card title="Research provider">
+        <Card title="Candidate discovery provider">
+          <div className="mb-2">
+            <Tag tone={discovery.configured ? "ok" : "neutral"}>
+              {discovery.configured
+                ? discovery.name
+                : `${discovery.name} (not configured)`}
+            </Tag>
+          </div>
+          <p className="text-[13px] text-ink-muted">
+            People search only — profiles, portfolios, publications, registries,
+            rosters. Backed by the two live people-only engines (set
+            TALENTOS_GOOGLE_CSE_KEY to enable). Result pages are never fetched;
+            saved snippets stay labeled unverified until you check the source.
+          </p>
+        </Card>
+        <Card title="Research provider (general)">
           <div className="mb-2">
             <Tag tone={research.configured ? "ok" : "neutral"}>
               {research.configured ? research.name : "none (Phase 2)"}
             </Tag>
           </div>
           <p className="text-[13px] text-ink-muted">
-            Live web research (market data, channel verification, candidate
-            discovery) arrives in Phase 2 behind the ResearchProvider
-            abstraction. Until then, model-generated venue and market claims are
-            labeled inferred/unknown — never verified.
+            General web research (market data, associations, conferences,
+            compensation, regulations, channel verification) is a separate
+            boundary from candidate discovery — a people-only engine never
+            answers research questions. Until a real research provider is wired,
+            model-generated venue and market claims are labeled inferred/unknown
+            — never verified.
           </p>
         </Card>
         <Card title="Data">
