@@ -199,6 +199,9 @@ describe("CAIS golden path through the canonical IR (mock provider)", () => {
     expect(queries.length).toBeGreaterThan(0);
     // The composed strings carry the plan's concepts and x-ray targets.
     expect(queries.some((q) => q.query.includes("site:"))).toBe(true);
+    // Overlapping title lists never produce a redundant OR group.
+    const balanced = queries.find((q) => q.breadth === "balanced");
+    expect(balanced?.query.match(/"Research Scientist"/g)).toHaveLength(1);
     expect(queries.some((q) => /"Research Scientist"/.test(q.query))).toBe(
       true,
     );

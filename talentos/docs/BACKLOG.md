@@ -33,3 +33,11 @@ string-expansion task:
   `sample` runtime capability (Claude calls billed to the owner's
   subscription, no API key) with `db` persistence — candidate for a
   lightweight on-the-go surface; the local app stays the system of record.
+- **Composer OR-group de-duplication**: `composeQueries` concatenates
+  titles + alternate titles (and must-have + any-of) without de-duplicating,
+  so overlapping model output yields `("A" OR "B" OR "A" …)`. The IR path
+  (`composeDiscoveryQueries`) de-duplicates before calling the composer;
+  the String Lab path (`generateSearchStrings`) does not yet. Fixing it
+  inside the composer touches the validated reference port (root CLAUDE.md:
+  do not redesign), so do it as a pre-composer normalization shared by both
+  callers. Found by the W8.5 golden-path walkthrough, 2026-09-02.

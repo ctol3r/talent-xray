@@ -187,9 +187,24 @@ export interface PlannedQueries {
   queries: ComposedQuery[];
 }
 
+/** Case-insensitive de-duplication, also dropping anything in `against`. */
+function dedupeTerms(terms: string[], against: string[] = []): string[] {
+  const seen = new Set(against.map((t) => t.trim().toLowerCase()));
+  const out: string[] = [];
+  for (const term of terms) {
+    const key = term.trim().toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(term.trim());
+  }
+  return out;
+}
+
 /**
  * Deterministic: SearchPlanIR query plans → the validated composer →
- * concrete, always-visible query strings. No model call.
+ * concrete, always-visible query strings. No model call. Lists are
+ * de-duplicated here (alternates against primaries, adjacents against
+ * both) so a model that repeats a title never yields a redundant OR group.
  */
 export async function composeDiscoveryQueries(
   db: Db,
@@ -200,20 +215,29 @@ export async function composeDiscoveryQueries(
   if (!plan) {
     throw new Error("No SearchPlanIR yet — derive the search plan first.");
   }
-  return plan.queryPlans.map((queryPlan) => ({
-    segmentLabel: queryPlan.segmentLabel,
-    linkedRequirementIds: queryPlan.linkedRequirementIds,
-    rationale: queryPlan.rationale,
-    queries: composeQueries({
-      titles: queryPlan.titles,
-      alternateTitles: queryPlan.alternateTitles,
-      adjacentTitles: queryPlan.adjacentTitles,
-      mustHave: queryPlan.mustHaveTerms,
-      anyOf: queryPlan.anyOfTerms,
-      credentials: queryPlan.credentials,
-      locations: queryPlan.locations,
-      companies: [],
-      exclusions: queryPlan.exclusions,
-    }),
-  }));
+  return plan.queryPlans.map((queryPlan) => {
+    const titles = dedupeTerms(queryPlan.titles);
+    const alternateTitles = dedupeTerms(queryPlan.alternateTitles, titles);
+    const adjacentTitles = dedupeTerms(queryPlan.adjacentTitles, [
+      ...titles,
+      ...alternateTitles,
+    ]);
+    const mustHave = dedupeTerms(queryPlan.mustHaveTerms);
+    return {
+      segmentLabel: queryPlan.segmentLabel,
+      linkedRequirementIds: queryPlan.linkedRequirementIds,
+      rationale: queryPlan.rationale,
+      queries: composeQueries({
+        titles,
+        alternateTitles,
+        adjacentTitles,
+        mustHave,
+        anyOf: dedupeTerms(queryPlan.anyOfTerms, mustHave),
+        credentials: dedupeTerms(queryPlan.credentials),
+        locations: dedupeTerms(queryPlan.locations),
+        companies: [],
+        exclusions: dedupeTerms(queryPlan.exclusions),
+      }),
+    };
+  });
 }
