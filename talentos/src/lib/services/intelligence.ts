@@ -29,6 +29,7 @@ import { loadProjectContext } from "@/lib/ai/context";
 import { runAiTask } from "@/lib/ai/run";
 import { hiringNeedTask } from "@/lib/ai/tasks/hiring-need";
 import { intakeReasonTask } from "@/lib/ai/tasks/intake-reason";
+import { applyIntakeHygiene } from "@/lib/domain/intake-hygiene";
 import { personasTask } from "@/lib/ai/tasks/personas";
 import { searchPlanTask } from "@/lib/ai/tasks/search-plan";
 import {
@@ -176,13 +177,18 @@ export async function recordManagerStatement(
     { db, searchProjectId: input.searchProjectId },
   );
   const reasonedAt = new Date().toISOString();
+  // W12 S-2/S-3/S-4: deterministic backstops behind the reasoner's own
+  // rules — see src/lib/domain/intake-hygiene.ts.
+  const hygienic = applyIntakeHygiene(output, stored, project.jdText, [
+    ...stored.statements,
+  ]);
   const intent: HiringIntentIR = {
     need: {
       ...stored.need,
       claims: [...stored.need.claims, ...output.extractedClaims],
     },
-    requirements: output.requirements,
-    uncertainties: output.uncertainties,
+    requirements: hygienic.requirements,
+    uncertainties: hygienic.uncertainties,
     contradictions: output.contradictions,
     statements: stored.statements.map((s) =>
       s.id === statement.id ? { ...s, reasonedAt } : s,

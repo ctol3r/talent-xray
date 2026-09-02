@@ -204,6 +204,10 @@ extraction recommendation.
 - [x] **Full-corpus run** — all 53 conversations, 251 hand-fulfilled
       generations, instrument corrections re-scored, taxonomy and
       extraction recommendation revised (`REPORT.md` §10–§14)
+- [x] **S-1…S-5 fixed** (owner instruction) — five reasoner rules, three
+      with deterministic backstops in `src/lib/domain/intake-hygiene.ts`;
+      10 regression tests; `--project-hygiene` scores the code half against
+      the stored corpus (`REPORT.md` §15)
 
 Outcome (`eval/w12/REPORT.md`): all four hard targets met at baseline —
 provenance 100 %, silent mutation 0, protected-trait violations 0,
@@ -227,6 +231,17 @@ like a schema gap and is a behaviour rule. Two instrument defects fixed and
 regression-tested; a third (no sex/gender text-scan pattern) found by
 inspection and fixed. S-1…S-5 are deliberately left unfixed: applying them
 and re-running would mean hand-authoring 251 generations with knowledge of
-every check, which is the corpus-optimisation this wave forbade. Extraction:
-still not yet — the schema question is now well settled, but the reasoner's
-behaviour behind the boundary is not.
+every check, which is the corpus-optimisation this wave forbade.
+S-1…S-5 were then fixed on the owner's instruction (`REPORT.md` §15): five
+rules in the intake reasoner, three of them backed by deterministic
+corrections in `src/lib/domain/intake-hygiene.ts` (origin follows the
+statement; market comparisons cannot be closed from inside the company;
+withdrawn requirements are removed rather than demoted), with 10 regression
+tests. The code half is scored against the stored corpus by
+`pnpm eval:w12 --run full --project-hygiene`: **14 failures removed, 0
+introduced**, provenance 99.4 % → 99.9 % and must_not_exist 86.5 % → 94.6 %.
+The prompt half is the larger half and cannot be scored without an API key,
+so `false_signal_recall` and `contradiction_detection` remain unproven. No
+schema field was added, which is the same verdict the corpus reached
+independently. Extraction: still not yet — the schema question is well
+settled, but fixes that have not been measured are not evidence.

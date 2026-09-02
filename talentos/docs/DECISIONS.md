@@ -359,3 +359,47 @@ ignored by every consumer that does not need them; the risk is that
 `contested` goes stale if a reconciliation is never recorded, which is why
 the reasoner is instructed to clear it only on a statement that settles the
 disagreement.
+
+## D-015 — Withdrawn requirements are removed, not demoted; provenance and market comparisons are enforced in code
+
+**Decision.** (W12 full-corpus evaluation, 2026-09-02.) Three rules about
+`HiringIntentIR`, each stated to the intake reasoner and each backstopped
+deterministically in `src/lib/domain/intake-hygiene.ts`:
+
+1. **A withdrawn requirement leaves the requirement set.** When a hiring
+   manager takes a requirement away it is removed, not demoted to
+   `preferred` and not relabelled "(withdrawn)". The withdrawal survives in
+   `extractedClaims` and the verbatim statement log.
+2. **`statement` and `origin` move together.** A manager restating a
+   job-description requirement in their own words takes both, plus
+   `assertedBy`. A manager merely explaining what a JD phrase means leaves
+   the statement verbatim and puts their words in `definition`.
+3. **A comparison with the outside market cannot be resolved from inside
+   the company.** The manager stating their own figure answers one side;
+   the uncertainty stays open, and only market evidence closes it.
+
+**Evidence.** All five `must_not_exist` violations in the full corpus were
+rule 1 (g-01, j-05, x-01, e-01, i-05, across five occupations); `preferred`
+legitimately raises a candidate's review priority, so a withdrawn
+requirement kept that way still shapes the search. Rule 2 accounts for all
+8 provenance failures and 11 of the 26 `requirement_recall` failures — one
+mechanism, two metrics. Rule 3 accounts for 13 of the 23
+`uncertainty_detection` failures, all of them an unknown being converted
+into a fact. `eval/w12/REPORT.md` §12.1 (S-2, S-3, S-4) and §15.
+
+**No schema change.** Rule 1 looked like a `RequirementIR` gap — a
+`withdrawn` status — and is not one: the information is preserved in the
+claim log, and the intake prompt already forbids re-deriving requirements
+from the job description, so removal loses nothing. Adding a fifth enum
+value would have been a field added on suggestion rather than on evidence,
+which D-014 already refused for three other candidates.
+
+**Tradeoff.** Rules stated to a model are not guarantees, so each is paired
+with a narrow deterministic correction that can be unit-tested: the
+backstops only act on unambiguous shapes (a requirement _named_ withdrawn,
+a statement verbatim from a different source, a comparison uncertainty
+resolved on a turn it was open). Projected onto the stored corpus they
+remove 14 failures and introduce none
+(`pnpm eval:w12 --run full --project-hygiene`). The two fixes with no
+deterministic shape — populating false signals, and recording a manager's
+own counterexample as a contradiction — remain prompt-only and unmeasured.

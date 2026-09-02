@@ -3,6 +3,8 @@
  *   pnpm eval:w12 --run baseline [--subset stratified | --only a-01,b-02]
  *                 [--replan-only a-01,b-02] [--judge] [--provider session|mock]
  *                 [--rescore]   re-measure stored snapshots, no model calls
+ *                 [--project-hygiene] project the deterministic S-2/S-3/S-4
+ *                               backstops onto stored snapshots (no model calls)
  * Resumable: re-run the same --run after fulfilling parked session requests.
  * Results: eval/w12/results/<run>/ (state.json, snapshots/, REPORT.md, summary.json).
  */
@@ -46,6 +48,34 @@ const selected = only
     ? corpus.filter((c) => STRATIFIED_SUBSET.includes(c.id))
     : corpus;
 if (selected.length === 0) throw new Error("no conversations selected");
+
+// --project-hygiene answers "what would the deterministic half of the W12
+// fixes have changed on the outputs we already have?" — no model calls, and
+// no claim about the prompt rules, which need a fresh run.
+if (flag("project-hygiene")) {
+  const { projectHygiene } = await import("../eval/w12/project-hygiene");
+  const { METRIC_ORDER } = await import("../eval/w12/report");
+  const p = projectHygiene(selected, resultsDir);
+  const pct = (t?: { pass: number; total: number }) =>
+    t && t.total > 0
+      ? `${t.pass}/${t.total} (${((t.pass / t.total) * 100).toFixed(1)} %)`
+      : "—";
+  console.log(`# W12 hygiene projection — ${runName}\n`);
+  console.log("| Metric | Stored run | With backstops |");
+  console.log("| --- | --- | --- |");
+  for (const m of METRIC_ORDER) {
+    const b = p.before[m];
+    const a = p.after[m];
+    if (!b && !a) continue;
+    const moved = b && a && (b.pass !== a.pass || b.total !== a.total);
+    console.log(`| ${m}${moved ? " **" : ""} | ${pct(b)} | ${pct(a)} |`);
+  }
+  console.log(`\n## Failures removed (${p.fixed.length})\n`);
+  for (const f of p.fixed) console.log(`- ${f}`);
+  console.log(`\n## Failures introduced (${p.introduced.length})\n`);
+  for (const f of p.introduced) console.log(`- ${f}`);
+  process.exit(p.introduced.length === 0 ? 0 : 1);
+}
 
 // --rescore re-measures a finished run's stored snapshots with the current
 // checks and makes no model calls. Used after an instrument correction.

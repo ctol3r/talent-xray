@@ -160,7 +160,7 @@ export function summarize(
   };
 }
 
-const METRIC_ORDER: MetricId[] = [
+export const METRIC_ORDER: MetricId[] = [
   "provenance_preservation",
   "silent_mutation",
   "protected_traits",

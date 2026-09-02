@@ -499,3 +499,82 @@ them and re-running would mean I author 251 more generations knowing exactly
 which check each one has to satisfy — the corpus-optimisation the wave was
 built to avoid. The measurement above is worth more than an improved score
 obtained that way.
+
+---
+
+## 15. S-1 … S-5 fixed
+
+Owner instruction, after §14 was written: fix them now. Done. §14 argued for
+deferring, and that argument was about _scoring_, not about shipping the
+fixes — so the fixes are in and the scoring caveat below stands unchanged.
+
+### What each fix is
+
+| Defect                                                           | Fix                                                                                                                                                                                                                                                                                                                                                                                      | Where         |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| **S-1** false signals not populated                              | Reasoner rule: for every must-have and disqualifier, name what a candidate could show that _looks_ like this requirement and is not it. Empty because none exist is fine; empty because the work was skipped is a defect. Five of the corpus's own misses are quoted in the prompt as the shapes to look for.                                                                            | prompt        |
+| **S-2** origin drifts when a JD requirement is re-asserted       | Reasoner rule: `statement` and `origin` move together — a manager restating a requirement in their own words takes both, plus `assertedBy`; a manager only _explaining_ a JD phrase leaves the statement verbatim and puts their words in `definition`. Backstop: `reconcileRequirementOrigins()` flips any `origin: "jd"` whose statement is verbatim from a manager statement instead. | prompt + code |
+| **S-3** market comparisons resolved from inside the company      | Reasoner rule: a comparison to the outside market cannot be closed by anyone inside it; record the manager's figure and keep the uncertainty open. Backstop: `keepMarketComparisonsOpen()` reverts such a resolution and keeps the manager's answer on the consequence, since it is one side of the comparison.                                                                          | prompt + code |
+| **S-4** withdrawn requirements demoted to `preferred`            | Reasoner rule: remove them outright — `preferred` raises review priority, so a withdrawn requirement kept that way still shapes the search, and nothing is lost because the withdrawal is in the claim log. Backstop: `dropWithdrawnRequirements()` drops any requirement _named_ withdrawn.                                                                                             | prompt + code |
+| **S-5** rule-versus-example contradictions patched away silently | Reasoner rule: a manager's own example that refutes their own stated rule is a `ContradictionIR`. Amending the requirement is usually right in substance; doing it quietly hides the thing the recruiter has to take back into the room.                                                                                                                                                 | prompt        |
+
+Code: `src/lib/domain/intake-hygiene.ts`, applied in
+`recordManagerStatement`, tested in `tests/unit/intake-hygiene.test.ts`
+(10 cases, each drawn from a conversation that actually failed, including
+the negative cases — a genuinely JD-sourced requirement, an ordinary
+uncertainty, a live requirement that merely _mentions_ a withdrawal).
+
+### What can be measured, and what cannot
+
+The prompt rules are the larger half of every fix and **cannot** be scored
+without a fresh corpus run against an API key — for the reason §14 gave and
+this wave was built on: a hand-fulfilled re-run would have me authoring 251
+generations knowing exactly which check each has to satisfy. That number
+would be worthless.
+
+The deterministic backstops **can** be scored, because they are code
+applied to outputs that already exist. `pnpm eval:w12 --run full
+--project-hygiene` applies them to the stored snapshots and re-checks, with
+no model calls:
+
+| Metric                  | Stored run         | With backstops         |
+| ----------------------- | ------------------ | ---------------------- |
+| provenance_preservation | 1406/1414 (99.4 %) | **1407/1408 (99.9 %)** |
+| must_not_exist          | 32/37 (86.5 %)     | **35/37 (94.6 %)**     |
+| uncertainty_detection   | 85/108 (78.7 %)    | **89/108 (82.4 %)**    |
+| requirement_recall      | 205/231 (88.7 %)   | **206/231 (89.2 %)**   |
+| every other metric      | —                  | unchanged              |
+
+**14 failures removed, 0 introduced.** The remaining gaps are exactly the
+ones that need the prompt half:
+
+- provenance: one case left (`g-04`), where the requirement's origin is
+  already `manager_statement` and the statement is a _paraphrase_ of what
+  the manager said. No backstop can fix a paraphrase; the rule can.
+- must_not_exist: two left (`e-01` "Public-company CFO title", `i-05`
+  "Television appearances") — withdrawn in substance but not labelled
+  withdrawn, so only the reasoner can know.
+- `false_signal_recall` (54.8 %) and `contradiction_detection` (76.9 %) do
+  not move at all, because S-1 and S-5 are prompt-only. They are the two
+  fixes with the most to gain and no evidence yet that they work.
+
+One honest note on the projection: turns are chained, each scored against
+the _patched_ previous turn, which is what a real run would see. Scored
+against unpatched predecessors it reports one extra failure — a withdrawn
+requirement "disappearing" on the turn after the one that removed it —
+which is an artifact of the projection, not a defect. Both variants are
+reproducible from the committed code.
+
+### Effect on the extraction condition
+
+§14's condition is unchanged and now more precisely stated: fix S-1…S-5
+(done), then re-run the full corpus **with an API key** and a judge on a
+**different model**. Extract if that run holds `false_signal_recall` above
+85 %, `provenance_preservation` at 100 %, and `RequirementIR` unchanged.
+Two of the three now have a plausible path: provenance is at 99.9 % from
+code alone with one paraphrase case left to the rule, and `RequirementIR`
+did not move for these fixes — no field was added, which is the same
+verdict §13 reached. `false_signal_recall` remains entirely unproven.
+
+**Recommendation is unchanged: do not extract yet.** Fixes that have not
+been measured are not evidence, and these have not been measured.
