@@ -243,7 +243,13 @@ highest-information next question → capture the answer verbatim → update
 `HiringIntentIR`. The full generated question bank (D-003 intake sessions)
 remains available; live intake prioritizes reducing consequential
 uncertainty over asking every question. Statements are append-only and
-service-owned — the model never rewrites the statement log.
+service-owned — the model never rewrites the statement log. The loop is
+two-phase so it is resumable under the session provider (found in the first
+live run, 2026-09-02): the statement is persisted verbatim first (no
+`reasonedAt`), then reasoned over; a re-run with the same text reuses the
+stored statement, so the reasoner's prompt hash — and the parked session
+request — stay stable. Recording a different statement while one is still
+un-reasoned is refused rather than silently stacked.
 
 The crew critic tests every artifact against the IR for: unsupported
 inference, contradiction with source state, missing provenance, violation

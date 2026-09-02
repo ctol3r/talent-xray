@@ -116,39 +116,67 @@ export const recordManagerStatementInput = z.object({
 });
 
 /**
- * The adaptive-intake loop (IntakeReasoner): append the statement verbatim,
- * run one reasoning turn, merge the updated requirement/uncertainty/
- * contradiction sets, bump the revision, and return the next question.
+ * The adaptive-intake loop (IntakeReasoner), in two durable phases so it
+ * is resumable under the session provider:
+ *   1. Append the statement verbatim and persist it immediately (no
+ *      `reasonedAt`). A re-run with the same text reuses that stored
+ *      statement instead of minting a new id — so the reasoner's prompt,
+ *      and therefore the session request hash, is stable.
+ *   2. Run one reasoning turn over the stored statement, merge the updated
+ *      requirement/uncertainty/contradiction sets, stamp `reasonedAt`, bump
+ *      the revision, and return the next question.
  */
 export async function recordManagerStatement(
   db: Db,
-  input: z.infer<typeof recordManagerStatementInput>,
+  rawInput: z.input<typeof recordManagerStatementInput>,
 ) {
+  const input = recordManagerStatementInput.parse(rawInput);
   const row = await requireIntent(db, input.searchProjectId);
   const current = row.payload.intent;
-  const statement: ManagerStatement = {
+  const last = current.statements.at(-1);
+  const pending =
+    last && !last.reasonedAt && last.text === input.text ? last : undefined;
+  const statement: ManagerStatement = pending ?? {
     id: crypto.randomUUID(),
     at: new Date().toISOString(),
     speaker: input.speaker,
     text: input.text,
     context: input.context,
   };
+  if (!pending) {
+    if (last && !last.reasonedAt) {
+      throw new Error(
+        "The previous hiring-manager statement has not been reasoned over yet — re-run it before recording another.",
+      );
+    }
+    await persist(db, input.searchProjectId, {
+      ...row.payload,
+      intent: { ...current, statements: [...current.statements, statement] },
+    });
+  }
+  const stored: HiringIntentIR = pending
+    ? current
+    : { ...current, statements: [...current.statements, statement] };
+
   const project = await loadProjectContext(db, input.searchProjectId);
   const { output, meta, warnings } = await runAiTask(
     intakeReasonTask,
-    { project, intent: current, statement },
+    { project, intent: stored, statement },
     { db, searchProjectId: input.searchProjectId },
   );
+  const reasonedAt = new Date().toISOString();
   const intent: HiringIntentIR = {
     need: {
-      ...current.need,
-      claims: [...current.need.claims, ...output.extractedClaims],
+      ...stored.need,
+      claims: [...stored.need.claims, ...output.extractedClaims],
     },
     requirements: output.requirements,
     uncertainties: output.uncertainties,
     contradictions: output.contradictions,
-    statements: [...current.statements, statement],
-    revision: current.revision + 1,
+    statements: stored.statements.map((s) =>
+      s.id === statement.id ? { ...s, reasonedAt } : s,
+    ),
+    revision: stored.revision + 1,
   };
   await persist(db, input.searchProjectId, { ...row.payload, intent }, meta);
   return { intent, nextQuestion: output.nextQuestion, warnings };

@@ -144,7 +144,7 @@ unexplained string that each downstream agent interprets its own way.
 intake loop:
 
 ```
-ManagerStatement (verbatim)
+ManagerStatement (verbatim, persisted BEFORE reasoning — resumable)
   → extract claims                (provenance: manager_statement)
   → update RequirementIRs         (clarify, add, re-classify)
   → identify ambiguity            (UncertaintyIR: ambiguity)

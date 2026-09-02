@@ -44,6 +44,11 @@ export const managerStatementSchema = z.object({
   text: z.string(),
   /** What prompted it — usually the question that was asked. */
   context: z.string().optional(),
+  /**
+   * Set once the intake reasoner has consumed the statement. Absent means
+   * appended but not yet reasoned over (e.g. parked on a session request).
+   */
+  reasonedAt: z.string().optional(),
 });
 export type ManagerStatement = z.infer<typeof managerStatementSchema>;
 

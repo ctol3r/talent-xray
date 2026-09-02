@@ -54,7 +54,9 @@ ${JSON.stringify(
     requirements: ctx.intent.requirements,
     uncertainties: ctx.intent.uncertainties,
     contradictions: ctx.intent.contradictions,
-    priorStatements: ctx.intent.statements,
+    priorStatements: ctx.intent.statements.filter(
+      (s) => s.id !== ctx.statement?.id,
+    ),
   },
   null,
   1,
