@@ -64,6 +64,52 @@ with `providerRank` and no relevance field; explicit save produced
 `candidate.resumeText = null` and one `candidate_source_evidence` row
 (`unverified`, `search_result`, rank 1).
 
+## Intake loop, turn 2 (RS vs RE) — continued the same session run
+
+**Question asked** (the reasoner's next question from turn 1): one seat or
+two; does an artifact-only builder with no first-author paper clear the bar,
+and are they an RE or an RS here.
+
+**HM statement (scripted fixture, verbatim):** "One seat, and the title
+follows the person — we would hire either. The line for us: a Research
+Scientist generates the research questions and is judged on the research
+they originate; a Research Engineer is judged on whether the infrastructure
+and evals they build let the whole team run experiments it could not run
+before — but both own projects end to end here, nobody is a service
+function. And yes, someone whose whole record is an adopted benchmark or
+eval harness with no first-author paper absolutely clears the bar; we would
+call them a Research Engineer, and some of our strongest people came in
+exactly that way. The one profile that does not clear it is a maintainer
+who only ships what others designed."
+
+**Reasoner turn** (`revision: 1 → 2`, both statements `reasoned`; the
+resumable two-phase loop held under the session provider on first try):
+
+- 6 claims extracted with `manager_statement` provenance.
+- `Strong empirical research record` → `explicit` / `origin:
+manager_statement`, definition rewritten as two fully equivalent arms
+  (first-author top-venue research the person originated, OR an adopted
+  benchmark/eval harness with no paper); "maintaining what others
+  designed" added as a false signal.
+- New requirement, kind **`disqualifier`**: "End-to-end project ownership
+  (not maintainer-only)" — the HM's one stated non-qualifier made explicit.
+- Resolved: `unc-rs-vs-re` (one seat, title follows the person; RS
+  originates questions, RE builds what lets the team run new experiments),
+  `unc-equivalent-impact` (artifact-only builders clear the bar outright),
+  `unc-phd-weight` (marked as inferred from the statement, not verbatim).
+- Still open: 8 (6 consequential) — scale bar, priority area,
+  capacity-vs-capability, mission assessment, seniority, compensation band,
+  relocation, exemplar artifacts.
+- Next question: which of the four areas the hire is for and whether the
+  need is capacity or a missing capability ("what's the experiment you
+  can't run right now?") — targeting priority area, capacity-vs-capability,
+  and exemplar artifacts; relocation and the scale bar queued next.
+
+Consequence for the plan: SearchPlanIR from turn 1 sequenced the GitHub
+x-ray on segment 2 as "only after the HM confirms artifact-only builders
+clear the bar" — that condition is now met, and the plan should be
+re-derived (it is stale relative to revision 2).
+
 ## Defect found and fixed by this run
 
 `recordManagerStatement` minted a fresh statement id/timestamp on every
