@@ -5,3 +5,6 @@ data/
 drizzle/
 test-results/
 playwright-report/
+
+# W12 evaluation run artifacts: machine-written by `pnpm eval:w12`
+eval/w12/results/
