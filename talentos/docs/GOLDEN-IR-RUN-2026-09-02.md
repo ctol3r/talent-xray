@@ -298,6 +298,54 @@ by structured fellowship pipelines, and needs the timing question answered befor
 asked. Its do-not-say list forbids promising a held seat, since that is exactly what the
 next question is about.
 
+## Turn 7 — the benchmark-cycle deadline (revision 7, sixth re-plan)
+
+**Question asked (from turn 6).** How hard is the deadline behind the hire — is there a
+date by which the person must be producing — and would a seat be held for a strong
+originator who cannot start until they finish? The band stayed parked.
+
+**Scripted hiring-manager answer (fixture).** Cycle submissions close the first week of
+March, so anyone carrying a benchmark into it must be producing by 1 December; that date
+is the constraint, not a requisition close. The seat will be held once, at a higher bar,
+for a candidate who is _clearly_ the strongest originator seen — not merely equal —
+skipping the cycle with them; never for two people, and never as something a recruiter
+may promise in an email. The degree in hand is not required: starting in December and
+defending afterwards is fine, with reasonable writing time. Availability must be asked
+early, not inferred from a graduation date. Headcount is one seat this fiscal year, with
+a likely second next year that must not be sourced against.
+
+**What the reasoner did.** Nine claims extracted. One new requirement — _Producing by
+1 December (waivable once, for a clearly stronger originator)_ — deliberately typed
+`preferred` rather than `must_have`, because the hiring manager reserved a waiver; its
+false signals name the exact mistakes available (inferring a start date from an
+enrollment year, treating a not-yet-graduated candidate as unavailable, putting the date
+in a search string). Two consequential uncertainties resolved: student availability and
+the headcount/timeline. One new uncertainty opened and immediately marked
+**non-consequential** — what "clearly stronger" means for the deferred-start exception —
+recorded with the note that the hiring manager reserved that call, so it is not mistaken
+for a recruiter-side gap. This is the first turn that closed more uncertainty than it
+opened.
+
+**Re-plan (sixth `derive_search_plan`, against revision 7).** Outcomes are now dated
+(90 days reads as end of February from a 1 December start; the release horizon is the
+March cycle close). A thirteenth `EvidenceIR` item covers availability and says plainly
+that it is asked, not researched. Every query plan's rationale gained the rule that no
+graduation-year or availability phrasing may enter a string. Sequencing lost the
+conditional that had hedged the student plan — the timing risk that justified deferring
+it is gone, so it runs third outright — and gained three operational lines: open every
+first conversation with the availability question, outreach may say the degree is not
+required but may never promise a held seat, and one seat means filling it rather than
+building a bench.
+
+**Personas rebuilt (third time).** Again three personas from the same 27 findings with
+no new web search. The student persona is where the turn lands: its concerns now include
+the assumption that a defence date disqualifies them, its proof points carry the
+degree-not-required fact, its tone guidance puts the timing answer in the _first_ message
+rather than a later conversation, and its do-not-say list gained two entries drawn
+directly from the hiring manager's constraint — never promise a held seat or a deferred
+start, and never imply the December date is generally negotiable. The exception exists,
+but it is not the recruiter's to offer.
+
 ## W11 — research-gated personas and outreach (live, session providers)
 
 Owner request the same day: "what happened to email outreach drafts? …
