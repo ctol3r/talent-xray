@@ -6,9 +6,9 @@ schemas as the mock acceptance test (`tests/unit/ir-pipeline.test.ts`).
 Discovery transport was stubbed (no Google key in the run environment); the
 composed queries and the request to the live Core engine id are real.
 
-Model turns: 9 (`derive_hiring_need`, `intake_reasoning` propose,
-`intake_reasoning` statement ×4, `derive_search_plan` ×3). All nine passed
-zod validation and the fair-hiring scan with no warnings.
+Model turns: 11 (`derive_hiring_need`, `intake_reasoning` propose,
+`intake_reasoning` statement ×5, `derive_search_plan` ×4). All eleven
+passed zod validation and the fair-hiring scan with no warnings.
 
 ## What the run demonstrated
 
@@ -195,6 +195,39 @@ narrow, GitHub x-ray:
 ("Research Scientist" OR "Research Engineer") benchmark (evaluation OR evals OR "dangerous capabilities" OR "capability evaluation" OR "language models" OR LLM) -recruiter site:github.com
 ```
 
+## Intake loop, turn 5 (scale bar) + re-plan
+
+**HM statement (scripted fixture, verbatim):** "Orchestration is the real
+bar. Running evals across a whole family of open-weight models reproducibly
+— sweeps, checkpoints, the harness — is exactly what we do daily, and that
+is required from day one. Multi-node training is not: we fine-tune
+occasionally, mostly small, and anyone who has run large eval programs picks
+it up in a quarter with our infra team. So: orchestration must-have,
+distributed training trainable. Don't filter on 'distributed training' —
+you'd throw away the benchmark builders."
+
+**Reasoner turn** (`revision: 4 → 5`): 4 claims extracted; the JD's
+either/or requirement "Distributed training or large-scale experiment
+orchestration" became **"Large-scale evaluation orchestration"**
+(`must_have`, `origin: manager_statement`, with "distributed-training
+experience offered in place of orchestration" as a false signal) plus a new
+**"Multi-node distributed training (trainable)"** requirement of kind
+`trainable` whose false signals include treating its absence as
+disqualifying; `unc-scale-bar` resolved. 15 uncertainties: 11 resolved, 4
+open (seniority, compensation band, mission assessment, agentic-gap
+weight). Next question: seniority (is a finishing PhD / postdoc who
+originated an adopted benchmark in scope?) and the compensation band —
+together they set the title set, the adjacent-segment decision, and which
+segments are closable.
+
+**Re-plan (fourth `derive_search_plan`, against revision 5).** Query terms
+unchanged (there was deliberately no training term); EvidenceIR's
+orchestration item rewritten to the HM's bar and an 11th item added for the
+trainable requirement stating it must not lower review priority; the
+PhD/postdoc adjacent segment's tradeoff no longer cites the scale bar;
+sequencing step 6 now runs that variant as soon as seniority admits it and
+tells screening to probe orchestration, never distributed training.
+
 ## Defect found and fixed by this run
 
 `recordManagerStatement` minted a fresh statement id/timestamp on every
@@ -209,6 +242,6 @@ pending is refused). Pinned by `tests/unit/intake-session.test.ts`.
 
 A real hiring manager (the statement is the fixture's scripted answer), a
 live Google key for the discovery transport, and the remaining intake turns
-(scale bar, seniority, compensation band, mission assessment, agentic-gap
-weight) — the loop stopped after four statements by choice, not because
-nothing was open. The search plan is current as of revision 4.
+(seniority, compensation band, mission assessment, agentic-gap weight) —
+the loop stopped after five statements by choice, not because nothing was
+open. The search plan is current as of revision 5.
