@@ -246,6 +246,58 @@ live Google key for the discovery transport, and the remaining intake turns
 the loop stopped after five statements by choice, not because nothing was
 open. The search plan is current as of revision 5.
 
+## Turn 6 — seniority (revision 6, fifth re-plan)
+
+**Question asked (from turn 5).** Two bundled: what "Senior" means here — years, having
+led a thread, or working unsupervised — and whether a finishing PhD candidate or a
+postdoc who originated an adopted benchmark is in scope; plus the compensation band.
+
+**Scripted hiring-manager answer (fixture, not a real hiring manager).** "Senior" is
+HR's word, not the manager's, and must not be read as years. The bar is having owned a
+research thread end to end: picked the problem, made the design calls, shipped it,
+defended it when pushed back on. A finishing PhD candidate or postdoc who originated a
+benchmark others now run is squarely in scope and among the strongest profiles, because
+originating a benchmark beside a thesis is the taste signal itself. Out regardless of
+tenure: eight years executing someone else's evaluation agenda, never choosing what to
+measure. The written floor is one independent, shipped, adopted artifact. Do not screen
+on "Senior" in a title; do not screen out students. The band was deliberately deferred —
+the manager is retrieving it from ops and asked for a day.
+
+**What the reasoner did.** Eight claims extracted. One new `RequirementIR` — _Owned a
+research thread end to end (the actual seniority bar)_, must-have, with evidence spec
+(repository creator, self-initiated project distinct from the thesis, public defence of
+design decisions) and false signals (Senior/Staff titles, years, maintainer status,
+student status used to exclude). Three existing requirements rewritten: the
+maintainer-only disqualifier now names the long-tenure-without-origination profile
+explicitly; the benchmark-construction and empirical-record requirements gained
+career-stage parity and title-as-false-signal language. `unc-seniority` resolved;
+`unc-comp-band` left open with its consequence rewritten to record the manager's own
+deferral. One new consequential uncertainty opened by the answer:
+`unc-student-availability` — the newly primary student pool is calendar-bound, and the
+benchmark-cycle deadline may not admit a spring finish. Next question asks how hard that
+deadline is and whether a seat would be held, and parks the band.
+
+**Re-plan (fifth `derive_search_plan`, against revision 6).** The PhD/postdoc pool moved
+from `adjacentSegments` to a third primary `TalentPopulationIR` segment, with its own
+query plan where student titles are primary rather than adjacent, so the narrow and
+balanced variants target them directly instead of only appearing in the broad pass. A
+new exclusions entry states the anti-filter explicitly ("NOT an exclusion, stated to
+prevent one: career stage"), and every query plan's rationale now records that no years
+or "Senior" term may be added. Sequencing runs the student plan third, ahead of the
+LinkedIn pass, with an explicit note that the surface will under-serve it — students are
+visible by what they shipped, not by a title — and a fallback position if the deadline
+turns out to be hard. A twelfth `EvidenceIR` item covers the new requirement.
+
+**Personas rebuilt.** The re-plan dropped the stored personas, as designed (they are
+bound to the population segments). Re-deriving produced three personas from the same 27
+stored findings — no new web search, because the new segment's plan vocabulary
+de-duplicates against segment 1's, so the deterministic query set was unchanged. The new
+persona, _Thesis-adjacent benchmark originators_, is built around the failure mode this
+turn created: an audience that self-selects out of anything labelled "Senior", is courted
+by structured fellowship pipelines, and needs the timing question answered before it is
+asked. Its do-not-say list forbids promising a held seat, since that is exactly what the
+next question is about.
+
 ## W11 — research-gated personas and outreach (live, session providers)
 
 Owner request the same day: "what happened to email outreach drafts? …
