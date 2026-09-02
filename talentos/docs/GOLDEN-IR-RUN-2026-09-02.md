@@ -6,8 +6,8 @@ schemas as the mock acceptance test (`tests/unit/ir-pipeline.test.ts`).
 Discovery transport was stubbed (no Google key in the run environment); the
 composed queries and the request to the live Core engine id are real.
 
-Model turns: 7 (`derive_hiring_need`, `intake_reasoning` propose,
-`intake_reasoning` statement ×3, `derive_search_plan` ×2). All seven passed
+Model turns: 9 (`derive_hiring_need`, `intake_reasoning` propose,
+`intake_reasoning` statement ×4, `derive_search_plan` ×3). All nine passed
 zod validation and the fair-hiring scan with no warnings.
 
 ## What the run demonstrated
@@ -160,6 +160,41 @@ is not visible in a search string. Segment 1 narrow, GitHub x-ray:
 ("Research Scientist" OR "Research Engineer") benchmark (evaluation OR evals OR "dangerous capabilities" OR "capability evaluation" OR "language models" OR LLM) ("San Francisco" OR "Bay Area" OR Berkeley) -recruiter site:github.com
 ```
 
+## Intake loop, turn 4 (relocation / on-site) + re-plan
+
+**HM statement (scripted fixture, verbatim):** "We will relocate the right
+person from anywhere in the US — we've done it several times and it's fast.
+International relocation is possible in principle but it has taken months
+in the past, and with the benchmark cycle as the deadline we can't count on
+it for this seat. On-site means on-site: at least four days a week in the
+office; occasional weeks away with collaborators are fine. No remote
+arrangement, even for someone exceptional."
+
+**Reasoner turn** (`revision: 3 → 4`): 4 claims extracted; "On-site in San
+Francisco" → "On-site in San Francisco (US-wide relocation supported)",
+definition rewritten (four on-site days minimum, no remote, US-wide
+sourcing geography, outside-US deprioritized for timeline rather than
+excluded); `unc-relocation` resolved. 15 uncertainties: 10 resolved, 5
+open (scale bar, mission assessment, seniority, compensation band,
+agentic-gap weight). Next question: the true distributed-training / scale
+bar and whether it is trainable — "decides whether a must-have term stays
+in every query plan".
+
+**Re-plan (third `derive_search_plan`, against revision 4).** Three query
+plans: "Benchmark and evaluation originators — Bay Area first" (unchanged
+vocabulary, location filter kept, run first for the deadline), the same
+segment "— US national" (no location term: location applied in review,
+not in the query, because a hub OR-group would be both noisy and
+incomplete), and "Agentic-evaluation infrastructure builders — US national"
+(the thin capability-gap population would be emptied by a Bay Area filter).
+Sequencing adds an early on-site-pattern confirmation and a revisit of the
+distributed-training must-have once the scale bar is answered. US-national
+narrow, GitHub x-ray:
+
+```
+("Research Scientist" OR "Research Engineer") benchmark (evaluation OR evals OR "dangerous capabilities" OR "capability evaluation" OR "language models" OR LLM) -recruiter site:github.com
+```
+
 ## Defect found and fixed by this run
 
 `recordManagerStatement` minted a fresh statement id/timestamp on every
@@ -174,6 +209,6 @@ pending is refused). Pinned by `tests/unit/intake-session.test.ts`.
 
 A real hiring manager (the statement is the fixture's scripted answer), a
 live Google key for the discovery transport, and the remaining intake turns
-(relocation, scale bar, seniority, compensation band, mission assessment,
-agentic-gap weight) — the loop stopped after three statements by choice,
-not because nothing was open. The search plan is current as of revision 3.
+(scale bar, seniority, compensation band, mission assessment, agentic-gap
+weight) — the loop stopped after four statements by choice, not because
+nothing was open. The search plan is current as of revision 4.
