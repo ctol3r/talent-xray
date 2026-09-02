@@ -153,3 +153,26 @@ artifact and one revision pass when the critic finds concrete defects
 "Run agents" chains evidence → outreach. Runs on the viewer's Claude
 account; intake answers stay human. Republished to the same artifact URL;
 script syntax + headless boot verified.
+
+## W11 — Audience personas + research-gated outreach (D-013)
+
+Owner request 2026-09-02. Acceptance: `tests/unit/research-personas.test.ts`
+(session research file handoff round trip; research gate refuses personas
+with no findings; mock research → personas cite only provided findings;
+outreach auto-derives personas and cites the persona), existing outreach
+paths (crew, smoke, e2e) green under the mock research provider, and a live
+session run where a Claude session performs real web searches for the CAIS
+audience and the outreach draft cites them.
+
+- [x] Docs: D-013, ARCHITECTURE §§4–5, DATA_MODEL, PRODUCT_SPEC, .env
+- [x] `ResearchProvider` implementations: `session` (file handoff) and
+      `mock` (watermarked); `none` default; defaults follow the model provider
+- [x] `AudiencePersonaIR` in `core/ir.ts`; `personas` on the canonical
+      document; `derive_personas` task with a research-grounding rule
+- [x] `services/research.ts`: deterministic audience queries from the IR,
+      findings persisted to `research_sources` with query + provider
+- [x] `derivePersonas` with the research gate; `generateOutreach` consumes
+      the persona + findings and derives personas when missing
+- [x] Outreach tab: personas card with research citations + "Research
+      audience & build personas"; candidate outreach card shows the persona
+- [x] Tests + full verify; live session demonstration recorded

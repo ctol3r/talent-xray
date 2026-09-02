@@ -317,6 +317,8 @@ export type OutreachStep = z.infer<typeof outreachStepSchema>;
 export const outreachSequencePayloadSchema = z.object({
   steps: z.array(outreachStepSchema),
   cadenceRationale: z.string(),
+  /** The research-backed AudiencePersonaIR the sequence was written against (D-013). */
+  personaLabel: z.string().optional(),
 });
 export type OutreachSequencePayload = z.infer<
   typeof outreachSequencePayloadSchema

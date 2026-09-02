@@ -245,3 +245,63 @@ live Google key for the discovery transport, and the remaining intake turns
 (seniority, compensation band, mission assessment, agentic-gap weight) —
 the loop stopped after five statements by choice, not because nothing was
 open. The search plan is current as of revision 5.
+
+## W11 — research-gated personas and outreach (live, session providers)
+
+Owner request the same day: "what happened to email outreach drafts? …
+persona creation of targeted audiences … make sure it researches the web
+before generating anything." Run against the same `ir-live` database
+(intent revision 5, plan v4) with `TALENTOS_MODEL_PROVIDER=session` and the
+research provider following it (`session`, D-013). The fulfilling Claude
+session performed the web searches itself; no API key was involved.
+
+**Audience research (5 deterministic queries from the IR, all visible and
+stored with every finding).** Company mission; one query per talent
+segment using the plan's own must-have / any-of vocabulary (benchmark ·
+evaluation · evals; evals · agentic · agent evaluation); compensation; what
+the audience values. Five `Research-<hash>.request.json` files were parked
+at once, fulfilled with one web search each, and 27 findings were stored in
+`research_sources` (`source = session-research`, `query`, `retrievedAt`;
+one URL shared by two queries was stored once). Individuals' pages that the
+searches returned (three biographies under the compensation query) were
+excluded by the fulfilling session per the request's scope rule —
+audience-level only, never a person.
+
+**Personas (`derive_personas`, one session request).** Two
+`AudiencePersonaIR`s, one per `TalentPopulationIR` segment:
+
+- _Benchmark originators — RS/RE who shipped an adopted eval_: values
+  owning a measurement problem end to end and public, adopted work;
+  concerns are service-function risk, nonprofit pay versus labs, on-site SF
+  relocation, and benchmark fragmentation; twelve citations (CAIS mission
+  and work pages, the benchmark-fragmentation and evaluation-vs-deployment
+  findings, the field's Iterators/Connectors talent analysis, the
+  compensation career review, the 2026 evaluation convenings).
+- _Agentic-eval infrastructure builders_: values cross-family harnesses and
+  bringing consistency to an inconsistent field; concerns are "plumbing vs
+  research", how much the agentic side leads (still open with the HM), and
+  competing Bay Area employers and fellowships; twelve citations.
+
+`groundPersonas` dropped 0 citations — every cited URL was a stored finding.
+
+**Outreach (`outreach_generation`, one session request)** for the fixture
+record "A. Researcher" (saved from the discovery walkthrough; no title, no
+recorded evidence). The draft records `personaLabel` = the benchmark
+originators persona, chosen from the discovery query the record was saved
+from, and says so in `cadenceRationale`. Seven steps (email 1 → breakup,
+LinkedIn connect, InMail) on a 0/4/9/15/24 cadence justified for a scarce,
+heavily recruited audience; no sentence claims familiarity with the
+person's work; nine citations point at research URLs (audience claims) and
+the rest at canonical-IR requirement ids (seat, relocation, agentic gap).
+Nothing was sent.
+
+**Gotcha found by this run.** Re-running `derivePersonas` after personas
+exist writes a _new_ session request: the rendered IR context now contains
+the stored personas, so the prompt hash changes. `generateOutreach` never
+re-derives (it checks for stored personas first); the scratch driver was
+fixed to do the same. Noted in `docs/BACKLOG.md`.
+
+**Not exercised here.** A real candidate with recorded evidence (the fixture
+record has none, so the drafts are deliberately non-personalized), the
+Outreach tab's persona card in a browser against this database, and a
+research provider other than a Claude session.

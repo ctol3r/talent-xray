@@ -62,8 +62,8 @@ through `CandidateDiscoveryProvider`.
 ├──────────────────────┼───────────────────────────────────────┤
 │ Domain (pure TS)     │ Providers                             │
 │  pipeline rules      │  ModelProvider: anthropic|session|mock│
-│  analytics/funnel    │  ResearchProvider: none (general web, │
-│  next-best-action    │    honest until a real impl exists)   │
+│  analytics/funnel    │  ResearchProvider: none|session|mock   │
+│  next-best-action    │    (general web; D-013 research gate) │
 │  search strings      │  CandidateDiscoveryProvider:          │
 │  fair-hiring guard   │    talent-xray (two live CSEs)        │
 │  canonical IR types  │                                       │
@@ -133,6 +133,7 @@ one `hiring_intelligence` row per search stores the composed document:
 | `EvidenceIR`         | Per requirement: what observable evidence would satisfy it, where that evidence lives publicly, what strong vs weak looks like.                                                                                                                                                            |
 | `TalentPopulationIR` | Who plausibly clears the bar: segments with where-they-are surfaces and honest supply estimates (`abundant/adequate/scarce/unknown`).                                                                                                                                                      |
 | `SearchPlanIR`       | How to find them: per-segment query plans (concepts + synonym groups + platforms + breadth, linked to requirement ids) that the deterministic composer turns into concrete strings.                                                                                                        |
+| `AudiencePersonaIR`  | One persona per talent segment for outreach: who they are, what they value, likely concerns, where they read, tone, proof points the seat offers, things not to say — each grounded in cited research findings. Audience-level only; never an individual.                                  |
 
 **The rule that matters:** vague hiring-manager language ("research taste",
 "strong communicator", "scrappy") must become an explicit `RequirementIR`
@@ -172,9 +173,19 @@ Two deliberately separate boundaries (`src/lib/research/`, D-010):
 - **`ResearchProvider`** (`provider.ts`) — the general/public information
   environment: profession research, company research, market intelligence,
   associations, conferences, compensation, regulations, job boards, current
-  facts. Default is the honest `none` provider; no general-research backend
-  ships yet, and agents record that gap as uncertainty instead of faking
-  findings. Findings land in `research_sources`.
+  facts. Implementations (D-013): `session` — a file-handoff mirror of the
+  session model provider where a Claude session performs the web search and
+  writes findings back; `mock` — watermarked fixtures for tests; `none` —
+  the honest default when nothing is configured (agents record the gap as
+  uncertainty instead of faking findings). Findings land in
+  `research_sources` with the query that produced them.
+- **Research gate (D-013).** Audience personas are generated only from
+  research findings, and outreach drafts are generated only from a
+  research-backed persona — `derivePersonas` runs the audience research
+  first and `generateOutreach` derives personas when missing, so nothing
+  outreach-shaped exists without the web having been researched. Research
+  is audience-level (segments, surfaces, company, mission); the system
+  never researches an individual candidate.
 - **`CandidateDiscoveryProvider`** (`discovery-provider.ts`) — people search
   only: profiles, portfolios, publications, registries, rosters.
   `TalentXRayCandidateDiscoveryProvider` (`talent-xray.ts`) is the first

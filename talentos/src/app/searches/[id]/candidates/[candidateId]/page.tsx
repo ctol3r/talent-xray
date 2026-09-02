@@ -208,10 +208,18 @@ export default async function CandidatePage({
             {!sequence ? (
               <p className="text-[13px] text-ink-muted">
                 Drafts a personalized multi-step sequence citing only recorded
-                evidence. Nothing sends automatically — copy out what you use.
+                evidence, written for the research-backed audience persona of
+                this candidate&apos;s segment (the audience is researched on the
+                web first when no personas exist yet — never the individual).
+                Nothing sends automatically — copy out what you use.
               </p>
             ) : (
               <div className="space-y-3">
+                {sequence.payload.personaLabel && (
+                  <Tag tone="neutral">
+                    persona: {sequence.payload.personaLabel}
+                  </Tag>
+                )}
                 <p className="text-[12.5px] text-ink-muted italic">
                   {sequence.payload.cadenceRationale}
                 </p>

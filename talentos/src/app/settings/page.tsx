@@ -57,18 +57,23 @@ export default function SettingsPage() {
           </p>
         </Card>
         <Card title="Research provider (general)">
-          <div className="mb-2">
+          <div className="mb-2 flex flex-wrap gap-2">
             <Tag tone={research.configured ? "ok" : "neutral"}>
-              {research.configured ? research.name : "none (Phase 2)"}
+              {research.configured ? research.name : "none"}
             </Tag>
+            {research.name === "mock" && <Tag tone="warn">mock mode</Tag>}
           </div>
           <p className="text-[13px] text-ink-muted">
-            General web research (market data, associations, conferences,
-            compensation, regulations, channel verification) is a separate
-            boundary from candidate discovery — a people-only engine never
-            answers research questions. Until a real research provider is wired,
-            model-generated venue and market claims are labeled inferred/unknown
-            — never verified.
+            General web research (audience research for outreach personas,
+            market data, associations, conferences, compensation, channel
+            verification) is a separate boundary from candidate discovery — a
+            people-only engine never answers research questions. Personas and
+            outreach drafts require it (D-013): &quot;session&quot; hands each
+            query to a Claude session through the outbox; &quot;mock&quot; is a
+            watermarked fixture for tests; unset follows the model provider.
+            Research is audience-level only — the app never researches an
+            individual candidate. Without a provider, model-generated venue and
+            market claims stay labeled inferred/unknown — never verified.
           </p>
         </Card>
         <Card title="Data">

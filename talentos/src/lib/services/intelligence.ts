@@ -15,6 +15,7 @@ import type { GenerationMeta } from "@/lib/core/enums";
 import type { Db } from "@/lib/db/client";
 import { hiringIntelligence } from "@/lib/db/schema";
 import {
+  type AudiencePersonaIR,
   type CanonicalIntelligence,
   type HiringIntentIR,
   type ManagerStatement,
@@ -28,7 +29,17 @@ import { loadProjectContext } from "@/lib/ai/context";
 import { runAiTask } from "@/lib/ai/run";
 import { hiringNeedTask } from "@/lib/ai/tasks/hiring-need";
 import { intakeReasonTask } from "@/lib/ai/tasks/intake-reason";
+import { personasTask } from "@/lib/ai/tasks/personas";
 import { searchPlanTask } from "@/lib/ai/tasks/search-plan";
+import {
+  getResearchProvider,
+  type ResearchProvider,
+} from "@/lib/research/provider";
+import {
+  audienceSegments,
+  researchAudience,
+  ResearchRequiredError,
+} from "./research";
 
 export async function getIntelligence(db: Db, projectId: string) {
   const [row] = await db
@@ -197,6 +208,8 @@ export async function deriveSearchPlan(
     db,
     searchProjectId: projectId,
   });
+  // Personas are bound to the population segments, so a re-plan drops them;
+  // derivePersonas rebuilds them from the stored research findings.
   const payload: CanonicalIntelligence = {
     intent: row.payload.intent,
     success: output.success,
@@ -268,4 +281,89 @@ export async function composeDiscoveryQueries(
       }),
     };
   });
+}
+
+/**
+ * Derive the hiring need when no canonical document exists yet, so a
+ * downstream step (personas, outreach) never runs against the raw JD.
+ */
+export async function ensureIntent(db: Db, projectId: string) {
+  const existing = await getIntelligence(db, projectId);
+  if (existing) return existing;
+  await deriveHiringNeed(db, projectId);
+  return requireIntent(db, projectId);
+}
+
+/**
+ * Provenance enforcement for personas (D-013): a citation may point only at
+ * a finding that was actually provided; anything else is fabricated and is
+ * dropped. A persona left with no citation is refused — the gate exists so
+ * that no persona rests on the model's "knowledge" of an audience.
+ */
+export function groundPersonas(
+  personas: AudiencePersonaIR[],
+  allowedUrls: Iterable<string>,
+): { personas: AudiencePersonaIR[]; droppedCitations: number } {
+  const allowed = new Set(allowedUrls);
+  let droppedCitations = 0;
+  const grounded = personas.map((persona) => {
+    const researchCitations = persona.researchCitations.filter((citation) =>
+      allowed.has(citation.url),
+    );
+    droppedCitations +=
+      persona.researchCitations.length - researchCitations.length;
+    if (researchCitations.length === 0) {
+      throw new Error(
+        `Persona "${persona.label}" cites no provided research finding — refusing to store an ungrounded persona.`,
+      );
+    }
+    return {
+      ...persona,
+      id: persona.id ?? crypto.randomUUID(),
+      researchCitations,
+      provenance: "research" as const,
+    };
+  });
+  return { personas: grounded, droppedCitations };
+}
+
+/**
+ * Research gate (D-013): audience research first (idempotent per query),
+ * then one AudiencePersonaIR per talent segment, each grounded in the
+ * stored findings. Audience-level only — never an individual candidate.
+ */
+export async function derivePersonas(
+  db: Db,
+  projectId: string,
+  options: { critique?: string[]; researchProvider?: ResearchProvider } = {},
+) {
+  await ensureIntent(db, projectId);
+  const provider = options.researchProvider ?? getResearchProvider();
+  const { findings } = await researchAudience(db, projectId, provider);
+  if (findings.length === 0) throw new ResearchRequiredError(provider.name);
+
+  const row = await requireIntent(db, projectId);
+  const ctx = await loadProjectContext(db, projectId, options.critique);
+  const segments = audienceSegments(ctx.project, row.payload);
+  const { output, meta, warnings } = await runAiTask(
+    personasTask,
+    {
+      project: ctx,
+      segments,
+      findings: findings.map((f) => ({
+        url: f.url,
+        title: f.title ?? undefined,
+        snippet: f.snippet ?? undefined,
+        query: f.query ?? "",
+      })),
+    },
+    { db, searchProjectId: projectId },
+  );
+  const { personas, droppedCitations } = groundPersonas(
+    output.personas,
+    findings.map((f) => f.url),
+  );
+  const latest = await requireIntent(db, projectId);
+  await persist(db, projectId, { ...latest.payload, personas }, meta);
+  return { personas, findings, droppedCitations, warnings };
 }

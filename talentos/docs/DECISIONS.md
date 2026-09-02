@@ -270,3 +270,51 @@ See `docs/ADR-001-talentos-incubation.md`: TalentOS is logically
 independent, will be extracted to its own repository once the IR and
 provider boundaries are stable, and Talent X-Ray will then integrate
 exclusively through `CandidateDiscoveryProvider`.
+
+## D-013 — Research before outreach: session research provider, audience personas, research gate
+
+**Decision.** (Owner request, 2026-09-02: "persona creation of targeted
+audiences" and "make sure it researches the web before generating
+anything".)
+
+1. `ResearchProvider` (D-010, general information environment) gets its
+   first two implementations. **`session`** mirrors the session model
+   provider (D-008): a research request file (`query`, `limit`,
+   `respondTo`) is written to the outbox and `ResearchPendingError` is
+   thrown; a Claude session performs the web search and writes findings
+   (url, title, snippet, retrievedAt) to the response path; the caller
+   re-runs. **`mock`** is a watermarked, deterministic fixture for tests
+   only. `none` stays the default when nothing is configured; when the model
+   provider is `session` or `mock` and the research provider is unset, it
+   defaults to the matching kind (same handoff channel, same test posture).
+   The people-only engines remain rejected here.
+2. **`AudiencePersonaIR`** joins the canonical IR: one persona per
+   `TalentPopulationIR` segment — who they are, what they value, their
+   likely concerns, where they read, tone guidance, proof points the seat
+   offers, things not to say — each grounded in cited research findings
+   (`research_sources` rows) plus the IR. Personas are audience-level; the
+   system never researches an individual candidate (privacy and fair-hiring
+   posture: personalization still comes only from recorded, job-related
+   evidence).
+3. **Research gate.** Personas cannot be generated without research
+   findings for the search (`ResearchRequiredError`); `derivePersonas` runs
+   the audience research first and fails honestly when no research
+   provider is configured. Outreach generation consumes the persona for the
+   candidate's segment and the cited findings, and derives personas (hence
+   research) automatically when missing — so nothing outreach-shaped is
+   generated without the web having been researched first. Research queries
+   are deterministic from the IR (segment, surfaces, priority vocabulary,
+   company, mission) and are stored with every finding; result pages are
+   never fetched by the app.
+
+**Alternatives.** (a) Let the model "use its knowledge" of the audience
+(rejected: unverifiable, exactly the fake-data failure mode). (b) Research
+the individual candidate before outreach (rejected: profile-page fetching
+is forbidden and person-level research is a privacy and fair-hiring
+hazard). (c) A soft gate that warns instead of blocking (rejected: the
+owner asked for a guarantee, not a suggestion).
+
+**Tradeoffs.** Outreach now depends on a research provider; with `none`
+configured it stops with a clear message instead of drafting. The session
+research provider is only as fresh as the fulfilling session's search; the
+mock research provider is never real research and is watermarked.

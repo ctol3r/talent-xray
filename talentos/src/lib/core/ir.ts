@@ -209,6 +209,35 @@ export const searchPlanIRSchema = z.object({
 });
 export type SearchPlanIR = z.infer<typeof searchPlanIRSchema>;
 
+/**
+ * AudiencePersonaIR (D-013): one persona per talent segment, for outreach.
+ * Audience-level only — never an individual. Every persona rests on cited
+ * research findings; a persona with no research behind it is not allowed
+ * to exist (the research gate in services/intelligence.ts).
+ */
+export const audiencePersonaIRSchema = z.object({
+  id: z.string().optional(),
+  label: z.string(),
+  /** The TalentPopulationIR segment (or fallback audience) this persona is for. */
+  segmentLabel: z.string(),
+  whoTheyAre: z.string(),
+  whatTheyValue: z.array(z.string()),
+  /** Likely concerns and objections about a move like this one. */
+  concerns: z.array(z.string()),
+  /** Surfaces and venues where this audience actually reads and talks. */
+  whereTheyRead: z.array(z.string()),
+  toneGuidance: z.string(),
+  /** What this seat genuinely offers them — drawn from the IR/JD, not invented. */
+  proofPoints: z.array(z.string()),
+  doNotSay: z.array(z.string()),
+  /** URLs of the provided research findings this persona rests on. */
+  researchCitations: z.array(
+    z.object({ url: z.string(), whatItSupports: z.string() }),
+  ),
+  provenance: irProvenanceSchema,
+});
+export type AudiencePersonaIR = z.infer<typeof audiencePersonaIRSchema>;
+
 /** The full canonical document stored per search (hiring_intelligence). */
 export const canonicalIntelligenceSchema = z.object({
   intent: hiringIntentIRSchema,
@@ -216,6 +245,7 @@ export const canonicalIntelligenceSchema = z.object({
   evidence: evidenceIRSchema.optional(),
   population: talentPopulationIRSchema.optional(),
   searchPlan: searchPlanIRSchema.optional(),
+  personas: z.array(audiencePersonaIRSchema).optional(),
 });
 export type CanonicalIntelligence = z.infer<typeof canonicalIntelligenceSchema>;
 
@@ -260,3 +290,8 @@ export const searchPlanOutputSchema = z.object({
   searchPlan: searchPlanIRSchema,
 });
 export type SearchPlanOutput = z.infer<typeof searchPlanOutputSchema>;
+
+export const personasOutputSchema = z.object({
+  personas: z.array(audiencePersonaIRSchema),
+});
+export type PersonasOutput = z.infer<typeof personasOutputSchema>;

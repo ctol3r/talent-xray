@@ -97,7 +97,13 @@ workspace and share its context.
   states, advisory review priority, always overridable, never framed as an
   employment decision.
 - **Outreach** never invents candidate facts; each personalization cites the
-  evidence item it used. Nothing sends automatically.
+  evidence item it used. Nothing sends automatically. **Research first
+  (D-013):** every sequence is written against a research-backed
+  `AudiencePersonaIR` for the candidate's talent segment — who they are, what
+  they value, their concerns, where they read, tone, proof points — and the
+  persona itself exists only once the audience has been researched on the
+  web (findings cited by URL). Research is audience-level; the system never
+  researches an individual.
 - **Scorecards** refuse "culture fit = 2": a rating cannot be saved without
   behavioral/outcome evidence text.
 - **Learnings** warn on generalizations from tiny samples.

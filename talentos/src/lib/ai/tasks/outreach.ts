@@ -3,7 +3,9 @@ import {
   type OutreachSequencePayload,
 } from "@/lib/core/payloads";
 import type { EvidenceAlignmentPayload } from "@/lib/core/payloads";
+import type { AudiencePersonaIR } from "@/lib/core/ir";
 import type { candidates } from "@/lib/db/schema";
+import type { ResearchFinding } from "@/lib/research/provider";
 import { renderProjectContext, type ProjectContext } from "../context";
 import { classifyOccupationForMock } from "../mock-knowledge";
 import { systemPrelude } from "../prompts";
@@ -14,6 +16,10 @@ export interface OutreachContext {
   candidate: typeof candidates.$inferSelect;
   evidence?: EvidenceAlignmentPayload;
   recruiterTone?: string;
+  /** Research-backed audience personas (D-013); the service always supplies them. */
+  personas?: AudiencePersonaIR[];
+  /** The research findings those personas cite — citable by URL. */
+  findings?: Pick<ResearchFinding, "url" | "title" | "snippet" | "query">[];
 }
 
 export const outreachTask = defineAiTask<
@@ -30,6 +36,7 @@ Draft a full outreach sequence for this candidate: email_1, follow_up_1, follow_
 
 Non-negotiables:
 - NEVER invent facts about the candidate. Personalize ONLY from the provided evidence items and candidate material. Every personalization gets a citations entry: { personalization: the sentence/claim used, evidence: the exact provided evidence it rests on }. If there is no real evidence, write honest, direct outreach without fake familiarity — and say so in cadenceRationale.
+- Write for the AUDIENCE PERSONA (research-backed, audience-level). Pick the one persona whose segment best fits this candidate's title and evidence, copy its label into personaLabel exactly, and let its values, concerns, tone guidance, proof points and doNotSay shape every step. A persona describes an audience, never this person: never assert a persona trait as a fact about the candidate ("I know you care about…"); frame it as what people doing this work tend to weigh. When an audience-level claim is used, cite the research finding URL it rests on in citations.evidence. Cite nothing outside the provided evidence items and findings.
 - Subject lines: 2–3 variants per email step, none clickbait.
 - Voice: direct, specific, peer-to-peer; match the seniority (an executive gets discretion and brevity; an hourly candidate gets clarity about pay, shift, and location up front where known).
 - dayOffset per step. Default cadence 0/3/7/12/20 — but ADAPT it to seniority, scarcity, and channel, and explain the adaptation in cadenceRationale.
@@ -49,6 +56,19 @@ ${JSON.stringify(
 )}
 ## Evidence available for personalization
 ${ctx.evidence ? JSON.stringify(ctx.evidence.items, null, 1) : "None recorded — do not fabricate any."}
+## Audience personas (research-backed; choose one, set personaLabel)
+${ctx.personas && ctx.personas.length > 0 ? JSON.stringify(ctx.personas, null, 1) : "None provided — write honest, direct outreach for the role's audience in general and leave personaLabel unset."}
+## Research findings the personas rest on (citable by URL)
+${
+  ctx.findings && ctx.findings.length > 0
+    ? ctx.findings
+        .map(
+          (f, i) =>
+            `${i + 1}. ${f.url}${f.title ? ` — ${f.title}` : ""}${f.snippet ? `\n   "${f.snippet}"` : ""}`,
+        )
+        .join("\n")
+    : "None."
+}
 ${ctx.recruiterTone ? `## Recruiter tone preference\n${ctx.recruiterTone}` : ""}
 ## Task
 Draft the complete outreach sequence for this candidate now.`,
@@ -59,14 +79,26 @@ Draft the complete outreach sequence for this candidate now.`,
     const firstEvidence = ctx.evidence?.items.find(
       (i) => i.status === "strong" || i.status === "partial",
     );
-    const cite = firstEvidence
-      ? [
-          {
-            personalization: `[Mock] Mention of ${firstEvidence.criterion}`,
-            evidence: firstEvidence.evidenceText,
-          },
-        ]
-      : [];
+    const persona = ctx.personas?.[0];
+    const finding = ctx.findings?.[0];
+    const cite = [
+      ...(firstEvidence
+        ? [
+            {
+              personalization: `[Mock] Mention of ${firstEvidence.criterion}`,
+              evidence: firstEvidence.evidenceText,
+            },
+          ]
+        : []),
+      ...(persona && finding
+        ? [
+            {
+              personalization: `[Mock] Audience framing for ${persona.segmentLabel}`,
+              evidence: finding.url,
+            },
+          ]
+        : []),
+    ];
     const step = (
       kind: OutreachSequencePayload["steps"][number]["kind"],
       dayOffset: number,
@@ -104,6 +136,7 @@ Draft the complete outreach sequence for this candidate now.`,
         step("inmail", 1, "[Mock] InMail draft."),
       ],
       cadenceRationale: `[Mock] Default 0/3/7/12/20 cadence for ${occ.profession}.`,
+      personaLabel: persona?.label,
     };
   },
 });

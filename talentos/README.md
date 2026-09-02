@@ -93,3 +93,11 @@ X-Ray product at the repo root is untouched; its validated query-composer
 semantics are ported into `src/lib/domain/search-strings.ts`, and its two
 live people-only engines power `TalentXRayCandidateDiscoveryProvider` —
 candidate discovery, deliberately never the general research path (D-010).
+
+Outreach is research-gated (D-013): drafting a sequence first researches
+the _audience_ on the web through the general `ResearchProvider`
+(`TALENTOS_RESEARCH_PROVIDER=session|mock|none`; unset follows the model
+provider), builds one cited `AudiencePersonaIR` per talent segment, and
+only then writes the sequence for that persona. Research is audience-level —
+the app never researches an individual candidate — and every finding is
+stored with the exact query that produced it.

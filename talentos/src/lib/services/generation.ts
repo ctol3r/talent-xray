@@ -5,6 +5,7 @@
  */
 import { desc, eq } from "drizzle-orm";
 import type { QuerySuggestion } from "@/lib/core/payloads";
+import type { TraitScanHit } from "@/lib/domain/fair-hiring";
 import { composeQueries } from "@/lib/domain/search-strings";
 import type { Db } from "@/lib/db/client";
 import {
@@ -28,6 +29,9 @@ import {
 } from "@/lib/db/schema";
 import { loadProjectContext } from "@/lib/ai/context";
 import { listCandidateSourceEvidence } from "./discovery";
+import { derivePersonas, getIntelligence } from "./intelligence";
+import { listResearchFindings, ResearchRequiredError } from "./research";
+import { getResearchProvider } from "@/lib/research/provider";
 import { runAiTask } from "@/lib/ai/run";
 import { channelsTask } from "@/lib/ai/tasks/channels";
 import { closePlanTask } from "@/lib/ai/tasks/close-plan";
@@ -313,32 +317,60 @@ export async function generateEvidenceAlignment(
   return { output, meta, warnings };
 }
 
+/**
+ * Research-gated outreach (D-013): the sequence is written against the
+ * research-backed AudiencePersonaIR for the candidate's segment. When no
+ * personas exist yet, the audience is researched and personas derived
+ * first (which derives the hiring need first when that is missing too) —
+ * nothing outreach-shaped is drafted without the web having been
+ * researched. Research is audience-level; the candidate is never looked up.
+ */
 export async function generateOutreach(
   db: Db,
   candidateId: string,
   critique?: string[],
 ) {
   const candidate = await requireCandidate(db, candidateId);
-  const project = await loadProjectContext(
-    db,
-    candidate.searchProjectId,
-    critique,
-  );
+  const projectId = candidate.searchProjectId;
+  const upstreamWarnings: TraitScanHit[] = [];
+  let intelligence = await getIntelligence(db, projectId);
+  if (!intelligence?.payload.personas?.length) {
+    const derived = await derivePersonas(db, projectId);
+    upstreamWarnings.push(...derived.warnings);
+    intelligence = await getIntelligence(db, projectId);
+  }
+  const personas = intelligence?.payload.personas ?? [];
+  if (personas.length === 0) {
+    throw new ResearchRequiredError(getResearchProvider().name);
+  }
+  const findings = (await listResearchFindings(db, projectId)).map((f) => ({
+    url: f.url,
+    title: f.title ?? undefined,
+    snippet: f.snippet ?? undefined,
+    query: f.query ?? "",
+  }));
+  const project = await loadProjectContext(db, projectId, critique);
   const [evidence] = await db
     .select()
     .from(candidateEvidence)
     .where(eq(candidateEvidence.candidateId, candidateId));
   const { output, meta, warnings } = await runAiTask(
     outreachTask,
-    { project, candidate, evidence: evidence?.payload },
-    { db, searchProjectId: candidate.searchProjectId, candidateId },
+    { project, candidate, evidence: evidence?.payload, personas, findings },
+    { db, searchProjectId: projectId, candidateId },
   );
+  // The persona used is part of the record. Fill it in only when it is
+  // unambiguous (one persona) — never guess between several.
+  const payload =
+    !output.personaLabel && personas.length === 1
+      ? { ...output, personaLabel: personas[0].label }
+      : output;
   const [sequence] = await db
     .insert(outreachSequences)
     .values({
       candidateId,
-      searchProjectId: candidate.searchProjectId,
-      payload: output,
+      searchProjectId: projectId,
+      payload,
       meta,
     })
     .returning();
@@ -352,7 +384,7 @@ export async function generateOutreach(
       body: step.body,
     })),
   );
-  return { sequence, warnings };
+  return { sequence, warnings: [...upstreamWarnings, ...warnings] };
 }
 
 export async function generateScreenGuide(

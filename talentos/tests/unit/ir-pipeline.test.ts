@@ -102,12 +102,19 @@ describe("CAIS golden path through the canonical IR (mock provider)", () => {
     // The step exists in the pipeline; with no general ResearchProvider
     // wired, the honest state is "unavailable" — recorded as uncertainty,
     // never faked, and never served by the people-only discovery engines.
+    // (Unset, the research provider follows the mock model provider —
+    // D-013 — so the "none" posture is requested explicitly here.)
     const { getResearchProvider } = await import("@/lib/research/provider");
-    const research = getResearchProvider();
-    expect(research.configured).toBe(false);
-    await expect(research.search("ML research labor market")).rejects.toThrow(
-      /cannot answer research questions|No general research provider/,
-    );
+    process.env.TALENTOS_RESEARCH_PROVIDER = "none";
+    try {
+      const research = getResearchProvider();
+      expect(research.configured).toBe(false);
+      await expect(research.search("ML research labor market")).rejects.toThrow(
+        /cannot answer research questions|No general research provider/,
+      );
+    } finally {
+      delete process.env.TALENTOS_RESEARCH_PROVIDER;
+    }
   });
 
   it("adaptive intake proposes the highest-information question (targets the taste uncertainty)", async () => {

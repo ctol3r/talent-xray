@@ -41,3 +41,20 @@ string-expansion task:
   inside the composer touches the validated reference port (root CLAUDE.md:
   do not redesign), so do it as a pre-composer normalization shared by both
   callers. Found by the W8.5 golden-path walkthrough, 2026-09-02.
+- **Audience research query phrasing**: `audienceQueries` concatenates the
+  industry string with fixed phrases, which can repeat words ("AI safety
+  research research team"). Searches still worked in the W11 live run; a
+  small normalization (drop duplicated adjacent words, fall back to the role
+  when the industry is unset) would read better. Keep them deterministic.
+- **Persona re-derivation under the session provider**: `derivePersonas`
+  renders the canonical IR — including any stored personas — into the
+  prompt, so re-deriving after personas exist yields a new request hash.
+  Either omit `personas` from the `derive_personas` context or clear them
+  before re-deriving; `generateOutreach` already avoids re-derivation.
+- **TalentOS-Lite outreach has no research gate**: the artifact's outreach
+  draft (W10) is not routed through D-013's persona/research gate; bring
+  it in line or label its drafts "not research-backed".
+- **Crew outreach critic pass**: the W7 critic is not wired for the
+  `outreach` job (persists as sequence rows); with personas now in the IR,
+  a critic check that every audience claim cites a stored finding is a
+  natural addition.
