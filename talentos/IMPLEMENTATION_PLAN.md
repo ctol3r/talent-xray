@@ -201,6 +201,9 @@ extraction recommendation.
 - [x] After-fix run on the same subset; regression tests pinned
 - [x] Authority-semantics and requirement-facet verdicts, from evidence
 - [x] Extraction-readiness recommendation
+- [x] **Full-corpus run** — all 53 conversations, 251 hand-fulfilled
+      generations, instrument corrections re-scored, taxonomy and
+      extraction recommendation revised (`REPORT.md` §10–§14)
 
 Outcome (`eval/w12/REPORT.md`): all four hard targets met at baseline —
 provenance 100 %, silent mutation 0, protected-trait violations 0,
@@ -209,5 +212,21 @@ semantics, paraphrased false signals, compensation in personas); three
 fixed by prompt rules and one by the smallest proven schema addition
 (`assertedBy`, `contested`). AuthorityIR beyond those two fields, and every
 proposed requirement facet, were tested and REJECTED as unearned by the
-evidence. Extraction: not yet — the schema moved during this wave, and only
-10 of 53 conversations ran live.
+evidence.
+
+Full corpus (`REPORT.md` §10–§14): 53/53 conversations, 13 occupations,
+20/20 categories, 251 generations. Hard targets — silent mutation 0 ✓,
+fabrication 0 ✓, provenance 99.4 % ✗ (8 failures), protected traits 1 ✗
+(a conservative scanner firing on the age of a _field_, not a person; not
+narrowed to make it pass). The ten-fixture subset overstated the system on
+nine of fourteen reported metrics: `false_signal_recall` 54.8 %,
+`proxy_identified` 68.2 %, `unknown_preserved` 71.4 %,
+`contradiction_detection` 76.9 %. Nine system defect classes (S-1…S-9) and
+**no further schema change earned** — the withdrawn-requirement case looked
+like a schema gap and is a behaviour rule. Two instrument defects fixed and
+regression-tested; a third (no sex/gender text-scan pattern) found by
+inspection and fixed. S-1…S-5 are deliberately left unfixed: applying them
+and re-running would mean hand-authoring 251 generations with knowledge of
+every check, which is the corpus-optimisation this wave forbade. Extraction:
+still not yet — the schema question is now well settled, but the reasoner's
+behaviour behind the boundary is not.

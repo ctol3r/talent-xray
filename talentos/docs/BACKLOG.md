@@ -58,3 +58,18 @@ string-expansion task:
   `outreach` job (persists as sequence rows); with personas now in the IR,
   a critic check that every audience claim cites a stored finding is a
   natural addition.
+- **W12 full-corpus system defects S-1…S-5** (`eval/w12/REPORT.md` §12.1),
+  deliberately deferred so the fixes are not authored against a corpus whose
+  expectations the fixer has read. All five are prompt-level; none touches
+  the schema. In value order: **S-1** populate `falseSignals` (worst metric
+  at 54.8 %); **S-2** when a hiring manager re-asserts a JD requirement in
+  their own words, the statement becomes their words and `origin` becomes
+  `manager_statement` (fixes 19 failures across two metrics); **S-3** a
+  market- or comparison-uncertainty is not resolved by the company stating
+  its own number; **S-4** a withdrawn requirement is removed from the
+  requirement set, never demoted to `preferred`; **S-5** a manager's example
+  that refutes their own stated rule is recorded as a `ContradictionIR`, not
+  patched into the requirement.
+- **Corpus gap — no protected-trait case for sex or gender.** The text
+  scanner had no gender pattern until W12 and the corpus would not have
+  caught it; add a conversation where a manager genders the role.

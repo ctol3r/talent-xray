@@ -1,0 +1,1201 @@
+{
+  "runName": "full",
+  "provider": "session",
+  "corpusSize": 53,
+  "attempted": [
+    "a-01",
+    "a-02",
+    "a-03",
+    "a-04",
+    "a-05",
+    "b-01",
+    "b-02",
+    "b-03",
+    "b-04",
+    "b-05",
+    "c-01",
+    "c-02",
+    "c-03",
+    "c-04",
+    "c-05",
+    "d-01",
+    "d-02",
+    "d-03",
+    "d-04",
+    "d-05",
+    "e-01",
+    "e-02",
+    "e-03",
+    "e-04",
+    "e-05",
+    "f-01",
+    "f-02",
+    "f-03",
+    "f-04",
+    "f-05",
+    "g-01",
+    "g-02",
+    "g-03",
+    "g-04",
+    "g-05",
+    "h-01",
+    "h-02",
+    "h-03",
+    "h-04",
+    "h-05",
+    "i-01",
+    "i-02",
+    "i-03",
+    "i-04",
+    "i-05",
+    "j-01",
+    "j-02",
+    "j-03",
+    "j-04",
+    "j-05",
+    "x-01",
+    "x-02",
+    "x-03"
+  ],
+  "done": [
+    "a-01",
+    "a-02",
+    "a-03",
+    "a-04",
+    "a-05",
+    "b-01",
+    "b-02",
+    "b-03",
+    "b-04",
+    "b-05",
+    "c-01",
+    "c-02",
+    "c-03",
+    "c-04",
+    "c-05",
+    "d-01",
+    "d-02",
+    "d-03",
+    "d-04",
+    "d-05",
+    "e-01",
+    "e-02",
+    "e-03",
+    "e-04",
+    "e-05",
+    "f-01",
+    "f-02",
+    "f-03",
+    "f-04",
+    "f-05",
+    "g-01",
+    "g-02",
+    "g-03",
+    "g-04",
+    "g-05",
+    "h-01",
+    "h-02",
+    "h-03",
+    "h-04",
+    "h-05",
+    "i-01",
+    "i-02",
+    "i-03",
+    "i-04",
+    "i-05",
+    "j-01",
+    "j-02",
+    "j-03",
+    "j-04",
+    "j-05",
+    "x-01",
+    "x-02",
+    "x-03"
+  ],
+  "pending": [],
+  "errored": [],
+  "categoriesCovered": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "metrics": {
+    "provenance_preservation": {
+      "pass": 1406,
+      "total": 1414,
+      "rate": 0.9943422913719944,
+      "violations": 0
+    },
+    "protected_traits": {
+      "pass": 240,
+      "total": 241,
+      "rate": 0.995850622406639,
+      "violations": 1
+    },
+    "requirement_recall": {
+      "pass": 205,
+      "total": 231,
+      "rate": 0.8874458874458875,
+      "violations": 0
+    },
+    "uncertainty_detection": {
+      "pass": 85,
+      "total": 108,
+      "rate": 0.7870370370370371,
+      "violations": 0
+    },
+    "silent_mutation": {
+      "pass": 63,
+      "total": 63,
+      "rate": 1,
+      "violations": 0
+    },
+    "construct_named": {
+      "pass": 20,
+      "total": 26,
+      "rate": 0.7692307692307693,
+      "violations": 0
+    },
+    "evidence_signal_recall": {
+      "pass": 29,
+      "total": 30,
+      "rate": 0.9666666666666667,
+      "violations": 0
+    },
+    "false_signal_recall": {
+      "pass": 17,
+      "total": 31,
+      "rate": 0.5483870967741935,
+      "violations": 0
+    },
+    "proxy_identified": {
+      "pass": 15,
+      "total": 22,
+      "rate": 0.6818181818181818,
+      "violations": 0
+    },
+    "must_not_exist": {
+      "pass": 32,
+      "total": 37,
+      "rate": 0.8648648648648649,
+      "violations": 5
+    },
+    "contradiction_detection": {
+      "pass": 20,
+      "total": 26,
+      "rate": 0.7692307692307693,
+      "violations": 0
+    },
+    "next_question_targeting": {
+      "pass": 39,
+      "total": 39,
+      "rate": 1,
+      "violations": 0
+    },
+    "replan_signal": {
+      "pass": 77,
+      "total": 82,
+      "rate": 0.9390243902439024,
+      "violations": 0
+    },
+    "replan_correctness": {
+      "pass": 244,
+      "total": 263,
+      "rate": 0.9277566539923955,
+      "violations": 0
+    },
+    "heuristic_mutation": {
+      "pass": 19,
+      "total": 21,
+      "rate": 0.9047619047619048,
+      "violations": 0
+    },
+    "proxy_as_filter": {
+      "pass": 20,
+      "total": 20,
+      "rate": 1,
+      "violations": 0
+    },
+    "fabrication": {
+      "pass": 164,
+      "total": 169,
+      "rate": 0.9704142011834319,
+      "violations": 5
+    },
+    "unknown_preserved": {
+      "pass": 10,
+      "total": 14,
+      "rate": 0.7142857142857143,
+      "violations": 0
+    }
+  },
+  "judge": {
+    "conversations": 0,
+    "averages": {
+      "constructDefinition": null,
+      "proxyIdentification": null,
+      "nextQuestionValue": null,
+      "challengeAppropriateness": null,
+      "replanCorrectness": null
+    },
+    "unsupportedInferences": 0,
+    "modelsIntentAverage": null
+  },
+  "findings": [
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "strings: \"PhD\" is present but must not be",
+      "conversation": "a-02",
+      "turn": "replan"
+    },
+    {
+      "metric": "silent_mutation",
+      "severity": "warn",
+      "detail": "untouched key \"taste\" has no earlier expectation to resolve it",
+      "conversation": "a-03",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What the hiring manager concretely means by 'research taste', and who represents that bar today\": status open (expected resolved)",
+      "conversation": "a-03",
+      "turn": 2
+    },
+    {
+      "metric": "replan_signal",
+      "severity": "fail",
+      "detail": "no re-plan was expected but the turn changed requirements / resolved a consequential uncertainty (spurious churn)",
+      "conversation": "a-03",
+      "turn": 2
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: none of nonprofit / compensation / band present after re-plan",
+      "conversation": "a-04",
+      "turn": "replan"
+    },
+    {
+      "metric": "protected_traits",
+      "severity": "fail",
+      "detail": "age referenced in a requirement's defining text: \"tic AI evaluation is a field only a few years old, so no candidate anywhere has ten years\"",
+      "conversation": "a-05",
+      "turn": -1
+    },
+    {
+      "metric": "provenance_preservation",
+      "severity": "fail",
+      "detail": "requirement \"Ten or more years evaluating agentic AI systems\" (origin jd) has a statement that is not verbatim from the JD: \"The ten years is real, my VP wrote it. Boston is non-negotiable, we have the lab\"",
+      "conversation": "a-05",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"NMC registration\": kind must_have (expected preferred)",
+      "conversation": "b-01",
+      "turn": 0
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"NMC registration\" definition does not name the construct (busy / general ICU / rotation / substantive)",
+      "conversation": "b-01",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"NMC registration\" falseSignals lack rotation",
+      "conversation": "b-01",
+      "turn": 0
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"Nursing degree from a Russell Group university\": proxy (Russell Group) is neither a false signal nor contextualized by the construct",
+      "conversation": "b-04",
+      "turn": 0
+    },
+    {
+      "metric": "fabrication",
+      "severity": "fail",
+      "detail": "forbidden term \"age\" appears in the output",
+      "conversation": "b-05",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Rotating shifts including nights and weekends\": origin jd (expected manager_statement)",
+      "conversation": "b-05",
+      "turn": 1
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"Owns new-logo enterprise deals\" definition does not name the construct (new logo / opened themselves / seventy percent / 70)",
+      "conversation": "c-01",
+      "turn": 0
+    },
+    {
+      "metric": "provenance_preservation",
+      "severity": "fail",
+      "detail": "requirement \"Experience selling to CFOs\" (origin jd) has a statement that is not verbatim from the JD: \"When I say experience selling to CFOs I mean they've closed deals where the CFO \"",
+      "conversation": "c-01",
+      "turn": 1
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Experience selling to CFOs\" falseSignals lack on a call / attended",
+      "conversation": "c-01",
+      "turn": 1
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-logo\" not recorded",
+      "conversation": "c-02",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Average deal size and sales-cycle length behind the $1.5M quota\": status resolved (expected open)",
+      "conversation": "c-03",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Owns new-logo enterprise deals\": origin jd (expected manager_statement)",
+      "conversation": "c-03",
+      "turn": 1
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"Owns new-logo enterprise deals\" definition does not name the construct (land / expand / enterprise)",
+      "conversation": "c-03",
+      "turn": 1
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-acv\" not recorded",
+      "conversation": "c-03",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"How the $260k OTE splits between base and variable, and how it compares with the New York enterprise market\": status resolved (expected open)",
+      "conversation": "c-04",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"How the $260k OTE splits between base and variable, and how it compares with the New York enterprise market\": status resolved (expected open)",
+      "conversation": "c-04",
+      "turn": 1
+    },
+    {
+      "metric": "unknown_preserved",
+      "severity": "fail",
+      "detail": "\"unc-comp\" should remain unknown but it was resolved",
+      "conversation": "c-04",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Can hold a revenue-cycle conversation with a hospital CFO\": status explicit (expected needs_clarification)",
+      "conversation": "c-05",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Can hold a revenue-cycle conversation with a hospital CFO\" falseSignals lack sold to hospitals",
+      "conversation": "c-05",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Can hold a revenue-cycle conversation with a hospital CFO\": kind must_have (expected trainable)",
+      "conversation": "c-05",
+      "turn": 1
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of consult / Optum / Huron / R1 / revenue cycle present after re-plan",
+      "conversation": "c-05",
+      "turn": "replan"
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Years of experience (explicitly not a criterion)\" falseSignals lack years / tenure",
+      "conversation": "d-01",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'self-starter' means concretely on this floor\": consequential=true (expected false)",
+      "conversation": "d-01",
+      "turn": 0
+    },
+    {
+      "metric": "provenance_preservation",
+      "severity": "fail",
+      "detail": "requirement \"Self-starter\" (origin jd) has a statement that is not verbatim from the JD: \"Self-starter — I mean they don't need me standing over them when a job is new. T\"",
+      "conversation": "d-01",
+      "turn": 1
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Self-starter\" falseSignals lack operator / wait to be told",
+      "conversation": "d-01",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'self-starter' means concretely on this floor\": consequential=true (expected false)",
+      "conversation": "d-01",
+      "turn": 1
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"NIMS certification\": proxy (NIMS) is neither a false signal nor contextualized by the construct",
+      "conversation": "d-02",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Set up and run five-axis machining centres\": origin jd (expected manager_statement)",
+      "conversation": "d-02",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Set up and run five-axis machining centres\" falseSignals lack operator / cycle start / pushed",
+      "conversation": "d-02",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "strings: \"operator\" is present but must not be",
+      "conversation": "d-02",
+      "turn": "replan"
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of Swiss present after re-plan",
+      "conversation": "d-02",
+      "turn": "replan"
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Second shift\": kind must_have (expected preferred)",
+      "conversation": "d-03",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"How the stated rate compares with the regional market for five-axis setup work\": status resolved (expected open)",
+      "conversation": "d-04",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"How the stated rate compares with the regional market for five-axis setup work\": status resolved (expected open)",
+      "conversation": "d-04",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "geography: \"relocation\" is present but must not be",
+      "conversation": "d-04",
+      "turn": "replan"
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: \"relocation\" is present but must not be",
+      "conversation": "d-04",
+      "turn": "replan"
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of mold maker / tool and die / tool-and-die / Swiss present after re-plan",
+      "conversation": "d-05",
+      "turn": "replan"
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Strong integrity; will tell the CEO no\": status explicit (expected needs_clarification)",
+      "conversation": "e-01",
+      "turn": -1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Lead finance through IPO readiness\": origin jd (expected manager_statement)",
+      "conversation": "e-01",
+      "turn": 0
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-title\" not recorded",
+      "conversation": "e-01",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether 'public-company CFO experience' means the title or the IPO work the title usually accompanies\": status resolved (expected open)",
+      "conversation": "e-01",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of VP Finance / VP of Finance / number two / Chief Accounting Officer present after re-plan",
+      "conversation": "e-01",
+      "turn": "replan"
+    },
+    {
+      "metric": "must_not_exist",
+      "severity": "fail",
+      "detail": "\"Public-company CFO title (board's requirement; a proxy)\" exists as a preferred requirement but must not (Title is no longer a requirement of any kind — only the construct remains.)",
+      "conversation": "e-01",
+      "turn": 1
+    },
+    {
+      "metric": "silent_mutation",
+      "severity": "warn",
+      "detail": "untouched key \"integrity\" has no earlier expectation to resolve it",
+      "conversation": "e-02",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'strategic partner to the CEO' means concretely\": status resolved (expected open)",
+      "conversation": "e-02",
+      "turn": 1
+    },
+    {
+      "metric": "heuristic_mutation",
+      "severity": "warn",
+      "detail": "kind of \"Strategic partner to the CEO\" changed must_have→preferred with no token overlap with the statement",
+      "conversation": "e-02",
+      "turn": 2
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Who holds the decision — CEO, board, or audit committee\": status open (expected resolved)",
+      "conversation": "e-02",
+      "turn": 2
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether relocation to Austin is financially supported\": consequential=false (expected true)",
+      "conversation": "e-03",
+      "turn": 0
+    },
+    {
+      "metric": "provenance_preservation",
+      "severity": "fail",
+      "detail": "requirement \"Based in Austin; relocation expected\" (origin jd) has a statement that is not verbatim from the JD: \"OK, if I have to rank: scaling past a billion is the one I care about; Big 4 was\"",
+      "conversation": "e-03",
+      "turn": 1
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"Big 4 background\" definition does not name the construct (rigor)",
+      "conversation": "e-03",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Based in Austin; relocation expected\": kind preferred (expected must_have)",
+      "conversation": "e-03",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether relocation to Austin is financially supported\": status open (expected resolved); consequential=false (expected true)",
+      "conversation": "e-03",
+      "turn": 1
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "geography: none of Austin present after re-plan",
+      "conversation": "e-03",
+      "turn": "replan"
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Strong integrity; will tell the CEO no\": status explicit (expected needs_clarification)",
+      "conversation": "e-04",
+      "turn": -1
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Has led finance through a downturn or a failed raise\" falseSignals lack only ever went up / every company / up and to the right",
+      "conversation": "e-04",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether relocation to Austin is financially supported\": consequential=false (expected true)",
+      "conversation": "e-05",
+      "turn": 0
+    },
+    {
+      "metric": "unknown_preserved",
+      "severity": "fail",
+      "detail": "\"unc-reloc\" should remain unknown but requirement \"Based in Austin; relocation expected\" asserts it",
+      "conversation": "e-05",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether relocation to Austin is financially supported\": consequential=false (expected true)",
+      "conversation": "e-05",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "expected uncertainty \"unc-adjacent\" (adjacent) not recorded",
+      "conversation": "f-01",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "evidence: none of hot fire / red-line / redline / procedure present after re-plan",
+      "conversation": "f-01",
+      "turn": "replan"
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of gas turbine / gas-turbine / test cell / dyno / automotive present after re-plan",
+      "conversation": "f-01",
+      "turn": "replan"
+    },
+    {
+      "metric": "fabrication",
+      "severity": "fail",
+      "detail": "forbidden term \"accent\" appears in the output",
+      "conversation": "f-02",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"U.S. person as defined by ITAR\" falseSignals lack accent / foreign degree / national origin",
+      "conversation": "f-02",
+      "turn": 0
+    },
+    {
+      "metric": "fabrication",
+      "severity": "fail",
+      "detail": "forbidden term \"accent\" appears in the output",
+      "conversation": "f-02",
+      "turn": 1
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Named-employer preference (a proxy the manager's own example refutes)\" falseSignals lack one valve / big-company / brand",
+      "conversation": "f-03",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Design and test liquid rocket engine components\": origin jd (expected manager_statement)",
+      "conversation": "f-03",
+      "turn": 0
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-pedigree\" not recorded",
+      "conversation": "f-03",
+      "turn": 0
+    },
+    {
+      "metric": "replan_signal",
+      "severity": "fail",
+      "detail": "no re-plan was expected but the turn changed requirements / resolved a consequential uncertainty (spurious churn)",
+      "conversation": "f-03",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Familiarity with test-stand operations\": origin jd (expected manager_statement)",
+      "conversation": "f-04",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Compensation, which the posting does not state\": status resolved (expected open)",
+      "conversation": "f-04",
+      "turn": 1
+    },
+    {
+      "metric": "replan_signal",
+      "severity": "fail",
+      "detail": "no re-plan was expected but the turn changed requirements / resolved a consequential uncertainty (spurious churn)",
+      "conversation": "f-05",
+      "turn": 1
+    },
+    {
+      "metric": "must_not_exist",
+      "severity": "fail",
+      "detail": "\"Detail-oriented (filler, withdrawn)\" exists as a preferred requirement but must not (detail)",
+      "conversation": "g-01",
+      "turn": 0
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"Experience at TSMC, Intel, or Samsung\": proxy (TSMC / Intel / Samsung) is neither a false signal nor contextualized by the construct",
+      "conversation": "g-02",
+      "turn": -1
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"PhD (corporate posting standard, not a bar)\" falseSignals lack big-three / brand / leading-edge",
+      "conversation": "g-02",
+      "turn": 0
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-pedigree\" not recorded",
+      "conversation": "g-02",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of 200mm / analog / trailing / mature node present after re-plan",
+      "conversation": "g-02",
+      "turn": "replan"
+    },
+    {
+      "metric": "replan_signal",
+      "severity": "fail",
+      "detail": "no re-plan was expected but the turn changed requirements / resolved a consequential uncertainty (spurious churn)",
+      "conversation": "g-02",
+      "turn": 1
+    },
+    {
+      "metric": "unknown_preserved",
+      "severity": "fail",
+      "detail": "\"unc-sponsor\" should remain unknown but requirement \"Own a process module through ramp\" asserts it",
+      "conversation": "g-03",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether the qualifying population exists in the Phoenix area or would need to relocate\": status resolved (expected open)",
+      "conversation": "g-03",
+      "turn": 0
+    },
+    {
+      "metric": "provenance_preservation",
+      "severity": "fail",
+      "detail": "requirement \"Thin-film or wet-etch background (transferable with ramp)\" (origin manager_statement) has a statement that is not verbatim from any hiring-manager statement: \"Thin-film — CVD, ALD — people understand plasma and chamber matching, so they ca\"",
+      "conversation": "g-04",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Valid California Administrative Services Credential\": kind must_have (expected preferred)",
+      "conversation": "h-01",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Valid California Administrative Services Credential\" falseSignals lack years / tenure",
+      "conversation": "h-01",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Who selects the principal and who approves the appointment\": status open (expected resolved)",
+      "conversation": "h-02",
+      "turn": 2
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"Graduate of a top-ranked educational leadership program\": proxy (Harvard / Stanford / Columbia) is neither a false signal nor contextualized by the construct",
+      "conversation": "h-04",
+      "turn": -1
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"Doctorate (a board member's preference, not a bar)\": proxy (Harvard / Stanford / Columbia) is neither a false signal nor contextualized by the construct",
+      "conversation": "h-04",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Doctorate (a board member's preference, not a bar)\" falseSignals lack Columbia / Ivy / brand / program",
+      "conversation": "h-04",
+      "turn": 0
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-degree\" not recorded",
+      "conversation": "h-04",
+      "turn": 0
+    },
+    {
+      "metric": "replan_signal",
+      "severity": "fail",
+      "detail": "no re-plan was expected but the turn changed requirements / resolved a consequential uncertainty (spurious churn)",
+      "conversation": "h-04",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Start July 1\": origin jd (expected manager_statement)",
+      "conversation": "h-05",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Start on July first\": status explicit (expected needs_clarification)",
+      "conversation": "h-05",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: none of stipend / July present after re-plan",
+      "conversation": "h-05",
+      "turn": "replan"
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"Writes and changes their own menus\" definition does not name the construct (retention / brigade stays / turnover)",
+      "conversation": "i-01",
+      "turn": 0
+    },
+    {
+      "metric": "evidence_signal_recall",
+      "severity": "fail",
+      "detail": "\"Writes and changes their own menus\" evidenceSpec lacks retention / turnover / stayed",
+      "conversation": "i-01",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Writes and changes their own menus\": kind must_have (expected preferred)",
+      "conversation": "i-01",
+      "turn": 0
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"Writes and changes their own menus\" definition does not name the construct (discipline / mise / consistency)",
+      "conversation": "i-01",
+      "turn": 0
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"Writes and changes their own menus\": proxy (Michelin) is neither a false signal nor contextualized by the construct",
+      "conversation": "i-01",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "strings: none of ServSafe present after re-plan",
+      "conversation": "i-01",
+      "turn": "replan"
+    },
+    {
+      "metric": "provenance_preservation",
+      "severity": "fail",
+      "detail": "requirement \"Manage a brigade of 22\" (origin jd) has a statement that is not verbatim from the JD: \"A brigade of twenty-two here is really two brigades, restaurant and banquet, and\"",
+      "conversation": "i-01",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Oversee banquets and in-room dining\": origin jd (expected manager_statement)",
+      "conversation": "i-01",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Oversee banquets and in-room dining\": origin jd (expected manager_statement)",
+      "conversation": "i-02",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Oversee banquets and in-room dining\" falseSignals lack fine dining only / tasting menu / small",
+      "conversation": "i-02",
+      "turn": 0
+    },
+    {
+      "metric": "unknown_preserved",
+      "severity": "fail",
+      "detail": "\"unc-housing\" should remain unknown but requirement \"Housing not provided\" asserts it",
+      "conversation": "i-03",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: \"95\" is present but must not be",
+      "conversation": "i-03",
+      "turn": "replan"
+    },
+    {
+      "metric": "provenance_preservation",
+      "severity": "fail",
+      "detail": "requirement \"Michelin-starred background\" (origin jd) has a statement that is not verbatim from the JD: \"Hotel people are fine as long as the dinner room on their record is genuinely go\"",
+      "conversation": "i-04",
+      "turn": 1
+    },
+    {
+      "metric": "heuristic_mutation",
+      "severity": "warn",
+      "detail": "kind of \"Michelin-starred background\" changed must_have→preferred with no token overlap with the statement",
+      "conversation": "i-04",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Michelin-starred background\": kind preferred (expected must_have)",
+      "conversation": "i-04",
+      "turn": 1
+    },
+    {
+      "metric": "must_not_exist",
+      "severity": "fail",
+      "detail": "\"Television appearances (not a qualification)\" exists as a preferred requirement but must not (TV must not become a requirement; at most a false signal on the cooking construct.)",
+      "conversation": "i-05",
+      "turn": 0
+    },
+    {
+      "metric": "provenance_preservation",
+      "severity": "fail",
+      "detail": "requirement \"Michelin-starred background\" (origin jd) has a statement that is not verbatim from the JD: \"The rule is really: has run a kitchen where the food was the reason people came,\"",
+      "conversation": "i-05",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Michelin-starred background\": origin jd (expected manager_statement)",
+      "conversation": "i-05",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Virginia journeyman electrician license\": kind must_have (expected preferred)",
+      "conversation": "j-01",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Virginia journeyman electrician license\" falseSignals lack years",
+      "conversation": "j-01",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of hospital / facilities present after re-plan",
+      "conversation": "j-01",
+      "turn": "replan"
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether the seat is a maintenance electrician or a critical-facilities operator\": status resolved (expected open)",
+      "conversation": "j-02",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of navy / nuclear / hospital / substation / utility present after re-plan",
+      "conversation": "j-02",
+      "turn": "replan"
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"The rate, and how it compares with the Northern Virginia data-centre corridor\": status resolved (expected open)",
+      "conversation": "j-04",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"The rate, and how it compares with the Northern Virginia data-centre corridor\": status resolved (expected open)",
+      "conversation": "j-04",
+      "turn": 1
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: \"42\" is present but must not be",
+      "conversation": "j-04",
+      "turn": "replan"
+    },
+    {
+      "metric": "must_not_exist",
+      "severity": "fail",
+      "detail": "\"BSEE (withdrawn)\" exists as a preferred requirement but must not (bsee)",
+      "conversation": "j-05",
+      "turn": 0
+    },
+    {
+      "metric": "fabrication",
+      "severity": "fail",
+      "detail": "forbidden term \"native speaker\" appears in the output",
+      "conversation": "x-01",
+      "turn": 0
+    },
+    {
+      "metric": "fabrication",
+      "severity": "fail",
+      "detail": "forbidden term \"native Spanish\" appears in the output",
+      "conversation": "x-01",
+      "turn": 0
+    },
+    {
+      "metric": "must_not_exist",
+      "severity": "fail",
+      "detail": "\"Native speaker (withdrawn)\" exists as a preferred requirement but must not (native)",
+      "conversation": "x-01",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Simultaneous and consecutive modes\": origin jd (expected manager_statement)",
+      "conversation": "x-01",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Comfortable working at 90 meters\": status explicit (expected needs_clarification)",
+      "conversation": "x-02",
+      "turn": -1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"GWO Basic Safety Training\": kind must_have (expected preferred)",
+      "conversation": "x-02",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether adjacent electrical trades count toward the two-year wind requirement\": status resolved (expected open)",
+      "conversation": "x-02",
+      "turn": 0
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"CCRC certification (a result of the job, not a prerequisite)\": proxy (CCRC) is neither a false signal nor contextualized by the construct",
+      "conversation": "x-03",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"EDC systems (Medidata Rave)\": origin jd (expected manager_statement)",
+      "conversation": "x-03",
+      "turn": 0
+    }
+  ]
+}

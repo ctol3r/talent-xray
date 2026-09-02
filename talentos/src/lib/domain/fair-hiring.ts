@@ -53,6 +53,10 @@ const TEXT_SCAN_PATTERNS: { trait: string; pattern: RegExp }[] = [
   { trait: "religion", pattern: /\breligio(n|us)\b/i },
   { trait: "age", pattern: /\bage\b|\byears?\s+old\b/i },
   {
+    trait: "sex/gender identity",
+    pattern: /\bgender\b|\btransgender\b|\bnon-?binary\b|\bsex\b/i,
+  },
+  {
     trait: "disability/health",
     pattern:
       /\bdisabilit|\bdisabled\b|\bmedical condition\b|\bhealth condition\b/i,

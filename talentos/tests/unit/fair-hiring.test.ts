@@ -56,6 +56,22 @@ describe("scanTextForProtectedTraits", () => {
     expect(hits.map((h) => h.trait)).toContain("pregnancy/family status");
   });
 
+  it("flags sex and gender identity, which PROTECTED_TRAITS names", () => {
+    // Found by inspection during W12: PROTECTED_TRAITS and
+    // BLOCKED_FIELD_PATTERNS both covered gender, but the text scanner had no
+    // pattern for it, so the deterministic guard could not catch it.
+    expect(
+      scanTextForProtectedTraits("Prefers a male candidate; note gender.").map(
+        (h) => h.trait,
+      ),
+    ).toContain("sex/gender identity");
+    expect(
+      scanTextForProtectedTraits("Record the applicant's sex.").map(
+        (h) => h.trait,
+      ),
+    ).toContain("sex/gender identity");
+  });
+
   it("does not flag ordinary professional evidence", () => {
     const hits = scanTextForProtectedTraits(
       "Three first-author NeurIPS papers; led a team of five; deep coverage of distributed training; strong stage presence at conferences.",

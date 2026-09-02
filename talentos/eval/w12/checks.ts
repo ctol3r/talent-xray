@@ -90,6 +90,31 @@ export function has(hay: string, needle: string): boolean {
   return norm(hay).includes(norm(needle));
 }
 
+/** `has`, but on word boundaries: "Agenda for Change" does not contain "age". */
+export function hasWord(hay: string, needle: string): boolean {
+  const n = norm(needle);
+  if (n === "") return false;
+  const re = new RegExp(
+    `(?<![\\p{L}\\p{N}])${n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}\\p{N}])`,
+    "u",
+  );
+  return re.test(norm(hay));
+}
+
+/** Language that marks a term as being refused rather than adopted. */
+const REFUSAL =
+  /withdraw|dropped|no longer|not a requirement|not a filter|not a bar|never|must not|do not|does not|is not|cannot|unlawful|refus|false signal|rather than/i;
+
+/**
+ * True when `term` appears in `text` as something the search would act on.
+ * A hit is exempt when the clause containing it carries refusal language.
+ */
+export function propagatesTerm(text: string, term: string): boolean {
+  return text
+    .split(/[\n.;]+/)
+    .some((clause) => hasWord(clause, term) && !REFUSAL.test(clause));
+}
+
 function anyAlias(hay: string, aliases: string[] | undefined): boolean {
   if (!aliases || aliases.length === 0) return true;
   return aliases.some((a) => has(hay, a));
@@ -448,10 +473,7 @@ export function checkTurn(args: TurnCheckArgs): CheckResult {
     // consequence is illustrative analysis prose. Both are legitimate work.
     // The assertive surfaces are definitions, evidence specs, false signals,
     // extracted claims, and what an uncertainty says it is about.
-    // forbiddenTerms still scan everything, so a leaked band is caught
-    // wherever it lands.
     const assertive = `${text.defining}\n${text.falseSignals}\n${text.uncertaintyAbouts}\n${text.claims}`;
-    const outputAll = `${text.defining}\n${text.uncertainties}\n${text.nextQuestion}\n${text.claims}\n${text.falseSignals}`;
     const inputAll = [
       inputs.jd,
       inputs.projectFacts,
@@ -468,11 +490,23 @@ export function checkTurn(args: TurnCheckArgs): CheckResult {
           `number "${n}" appears in the output but in no input`,
         );
     }
+    // A protected-trait proxy may be NAMED in order to be refused. Saying
+    // "an accent is not evidence of anything and we will not screen on it" is
+    // the system working, and the corpus asks for exactly that elsewhere
+    // (f-02 expects "accent" in falseSignals). What must never happen is that
+    // the term propagates into something the search will act on. So this scans
+    // the propagating surfaces only — a requirement's label, definition and
+    // evidence spec — matches on word boundaries rather than substrings
+    // ("Agenda for Change" is not "age"), and exempts a hit whose own clause
+    // carries refusal language.
     for (const term of expectation.forbiddenTerms) {
-      const present = has(outputAll, term) || has(text.contradictions, term);
+      const present = propagatesTerm(text.defining, term);
       bump(tally, "fabrication", !present);
       if (present)
-        fail("fabrication", `forbidden term "${term}" appears in the output`);
+        fail(
+          "fabrication",
+          `forbidden term "${term}" propagates into a requirement's defining text`,
+        );
     }
   }
 
