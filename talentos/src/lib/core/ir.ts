@@ -91,10 +91,36 @@ export const requirementIRSchema = z.object({
   definition: z.string(),
   kind: z.enum(["must_have", "preferred", "trainable", "disqualifier"]),
   origin: irProvenanceSchema,
+  /**
+   * Who asserted it — the `speaker` of the ManagerStatement it came from
+   * (W12 finding F-2). With several stakeholders, `origin` only says the
+   * claim came from a person, not which one; without this the attribution
+   * survives only if a model happens to write it into prose, so nothing
+   * downstream can ask "whose requirement is this?" Absent for JD-derived
+   * and inferred requirements.
+   */
+  assertedBy: z.string().optional(),
+  /**
+   * True when stakeholders disagree about this requirement and the
+   * disagreement is unresolved (W12 finding F-2). Kept separate from
+   * `status` so that "clear but disputed" is not encoded as "vague":
+   * `status` describes how well the requirement is DEFINED, this describes
+   * whether it is AGREED. The contradiction itself is recorded in
+   * ContradictionIR.
+   */
+  contested: z.boolean().optional(),
   /** Observable evidence that would satisfy the requirement. */
   evidenceSpec: z.array(z.string()),
   /** Signals that look like evidence for it but are not. */
   falseSignals: z.array(z.string()),
+  /**
+   * How well the requirement is DEFINED, not how certain we are of every
+   * detail (W12 finding F-1): "explicit" once the hiring manager has said
+   * what it is, even when its threshold is still open — the open threshold
+   * belongs in linkedUncertaintyIds. "needs_clarification" means the
+   * requirement itself is still vague. Disagreement between stakeholders is
+   * `contested`, not a status.
+   */
   status: z.enum(["explicit", "needs_clarification", "assumed"]),
   linkedUncertaintyIds: z.array(z.string()),
 });

@@ -16,6 +16,7 @@ import {
   checkTurn,
   isVerbatimFrom,
   mergeTallies,
+  stripExclusions,
   type Finding,
 } from "../../eval/w12/checks";
 import {
@@ -610,5 +611,129 @@ describe("W12 re-plan checks", () => {
       { fabrication: { pass: 3, total: 3 } },
     );
     expect(m.fabrication).toEqual({ pass: 4, total: 5 });
+  });
+});
+
+describe("W12 instrument corrections (pinned after the first baseline)", () => {
+  it("matches requirements most-specific-first, so a mention cannot steal an expectation", () => {
+    const after = goodAfter();
+    // "Engineering ability in Python" mentions research taste in its definition;
+    // the taste expectation must still resolve to the taste requirement.
+    after.requirements[1] = {
+      ...after.requirements[1],
+      definition: "Ships research code; supports the research taste bar.",
+    };
+    const r = checkTurn({
+      conversation,
+      turnIndex: 0,
+      expectation: conversation.turns[0].expect,
+      before,
+      after,
+      output: outputFor(after),
+      inputs,
+    });
+    expect(fails(r.findings, "construct_named")).toEqual([]);
+    expect(fails(r.findings, "requirement_recall")).toEqual([]);
+  });
+
+  it("does not treat a query exclusion as searching for the term", () => {
+    expect(
+      stripExclusions("nurse ECMO -perfusionist site:x.com"),
+    ).not.toContain("perfusionist");
+    expect(stripExclusions('a -"talent acquisition" b')).not.toContain(
+      "talent acquisition",
+    );
+    expect(stripExclusions("nurse ECMO -perfusionist")).toContain("ECMO");
+  });
+
+  it("does not count a number proposed in the next question as fabrication", () => {
+    const after = goodAfter();
+    const nq = {
+      question: "Is 7nm-class the line, or something else?",
+      whyItMatters: "It sets the bar.",
+      targetsUncertaintyIds: ["unc-comp"],
+      informationValue: "high",
+    };
+    const r = checkTurn({
+      conversation,
+      turnIndex: 0,
+      expectation: conversation.turns[0].expect,
+      before,
+      after,
+      output: outputFor(after, nq),
+      inputs,
+    });
+    expect(fails(r.findings, "fabrication")).toEqual([]);
+    // …but the same number asserted in a definition is still caught.
+    const asserted = goodAfter();
+    asserted.requirements[0].definition += " The node is 7nm-class.";
+    const r2 = checkTurn({
+      conversation,
+      turnIndex: 0,
+      expectation: conversation.turns[0].expect,
+      before,
+      after: asserted,
+      output: outputFor(asserted),
+      inputs,
+    });
+    expect(fails(r2.findings, "fabrication").length).toBe(1);
+  });
+
+  it("lets a persona name a forbidden phrase in doNotSay but not assert it", () => {
+    const plan: SearchPlanOutput = {
+      success: { mission: "m", outcomes: [], goodVsExceptional: "g" },
+      evidence: { items: [] },
+      population: { segments: [], adjacentSegments: [], exclusions: [] },
+      searchPlan: { queryPlans: [], sequencing: [] },
+    };
+    const expectation = {
+      ...conversation.turns[0].expect,
+      replan: {
+        required: true,
+        changes: [
+          {
+            dimension: "persona" as const,
+            aliases: [],
+            mustNotContain: ["twenty-six"],
+          },
+        ],
+      },
+    };
+    const persona = {
+      label: "p",
+      segmentLabel: "s",
+      whoTheyAre: "w",
+      whatTheyValue: [],
+      concerns: [],
+      whereTheyRead: [],
+      toneGuidance: "t",
+      proofPoints: [],
+      doNotSay: [
+        "Any rate; the plant manager's twenty-six is not ours to quote",
+      ],
+      researchCitations: [],
+      provenance: "research" as const,
+    };
+    const ok = checkReplan({
+      expectation,
+      plan,
+      composed: [],
+      personas: [persona],
+      proxyTerms: [],
+    });
+    expect(fails(ok.findings, "replan_correctness")).toEqual([]);
+    const leaked = {
+      ...persona,
+      doNotSay: [],
+      proofPoints: ["Pays twenty-six an hour"],
+    };
+    const bad = checkReplan({
+      expectation,
+      plan,
+      composed: [],
+      personas: [leaked],
+      proxyTerms: [],
+    });
+    expect(fails(bad.findings, "replan_correctness").length).toBe(1);
   });
 });

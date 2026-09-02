@@ -48,7 +48,8 @@ Grounding rules (mandatory):
 - whereTheyRead: surfaces and venues the findings and IR support, in the words the audience uses.
 - concerns: the objections this audience would plausibly raise about this move — grounded, not flattering.
 - doNotSay: phrases, claims, or pressure tactics that would misfire with this audience or violate honesty (no false urgency, no manipulation).
-- toneGuidance: concrete (register, length, what to lead with), fitted to seniority and the seat.`,
+- toneGuidance: concrete (register, length, what to lead with), fitted to seniority and the seat.
+- NEVER put an internal compensation position in a persona: no band, no ceiling, no "they would go to X for the right person", no equity percentage. Those are the employer's negotiating position, and a persona is outreach material. Say what the seat offers in kind (the work, the terms, what is genuinely on the table) and leave numbers to the recruiter in conversation. Naming a figure in doNotSay to forbid it is fine; asserting one as a proof point is not.`,
   user: (ctx) => `${renderProjectContext(ctx.project)}
 ## Talent segments to build personas for
 ${JSON.stringify(ctx.segments, null, 1)}

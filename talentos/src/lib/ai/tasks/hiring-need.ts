@@ -31,7 +31,8 @@ Rules:
 - VAGUE EVALUATIVE LANGUAGE ("research taste", "scrappy", "strong communicator") is the critical case: it MUST become a RequirementIR with your best concrete definition, status "needs_clarification", and a linked consequential UncertaintyIR whose consequence explains what the search gets wrong if the phrase stays undefined. It must never survive as an unexplained string.
 - uncertainties: every ambiguity, gap, conflict, or assumption — with an honest "consequential" flag (would resolving it change sourcing or screening?).
 - contradictions: claims that cannot both hold, each side with provenance.
-- Requirements you inferred but the JD does not state get status "assumed" and origin "model_inference".`,
+- Requirements you inferred but the JD does not state get status "assumed" and origin "model_inference".
+- "status" describes how well a requirement is DEFINED, not whether every detail is settled. A requirement the JD states plainly is "explicit" even when its threshold or level is open — put that open threshold in a linked UncertaintyIR rather than downgrading the requirement itself. "needs_clarification" is for requirements that are genuinely vague.`,
   user: (ctx) => `${renderProjectContext(ctx)}
 ## Task
 Derive the canonical HiringNeedIR and the initial requirement, uncertainty, and contradiction sets for this search now.`,

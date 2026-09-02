@@ -188,16 +188,26 @@ BEFORE any fix, every fix is named by a failure-taxonomy entry, the same
 subset is re-run after, and `eval/w12/REPORT.md` states coverage and the
 extraction recommendation.
 
-- [ ] Spec + plan entry (docs first)
-- [ ] Corpus: ≥ 50 conversations, ≥ 10 occupations, all 20 categories,
+- [x] Spec + plan entry (docs first)
+- [x] Corpus: ≥ 50 conversations, ≥ 10 occupations, all 20 categories,
       special fixtures A–J, stakeholder disagreement
-- [ ] Harness: schema, deterministic checks, judge task, resumable runner,
+- [x] Harness: schema, deterministic checks, judge task, resumable runner,
       report; `pnpm eval:w12`
-- [ ] Baseline run (stratified subset under the session provider), scores
+- [x] Baseline run (stratified subset under the session provider), scores
       recorded before fixes
-- [ ] Failure taxonomy
-- [ ] Targeted fixes (prompt / service merge / smallest proven schema
+- [x] Failure taxonomy
+- [x] Targeted fixes (prompt / service merge / smallest proven schema
       correction), each tied to a taxonomy entry
-- [ ] After-fix run on the same subset; regression tests pinned
-- [ ] Authority-semantics and requirement-facet verdicts, from evidence
-- [ ] Extraction-readiness recommendation
+- [x] After-fix run on the same subset; regression tests pinned
+- [x] Authority-semantics and requirement-facet verdicts, from evidence
+- [x] Extraction-readiness recommendation
+
+Outcome (`eval/w12/REPORT.md`): all four hard targets met at baseline —
+provenance 100 %, silent mutation 0, protected-trait violations 0,
+fabrication 0. Four defects found (status conflation, missing authority
+semantics, paraphrased false signals, compensation in personas); three
+fixed by prompt rules and one by the smallest proven schema addition
+(`assertedBy`, `contested`). AuthorityIR beyond those two fields, and every
+proposed requirement facet, were tested and REJECTED as unearned by the
+evidence. Extraction: not yet — the schema moved during this wave, and only
+10 of 53 conversations ran live.

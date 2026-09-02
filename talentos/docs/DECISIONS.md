@@ -318,3 +318,44 @@ owner asked for a guarantee, not a suggestion).
 configured it stops with a clear message instead of drafting. The session
 research provider is only as fresh as the fulfilling session's search; the
 mock research provider is never real research and is watermarked.
+
+## D-014 — Requirement authority semantics: `assertedBy` and `contested`, and nothing more
+
+**Decision.** (W12 adversarial evaluation, 2026-09-02.) `RequirementIR`
+gains two optional fields and no others:
+
+- `assertedBy?: string` — the `speaker` of the ManagerStatement the
+  requirement came from, set whenever `origin` is `manager_statement`.
+- `contested?: boolean` — true while stakeholders disagree about the
+  requirement and have not reconciled.
+
+`status` is documented as describing how well a requirement is DEFINED, not
+how certain every detail is: a requirement the manager has stated is
+`explicit` even when its threshold is still open (the threshold belongs in
+`linkedUncertaintyIds`), and disagreement is `contested`, never
+`needs_clarification`.
+
+**Evidence.** Fixture e-02 (CFO, CEO vs board chair) showed that with two
+stakeholders `origin` only records that a person spoke, not which one, so
+attribution survived solely as prose no downstream agent can query; and that
+"clear but disputed" was being encoded as "vague". Fixture b-02 (ICU/ECMO)
+showed a plainly-stated must-have demoted to `needs_clarification` because
+its threshold was open. Both are in `eval/w12/REPORT.md` §3 with the
+before/after scores in §6.
+
+**Rejected, with reasons.** `decisionAuthority` — a property of a
+stakeholder, not of a requirement. `challengedBy` — duplicates
+`ContradictionIR`, which held both sides correctly in every stakeholder
+fixture (4/4). `approvedBy` — a workflow event with no failure behind it.
+Requirement facets CONSTRUCT / PROXY / SIGNAL / EVIDENCE / THRESHOLD /
+FALSE_SIGNAL / COUNTEREVIDENCE as separate fields — the corpus showed
+`definition`, `evidenceSpec` and `falseSignals` already carry them
+(proxy identification 100 %, proxy-as-filter 0), THRESHOLD is expressible
+through `linkedUncertaintyIds` and needed a rule rather than a field, and
+COUNTEREVIDENCE produced no failure at all.
+
+**Tradeoff.** Two optional fields cost nothing to existing rows and are
+ignored by every consumer that does not need them; the risk is that
+`contested` goes stale if a reconciliation is never recorded, which is why
+the reasoner is instructed to clear it only on a statement that settles the
+disagreement.

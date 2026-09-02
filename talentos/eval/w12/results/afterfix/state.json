@@ -1,0 +1,429 @@
+{
+  "runName": "afterfix",
+  "startedAt": "2026-09-02T20:01:23.265Z",
+  "provider": "session",
+  "conversations": {
+    "b-02": {
+      "id": "b-02",
+      "occupation": "ICU registered nurse",
+      "fixtureLetter": "B",
+      "categories": [6, 5, 10],
+      "status": "done",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        }
+      ],
+      "projectId": "38b496d6-2d82-454c-a070-eb344938399e",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 6,
+              "total": 6
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "d-04": {
+      "id": "d-04",
+      "occupation": "CNC machinist",
+      "fixtureLetter": "D",
+      "categories": [18, 17, 11, 19],
+      "status": "done",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "fabrication": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 3,
+                "total": 3
+              },
+              "unknown_preserved": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "fabrication": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 3,
+                "total": 3
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "personasRan": true,
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 6,
+                "total": 6
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        }
+      ],
+      "projectId": "1a4108ac-2e84-4d7d-be0f-a4bc2f63f35c",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "fabrication": {
+              "pass": 4,
+              "total": 4
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "e-02": {
+      "id": "e-02",
+      "occupation": "Chief financial officer",
+      "fixtureLetter": "E",
+      "categories": [7, 2, 20],
+      "status": "done",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "contradiction_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "silent_mutation",
+                "severity": "warn",
+                "detail": "untouched key \"integrity\" has no earlier expectation to resolve it"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 2,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "contradiction_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        }
+      ],
+      "projectId": "2f3c6b25-a91b-40c7-81df-95be32891778",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            },
+            "uncertainty_detection": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    }
+  }
+}
