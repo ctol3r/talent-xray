@@ -176,3 +176,28 @@ audience and the outreach draft cites them.
 - [x] Outreach tab: personas card with research citations + "Research
       audience & build personas"; candidate outreach card shows the persona
 - [x] Tests + full verify; live session demonstration recorded
+
+## W12 — Hiring Intelligence Adversarial Evaluation
+
+Owner request 2026-09-02: "We are testing the brain now." Evaluation,
+reasoning and hardening only — no new product surface, no extraction.
+Spec: `W12_EVAL_SPEC.md`. Acceptance: the corpus meets its coverage
+contract (`tests/unit/w12-corpus.test.ts`), the deterministic checks are
+regression-tested (`tests/unit/w12-checks.test.ts`), a baseline is recorded
+BEFORE any fix, every fix is named by a failure-taxonomy entry, the same
+subset is re-run after, and `eval/w12/REPORT.md` states coverage and the
+extraction recommendation.
+
+- [ ] Spec + plan entry (docs first)
+- [ ] Corpus: ≥ 50 conversations, ≥ 10 occupations, all 20 categories,
+      special fixtures A–J, stakeholder disagreement
+- [ ] Harness: schema, deterministic checks, judge task, resumable runner,
+      report; `pnpm eval:w12`
+- [ ] Baseline run (stratified subset under the session provider), scores
+      recorded before fixes
+- [ ] Failure taxonomy
+- [ ] Targeted fixes (prompt / service merge / smallest proven schema
+      correction), each tied to a taxonomy entry
+- [ ] After-fix run on the same subset; regression tests pinned
+- [ ] Authority-semantics and requirement-facet verdicts, from evidence
+- [ ] Extraction-readiness recommendation

@@ -19,7 +19,9 @@
     "golden:cais": "tsx scripts/golden-cais.mts",
     "golden:session": "tsx scripts/golden-cais-session.mts",
     "crew:work": "tsx scripts/crew-worker.mts",
-    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "eval:w12": "tsx scripts/eval-w12.mts",
+    "eval:w12:fulfil": "tsx scripts/eval-w12-fulfil.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",

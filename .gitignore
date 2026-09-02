@@ -44,3 +44,5 @@ next-env.d.ts
 # cloudflare / opennext
 .open-next/
 .wrangler/
+talentos/eval/w12/results/*/eval.db
+talentos/eval/w12/results/*/outbox/
