@@ -34,7 +34,7 @@ export const conversations: Conversation[] = [
         },
         {
           key: "leader",
-          aliases: ["strong leader", "leader"],
+          aliases: ["strong leader"],
           status: "needs_clarification",
         },
         { key: "michelin", aliases: ["Michelin"], proxyTerms: ["Michelin"] },
@@ -57,7 +57,7 @@ export const conversations: Conversation[] = [
             },
             {
               key: "leader",
-              aliases: ["leader", "brigade stays", "retention", "turnover"],
+              aliases: ["strong leader", "brigade stays", "brigade retention"],
               status: "explicit",
               constructAliases: ["retention", "brigade stays", "turnover"],
               evidenceAliases: ["retention", "turnover", "stayed"],

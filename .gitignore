@@ -46,3 +46,4 @@ next-env.d.ts
 .wrangler/
 talentos/eval/w12/results/*/eval.db
 talentos/eval/w12/results/*/outbox/
+talentos/eval/w12/results/*/snapshots/

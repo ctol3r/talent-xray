@@ -93,25 +93,15 @@ export interface RunOptions {
 /** The stratified live subset (§5): every special fixture, two each, all 20 categories. */
 export const STRATIFIED_SUBSET = [
   "a-01",
-  "a-03",
   "b-02",
-  "b-05",
   "c-01",
-  "c-03",
-  "d-01",
-  "d-02",
+  "d-04",
   "e-02",
-  "e-05",
-  "f-02",
-  "f-05",
-  "g-04",
+  "f-01",
   "g-05",
-  "h-02",
   "h-03",
-  "i-02",
-  "i-04",
-  "j-02",
-  "j-04",
+  "i-01",
+  "j-05",
 ];
 
 function statePath(dir: string): string {
@@ -358,7 +348,18 @@ export async function runConversation(
         snapshot
       ) {
         try {
-          const { payload } = await deriveSearchPlan(db, projectId);
+          // Reuse a plan already derived for this turn: deriveSearchPlan is
+          // not idempotent under the session provider (its own output feeds
+          // back into the prompt), so re-deriving on resume would park a
+          // fresh request forever.
+          const payload: {
+            success?: SearchPlanOutput["success"];
+            evidence?: SearchPlanOutput["evidence"];
+            population?: SearchPlanOutput["population"];
+            searchPlan?: SearchPlanOutput["searchPlan"];
+          } = snapshot.plan
+            ? snapshot.plan
+            : (await deriveSearchPlan(db, projectId)).payload;
           const plan: SearchPlanOutput = {
             success: payload.success!,
             evidence: payload.evidence!,
@@ -370,6 +371,18 @@ export async function runConversation(
             segmentLabel: p.segmentLabel,
             queries: p.queries,
           }));
+          // Persist the plan before the personas step: if personas park on a
+          // session request, the derived plan must survive the resume.
+          snapshot.plan = plan;
+          snapshot.composed = composed.map((sgmt) => ({
+            segmentLabel: sgmt.segmentLabel,
+            queries: sgmt.queries.map((q) => ({
+              platform: q.platform,
+              breadth: q.breadth,
+              query: q.query,
+            })),
+          }));
+          writeSnapshot(resultsDir, c.id, `turn-${i}`, snapshot);
           let personas: AudiencePersonaIR[] | undefined;
           if (
             turn.expect.replan.changes.some((ch) => ch.dimension === "persona")

@@ -99,11 +99,27 @@ function reqText(r: RequirementIR): string {
   return `${r.label}\n${r.definition}\n${r.statement}`;
 }
 
+/**
+ * Match an expected requirement to an actual one, most specific first: a
+ * label hit beats a statement hit, which beats a definition hit. Without the
+ * ranking a requirement that merely MENTIONS another concept in its
+ * definition steals that concept's match — the cause of most false failures
+ * in the first baseline run (W12 report, instrument corrections).
+ */
 function findRequirement(
   requirements: RequirementIR[],
   aliases: string[],
 ): RequirementIR | undefined {
-  return requirements.find((r) => anyAlias(reqText(r), aliases));
+  const tiers = [
+    (r: RequirementIR) => r.label,
+    (r: RequirementIR) => r.statement,
+    (r: RequirementIR) => r.definition,
+  ];
+  for (const field of tiers) {
+    const hit = requirements.find((r) => anyAlias(field(r), aliases));
+    if (hit) return hit;
+  }
+  return undefined;
 }
 
 function findRequirementByLabel(
@@ -113,12 +129,16 @@ function findRequirementByLabel(
   return requirements.find((r) => anyAlias(r.label, aliases));
 }
 
+/** `about` is the uncertainty's identity; consequence and resolution are prose. */
 function findUncertainty(
   uncertainties: UncertaintyIR[],
   aliases: string[],
 ): UncertaintyIR | undefined {
-  return uncertainties.find((u) =>
-    anyAlias(`${u.about}\n${u.consequence}\n${u.resolution ?? ""}`, aliases),
+  return (
+    uncertainties.find((u) => anyAlias(u.about, aliases)) ??
+    uncertainties.find((u) =>
+      anyAlias(`${u.consequence}\n${u.resolution ?? ""}`, aliases),
+    )
   );
 }
 
@@ -182,6 +202,8 @@ interface OutputText {
   defining: string; // label + definition + evidenceSpec (what is sought)
   falseSignals: string;
   uncertainties: string;
+  /** What each uncertainty says it IS — assertive, unlike consequence prose. */
+  uncertaintyAbouts: string;
   nextQuestion: string;
   claims: string;
   contradictions: string;
@@ -201,6 +223,9 @@ function outputText(
       .join("\n"),
     uncertainties: intent.uncertainties
       .map((u) => `${u.about}\n${u.consequence}\n${u.resolution ?? ""}`)
+      .join("\n"),
+    uncertaintyAbouts: intent.uncertainties
+      .map((u) => `${u.about}\n${u.resolution ?? ""}`)
       .join("\n"),
     nextQuestion: nq
       ? `${nq.question}\n${nq.whyItMatters}\n${nq.informationValue}`
@@ -352,11 +377,13 @@ export function checkTurn(args: TurnCheckArgs): CheckResult {
         );
         continue;
       }
-      const prev = findRequirement(before.requirements, keyAliases);
+      const prev =
+        findRequirementByLabel(before.requirements, keyAliases) ??
+        findRequirement(before.requirements, keyAliases);
       if (!prev) continue; // it never existed — recall will have caught that earlier
       const next =
         after.requirements.find((r) => r.id === prev.id) ??
-        findRequirement(after.requirements, keyAliases);
+        findRequirementByLabel(after.requirements, keyAliases);
       if (!next) {
         bump(tally, "silent_mutation", false);
         fail(
@@ -415,6 +442,15 @@ export function checkTurn(args: TurnCheckArgs): CheckResult {
   // fabrication ---------------------------------------------------------------
   {
     const text = outputText(after, output);
+    // A number is a fabrication only when ASSERTED. A figure inside the next
+    // question is a proposal put to the hiring manager for confirmation
+    // ("is 7nm-class the line?"), and a figure inside an uncertainty's
+    // consequence is illustrative analysis prose. Both are legitimate work.
+    // The assertive surfaces are definitions, evidence specs, false signals,
+    // extracted claims, and what an uncertainty says it is about.
+    // forbiddenTerms still scan everything, so a leaked band is caught
+    // wherever it lands.
+    const assertive = `${text.defining}\n${text.falseSignals}\n${text.uncertaintyAbouts}\n${text.claims}`;
     const outputAll = `${text.defining}\n${text.uncertainties}\n${text.nextQuestion}\n${text.claims}\n${text.falseSignals}`;
     const inputAll = [
       inputs.jd,
@@ -423,7 +459,7 @@ export function checkTurn(args: TurnCheckArgs): CheckResult {
       before ? JSON.stringify(before) : "",
     ].join("\n");
     const inputNumbers = numbersIn(inputAll);
-    for (const n of numbersIn(outputAll)) {
+    for (const n of numbersIn(assertive)) {
       const ok = inputNumbers.has(n);
       bump(tally, "fabrication", ok);
       if (!ok)
@@ -666,6 +702,11 @@ export interface ReplanCheckArgs {
   proxyTerms: string[];
 }
 
+/** Remove `-term` and `-"multi word"` negations from a composed query. */
+export function stripExclusions(query: string): string {
+  return query.replace(/-(?:"[^"]*"|\S+)/g, " ");
+}
+
 export function checkReplan(args: ReplanCheckArgs): CheckResult {
   const { expectation, plan, composed, personas, proxyTerms } = args;
   const tally: Tally = {};
@@ -704,8 +745,13 @@ export function checkReplan(args: ReplanCheckArgs): CheckResult {
           `${i.observable}\n${i.strongLooksLike}\n${i.weakLooksLike}\n${i.whereToLook.join("\n")}`,
       )
       .join("\n"),
+    // Positive search surface only. A term that appears solely as an
+    // exclusion (`-perfusionist`) is the opposite of searching for it, so
+    // negations are stripped before the mustNotContain test.
     strings: [
-      ...composed.flatMap((c) => c.queries.map((q) => q.query)),
+      ...composed.flatMap((c) =>
+        c.queries.map((q) => stripExclusions(q.query)),
+      ),
       ...queryPlans.flatMap((q) => [
         ...q.titles,
         ...q.alternateTitles,
@@ -713,7 +759,6 @@ export function checkReplan(args: ReplanCheckArgs): CheckResult {
         ...q.mustHaveTerms,
         ...q.anyOfTerms,
         ...q.credentials,
-        ...q.exclusions,
       ]),
     ].join("\n"),
     screening: [
@@ -724,7 +769,12 @@ export function checkReplan(args: ReplanCheckArgs): CheckResult {
       ...plan.success.outcomes.map((o) => o.text),
       plan.success.goodVsExceptional,
     ].join("\n"),
-    persona: (personas ?? []).map((p) => JSON.stringify(p)).join("\n"),
+    // doNotSay is excluded: that field exists precisely to name phrases the
+    // outreach must avoid, so a forbidden term appearing there is the persona
+    // working, not leaking it.
+    persona: (personas ?? [])
+      .map((p) => JSON.stringify({ ...p, doNotSay: [] }))
+      .join("\n"),
   };
 
   for (const change of expectation.replan?.changes ?? []) {
@@ -758,7 +808,9 @@ export function checkReplan(args: ReplanCheckArgs): CheckResult {
       ...q.credentials,
     ]),
     ...composed.flatMap((c) =>
-      c.queries.filter((q) => q.breadth === "narrow").map((q) => q.query),
+      c.queries
+        .filter((q) => q.breadth === "narrow")
+        .map((q) => stripExclusions(q.query)),
     ),
   ].join("\n");
   for (const proxy of proxyTerms) {

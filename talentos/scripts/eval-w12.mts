@@ -2,6 +2,7 @@
  * W12 adversarial evaluation CLI.
  *   pnpm eval:w12 --run baseline [--subset stratified | --only a-01,b-02]
  *                 [--replan-only a-01,b-02] [--judge] [--provider session|mock]
+ *                 [--rescore]   re-measure stored snapshots, no model calls
  * Resumable: re-run the same --run after fulfilling parked session requests.
  * Results: eval/w12/results/<run>/ (state.json, snapshots/, REPORT.md, summary.json).
  */
@@ -45,6 +46,20 @@ const selected = only
     ? corpus.filter((c) => STRATIFIED_SUBSET.includes(c.id))
     : corpus;
 if (selected.length === 0) throw new Error("no conversations selected");
+
+// --rescore re-measures a finished run's stored snapshots with the current
+// checks and makes no model calls. Used after an instrument correction.
+if (flag("rescore")) {
+  const { loadState } = await import("../eval/w12/run");
+  const { rescore } = await import("../eval/w12/rescore");
+  const prior = loadState(resultsDir, runName, provider);
+  const rescored = rescore(prior, corpus, resultsDir);
+  const out = summarize(rescored, corpus);
+  const paths = writeReport(resultsDir, out);
+  console.log(renderReport(out));
+  console.log(`\nreport: ${paths.md}`);
+  process.exit(0);
+}
 
 const db = getDb();
 const state = await runAll({
