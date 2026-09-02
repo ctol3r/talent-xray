@@ -6,8 +6,8 @@ schemas as the mock acceptance test (`tests/unit/ir-pipeline.test.ts`).
 Discovery transport was stubbed (no Google key in the run environment); the
 composed queries and the request to the live Core engine id are real.
 
-Model turns: 4 (`derive_hiring_need`, `intake_reasoning` propose,
-`intake_reasoning` statement, `derive_search_plan`). All four passed zod
+Model turns: 5 (`derive_hiring_need`, `intake_reasoning` propose,
+`intake_reasoning` statement ×2, `derive_search_plan`). All five passed zod
 validation and the fair-hiring scan with no warnings.
 
 ## What the run demonstrated
@@ -124,5 +124,6 @@ pending is refused). Pinned by `tests/unit/intake-session.test.ts`.
 
 A real hiring manager (the statement is the fixture's scripted answer), a
 live Google key for the discovery transport, and the remaining intake turns
-(RS-vs-RE, priority area, relocation) — the loop stopped after one
-statement by design of the walkthrough, not because nothing was open.
+(priority area / capacity-vs-capability, relocation, scale bar) — the loop
+stopped after two statements by choice, not because nothing was open; the
+search plan has not yet been re-derived against revision 2.
