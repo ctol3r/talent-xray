@@ -346,6 +346,62 @@ directly from the hiring manager's constraint — never promise a held seat or a
 start, and never imply the December date is generally negotiable. The exception exists,
 but it is not the recruiter's to offer.
 
+## Turn 8 — the agentic-gap weight (revision 8, seventh re-plan)
+
+**Question asked (from turn 7).** When a stronger benchmark originator with no agentic
+background sits next to a slightly weaker originator who has built agent harnesses across
+model families, which one does the hiring manager want — and does the agentic plan run as
+a primary search or stay a supplement?
+
+**Scripted hiring-manager answer (fixture).** Origination is never traded for a skill: a
+strictly stronger originator wins every time, even against three shipped harnesses. The
+"capability gap" was the manager's own misframing — harness engineering is trainable in a
+quarter with support, exactly like distributed training. One part is not teachable, and it
+is not engineering: having run an evaluation where the model _acts_ over multiple steps —
+state, tool calls, partial credit, rollouts that derail. People who have only scored
+single-turn outputs underestimate nondeterminism, cost, drifting environments, and scoring
+a run that half-worked. Evidence of hitting those walls once, in any form, is the signal;
+building the harness is not. And no pipeline of agent-infrastructure engineers — most
+execute someone else's design and fail the ownership bar anyway.
+
+**What the reasoner did.** Eight claims. The agentic requirement was _rewritten rather
+than added to_: relabelled "Has evaluated a model that acts (multi-step, stateful
+evaluation)", with the failure modes as its evidence spec and "scale of harness
+engineering treated as the qualification" added as a false signal. A new `trainable`
+requirement, _Agent-harness engineering_, mirrors the distributed-training precedent — a
+bonus, never a filter, absence must not lower review priority. `unc-agentic-gap-weight`
+resolved.
+
+**First contradiction recorded in eight turns.** `con-agentic-gap-framing` pairs the
+earlier claim that agentic evaluation is _the capability gap this hire should close_
+against this turn's claim that the engineering is _trainable in a quarter_, and resolves
+it: both hold, the team does lack the capability today, but acquiring it is not what the
+hire is for. The contradiction was worth recording because the earlier framing had driven
+real structure — a segment, a query plan, and evidence-gathering depth. The `status:
+resolved` path had been exercised only in tests until now.
+
+**Re-plan (seventh, against revision 8).** The retracted framing had to be chased out of
+everything it had touched. `SuccessIR`'s mission no longer says the hire should "ideally
+close the capability gap"; the 12-month outcome now notes the harness engineering may well
+be learned here rather than brought. The agentic segment is relabelled _"supplementary
+surface, not a hiring target"_ and its description records the retraction. A new exclusion
+names agent-infrastructure pipelines as explicitly unwanted. Most consequentially, because
+the signal now belongs to the _same_ population rather than a separate one, its vocabulary
+moved into the benchmark plans' OR group — `agentic`, `tool use`, `multi-step` now sit
+beside `evaluation` and `evals` in plans 1 and 4 — while the agentic plan itself drops to
+last, "small and deliberately so". A fourteenth evidence item covers the trainable
+requirement in the same words the distributed-training item uses. Sequencing gained the
+finalist rule verbatim: never trade origination for agentic experience.
+
+**Personas rebuilt (fourth time).** The agentic persona needed the most work, because the
+retraction changes what outreach to it may honestly claim: it is now approached as
+_originators who happen to carry the signal_, its first do-not-say entry forbids
+positioning the seat as agent-infrastructure or eval-tooling work, and its tone guidance
+requires saying plainly that origination is the bar rather than implying harness work
+substitutes for it. A persona that mis-sells the seat would have been the most expensive
+kind of drift here — the audience's own first question is whether this is a research seat
+or a plumbing seat.
+
 ## W11 — research-gated personas and outreach (live, session providers)
 
 Owner request the same day: "what happened to email outreach drafts? …
