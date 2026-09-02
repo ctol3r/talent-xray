@@ -6,9 +6,9 @@ schemas as the mock acceptance test (`tests/unit/ir-pipeline.test.ts`).
 Discovery transport was stubbed (no Google key in the run environment); the
 composed queries and the request to the live Core engine id are real.
 
-Model turns: 5 (`derive_hiring_need`, `intake_reasoning` propose,
-`intake_reasoning` statement ×2, `derive_search_plan`). All five passed zod
-validation and the fair-hiring scan with no warnings.
+Model turns: 7 (`derive_hiring_need`, `intake_reasoning` propose,
+`intake_reasoning` statement ×3, `derive_search_plan` ×2). All seven passed
+zod validation and the fair-hiring scan with no warnings.
 
 ## What the run demonstrated
 
@@ -110,6 +110,56 @@ x-ray on segment 2 as "only after the HM confirms artifact-only builders
 clear the bar" — that condition is now met, and the plan should be
 re-derived (it is stale relative to revision 2).
 
+## Intake loop, turn 3 (priority area / capacity vs capability) + re-plan
+
+**HM statement (scripted fixture, verbatim):** "Evals and benchmark
+construction first — the next benchmark cycle is the deadline, so this
+person needs to own a benchmark end to end from day one. Mostly it is
+capacity: we know how to build these and we need one more person who can
+do it without being carried. But there is one capability gap: we cannot run
+agentic, long-horizon dangerous-capability evals at scale today. The
+experiment we can't run right now is a multi-step agent evaluation across a
+family of open-weight models with a harness someone can maintain after the
+paper ships. On exemplars: the benchmarks this team is best known for each
+started as one person's side project before anyone asked for them — that's
+the pattern."
+
+**Reasoner turn** (`revision: 2 → 3`; the loop resumed cleanly again):
+
+- 5 claims extracted (`manager_statement`).
+- The model-inferred "Direct prior work in the named safety areas"
+  (`preferred/assumed`) became **"Prior benchmark or evaluation construction,
+  owned end to end"** — `must_have`, `explicit`, `origin: manager_statement`;
+  robustness and unlearning demoted to secondary relevance.
+- New requirement, `preferred`: **"Agentic, long-horizon evaluation
+  infrastructure (capability gap)"** — with its own linked uncertainty
+  (`unc-agentic-gap-weight`: how it weighs against core capacity).
+- Resolved: `unc-priority-area`, `unc-capacity-vs-capability`,
+  `unc-exemplar-artifacts` (pattern given, names to confirm from the public
+  record). Opened: `unc-agentic-gap-weight`.
+- 15 uncertainties total: 9 resolved, 6 open (all consequential): scale
+  bar, mission assessment, seniority, compensation band, relocation,
+  agentic-gap weight.
+- Next question: relocation / hybrid — "the last big lever on pipeline
+  size" — targeting `unc-relocation`; scale bar, seniority, compensation
+  band queued.
+
+**Re-plan (second `derive_search_plan`, against revision 3).** SuccessIR
+outcomes now cite `manager_statement` provenance for the first two
+horizons; EvidenceIR grew to 10 items including an explicit
+origination/disqualifier check; TalentPopulationIR re-segmented to
+"Benchmark and evaluation originators (RS or RE)" (`scarce`) and
+"Agentic-evaluation infrastructure builders" (`unknown`); SearchPlanIR's
+two plans dropped robustness/unlearning vocabulary for evaluation terms,
+made the GitHub x-ray co-primary (artifact-only builders now clear the bar),
+kept the agentic plan a supplement until its weight is answered, and added
+a pre-outreach origination check because the maintainer-only disqualifier
+is not visible in a search string. Segment 1 narrow, GitHub x-ray:
+
+```
+("Research Scientist" OR "Research Engineer") benchmark (evaluation OR evals OR "dangerous capabilities" OR "capability evaluation" OR "language models" OR LLM) ("San Francisco" OR "Bay Area" OR Berkeley) -recruiter site:github.com
+```
+
 ## Defect found and fixed by this run
 
 `recordManagerStatement` minted a fresh statement id/timestamp on every
@@ -124,6 +174,6 @@ pending is refused). Pinned by `tests/unit/intake-session.test.ts`.
 
 A real hiring manager (the statement is the fixture's scripted answer), a
 live Google key for the discovery transport, and the remaining intake turns
-(priority area / capacity-vs-capability, relocation, scale bar) — the loop
-stopped after two statements by choice, not because nothing was open; the
-search plan has not yet been re-derived against revision 2.
+(relocation, scale bar, seniority, compensation band, mission assessment,
+agentic-gap weight) — the loop stopped after three statements by choice,
+not because nothing was open. The search plan is current as of revision 3.
