@@ -18,17 +18,17 @@ Provider under test: **session**. Judge: same provider (procedural independence 
 | fabrication | 169 / 169 | 100.0 % | 0 | 0 |
 | must_not_exist | 32 / 37 | 86.5 % | 5 | 0 |
 | proxy_as_filter | 20 / 20 | 100.0 % | 0 | 0 |
-| requirement_recall | 205 / 231 | 88.7 % | — | reported |
-| construct_named | 20 / 26 | 76.9 % | — | reported |
-| proxy_identified | 15 / 22 | 68.2 % | — | reported |
+| requirement_recall | 209 / 231 | 90.5 % | — | reported |
+| construct_named | 21 / 26 | 80.8 % | — | reported |
+| proxy_identified | 16 / 22 | 72.7 % | — | reported |
 | evidence_signal_recall | 29 / 30 | 96.7 % | — | reported |
-| false_signal_recall | 17 / 31 | 54.8 % | — | reported |
+| false_signal_recall | 19 / 31 | 61.3 % | — | reported |
 | contradiction_detection | 20 / 26 | 76.9 % | — | reported |
 | uncertainty_detection | 85 / 108 | 78.7 % | — | reported |
 | unknown_preserved | 10 / 14 | 71.4 % | — | reported |
 | next_question_targeting | 39 / 39 | 100.0 % | — | reported |
 | replan_signal | 77 / 82 | 93.9 % | — | reported |
-| replan_correctness | 244 / 263 | 92.8 % | — | reported |
+| replan_correctness | 245 / 263 | 93.2 % | — | reported |
 | heuristic_mutation | 19 / 21 | 90.5 % | — | reported |
 
 ## Judge (semantic dimensions, 0–2)
@@ -68,68 +68,60 @@ Provider under test: **session**. Judge: same provider (procedural independence 
 - [fail] j-05 · turn 0: "BSEE (withdrawn)" exists as a preferred requirement but must not (bsee)
 - [fail] x-01 · turn 0: "Native speaker (withdrawn)" exists as a preferred requirement but must not (native)
 
-### requirement_recall (26)
+### requirement_recall (22)
 - [fail] b-01 · turn 0: "NMC registration": kind must_have (expected preferred)
-- [fail] b-05 · turn 1: "Rotating shifts including nights and weekends": origin jd (expected manager_statement)
 - [fail] c-03 · turn 1: "Owns new-logo enterprise deals": origin jd (expected manager_statement)
 - [fail] c-05 · turn 0: "Can hold a revenue-cycle conversation with a hospital CFO": status explicit (expected needs_clarification)
 - [fail] c-05 · turn 1: "Can hold a revenue-cycle conversation with a hospital CFO": kind must_have (expected trainable)
-- [fail] d-02 · turn 0: "Set up and run five-axis machining centres": origin jd (expected manager_statement)
 - [fail] d-03 · turn 1: "Second shift": kind must_have (expected preferred)
 - [fail] e-01 · turn -1: "Strong integrity; will tell the CEO no": status explicit (expected needs_clarification)
-- [fail] e-01 · turn 0: "Lead finance through IPO readiness": origin jd (expected manager_statement)
 - [fail] e-03 · turn 1: "Based in Austin; relocation expected": kind preferred (expected must_have)
 - [fail] e-04 · turn -1: "Strong integrity; will tell the CEO no": status explicit (expected needs_clarification)
-- [fail] f-03 · turn 0: "Design and test liquid rocket engine components": origin jd (expected manager_statement)
 - [fail] f-04 · turn 0: "Familiarity with test-stand operations": origin jd (expected manager_statement)
-- [fail] h-01 · turn 0: "Valid California Administrative Services Credential": kind must_have (expected preferred)
+- [fail] g-05 · turn 0: "Nanosheet development exposure (pilot line acceptable)": kind preferred (expected must_have)
 - [fail] h-05 · turn 0: "Start July 1": origin jd (expected manager_statement)
 - [fail] h-05 · turn 0: "Start on July first": status explicit (expected needs_clarification)
-- [fail] i-01 · turn 0: "Writes and changes their own menus": kind must_have (expected preferred)
 - [fail] i-01 · turn 1: "Oversee banquets and in-room dining": origin jd (expected manager_statement)
 - [fail] i-02 · turn 0: "Oversee banquets and in-room dining": origin jd (expected manager_statement)
-- [fail] i-04 · turn 1: "Michelin-starred background": kind preferred (expected must_have)
+- [fail] i-04 · turn 1: "Lead a creative, seasonal fine-dining program": status needs_clarification (expected explicit)
 - [fail] i-05 · turn 1: "Michelin-starred background": origin jd (expected manager_statement)
 - [fail] j-01 · turn 0: "Virginia journeyman electrician license": kind must_have (expected preferred)
+- [fail] j-03 · turn 1: "Has worked nights before": kind preferred (expected must_have)
 - [fail] x-01 · turn 0: "Simultaneous and consecutive modes": origin jd (expected manager_statement)
 - [fail] x-02 · turn -1: "Comfortable working at 90 meters": status explicit (expected needs_clarification)
 - [fail] x-02 · turn 0: "GWO Basic Safety Training": kind must_have (expected preferred)
 - [fail] x-03 · turn 0: "EDC systems (Medidata Rave)": origin jd (expected manager_statement)
 
-### construct_named (6)
+### construct_named (5)
 - [fail] b-01 · turn 0: "NMC registration" definition does not name the construct (busy / general ICU / rotation / substantive)
 - [fail] c-01 · turn 0: "Owns new-logo enterprise deals" definition does not name the construct (new logo / opened themselves / seventy percent / 70)
 - [fail] c-03 · turn 1: "Owns new-logo enterprise deals" definition does not name the construct (land / expand / enterprise)
 - [fail] e-03 · turn 1: "Big 4 background" definition does not name the construct (rigor)
 - [fail] i-01 · turn 0: "Writes and changes their own menus" definition does not name the construct (retention / brigade stays / turnover)
-- [fail] i-01 · turn 0: "Writes and changes their own menus" definition does not name the construct (discipline / mise / consistency)
 
-### proxy_identified (7)
+### proxy_identified (6)
 - [fail] b-04 · turn 0: "Nursing degree from a Russell Group university": proxy (Russell Group) is neither a false signal nor contextualized by the construct
 - [fail] d-02 · turn 0: "NIMS certification": proxy (NIMS) is neither a false signal nor contextualized by the construct
 - [fail] g-02 · turn -1: "Experience at TSMC, Intel, or Samsung": proxy (TSMC / Intel / Samsung) is neither a false signal nor contextualized by the construct
 - [fail] h-04 · turn -1: "Graduate of a top-ranked educational leadership program": proxy (Harvard / Stanford / Columbia) is neither a false signal nor contextualized by the construct
 - [fail] h-04 · turn 0: "Doctorate (a board member's preference, not a bar)": proxy (Harvard / Stanford / Columbia) is neither a false signal nor contextualized by the construct
-- [fail] i-01 · turn 0: "Writes and changes their own menus": proxy (Michelin) is neither a false signal nor contextualized by the construct
 - [fail] x-03 · turn 0: "CCRC certification (a result of the job, not a prerequisite)": proxy (CCRC) is neither a false signal nor contextualized by the construct
 
 ### evidence_signal_recall (1)
 - [fail] i-01 · turn 0: "Writes and changes their own menus" evidenceSpec lacks retention / turnover / stayed
 
-### false_signal_recall (14)
+### false_signal_recall (12)
 - [fail] b-01 · turn 0: "NMC registration" falseSignals lack rotation
 - [fail] c-01 · turn 1: "Experience selling to CFOs" falseSignals lack on a call / attended
 - [fail] c-05 · turn 1: "Can hold a revenue-cycle conversation with a hospital CFO" falseSignals lack sold to hospitals
 - [fail] d-01 · turn 0: "Years of experience (explicitly not a criterion)" falseSignals lack years / tenure
 - [fail] d-01 · turn 1: "Self-starter" falseSignals lack operator / wait to be told
-- [fail] d-02 · turn 0: "Set up and run five-axis machining centres" falseSignals lack operator / cycle start / pushed
 - [fail] e-04 · turn 1: "Has led finance through a downturn or a failed raise" falseSignals lack only ever went up / every company / up and to the right
 - [fail] f-02 · turn 0: "U.S. person as defined by ITAR" falseSignals lack accent / foreign degree / national origin
 - [fail] f-03 · turn 0: "Named-employer preference (a proxy the manager's own example refutes)" falseSignals lack one valve / big-company / brand
 - [fail] g-02 · turn 0: "PhD (corporate posting standard, not a bar)" falseSignals lack big-three / brand / leading-edge
-- [fail] h-01 · turn 0: "Valid California Administrative Services Credential" falseSignals lack years / tenure
+- [fail] h-01 · turn 0: "Assistant-principal service (a guide, not a bar)" falseSignals lack years / tenure
 - [fail] h-04 · turn 0: "Doctorate (a board member's preference, not a bar)" falseSignals lack Columbia / Ivy / brand / program
-- [fail] i-02 · turn 0: "Oversee banquets and in-room dining" falseSignals lack fine dining only / tasting menu / small
 - [fail] j-01 · turn 0: "Virginia journeyman electrician license" falseSignals lack years
 
 ### contradiction_detection (6)
@@ -160,7 +152,7 @@ Provider under test: **session**. Judge: same provider (procedural independence 
 - [fail] f-04 · turn 1: "Compensation, which the posting does not state": status resolved (expected open)
 - [fail] g-03 · turn 0: "Whether the qualifying population exists in the Phoenix area or would need to relocate": status resolved (expected open)
 - [fail] h-02 · turn 2: "Who selects the principal and who approves the appointment": status open (expected resolved)
-- [fail] j-02 · turn 0: "Whether the seat is a maintenance electrician or a critical-facilities operator": status resolved (expected open)
+- [fail] j-02 · turn 1: "Whether adjacent critical-facilities backgrounds count toward the data-centre requirement": status open (expected resolved)
 - [fail] j-04 · turn 0: "The rate, and how it compares with the Northern Virginia data-centre corridor": status resolved (expected open)
 - [fail] j-04 · turn 1: "The rate, and how it compares with the Northern Virginia data-centre corridor": status resolved (expected open)
 - [fail] x-02 · turn 0: "Whether adjacent electrical trades count toward the two-year wind requirement": status resolved (expected open)
@@ -178,10 +170,9 @@ Provider under test: **session**. Judge: same provider (procedural independence 
 - [fail] g-02 · turn 1: no re-plan was expected but the turn changed requirements / resolved a consequential uncertainty (spurious churn)
 - [fail] h-04 · turn 1: no re-plan was expected but the turn changed requirements / resolved a consequential uncertainty (spurious churn)
 
-### replan_correctness (19)
+### replan_correctness (18)
 - [fail] a-02 · turn replan: strings: "PhD" is present but must not be
 - [fail] a-04 · turn replan: persona: none of nonprofit / compensation / band present after re-plan
-- [fail] c-05 · turn replan: adjacent: none of consult / Optum / Huron / R1 / revenue cycle present after re-plan
 - [fail] d-02 · turn replan: strings: "operator" is present but must not be
 - [fail] d-02 · turn replan: adjacent: none of Swiss present after re-plan
 - [fail] d-04 · turn replan: geography: "relocation" is present but must not be

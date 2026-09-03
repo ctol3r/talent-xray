@@ -8,9 +8,12 @@
  * corrects a specific, unambiguous shape and leaves everything else alone.
  *
  * Covers S-2 (origin drift), S-3 (market comparisons resolved from inside
- * the company) and S-4 (withdrawn requirements demoted instead of removed).
- * S-1 (false signals) and S-5 (rule-versus-example contradictions) are
- * judgement calls with no deterministic shape and are prompt-only.
+ * the company), S-4 (withdrawn requirements demoted instead of removed) and
+ * S-10 (one turn's whole text pasted as every requirement's verbatim
+ * statement). S-1 (false signals), S-5 (rule-versus-example contradictions),
+ * S-6 (status overloading), S-7 (constructs and proxies) and S-9
+ * (consequentiality) are judgement calls with no deterministic shape and are
+ * prompt-only.
  */
 import type {
   HiringIntentIR,
@@ -26,6 +29,15 @@ function norm(s: string): string {
     .replace(/[‘’]/g, "'")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Words distinctive enough to attribute a sentence to a requirement. */
+function tokens(text: string): Set<string> {
+  return new Set(
+    norm(text)
+      .split(/[^a-z0-9]+/)
+      .filter((t) => t.length >= 4),
+  );
 }
 
 /** A requirement statement is verbatim when it appears whole in a source. */
@@ -86,6 +98,50 @@ export function dropWithdrawnRequirements(
 }
 
 /**
+ * S-10 · The reasoner pastes the whole manager turn into `statement` for
+ * every requirement that turn touched — 197 of 803 requirements in the W12
+ * full corpus shared a byte-identical statement with a sibling. Two
+ * requirements cannot both have the same verbatim source phrase, so this is
+ * always wrong: it destroys per-requirement provenance and makes any
+ * downstream "which phrase asserted this?" question unanswerable.
+ *
+ * The reasoner is told to quote the fragment. This narrows the ones that get
+ * through, and only when the answer is unambiguous: among requirements
+ * sharing a statement, each takes the single sentence with the most
+ * distinctive overlap with its own label, and only when exactly one sentence
+ * wins. A narrowed statement is still a verbatim substring of the original,
+ * so provenance stays intact; anything unclear is left alone.
+ */
+export function narrowSharedStatements(
+  requirements: RequirementIR[],
+): RequirementIR[] {
+  const counts = new Map<string, number>();
+  for (const r of requirements) {
+    const k = norm(r.statement);
+    counts.set(k, (counts.get(k) ?? 0) + 1);
+  }
+  return requirements.map((r) => {
+    if ((counts.get(norm(r.statement)) ?? 0) < 2) return r;
+    const sentences = r.statement
+      .split(/(?<=[.!?])\s+/)
+      .map((x) => x.trim())
+      .filter((x) => x.length >= 12);
+    if (sentences.length < 2) return r;
+    const wanted = tokens(r.label);
+    if (wanted.size === 0) return r;
+    const scored = sentences.map((sentence) => ({
+      sentence,
+      score: [...tokens(sentence)].filter((t) => wanted.has(t)).length,
+    }));
+    const best = Math.max(...scored.map((x) => x.score));
+    if (best === 0) return r;
+    const winners = scored.filter((x) => x.score === best);
+    if (winners.length !== 1) return r;
+    return { ...r, statement: winners[0].sentence };
+  });
+}
+
+/**
  * Uncertainties about how something here compares with the market outside.
  * Deliberately narrow: it must be a comparison, not merely a mention of pay.
  */
@@ -125,7 +181,7 @@ export function keepMarketComparisonsOpen(
   });
 }
 
-/** All three backstops, applied to one reasoning turn's output. */
+/** All four backstops, applied to one reasoning turn's output. */
 export function applyIntakeHygiene(
   next: Pick<HiringIntentIR, "requirements" | "uncertainties">,
   before: Pick<HiringIntentIR, "uncertainties">,
@@ -133,8 +189,10 @@ export function applyIntakeHygiene(
   statements: ManagerStatement[],
 ): Pick<HiringIntentIR, "requirements" | "uncertainties"> {
   return {
-    requirements: dropWithdrawnRequirements(
-      reconcileRequirementOrigins(next.requirements, jdText, statements),
+    requirements: narrowSharedStatements(
+      dropWithdrawnRequirements(
+        reconcileRequirementOrigins(next.requirements, jdText, statements),
+      ),
     ),
     uncertainties: keepMarketComparisonsOpen(
       next.uncertainties,

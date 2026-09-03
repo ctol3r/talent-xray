@@ -78,12 +78,19 @@ export interface TurnInputs {
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 export function norm(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[“”"]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    s
+      .toLowerCase()
+      .replace(/[“”"]/g, '"')
+      .replace(/[‘’]/g, "'")
+      // Hyphenation of English compounds is arbitrary — "starred-kitchen
+      // discipline" and "starred kitchen" name the same thing — so a hyphen
+      // between words reads as a space. (Leading negation is stripped before
+      // this by stripExclusions.)
+      .replace(/(?<=\w)[-–—](?=\w)/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 export function has(hay: string, needle: string): boolean {
@@ -141,8 +148,16 @@ function findRequirement(
     (r: RequirementIR) => r.definition,
   ];
   for (const field of tiers) {
-    const hit = requirements.find((r) => anyAlias(field(r), aliases));
-    if (hit) return hit;
+    // Most specific match wins, not first-in-array. Without this, a
+    // requirement whose `statement` is a whole multi-topic manager turn
+    // matches any alias from that turn and steals the expectation belonging
+    // to the requirement that alias actually names (W12 full corpus: the
+    // "kind" half of requirement_recall failures were this, not the system).
+    const hits = requirements.filter((r) => anyAlias(field(r), aliases));
+    if (hits.length > 0)
+      return hits.reduce((best, r) =>
+        field(r).length < field(best).length ? r : best,
+      );
   }
   return undefined;
 }

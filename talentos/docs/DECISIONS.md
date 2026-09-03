@@ -403,3 +403,53 @@ remove 14 failures and introduce none
 (`pnpm eval:w12 --run full --project-hygiene`). The two fixes with no
 deterministic shape — populating false signals, and recording a manager's
 own counterexample as a contradiction — remain prompt-only and unmeasured.
+
+## D-016 — One requirement, one source phrase; and what `consequential` means
+
+**Decision.** (W12 full-corpus evaluation, 2026-09-03.) Two rules about the
+canonical IR, both stated to the JD-derivation task and the intake reasoner,
+one of them backstopped deterministically:
+
+1. **`statement` is the fragment that asserts that one requirement**, quoted
+   exactly, fragments joined with an ellipsis. Two requirements never carry
+   the same statement, and a multi-topic manager turn is never pasted onto
+   every requirement it touched. `narrowSharedStatements()` narrows the ones
+   that get through, only when one sentence clearly wins.
+2. **`consequential` on an UncertaintyIR means the answer would change who we
+   approach or whether they could accept** — the population, the geography,
+   the reachable supply, or a material term (pay, relocation support, shift,
+   start date, work authorisation). Not "would it change anything
+   downstream".
+
+Alongside them, two rules with no deterministic shape: `status: "explicit"`
+requires that a person could be assessed against the requirement, from
+observable evidence or a named assessment step (an open _threshold_ keeps a
+requirement explicit, an open _definition_ does not); and a prestige, brand
+or credential proxy is never a bare requirement — name the construct it
+stands for and put the proxy in `falseSignals`.
+
+**Evidence.** 197 of 803 requirements in the full corpus — 24.5 %, across 35
+of 53 conversations — carried a `statement` byte-identical to a sibling's.
+That destroys the provenance the field exists for, and it corrupted the
+evaluation's own numbers: a requirement carrying a whole turn matched any
+alias from that turn and absorbed the expectation belonging to the
+requirement that alias actually named (h-01, j-01, x-02, b-01, i-01 were all
+reported as `kind` errors the system had in fact got right). For
+`consequential`, the schema previously said "would resolving it change
+sourcing **or screening**", which is true of almost every question and made
+the flag useless for ranking; the corpus expects a machinist role's
+"what does self-starter mean" to be _not_ consequential and a funded-relocation
+question to be consequential. `eval/w12/REPORT.md` §16.
+
+**No schema shape change.** Only the `consequential` doc-comment moved, and
+that narrowing is the fix. `RequirementIR` is now unchanged across two rounds
+of fixes covering ten defect classes (S-1…S-10).
+
+**Tradeoff.** `narrowSharedStatements()` re-attributes provenance
+heuristically, which is a real risk, so it is deliberately timid: it acts
+only on statements already known to be wrong (shared by two or more
+requirements), only when exactly one sentence has the highest distinctive
+overlap with the requirement's label, and the result is always a verbatim
+substring of the original. An abbreviation the label does not spell out
+("AP") is not matched and the statement is left as-is — a missed narrowing is
+cheap, a wrong one is not.

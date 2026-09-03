@@ -208,6 +208,8 @@ extraction recommendation.
       with deterministic backstops in `src/lib/domain/intake-hygiene.ts`;
       10 regression tests; `--project-hygiene` scores the code half against
       the stored corpus (`REPORT.md` §15)
+- [x] **S-6…S-9 fixed, S-8 reclassified, S-10 found and fixed** (owner
+      instruction) — see `REPORT.md` §16
 
 Outcome (`eval/w12/REPORT.md`): all four hard targets met at baseline —
 provenance 100 %, silent mutation 0, protected-trait violations 0,
@@ -245,3 +247,20 @@ so `false_signal_recall` and `contradiction_detection` remain unproven. No
 schema field was added, which is the same verdict the corpus reached
 independently. Extraction: still not yet — the schema question is well
 settled, but fixes that have not been measured are not evidence.
+
+S-6…S-9 followed (`REPORT.md` §16), and investigating them changed the
+taxonomy. **S-8 is not a system defect**: four of its five failures are
+correct definition updates recording a manager's new instruction, and both
+narrowings of the re-plan-signal check trade those false positives for false
+negatives on real re-plans, so the check was measured and left alone.
+**S-10 was found and is the largest single defect in the corpus**: 197 of 803
+requirements (24.5 %, 35 of 53 conversations) carried a `statement`
+byte-identical to a sibling's, destroying per-requirement provenance and
+corrupting the evaluation's own attribution. Fixed by rule plus
+`narrowSharedStatements()`. Two instrument corrections (most-specific match,
+hyphens as spaces) raised the stored run's scores with no system change —
+requirement_recall 88.7 → 90.5 %, false_signal_recall 54.8 → 61.3 %.
+Projection with all backstops: **24 failures removed, 0→3 introduced**, the
+three being wording literalism now visible because attribution is correct.
+No schema shape changed across S-1…S-10; `RequirementIR` has held through
+two rounds of fixes.

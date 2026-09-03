@@ -65,12 +65,20 @@ string-expansion task:
   all. `false_signal_recall` (S-1) and `contradiction_detection` (S-5) are
   prompt-only and have no evidence behind them yet. Run the corpus with a
   key and an independent judge before treating any of these as done.
-- **W12 S-6…S-9, not yet fixed** (`eval/w12/REPORT.md` §12.1): status
-  overloading (`explicit` claimed for requirements that are stated but not
-  assessable), constructs and proxies named less reliably at scale
-  (`construct_named` 76.9 %, `proxy_identified` 68.2 %), spurious re-plan
-  signal on turns that should change nothing, and consequentiality
-  misjudged in both directions.
+- **W12 S-6…S-10 are fixed but the prompt half is unmeasured**
+  (`eval/w12/REPORT.md` §16), same caveat as S-1…S-5. `proxy_identified`
+  (72.7 %) and `contradiction_detection` (76.9 %) do not move under the
+  deterministic backstops at all.
+- **`replan_signal` cannot separate a definition edit that changes who
+  qualifies from one that does not** (`REPORT.md` §16.1). Both narrowings
+  tested trade false positives for false negatives on real re-plans, so the
+  coarse check stands. If the judge is ever run, this is a dimension worth
+  giving it.
+- **Some residual `false_signal_recall` / `evidence_signal_recall` gap is
+  instrument literalism** (`REPORT.md` §16.5): the corpus asks for tokens
+  (`retention`, `years`) where the system wrote the same thing in other words
+  (`tenure of their line across seasons`). Do not widen the aliases to fit
+  the implementation; if the judge runs, let it score these semantically.
 - **Corpus gap — no protected-trait case for sex or gender.** The text
   scanner had no gender pattern until W12 and the corpus would not have
   caught it; add a conversation where a manager genders the role.

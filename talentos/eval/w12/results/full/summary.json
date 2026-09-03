@@ -150,9 +150,9 @@
       "violations": 1
     },
     "requirement_recall": {
-      "pass": 205,
+      "pass": 209,
       "total": 231,
-      "rate": 0.8874458874458875,
+      "rate": 0.9047619047619048,
       "violations": 0
     },
     "uncertainty_detection": {
@@ -168,9 +168,9 @@
       "violations": 0
     },
     "construct_named": {
-      "pass": 20,
+      "pass": 21,
       "total": 26,
-      "rate": 0.7692307692307693,
+      "rate": 0.8076923076923077,
       "violations": 0
     },
     "evidence_signal_recall": {
@@ -180,15 +180,15 @@
       "violations": 0
     },
     "false_signal_recall": {
-      "pass": 17,
+      "pass": 19,
       "total": 31,
-      "rate": 0.5483870967741935,
+      "rate": 0.6129032258064516,
       "violations": 0
     },
     "proxy_identified": {
-      "pass": 15,
+      "pass": 16,
       "total": 22,
-      "rate": 0.6818181818181818,
+      "rate": 0.7272727272727273,
       "violations": 0
     },
     "must_not_exist": {
@@ -216,9 +216,9 @@
       "violations": 0
     },
     "replan_correctness": {
-      "pass": 244,
+      "pass": 245,
       "total": 263,
-      "rate": 0.9277566539923955,
+      "rate": 0.9315589353612167,
       "violations": 0
     },
     "heuristic_mutation": {
@@ -337,13 +337,6 @@
       "turn": 0
     },
     {
-      "metric": "requirement_recall",
-      "severity": "fail",
-      "detail": "\"Rotating shifts including nights and weekends\": origin jd (expected manager_statement)",
-      "conversation": "b-05",
-      "turn": 1
-    },
-    {
       "metric": "construct_named",
       "severity": "fail",
       "detail": "\"Owns new-logo enterprise deals\" definition does not name the construct (new logo / opened themselves / seventy percent / 70)",
@@ -442,13 +435,6 @@
       "turn": 1
     },
     {
-      "metric": "replan_correctness",
-      "severity": "fail",
-      "detail": "adjacent: none of consult / Optum / Huron / R1 / revenue cycle present after re-plan",
-      "conversation": "c-05",
-      "turn": "replan"
-    },
-    {
       "metric": "false_signal_recall",
       "severity": "fail",
       "detail": "\"Years of experience (explicitly not a criterion)\" falseSignals lack years / tenure",
@@ -487,20 +473,6 @@
       "metric": "proxy_identified",
       "severity": "fail",
       "detail": "\"NIMS certification\": proxy (NIMS) is neither a false signal nor contextualized by the construct",
-      "conversation": "d-02",
-      "turn": 0
-    },
-    {
-      "metric": "requirement_recall",
-      "severity": "fail",
-      "detail": "\"Set up and run five-axis machining centres\": origin jd (expected manager_statement)",
-      "conversation": "d-02",
-      "turn": 0
-    },
-    {
-      "metric": "false_signal_recall",
-      "severity": "fail",
-      "detail": "\"Set up and run five-axis machining centres\" falseSignals lack operator / cycle start / pushed",
       "conversation": "d-02",
       "turn": 0
     },
@@ -566,13 +538,6 @@
       "detail": "\"Strong integrity; will tell the CEO no\": status explicit (expected needs_clarification)",
       "conversation": "e-01",
       "turn": -1
-    },
-    {
-      "metric": "requirement_recall",
-      "severity": "fail",
-      "detail": "\"Lead finance through IPO readiness\": origin jd (expected manager_statement)",
-      "conversation": "e-01",
-      "turn": 0
     },
     {
       "metric": "contradiction_detection",
@@ -743,13 +708,6 @@
       "turn": 0
     },
     {
-      "metric": "requirement_recall",
-      "severity": "fail",
-      "detail": "\"Design and test liquid rocket engine components\": origin jd (expected manager_statement)",
-      "conversation": "f-03",
-      "turn": 0
-    },
-    {
       "metric": "contradiction_detection",
       "severity": "fail",
       "detail": "expected contradiction \"con-pedigree\" not recorded",
@@ -850,14 +808,14 @@
     {
       "metric": "requirement_recall",
       "severity": "fail",
-      "detail": "\"Valid California Administrative Services Credential\": kind must_have (expected preferred)",
-      "conversation": "h-01",
+      "detail": "\"Nanosheet development exposure (pilot line acceptable)\": kind preferred (expected must_have)",
+      "conversation": "g-05",
       "turn": 0
     },
     {
       "metric": "false_signal_recall",
       "severity": "fail",
-      "detail": "\"Valid California Administrative Services Credential\" falseSignals lack years / tenure",
+      "detail": "\"Assistant-principal service (a guide, not a bar)\" falseSignals lack years / tenure",
       "conversation": "h-01",
       "turn": 0
     },
@@ -939,27 +897,6 @@
       "turn": 0
     },
     {
-      "metric": "requirement_recall",
-      "severity": "fail",
-      "detail": "\"Writes and changes their own menus\": kind must_have (expected preferred)",
-      "conversation": "i-01",
-      "turn": 0
-    },
-    {
-      "metric": "construct_named",
-      "severity": "fail",
-      "detail": "\"Writes and changes their own menus\" definition does not name the construct (discipline / mise / consistency)",
-      "conversation": "i-01",
-      "turn": 0
-    },
-    {
-      "metric": "proxy_identified",
-      "severity": "fail",
-      "detail": "\"Writes and changes their own menus\": proxy (Michelin) is neither a false signal nor contextualized by the construct",
-      "conversation": "i-01",
-      "turn": 0
-    },
-    {
       "metric": "replan_correctness",
       "severity": "fail",
       "detail": "strings: none of ServSafe present after re-plan",
@@ -984,13 +921,6 @@
       "metric": "requirement_recall",
       "severity": "fail",
       "detail": "\"Oversee banquets and in-room dining\": origin jd (expected manager_statement)",
-      "conversation": "i-02",
-      "turn": 0
-    },
-    {
-      "metric": "false_signal_recall",
-      "severity": "fail",
-      "detail": "\"Oversee banquets and in-room dining\" falseSignals lack fine dining only / tasting menu / small",
       "conversation": "i-02",
       "turn": 0
     },
@@ -1025,7 +955,7 @@
     {
       "metric": "requirement_recall",
       "severity": "fail",
-      "detail": "\"Michelin-starred background\": kind preferred (expected must_have)",
+      "detail": "\"Lead a creative, seasonal fine-dining program\": status needs_clarification (expected explicit)",
       "conversation": "i-04",
       "turn": 1
     },
@@ -1072,18 +1002,25 @@
       "turn": "replan"
     },
     {
-      "metric": "uncertainty_detection",
-      "severity": "fail",
-      "detail": "\"Whether the seat is a maintenance electrician or a critical-facilities operator\": status resolved (expected open)",
-      "conversation": "j-02",
-      "turn": 0
-    },
-    {
       "metric": "replan_correctness",
       "severity": "fail",
       "detail": "adjacent: none of navy / nuclear / hospital / substation / utility present after re-plan",
       "conversation": "j-02",
       "turn": "replan"
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether adjacent critical-facilities backgrounds count toward the data-centre requirement\": status open (expected resolved)",
+      "conversation": "j-02",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Has worked nights before\": kind preferred (expected must_have)",
+      "conversation": "j-03",
+      "turn": 1
     },
     {
       "metric": "uncertainty_detection",

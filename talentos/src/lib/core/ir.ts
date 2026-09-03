@@ -64,7 +64,15 @@ export const uncertaintyIRSchema = z.object({
   ]),
   /** What goes wrong in the search if this stays unresolved. */
   consequence: z.string(),
-  /** Would resolving it change sourcing or screening decisions? */
+  /**
+   * Would the answer change WHO we approach or WHETHER they could accept?
+   * (W12 finding S-9.) The population, the geography, the reachable supply,
+   * or a material term — pay, relocation support, shift, start date, work
+   * authorisation. Deliberately narrower than "would it change anything
+   * downstream": a question that only sharpens how a screen is worded is
+   * worth asking but is not consequential, because almost every question
+   * changes screening and a flag that is always true ranks nothing.
+   */
   consequential: z.boolean(),
   status: z.enum(["open", "resolved"]),
   resolution: z.string().optional(),

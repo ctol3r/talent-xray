@@ -578,3 +578,150 @@ verdict §13 reached. `false_signal_recall` remains entirely unproven.
 
 **Recommendation is unchanged: do not extract yet.** Fixes that have not
 been measured are not evidence, and these have not been measured.
+
+---
+
+## 16. S-6 … S-9, and the defect the taxonomy missed
+
+Owner instruction after §15: fix S-6 through S-9. Investigating them changed
+the taxonomy, so the honest order is what was found first, then what was
+fixed.
+
+### 16.1 S-8 is not a system defect. Measured, then left alone.
+
+Five turns were filed as "spurious churn" — the turn changed something on a
+turn the corpus expects to change no search. Four of them (`f-03#1`,
+`f-05#1`, `g-02#1`, `h-04#1`) are a **definition-only edit**, and reading
+them settles it. h-04's doctorate went from _"does not predict the outcome
+the district needs and must not be used as a filter"_ to _"left visible on
+the posting as a plus, at the hiring manager's request, so the advertisement
+does not read as a lowered bar; explicitly not screened on"_. That is the
+manager's new instruction recorded correctly, and the search genuinely does
+not change. Same shape in the other three.
+
+So the check's inference — _any_ definition edit implies a re-plan — is too
+coarse. Two narrowings were tested against the whole corpus:
+
+| Rule for "this turn implies a re-plan"                                                 | Correct / 82 |
+| -------------------------------------------------------------------------------------- | ------------ |
+| current: set, kind, status, definition, or consequential resolution                    | 77           |
+| drop definition: set, kind, or consequential resolution                                | 78           |
+| searchable surface: set, kind, evidenceSpec, falseSignals, or consequential resolution | 78           |
+
+Both narrowings trade the four false positives for three or four **false
+negatives** on turns that genuinely need a re-plan (`c-01#1`, `c-04#1`,
+`g-05#1`). A missed re-plan is the more damaging error, so **the check stays
+as it is** and S-8 is reclassified: an instrument limitation, not a system
+defect. Whether a definition edit changed who qualifies is a semantic
+judgement no structural proxy makes reliably.
+
+The one genuine part of S-8 is `a-03#2`, where a "who decides when two
+stakeholders disagree" uncertainty was flagged consequential. That is S-9.
+
+### 16.2 S-10 · One turn's text pasted onto every requirement (new)
+
+Not in the original taxonomy, and the largest single defect found in this
+pass. **197 of 803 requirements — 24.5 %, across 35 of 53 conversations —
+carry a `statement` byte-identical to a sibling's.** The reasoner pastes the
+whole manager turn into every requirement that turn touched. Two
+requirements cannot both have the same verbatim source phrase, so it is
+always wrong, and it has two consequences:
+
+1. **Per-requirement provenance is destroyed.** `statement` exists to answer
+   "which phrase asserted this?", and a four-topic paragraph answers nothing.
+2. **It corrupted this report's own numbers.** The checker matches an
+   expected requirement by label, then statement, then definition; a
+   requirement carrying the whole turn matches _any_ alias from that turn and
+   steals the expectation belonging to the requirement that alias actually
+   names. In h-01 the system correctly recorded "Assistant-principal service
+   (a guide, not a bar)" as `preferred` — and the credential requirement,
+   carrying the same whole-turn statement, absorbed the expectation and was
+   reported as a `kind` error. The same in j-01, x-02, b-01 and i-01.
+
+### 16.3 Instrument corrections (two), and what they revealed
+
+Both are general, both are pinned by the existing regression tests, and both
+were re-scored against the stored snapshots with no model calls.
+
+- **Most-specific match wins.** Within a matching tier, the requirement with
+  the shortest matching field takes the expectation, not the first in array
+  order.
+- **Hyphens read as spaces.** English compound hyphenation is arbitrary —
+  "starred-kitchen discipline" and "starred kitchen" name the same thing —
+  and the corpus's aliases and the reasoner's labels disagreed about it
+  constantly.
+
+| Metric              | §15              | After the two corrections |
+| ------------------- | ---------------- | ------------------------- |
+| requirement_recall  | 205/231 (88.7 %) | **209/231 (90.5 %)**      |
+| construct_named     | 20/26 (76.9 %)   | **21/26 (80.8 %)**        |
+| proxy_identified    | 15/22 (68.2 %)   | **16/22 (72.7 %)**        |
+| false_signal_recall | 17/31 (54.8 %)   | **19/31 (61.3 %)**        |
+| replan_correctness  | 244/263 (92.8 %) | **245/263 (93.2 %)**      |
+
+Nothing about the system changed; these were mis-measurements. That is the
+second time in this wave the instrument was found to be a larger source of
+error than the thing being measured, and it is the argument for keeping every
+re-score reproducible from stored snapshots.
+
+### 16.4 The fixes
+
+| Defect                                                                         | Fix                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Where                            |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| **S-6** `explicit` claimed for requirements that are stated but not assessable | Two ordered tests. First: could a person be assessed against it, from observable evidence or a named assessment step? A disposition with neither — "strong integrity", "comfortable at height" — stays `needs_clarification` until someone says how it will be judged. Second: an open **threshold** on a clear requirement keeps it `explicit` (preserving D-014's F-1 fix); an open **definition**, whose answer changes which population qualifies, does not. Plus: something the manager says can be taught is a `trainable` requirement, which is what stops it being screened on. | prompt, both tasks               |
+| **S-7** constructs and proxies named less reliably at scale                    | The manager's own defining words go in `definition`. A prestige, brand or credential proxy is never a bare requirement: name the construct it stands for, and put the proxy itself in `falseSignals`. A proxy with neither is read downstream as a filter — which is how a prestige preference becomes a screen nobody chose.                                                                                                                                                                                                                                                           | prompt, both tasks               |
+| **S-9** consequentiality misjudged in both directions                          | `consequential` narrowed to: would the answer change **who we approach or whether they could accept** — population, geography, reachable supply, or a material term (pay, relocation, shift, start date, work authorisation). A question that only sharpens how a screen is worded is worth asking and is not consequential; nor is a process question like who signs off. The schema's doc-comment previously said "sourcing **or screening**", which made the flag true of almost everything and therefore useless for ranking.                                                       | prompt, both tasks + `ir.ts` doc |
+| **S-10** one turn's text as every requirement's statement                      | `statement` is the fragment asserting THIS requirement, quoted exactly; fragments joined with an ellipsis; two requirements never share one. Also: update the existing requirement a statement is about, never add a second one saying the same thing in the manager's words. Backstop `narrowSharedStatements()` narrows a shared statement to the single sentence with the most distinctive overlap with each requirement's label, only when exactly one sentence wins.                                                                                                               | prompt, both tasks + code        |
+
+Both prompt tasks were changed, not just the intake reasoner: five of the
+S-6/S-7 failures are at the JD-derivation step, which had none of these
+rules.
+
+### 16.5 Measured
+
+`pnpm eval:w12 --run full --project-hygiene`, deterministic backstops applied
+to the stored snapshots, no model calls:
+
+| Metric                  | Stored run         | With backstops         |
+| ----------------------- | ------------------ | ---------------------- |
+| provenance_preservation | 1406/1414 (99.4 %) | **1407/1408 (99.9 %)** |
+| must_not_exist          | 32/37 (86.5 %)     | **35/37 (94.6 %)**     |
+| requirement_recall      | 209/231 (90.5 %)   | **213/231 (92.2 %)**   |
+| construct_named         | 21/26 (80.8 %)     | **23/26 (88.5 %)**     |
+| uncertainty_detection   | 85/108 (78.7 %)    | **89/108 (82.4 %)**    |
+| false_signal_recall     | 19/31 (61.3 %)     | **21/31 (67.7 %)**     |
+
+**24 failures removed, 3 introduced** — up from 14 removed in §15, the
+difference being S-10. The three introduced deserve naming, because they are
+not regressions:
+
+- `f-03#0` the proxy expectation now matches "Has fired engines, breadth over
+  brand" instead of "Named-employer preference", and the latter carries
+  exactly the expected false signals.
+- `i-01#0` "Retains a brigade" lists _"tenure of their line across seasons"_
+  and _"cooks who followed them between kitchens"_ where the corpus asks for
+  the tokens `retention / turnover / stayed`.
+- `j-01#0` "Data-centre time (rule of thumb, waivable)" lists _"data-centre
+  tenure treated as the qualifying fact"_ where the corpus asks for `years`.
+
+In all three the content is right and the wording differs from the alias
+list. Adding those synonyms to the corpus would be editing the test to fit
+the implementation, so they stay as failures — but the honest reading is that
+some of the residual `false_signal_recall` and `evidence_signal_recall` gap
+is instrument literalism rather than absent content, now visible because
+attribution is finally correct.
+
+### 16.6 Still unmeasured, and still the same reason
+
+S-6, S-7 and S-9 are prompt-only; so is the larger half of S-10. Scoring them
+needs a fresh corpus run against an API key, because a hand-fulfilled re-run
+would mean authoring 251 generations knowing exactly which check each has to
+satisfy. `proxy_identified` (72.7 %) and `contradiction_detection` (76.9 %)
+do not move at all here.
+
+No schema shape changed for any of S-6…S-10 — only a doc-comment, on
+`consequential`, and that narrowing is itself one of the fixes. `RequirementIR`
+has now been unchanged across two rounds of fixes covering ten defect
+classes, which is the strongest evidence yet for the boundary. The extraction
+recommendation is unchanged: **not yet**, for the reason §15 gave — fixes that
+have not been measured are not evidence.

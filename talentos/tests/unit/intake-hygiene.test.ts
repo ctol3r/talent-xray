@@ -14,6 +14,7 @@ import {
   applyIntakeHygiene,
   dropWithdrawnRequirements,
   keepMarketComparisonsOpen,
+  narrowSharedStatements,
   reconcileRequirementOrigins,
 } from "@/lib/domain/intake-hygiene";
 
@@ -188,5 +189,69 @@ describe("applyIntakeHygiene", () => {
     expect(out.requirements).toHaveLength(1);
     expect(out.requirements[0].origin).toBe("manager_statement");
     expect(out.uncertainties[0].status).toBe("open");
+  });
+});
+
+describe("S-10 · one requirement, one source phrase", () => {
+  // h-01: one answer covers the credential, the tenure heuristic and two
+  // constructs, and the reasoner pasted all of it onto every requirement.
+  const turn =
+    "The credential is state law, done. Five years as AP is a guide, not a bar. Instructional leader means they have coached teachers through observation cycles.";
+
+  it("narrows a statement shared by several requirements to the sentence that asserts each", () => {
+    const out = narrowSharedStatements([
+      requirement({
+        label: "Administrative Services Credential",
+        statement: turn,
+      }),
+      requirement({
+        label: "Assistant-principal service (a guide, not a bar)",
+        statement: turn,
+      }),
+      requirement({ label: "Instructional leader", statement: turn }),
+    ]);
+    expect(out[0].statement).toBe("The credential is state law, done.");
+    expect(out[1].statement).toBe("Five years as AP is a guide, not a bar.");
+    expect(out[2].statement).toBe(
+      "Instructional leader means they have coached teachers through observation cycles.",
+    );
+    // Every narrowed statement is still verbatim from the turn.
+    for (const r of out) expect(turn).toContain(r.statement);
+  });
+
+  it("leaves a statement that only one requirement carries alone", () => {
+    const only = requirement({ label: "Night shift", statement: turn });
+    expect(narrowSharedStatements([only])[0].statement).toBe(turn);
+  });
+
+  it("leaves a requirement alone when its label shares no distinctive word with any sentence", () => {
+    // Conservative by design: an abbreviation the label does not spell out
+    // ("AP") is not matched, and a wrong narrowing is worse than none.
+    const out = narrowSharedStatements([
+      requirement({
+        label: "Administrative Services Credential",
+        statement: turn,
+      }),
+      requirement({ label: "Assistant-principal service", statement: turn }),
+    ]);
+    expect(out[1].statement).toBe(turn);
+  });
+
+  it("leaves a shared statement alone when no sentence clearly wins", () => {
+    const vague = "We need someone good. They should be good.";
+    const out = narrowSharedStatements([
+      requirement({ label: "Excellence", statement: vague }),
+      requirement({ label: "Quality", statement: vague }),
+    ]);
+    expect(out.every((r) => r.statement === vague)).toBe(true);
+  });
+
+  it("leaves a single-sentence shared statement alone — there is nothing to narrow to", () => {
+    const one = "The credential is state law and five years as AP is a guide.";
+    const out = narrowSharedStatements([
+      requirement({ label: "Credential", statement: one }),
+      requirement({ label: "Assistant-principal service", statement: one }),
+    ]);
+    expect(out.every((r) => r.statement === one)).toBe(true);
   });
 });
