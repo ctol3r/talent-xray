@@ -8,14 +8,17 @@
  * corrects a specific, unambiguous shape and leaves everything else alone.
  *
  * Covers S-2 (origin drift), S-3 (market comparisons resolved from inside
- * the company), S-4 (withdrawn requirements demoted instead of removed) and
+ * the company), S-4 (withdrawn requirements demoted instead of removed),
  * S-10 (one turn's whole text pasted as every requirement's verbatim
- * statement). S-1 (false signals), S-5 (rule-versus-example contradictions),
+ * statement) and S-11 (a prior contradiction lost because the reasoner
+ * simply stopped emitting it). S-1 (false signals), S-5
+ * (rule-versus-example contradictions),
  * S-6 (status overloading), S-7 (constructs and proxies) and S-9
  * (consequentiality) are judgement calls with no deterministic shape and are
  * prompt-only.
  */
 import type {
+  ContradictionIR,
   HiringIntentIR,
   ManagerStatement,
   RequirementIR,
@@ -181,13 +184,78 @@ export function keepMarketComparisonsOpen(
   });
 }
 
-/** All four backstops, applied to one reasoning turn's output. */
+/**
+ * Two contradictions are the same disagreement when both sides match, in
+ * either order. Claim texts are matched loosely on purpose: the reasoner
+ * routinely shortens or rewords a claim on the turn it resolves it (a-03,
+ * h-02), and an exact-text key would read that as a different contradiction
+ * and duplicate it.
+ */
+function sameClaim(a: string | undefined, b: string | undefined): boolean {
+  const x = norm(a ?? "");
+  const y = norm(b ?? "");
+  if (x === "" || y === "") return false;
+  if (x === y) return true;
+  const [short, long] = x.length < y.length ? [x, y] : [y, x];
+  if (short.length >= 20 && long.includes(short)) return true;
+  const A = tokens(x);
+  const B = tokens(y);
+  if (A.size === 0 || B.size === 0) return false;
+  const shared = [...A].filter((t) => B.has(t)).length;
+  return shared / Math.min(A.size, B.size) >= 0.6;
+}
+
+function sameContradiction(p: ContradictionIR, q: ContradictionIR): boolean {
+  return (
+    (sameClaim(p.claimA?.text, q.claimA?.text) &&
+      sameClaim(p.claimB?.text, q.claimB?.text)) ||
+    (sameClaim(p.claimA?.text, q.claimB?.text) &&
+      sameClaim(p.claimB?.text, q.claimA?.text))
+  );
+}
+
+/** Appended once, so a carried contradiction reads as carried, not re-asserted. */
+const CARRIED =
+  "Carried forward: the intake loop did not re-state this contradiction on a later turn and nobody recorded it as resolved.";
+
+/**
+ * S-11 · The reasoner returns the full contradiction set each turn and it
+ * replaces the previous one, so a contradiction it simply stops emitting is
+ * gone — silently, and with no key to notice it by. Claims and statements
+ * append; requirements and uncertainties are at least named (a label, an
+ * id) so a disappearance is visible. A contradiction has neither.
+ *
+ * An unreconciled disagreement between stakeholders is exactly what must
+ * not evaporate, so any prior contradiction with no counterpart in the new
+ * set is carried forward with its own status intact and its note marked.
+ * The corpus never lost one in 11 opportunities — this closes the shape,
+ * not a measured failure.
+ */
+export function preserveContradictions(
+  next: ContradictionIR[],
+  before: ContradictionIR[],
+): ContradictionIR[] {
+  const carried = before
+    .filter((prior) => !next.some((c) => sameContradiction(prior, c)))
+    .map((prior) => ({
+      ...prior,
+      note: (prior.note ?? "").includes(CARRIED)
+        ? prior.note
+        : `${prior.note ? `${prior.note} ` : ""}${CARRIED}`,
+    }));
+  return [...next, ...carried];
+}
+
+/** All five backstops, applied to one reasoning turn's output. */
 export function applyIntakeHygiene(
-  next: Pick<HiringIntentIR, "requirements" | "uncertainties">,
-  before: Pick<HiringIntentIR, "uncertainties">,
+  next: Pick<
+    HiringIntentIR,
+    "requirements" | "uncertainties" | "contradictions"
+  >,
+  before: Pick<HiringIntentIR, "uncertainties" | "contradictions">,
   jdText: string | undefined,
   statements: ManagerStatement[],
-): Pick<HiringIntentIR, "requirements" | "uncertainties"> {
+): Pick<HiringIntentIR, "requirements" | "uncertainties" | "contradictions"> {
   return {
     requirements: narrowSharedStatements(
       dropWithdrawnRequirements(
@@ -197,6 +265,10 @@ export function applyIntakeHygiene(
     uncertainties: keepMarketComparisonsOpen(
       next.uncertainties,
       before.uncertainties,
+    ),
+    contradictions: preserveContradictions(
+      next.contradictions,
+      before.contradictions,
     ),
   };
 }

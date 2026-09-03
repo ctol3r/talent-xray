@@ -725,3 +725,49 @@ has now been unchanged across two rounds of fixes covering ten defect
 classes, which is the strongest evidence yet for the boundary. The extraction
 recommendation is unchanged: **not yet**, for the reason §15 gave — fixes that
 have not been measured are not evidence.
+
+## 17. S-11 — a contradiction lost by omission
+
+Found by reading the merge, not by a corpus failure. The reasoner returns
+the full contradiction set each turn and the service replaces the previous
+one with it (`intelligence.ts`, and the same line in the artifact). Claims
+and statements append; requirements carry a label and uncertainties an id,
+so a disappearance can at least be named. A `ContradictionIR` has neither a
+required id nor a label. An unreconciled disagreement between two
+stakeholders — the thing the structure exists to hold — could therefore
+vanish with nothing to notice it by.
+
+### 17.1 What the corpus says: nothing
+
+| Measure                                        | Full corpus |
+| ---------------------------------------------- | ----------- |
+| turns carrying a prior contradiction           | 11          |
+| turns where the set shrank                     | **0**       |
+| prior contradictions with no counterpart after | **0**       |
+
+The projection with the backstop applied is identical to the projection
+without it — 24 failures removed, 3 introduced,
+`contradiction_detection` 20/26 either way. **This fix closes a shape, not a
+measured defect**, and nothing in this report should be read as evidence
+that it improves anything.
+
+### 17.2 The first measurement was wrong, and that is the finding
+
+Keying a contradiction by its two claim texts reported 2 losses (a-03 turn
+2, h-02 turn 2). Both were false. In each, the contradiction is present in
+`after` with `status: "resolved"` — the reasoner had **shortened the claim
+text** on the turn it resolved it:
+
+- a-03 claimB `"I'll be honest, mission alignment is nice-to-have. We've been…"` → `"I'll be honest, mission alignment is nice-to-have."`
+- h-02 claimA `"I need someone who has moved scores. Data cycles, benchmark…"` → `"I need someone who has moved scores. Community is…"`
+
+An exact-text key would have read those as new contradictions and carried
+the originals forward as stale open duplicates beside the correctly resolved
+ones — a backstop actively making the record worse. `sameClaim()` matches on
+equality, containment of a substantial substring, or 0.6 token overlap, and
+`sameContradiction()` accepts either side order. That the projection
+introduces nothing across the 11 turns is the only evidence the matcher has,
+and it is the evidence that matters.
+
+That is the third time in this wave that measuring the instrument before
+trusting it changed the answer (§13, §16.2, and now this).

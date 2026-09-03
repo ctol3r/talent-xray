@@ -492,3 +492,43 @@ TalentOS is incubating (ADR-001). The alternative — a build step that
 inlines `src/` into the artifact — buys correctness at the price of the one
 property that makes the artifact useful right now, that it is a single file
 someone can open. Revisit at extraction.
+
+## D-018 — A contradiction never leaves the record by omission (S-11)
+
+**Decision.** (2026-09-03.) The intake reasoner returns the full
+contradiction set each turn and it replaces the previous one. A prior
+contradiction with no counterpart in the new set is now carried forward by
+`preserveContradictions()`, with its own status and resolution intact and a
+sentence appended to its note saying it was carried rather than re-asserted.
+The reasoner is also told, in both the app and the artifact, that a
+contradiction never leaves by omission.
+
+**Why.** Claims and statements append. Requirements carry a label and
+uncertainties an id, so a disappearance is at least nameable. A
+`ContradictionIR` has neither a required id nor a label, so the one thing
+that must not evaporate — two stakeholders who have not reconciled — was the
+one thing that could vanish with nothing to notice it by.
+
+**Evidence, stated plainly: none from the corpus.** Across the 53-conversation
+full run there are 11 turns carrying a prior contradiction, the set never
+shrank on any of them, and no prior contradiction went unmatched. The
+projection with this backstop moves nothing: 24 failures removed, 3
+introduced, `contradiction_detection` unchanged at 20/26 — the same numbers
+as without it. This closes a shape, not a measured failure, and is recorded
+that way.
+
+**The matcher is the load-bearing part.** The obvious implementation — key a
+contradiction by its two claim texts — would have been worse than the bug.
+The reasoner routinely shortens or rewords a claim on the turn it resolves
+the contradiction (a-03 turn 2, h-02 turn 2, both real), so an exact key
+reads the resolved entry as a different contradiction and leaves a stale
+open duplicate beside it. `sameClaim()` therefore matches on equality,
+containment of a substantial substring, or 0.6 token overlap, and
+`sameContradiction()` accepts the two sides in either order. That the
+projection introduces nothing across those 11 turns is the evidence that the
+matcher does not duplicate.
+
+**Tradeoff.** A carried contradiction the reasoner deliberately merged into
+another will reappear as a duplicate; the note says it was carried, so a
+recruiter can delete it. A silently lost disagreement leaves no trace at
+all. Given the choice, the visible duplicate is the better failure.

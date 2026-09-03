@@ -779,7 +779,59 @@ Everything you produce is a draft the recruiter can edit; write content that is 
   }
 
   /* All four, applied to one reasoning turn's output. */
-  function applyIntakeHygiene(next, beforeUncertainties, jdText, statements) {
+  /* Two contradictions are the same disagreement when both sides match, in
+     either order. Claim texts match loosely on purpose: the reasoner
+     routinely shortens or rewords a claim on the turn it resolves it, and an
+     exact-text key would read that as a new contradiction and duplicate it. */
+  function sameClaim(a, b) {
+    const x = irNorm(a || "");
+    const y = irNorm(b || "");
+    if (!x || !y) return false;
+    if (x === y) return true;
+    const short = x.length < y.length ? x : y;
+    const long = x.length < y.length ? y : x;
+    if (short.length >= 20 && long.includes(short)) return true;
+    const A = irTokens(x);
+    const B = irTokens(y);
+    if (!A.size || !B.size) return false;
+    const shared = [...A].filter((t) => B.has(t)).length;
+    return shared / Math.min(A.size, B.size) >= 0.6;
+  }
+
+  function sameContradiction(p, q) {
+    const pa = (p.claimA || {}).text;
+    const pb = (p.claimB || {}).text;
+    const qa = (q.claimA || {}).text;
+    const qb = (q.claimB || {}).text;
+    return (
+      (sameClaim(pa, qa) && sameClaim(pb, qb)) ||
+      (sameClaim(pa, qb) && sameClaim(pb, qa))
+    );
+  }
+
+  const CARRIED =
+    "Carried forward: the intake loop did not re-state this contradiction on a later turn and nobody recorded it as resolved.";
+
+  /* S-11 · The reasoner returns the full contradiction set each turn and it
+     replaces the previous one, so a contradiction it simply stops emitting is
+     gone — silently, and with no key to notice it by. Requirements have a
+     label and uncertainties an id; a contradiction has neither. An
+     unreconciled disagreement between stakeholders is exactly what must not
+     evaporate, so a prior one with no counterpart is carried forward with its
+     status intact and its note marked. */
+  function preserveContradictions(next, before) {
+    const carried = (before || [])
+      .filter((prior) => !(next || []).some((c) => sameContradiction(prior, c)))
+      .map((prior) => ({
+        ...prior,
+        note: (prior.note || "").includes(CARRIED)
+          ? prior.note
+          : (prior.note ? prior.note + " " : "") + CARRIED,
+      }));
+    return [...(next || []), ...carried];
+  }
+
+  function applyIntakeHygiene(next, before, jdText, statements) {
     return {
       requirements: narrowSharedStatements(
         dropWithdrawnRequirements(
@@ -792,7 +844,11 @@ Everything you produce is a draft the recruiter can edit; write content that is 
       ),
       uncertainties: keepMarketComparisonsOpen(
         next.uncertainties || [],
-        beforeUncertainties || [],
+        (before || {}).uncertainties || [],
+      ),
+      contradictions: preserveContradictions(
+        next.contradictions || [],
+        (before || {}).contradictions || [],
       ),
     };
   }
@@ -1508,7 +1564,8 @@ ${IR_RULES}
 Always:
 - nextQuestion: the single question with the highest information value — the one whose answer would most change sourcing or screening. Target open CONSEQUENTIAL uncertainties first and explain the information value honestly. Return null only when nothing consequential remains open.
 - Never invent hiring-manager positions; unresolved stays unresolved.
-- Return the FULL updated requirement, uncertainty and contradiction sets — they replace the previous ones. Preserve existing ids.`;
+- Return the FULL updated requirement, uncertainty and contradiction sets — they replace the previous ones. Preserve existing ids.
+- A CONTRADICTION NEVER LEAVES BY OMISSION. Every contradiction still on the record must appear in the set you return, resolved or open. Two stakeholders who have not reconciled stay contradicting each other until one of them moves; dropping the entry does not settle it.`;
 
   const INTAKE_REASONER_SHAPE = `{"extractedClaims": [{"text": string, "provenance": "manager_statement"}], "requirements": [{"label": string, "statement": string, "definition": string, "kind": "must_have"|"preferred"|"trainable"|"disqualifier", "origin": "jd"|"manager_statement"|"research"|"recruiter"|"model_inference", "assertedBy": string?, "contested": boolean?, "evidenceSpec": string[], "falseSignals": string[], "status": "explicit"|"needs_clarification"|"assumed", "linkedUncertaintyIds": string[]}], "uncertainties": [{"id": string, "about": string, "kind": "ambiguity"|"missing_information"|"conflicting_information"|"assumption", "consequence": string, "consequential": boolean, "status": "open"|"resolved", "resolution": string?}], "contradictions": [{"claimA": {"text": string, "provenance": string}, "claimB": {"text": string, "provenance": string}, "note": string, "status": "open"|"resolved", "resolution": string?}], "nextQuestion": {"question": string, "whyItMatters": string, "targetsUncertaintyIds": string[], "informationValue": string} | null}`;
 
@@ -1586,7 +1643,10 @@ ${INTAKE_REASONER_SHAPE}`;
     const statements = [...prior, statement];
     const hygienic = applyIntakeHygiene(
       out,
-      intent.uncertainties,
+      {
+        uncertainties: intent.uncertainties,
+        contradictions: intent.contradictions,
+      },
       state.current.jd,
       statements,
     );
@@ -1597,7 +1657,7 @@ ${INTAKE_REASONER_SHAPE}`;
       },
       requirements: hygienic.requirements,
       uncertainties: hygienic.uncertainties,
-      contradictions: out.contradictions || [],
+      contradictions: hygienic.contradictions,
       statements: statements.map((st) =>
         st === statement ? { ...st, reasonedAt: new Date().toISOString() } : st,
       ),

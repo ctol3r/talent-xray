@@ -105,7 +105,10 @@ export function projectHygiene(
 
       const hygienic = applyIntakeHygiene(
         snap.after,
-        { uncertainties: snap.before?.uncertainties ?? [] },
+        {
+          uncertainties: snap.before?.uncertainties ?? [],
+          contradictions: snap.before?.contradictions ?? [],
+        },
         c.jd,
         snap.after.statements,
       );

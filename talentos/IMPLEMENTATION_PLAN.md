@@ -304,3 +304,23 @@ reaches both prompts — so the copy cannot rot silently. `pnpm verify` green
 **Unmeasured, and stated as such.** A single-file page cannot run the corpus
 harness against itself, so the ported brain is unproven in exactly the way
 the app's own prompt rules are: only the deterministic half has a score.
+
+## W12.6 — S-11: contradictions survive omission (CLOSED 2026-09-03)
+
+Owner instruction 2026-09-03, from reading the intake-loop walkthrough: the
+contradiction set is replaced wholesale each turn, so one the reasoner stops
+emitting is gone. Fixed in both implementations —
+`preserveContradictions()` in `src/lib/domain/intake-hygiene.ts` and its port
+in the artifact, plus a rule in both reasoner prompts ("A CONTRADICTION NEVER
+LEAVES BY OMISSION"). Eleven regression tests across the two test files,
+including the case that makes the naive fix wrong: a contradiction whose
+claims were reworded on the turn it was resolved must not be duplicated.
+
+Acceptance: `pnpm verify` green (18 files, 164 tests);
+`pnpm eval:w12 --run full --project-hygiene` unchanged at 24 removed / 3
+introduced, `contradiction_detection` 20/26.
+
+**No corpus evidence, stated as such** (`REPORT.md` §17): 11 turns carry a
+prior contradiction, the set never shrank on any of them. This closes a
+shape. The measurement's own first answer was wrong and is written up,
+because the exact-text key it implied would have made the record worse.

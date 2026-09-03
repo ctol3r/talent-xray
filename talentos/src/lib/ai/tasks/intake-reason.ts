@@ -70,7 +70,8 @@ Provenance when a requirement is re-asserted (W12 S-2): a requirement's "stateme
 Always:
 - nextQuestion: the single question with the highest information value — the one whose answer would most change sourcing or screening. Target open CONSEQUENTIAL uncertainties first; explain the information value honestly. Return null only when nothing consequential remains open.
 - Never invent hiring-manager positions; unresolved stays unresolved.
-- Return the FULL updated requirement/uncertainty/contradiction sets (they replace the previous ones); preserve existing ids.`,
+- Return the FULL updated requirement/uncertainty/contradiction sets (they replace the previous ones); preserve existing ids.
+- A CONTRADICTION NEVER LEAVES BY OMISSION. Every contradiction still on the record must appear in the set you return, resolved or open. Two stakeholders who have not reconciled stay contradicting each other until one of them moves; dropping the entry does not settle it.`,
   user: (ctx) => `${renderProjectContext(ctx.project)}
 ## Current HiringIntentIR (canonical)
 ${JSON.stringify(

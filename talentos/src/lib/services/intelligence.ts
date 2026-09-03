@@ -177,8 +177,8 @@ export async function recordManagerStatement(
     { db, searchProjectId: input.searchProjectId },
   );
   const reasonedAt = new Date().toISOString();
-  // W12 S-2/S-3/S-4: deterministic backstops behind the reasoner's own
-  // rules — see src/lib/domain/intake-hygiene.ts.
+  // W12 S-2/S-3/S-4/S-10/S-11: deterministic backstops behind the
+  // reasoner's own rules — see src/lib/domain/intake-hygiene.ts.
   const hygienic = applyIntakeHygiene(output, stored, project.jdText, [
     ...stored.statements,
   ]);
@@ -189,7 +189,7 @@ export async function recordManagerStatement(
     },
     requirements: hygienic.requirements,
     uncertainties: hygienic.uncertainties,
-    contradictions: output.contradictions,
+    contradictions: hygienic.contradictions,
     statements: stored.statements.map((s) =>
       s.id === statement.id ? { ...s, reasonedAt } : s,
     ),

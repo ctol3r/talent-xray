@@ -93,3 +93,10 @@ string-expansion task:
   needs a filesystem and a scorer, so a published page cannot run it. If a
   key ever arrives, run the corpus against the artifact's prompts as well as
   the app's — they have diverged before and will again.
+- **`ContradictionIR` has no stable identity.** `preserveContradictions()`
+  (D-018) matches on claim-text similarity because the schema gives it
+  nothing better — `id` is optional and the reasoner does not reliably emit
+  it. A required id, assigned when a contradiction is first recorded, would
+  make carry-forward exact instead of heuristic. Not taken now because no
+  corpus failure demands it and W12 earned no schema change; revisit if a
+  real run shows the matcher mis-pairing.
