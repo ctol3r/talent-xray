@@ -665,6 +665,138 @@ Everything you produce is a draft the recruiter can edit; write content that is 
     return count;
   }
 
+  /* ── Canonical IR hygiene (ported from lib/domain/intake-hygiene) ─────
+     Deterministic backstops behind the reasoner's own rules, from the W12
+     full-corpus taxonomy (eval/w12/REPORT.md §12.1, D-015/D-016). Each one
+     corrects a specific unambiguous shape and leaves everything else alone:
+     a rule stated to a model is not a guarantee, and these are the part that
+     can be enforced without one. */
+
+  const irNorm = (x) =>
+    String(x || "")
+      .toLowerCase()
+      .replace(/[“”"]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const irTokens = (text) =>
+    new Set(
+      irNorm(text)
+        .split(/[^a-z0-9]+/)
+        .filter((t) => t.length >= 4),
+    );
+
+  function irVerbatimFrom(statement, sources) {
+    const needle = irNorm(statement).replace(/^["'\s]+|["'\s]+$/g, "");
+    if (needle.length < 12) return true; // too short to attribute either way
+    return sources.some((src) => irNorm(src).includes(needle));
+  }
+
+  /* S-2 · `statement` and `origin` move together. A requirement claiming JD
+     origin whose statement is verbatim from a manager statement instead has
+     its origin flipped and the speaker recorded. */
+  function reconcileRequirementOrigins(requirements, jdText, statements) {
+    if (!statements.length) return requirements;
+    const jdSources = jdText ? [jdText] : [];
+    return requirements.map((r) => {
+      if (r.origin !== "jd") return r;
+      if (irVerbatimFrom(r.statement, jdSources)) return r;
+      const said = statements.find((st) =>
+        irVerbatimFrom(r.statement, [st.text]),
+      );
+      if (!said) return r;
+      return {
+        ...r,
+        origin: "manager_statement",
+        assertedBy: r.assertedBy || said.speaker,
+      };
+    });
+  }
+
+  /* S-4 · A withdrawn requirement leaves the set. "preferred" legitimately
+     raises a candidate's review priority, so keeping one still shapes the
+     search. Matched narrowly on the label: no live requirement is *named*
+     withdrawn. */
+  const dropWithdrawnRequirements = (requirements) =>
+    requirements.filter((r) => !/\bwithdrawn\b/i.test(r.label || ""));
+
+  /* S-10 · One requirement, one source phrase. The reasoner tends to paste a
+     whole multi-topic turn onto every requirement it touched — 24.5% of them
+     in the W12 corpus — which destroys the provenance the field exists for.
+     Narrows only when one sentence clearly wins; the result is always a
+     verbatim substring of the original. */
+  function narrowSharedStatements(requirements) {
+    const counts = new Map();
+    for (const r of requirements) {
+      const k = irNorm(r.statement);
+      counts.set(k, (counts.get(k) || 0) + 1);
+    }
+    return requirements.map((r) => {
+      if ((counts.get(irNorm(r.statement)) || 0) < 2) return r;
+      const sentences = String(r.statement || "")
+        .split(/(?<=[.!?])\s+/)
+        .map((x) => x.trim())
+        .filter((x) => x.length >= 12);
+      if (sentences.length < 2) return r;
+      const wanted = irTokens(r.label);
+      if (!wanted.size) return r;
+      const scored = sentences.map((sentence) => ({
+        sentence,
+        score: [...irTokens(sentence)].filter((t) => wanted.has(t)).length,
+      }));
+      const best = Math.max(...scored.map((x) => x.score));
+      if (best === 0) return r;
+      const winners = scored.filter((x) => x.score === best);
+      if (winners.length !== 1) return r;
+      return { ...r, statement: winners[0].sentence };
+    });
+  }
+
+  /* S-3 · A comparison with the outside market cannot be closed from inside
+     the company. The manager's own figure answers one side; the other needs
+     market evidence. Deliberately narrow — a comparison, not a mention. */
+  const MARKET_COMPARISON =
+    /\bcompare[sd]?\b|\bcomparison\b|\bversus\b|\bagainst the (?:market|region)|\b(?:market|regional|prevailing|going) rate\b|\bmarket[- ]competitive\b/i;
+
+  function keepMarketComparisonsOpen(uncertainties, before) {
+    const wasOpen = new Set(
+      (before || [])
+        .filter((u) => u.status === "open")
+        .map((u) => u.id || u.about),
+    );
+    return uncertainties.map((u) => {
+      if (u.status !== "resolved") return u;
+      if (!wasOpen.has(u.id || u.about)) return u;
+      if (!MARKET_COMPARISON.test(u.about || "")) return u;
+      const kept = u.resolution
+        ? `${u.consequence} The hiring manager has stated the internal figure ("${String(u.resolution).trim()}"), which is one side of the comparison; the market side is still unknown and only market evidence can close it.`
+        : u.consequence;
+      const out = { ...u, status: "open", consequence: kept };
+      delete out.resolution;
+      return out;
+    });
+  }
+
+  /* All four, applied to one reasoning turn's output. */
+  function applyIntakeHygiene(next, beforeUncertainties, jdText, statements) {
+    return {
+      requirements: narrowSharedStatements(
+        dropWithdrawnRequirements(
+          reconcileRequirementOrigins(
+            next.requirements || [],
+            jdText,
+            statements || [],
+          ),
+        ),
+      ),
+      uncertainties: keepMarketComparisonsOpen(
+        next.uncertainties || [],
+        beforeUncertainties || [],
+      ),
+    };
+  }
+
   /* ── Deterministic composer (ported from lib/domain/search-strings) ───── */
   function quoteTerm(term) {
     const t = String(term).trim();
@@ -999,6 +1131,33 @@ Familiarity with AI safety literature is preferred. A PhD is common among our re
       .join("\n");
 
     const sections = [`## Search project\n${facts}`];
+
+    /* The canonical IR is the source of truth once it exists (the W8.5
+       correction): agents consume it instead of re-deriving requirements
+       from the job description, which is then reference material only. */
+    const intent =
+      (artifacts.intent && artifacts.intent.payload) ||
+      (artifacts.hiring_need && artifacts.hiring_need.payload);
+    if (intent) {
+      sections.push(
+        `## Canonical hiring intelligence (IR) — SOURCE OF TRUTH
+This is the search's single canonical interpretation. Consume these objects as-is: do NOT re-derive requirements from the job description below, which is reference material only. Treat open uncertainties as unknowns, never as facts; a requirement's verbatim statement and its definition are both binding.
+${clip(
+  JSON.stringify(
+    {
+      need: intent.need,
+      requirements: intent.requirements,
+      uncertainties: intent.uncertainties,
+      contradictions: intent.contradictions,
+      statements: intent.statements || [],
+    },
+    null,
+    1,
+  ),
+  14000,
+)}`,
+      );
+    }
     if (p.jd)
       sections.push(`## Job description (verbatim)\n${clip(p.jd, 6000)}`);
     const art = (key, title, budget) => {
@@ -1008,24 +1167,47 @@ Familiarity with AI safety literature is preferred. A PhD is common among our re
           `## ${title}\n${clip(JSON.stringify(rec.payload, null, 1), budget)}`,
         );
     };
-    art("role_intelligence", "Role intelligence (recruiter-reviewed)", 6000);
-    const intake = artifacts.intake && artifacts.intake.payload;
-    if (intake) {
-      const answered = [];
-      for (const cat of intake.categories || [])
-        for (const q of cat.questions || [])
-          if (q.answer && q.answer.trim())
-            answered.push(`Q (${cat.title}): ${q.question}\nA: ${q.answer}`);
-      if (answered.length)
-        sections.push(
-          `## Hiring-manager intake answers\n${clip(answered.join("\n\n"), 6000)}`,
-        );
+    if (!intent) {
+      art("role_intelligence", "Role intelligence (recruiter-reviewed)", 6000);
+      const intake = artifacts.intake && artifacts.intake.payload;
+      if (intake) {
+        const answered = [];
+        for (const cat of intake.categories || [])
+          for (const q of cat.questions || [])
+            if (q.answer && q.answer.trim())
+              answered.push(`Q (${cat.title}): ${q.question}\nA: ${q.answer}`);
+        if (answered.length)
+          sections.push(
+            `## Hiring-manager intake answers\n${clip(answered.join("\n\n"), 6000)}`,
+          );
+      }
     }
     art("success_profile", "Success profile", 6000);
     art("market_intelligence", "Market intelligence", 5000);
     art("sourcing_strategy", "Sourcing strategy", 5000);
     return sections.join("\n");
   }
+
+  /* ── W12 reasoning rules, shared by both canonical-IR tasks ───────────
+     Ten defect classes found by the 53-conversation adversarial corpus
+     (eval/w12/REPORT.md §12.1, §15, §16). Stated once and carried by both
+     the JD derivation and the intake reasoner, because five of the failures
+     were at the derivation step, which originally had none of them. */
+  const IR_RULES = `Requirement shape (mandatory):
+- Each requirement carries: label, statement (verbatim source phrase), definition (what it concretely means for THIS search), kind (must_have | preferred | trainable | disqualifier), origin (jd | manager_statement | research | recruiter | model_inference), evidenceSpec (observable public evidence that would satisfy it), falseSignals (lookalikes that do not), status (explicit | needs_clarification | assumed).
+- ONE REQUIREMENT, ONE SOURCE PHRASE. "statement" is the fragment that asserts THIS requirement, quoted exactly — not the whole sentence when it covers several, and never the entire answer. Join split fragments with an ellipsis. Two requirements must never carry the same statement: pasting a whole turn onto each destroys the provenance the field exists for.
+- FALSE SIGNALS ARE NOT OPTIONAL. A false signal is the only thing that stops a proxy being read as evidence, and its absence is invisible — nothing downstream can tell "none exist" from "nobody wrote them down". For every must_have and every disqualifier, ask what a candidate could show that LOOKS like this and is not it. Empty because none genuinely exist is fine; empty because the work was skipped is a defect.
+- PROXIES BY NAME. A prestige, brand or credential proxy — a named employer, a university, a ranking, an award, a certification usually earned after the work — is never a bare requirement. Name the CONSTRUCT it stands for in "definition", and put the proxy itself in "falseSignals" BY NAME: "TSMC on a profile used in place of the module experience", not "a company name used as a stand-in". A screener can act on the name and cannot act on the abstraction. Both directions belong there: the proxy present, read as evidence, and the proxy absent, read as a reason to deprioritise.
+- STATUS IS ABOUT DEFINITION, in two ordered tests. First: could a person be assessed against it, either from observable evidence or by a NAMED assessment step (an interview scenario, a reference call, a practical test)? A disposition with neither — "strong integrity", "comfortable at height", "calm under pressure" — is "needs_clarification" until someone says how it will be judged, and becomes "explicit" the moment they do. Stating a trait is not defining it. Second: if it is assessable, an open THRESHOLD ("how many years of ECMO") keeps it "explicit" with the threshold in a linked uncertainty, while an open DEFINITION — one whose answer changes which population qualifies — does not.
+- Something the hiring manager says can be taught or learned on the job is kind "trainable". That is what the kind is for, and it is the only thing that stops the item being screened on.
+
+Uncertainties:
+- "consequential" means the answer would change WHO you approach or WHETHER they could accept: the population, the geography, the reachable supply, or a material term — pay, relocation support, shift, start date, work authorisation. A question that only sharpens how you word a screen is worth asking and is NOT consequential; nor is a process question like who signs off. Be honest in both directions: over-flagging turns the ranking into noise, under-flagging hides the questions that decide whether the search is reachable at all.
+- An uncertainty about how something here COMPARES with the market outside — the rate against the region, the package against what this population is paid, whether the qualifying population exists locally — cannot be resolved by anyone inside the company. The hiring manager stating their own number answers one side and leaves the other unknown; record their figure and keep it OPEN. Only market evidence closes these.
+
+Contradictions:
+- Record both sides with provenance and never silently pick a winner.
+- A hiring manager's own example that refutes their own stated rule IS a contradiction. "Nobody without a PhD… well, my best engineer doesn't have one." Amending the requirement to fit the example is usually right in substance, but doing it QUIETLY hides the thing the recruiter has to take back into the room. Record the contradiction and amend.`;
 
   /* ── AI task registry (prompts ported from lib/ai/tasks) ──────────────── */
   function shapeCheck(payload, spec) {
@@ -1042,6 +1224,31 @@ Familiarity with AI safety literature is preferred. A PhD is common among our re
   }
 
   const TASKS = {
+    hiring_need: {
+      label: "Canonical IR",
+      desc: "The search's single canonical interpretation — requirements with provenance and false signals, uncertainties, contradictions. Every later module consumes this instead of re-reading the JD.",
+      persona:
+        "an elite recruiter distilling a hiring need into a canonical, typed interpretation",
+      rules: `You are producing the search's SINGLE canonical interpretation. Every later agent consumes your objects instead of re-reading the job description, so precision here compounds.
+
+- need.claims: the job description's actual claims, quoted closely, each with provenance "jd". What it does not say goes in need.unknowns — never invented.
+- requirements: every requirement-shaped statement becomes one requirement object.
+- VAGUE EVALUATIVE LANGUAGE ("research taste", "scrappy", "strong communicator") is the critical case: it MUST become a requirement with your best concrete definition, status "needs_clarification", and a linked consequential uncertainty whose consequence explains what the search gets wrong if the phrase stays undefined. It must never survive as an unexplained string.
+- Requirements you inferred that the job description does not state get status "assumed" and origin "model_inference".
+- contradictions: claims that cannot both hold, each side with provenance.
+
+${IR_RULES}`,
+      ask: "Derive the canonical hiring need and the initial requirement, uncertainty, and contradiction sets for this search now.",
+      shape: `{"need": {"businessProblem": string, "roleSummary": string, "claims": [{"text": string, "provenance": "jd"}], "unknowns": string[]}, "requirements": [{"label": string, "statement": string, "definition": string, "kind": "must_have"|"preferred"|"trainable"|"disqualifier", "origin": "jd"|"manager_statement"|"research"|"recruiter"|"model_inference", "evidenceSpec": string[], "falseSignals": string[], "status": "explicit"|"needs_clarification"|"assumed", "linkedUncertaintyIds": string[]}], "uncertainties": [{"id": string, "about": string, "kind": "ambiguity"|"missing_information"|"conflicting_information"|"assumption", "consequence": string, "consequential": boolean, "status": "open"}], "contradictions": [{"claimA": {"text": string, "provenance": string}, "claimB": {"text": string, "provenance": string}, "note": string, "status": "open"|"resolved"}]}`,
+      check: (p) =>
+        shapeCheck(p, {
+          need: "object",
+          requirements: "array",
+          uncertainties: "array",
+          contradictions: "array",
+        }),
+      render: renderCanonicalIR,
+    },
     role_intelligence: {
       label: "Role Intelligence",
       desc: "Extracts the role's real shape from the JD — hard requirements strictly separated from preferences, signals, assumptions, and open questions.",
@@ -1192,6 +1399,8 @@ All terms must be real search tokens (short, quotable), not sentences.`,
   };
   const MODULE_ORDER = [
     "overview",
+    "hiring_need",
+    "intake_loop",
     "role_intelligence",
     "intake",
     "success_profile",
@@ -1270,6 +1479,141 @@ ${task.shape}`;
         downgrades,
       },
       traitWarnings: scanForProtectedTraits(payload),
+    };
+  }
+
+  /* ── Adaptive intake reasoner (ported from lib/ai/tasks/intake-reason) ──
+     One turn of the loop: a hiring-manager statement in, an updated canonical
+     IR and the next highest-information question out. This is the piece the
+     Lite artifact never had — its old intake produced a question list, which
+     cannot record what the manager answered. */
+
+  const INTAKE_REASONER_RULES = `You are one turn of the intake loop over the canonical hiring intelligence.
+
+When a new hiring-manager statement is provided:
+- extractedClaims: the discrete claims it contains, provenance "manager_statement". Quote closely; never paraphrase meaning away.
+- Update the requirement set: clarify definitions the statement resolves, add requirements it introduces, re-classify kinds it corrects.
+- UPDATE the existing requirement a statement is about; never add a second one alongside it saying the same thing in the manager's words. One concept, one requirement.
+- PROVENANCE MOVES TOGETHER. A requirement's "statement" is verbatim to its source and "origin" names that source. When the manager restates a job-description requirement in their own words, the statement becomes THEIR words, the origin becomes "manager_statement", and assertedBy becomes their speaker. Do not overwrite the statement while leaving origin "jd" — that leaves the provenance lying in both directions. If they only clarify what a JD phrase means, keep the JD statement verbatim and put their words in the definition.
+- WITHDRAWN REQUIREMENTS LEAVE THE SET. When a manager takes a requirement away — "drop native", "BSEE, no, take it off", "detail-oriented is filler" — REMOVE it entirely. Do not keep it as "preferred" and never append "(withdrawn)" to its label: "preferred" legitimately raises a candidate's review priority, so a withdrawn requirement kept that way still shapes the search. Nothing is lost — the withdrawal is in extractedClaims and in the verbatim statement log.
+- Update uncertainties: resolve the ones the statement answers, open new ones it raises. Do not open a second uncertainty about a question already open — extend the existing one.
+- assertedBy: the speaker of the statement the requirement came from. Set it whenever origin is "manager_statement". With several stakeholders this is the only structured record of who wants what.
+- contested: true when stakeholders disagree about a requirement and have not reconciled. Never encode disagreement as "needs_clarification", and never weaken or drop a requirement because a later speaker disagrees — both positions stand until the people reconcile them.
+- When a stakeholder defines a term, resolve the uncertainty on their word. If ANOTHER stakeholder disputes it, re-open it, mark the requirement contested, and keep it open until they agree.
+- FALSE SIGNALS IN THEIR WORDS. When the manager draws a contrast — "not people who've seen the machine", "not that they've had CFO on a call" — put THEIR wording in falseSignals, not a paraphrase. The contrast is the most screenable thing they said.
+- CONSTRUCTS IN THEIR WORDS. When they define a term, their own defining words go in the definition. A definition that paraphrases the construct away leaves every downstream agent guessing at exactly the thing that was just settled.
+
+${IR_RULES}
+
+Always:
+- nextQuestion: the single question with the highest information value — the one whose answer would most change sourcing or screening. Target open CONSEQUENTIAL uncertainties first and explain the information value honestly. Return null only when nothing consequential remains open.
+- Never invent hiring-manager positions; unresolved stays unresolved.
+- Return the FULL updated requirement, uncertainty and contradiction sets — they replace the previous ones. Preserve existing ids.`;
+
+  const INTAKE_REASONER_SHAPE = `{"extractedClaims": [{"text": string, "provenance": "manager_statement"}], "requirements": [{"label": string, "statement": string, "definition": string, "kind": "must_have"|"preferred"|"trainable"|"disqualifier", "origin": "jd"|"manager_statement"|"research"|"recruiter"|"model_inference", "assertedBy": string?, "contested": boolean?, "evidenceSpec": string[], "falseSignals": string[], "status": "explicit"|"needs_clarification"|"assumed", "linkedUncertaintyIds": string[]}], "uncertainties": [{"id": string, "about": string, "kind": "ambiguity"|"missing_information"|"conflicting_information"|"assumption", "consequence": string, "consequential": boolean, "status": "open"|"resolved", "resolution": string?}], "contradictions": [{"claimA": {"text": string, "provenance": string}, "claimB": {"text": string, "provenance": string}, "note": string, "status": "open"|"resolved", "resolution": string?}], "nextQuestion": {"question": string, "whyItMatters": string, "targetsUncertaintyIds": string[], "informationValue": string} | null}`;
+
+  /* The evolving canonical intent: the derived IR plus every statement the
+     recruiter has recorded, in order. Stored as its own artifact so the
+     statement log survives a re-derivation. */
+  function currentIntent() {
+    const stored = state.artifacts.intent && state.artifacts.intent.payload;
+    if (stored) return stored;
+    const derived =
+      state.artifacts.hiring_need && state.artifacts.hiring_need.payload;
+    if (!derived) return null;
+    return {
+      need: derived.need,
+      requirements: derived.requirements || [],
+      uncertainties: derived.uncertainties || [],
+      contradictions: derived.contradictions || [],
+      statements: [],
+      revision: 0,
+    };
+  }
+
+  async function reasonOverStatement(statement, ui) {
+    const intent = currentIntent();
+    if (!intent) throw { code: "upstream_error", message: "no canonical IR" };
+    const prior = intent.statements || [];
+    const prompt = `${systemPrelude("an elite recruiter running an adaptive hiring-manager intake")}
+
+${INTAKE_REASONER_RULES}
+
+${renderContext(state.current, state.artifacts)}
+## Current canonical intelligence
+${clip(
+  JSON.stringify(
+    {
+      need: intent.need,
+      requirements: intent.requirements,
+      uncertainties: intent.uncertainties,
+      contradictions: intent.contradictions,
+      priorStatements: prior,
+    },
+    null,
+    1,
+  ),
+  14000,
+)}
+## New hiring-manager statement
+${JSON.stringify(statement, null, 1)}
+
+## Task
+Run one turn of the intake loop now.
+
+## Output format
+Reply with ONLY one JSON object (no markdown fences, no commentary) of this shape:
+${INTAKE_REASONER_SHAPE}`;
+
+    const ctl = new AbortController();
+    if (ui && ui.bindStop) ui.bindStop(ctl);
+    const out = await sampleApi.json(prompt, {
+      signal: ctl.signal,
+      cache: false,
+      onText: ui && ui.onText,
+      modelTier: MODEL_TIER,
+    });
+    const err = shapeCheck(out, {
+      extractedClaims: "array",
+      requirements: "array",
+      uncertainties: "array",
+      contradictions: "array",
+    });
+    if (err) throw { code: "invalid_json", message: "shape: " + err };
+    downgradeVerified(out);
+
+    // The deterministic backstops run on every turn, behind the rules above.
+    const statements = [...prior, statement];
+    const hygienic = applyIntakeHygiene(
+      out,
+      intent.uncertainties,
+      state.current.jd,
+      statements,
+    );
+    const next = {
+      need: {
+        ...intent.need,
+        claims: [...(intent.need.claims || []), ...(out.extractedClaims || [])],
+      },
+      requirements: hygienic.requirements,
+      uncertainties: hygienic.uncertainties,
+      contradictions: out.contradictions || [],
+      statements: statements.map((st) =>
+        st === statement ? { ...st, reasonedAt: new Date().toISOString() } : st,
+      ),
+      revision: (intent.revision || 0) + 1,
+      nextQuestion: out.nextQuestion || null,
+    };
+    return {
+      payload: next,
+      meta: {
+        provider: "claude-artifact",
+        generatedAt: new Date().toISOString(),
+      },
+      traitWarnings: scanForProtectedTraits({
+        requirements: next.requirements,
+        uncertainties: next.uncertainties,
+      }),
     };
   }
 
@@ -1419,17 +1763,24 @@ Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": str
       const label =
         key === "overview"
           ? "Overview"
-          : key === "candidates"
-            ? "Candidates"
-            : key === "golden_test"
-              ? "Golden Test"
-              : TASKS[key].label;
+          : key === "intake_loop"
+            ? "Intake loop"
+            : key === "candidates"
+              ? "Candidates"
+              : key === "golden_test"
+                ? "Golden Test"
+                : TASKS[key].label;
       const done =
         key === "overview"
           ? true
-          : key === "candidates"
-            ? state.candidates.length > 0
-            : Boolean(state.artifacts[key]);
+          : key === "intake_loop"
+            ? Boolean(
+                state.artifacts.intent &&
+                (state.artifacts.intent.payload.statements || []).length,
+              )
+            : key === "candidates"
+              ? state.candidates.length > 0
+              : Boolean(state.artifacts[key]);
       const item = el(
         `<button class="mod-item ${state.module === key ? "active" : ""}"><span class="dot ${done ? "done" : ""}"></span>${esc(label)}</button>`,
       );
@@ -1453,6 +1804,7 @@ Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": str
       return;
     }
     if (state.module === "overview") return renderOverview(main);
+    if (state.module === "intake_loop") return renderIntakeLoop(main);
     if (state.module === "candidates") return renderCandidates(main);
     if (state.module === "golden_test") return renderGolden(main);
     renderTaskModule(main, state.module);
@@ -1633,6 +1985,89 @@ Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": str
     `<ul>${(items || []).map((i) => `<li>${esc(i.text)} ${provChip(i.provenance)}${i.note ? ` <span class="why">${esc(i.note)}</span>` : ""}</li>`).join("")}</ul>`;
   const plainList = (items) =>
     `<ul>${(items || []).map((i) => `<li>${esc(typeof i === "string" ? i : i.text)}</li>`).join("")}</ul>`;
+
+  /* ── Canonical IR renderers ───────────────────────────────────────────── */
+
+  function requirementCard(r) {
+    const chips = [
+      `<span class="chip ${r.kind === "must_have" ? "warn" : "num"}">${esc(r.kind)}</span>`,
+      `<span class="chip ${r.status === "explicit" ? "num" : "warn"}">${esc(r.status)}</span>`,
+      `<span class="chip inference">${esc(r.origin)}</span>`,
+      r.assertedBy
+        ? `<span class="chip num">asserted by ${esc(r.assertedBy)}</span>`
+        : "",
+      r.contested ? `<span class="chip warn">contested</span>` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const list = (title, items, why) =>
+      (items || []).length
+        ? `<h4>${title} <span class="why">${why}</span></h4>${plainList(items)}`
+        : `<h4>${title}</h4><p class="why">None recorded.${
+            title === "False signals"
+              ? " A false signal is the only thing that stops a proxy being read as evidence — if one exists, it belongs here."
+              : ""
+          }</p>`;
+    return `<div style="margin:14px 0;padding-top:12px;border-top:1px solid var(--line-soft)">
+      <div class="qq">${esc(r.label)}</div>
+      <div style="margin:4px 0 8px">${chips}</div>
+      <p>${esc(r.definition || "")}</p>
+      <p class="why">Source phrase: “${esc(r.statement || "")}”</p>
+      ${list("Evidence", r.evidenceSpec, "— observable proof a sourcer can find")}
+      ${list("False signals", r.falseSignals, "— lookalikes that are not evidence")}
+    </div>`;
+  }
+
+  function renderCanonicalIR(root, p) {
+    const need = p.need || {};
+    root.append(
+      el(`<div class="panel"><h3>The hiring need</h3>
+      <p>${esc(need.businessProblem || "")}</p>
+      <p class="why">${esc(need.roleSummary || "")}</p>
+      <h4>What the posting does not say</h4>${plainList(need.unknowns)}</div>`),
+    );
+    const reqs = p.requirements || [];
+    root.append(
+      el(`<div class="panel"><h3>Requirements <span class="why">— ${reqs.length}, each with its own source phrase</span></h3>
+      ${reqs.map(requirementCard).join("")}</div>`),
+    );
+    const uncs = p.uncertainties || [];
+    if (uncs.length)
+      root.append(
+        el(
+          `<div class="panel"><h3>Uncertainties</h3>${uncs
+            .map(
+              (u) => `<div style="margin:10px 0">
+          <div class="qq">${esc(u.about)}</div>
+          <div style="margin:4px 0">
+            <span class="chip ${u.status === "open" ? "warn" : "num"}">${esc(u.status)}</span>
+            ${u.consequential ? '<span class="chip warn">consequential</span>' : '<span class="chip num">not consequential</span>'}
+          </div>
+          <p class="why">${esc(u.consequence || "")}</p>
+          ${u.resolution ? `<p class="why">Resolved: ${esc(u.resolution)}</p>` : ""}
+        </div>`,
+            )
+            .join("")}</div>`,
+        ),
+      );
+    const cons = p.contradictions || [];
+    if (cons.length)
+      root.append(
+        el(
+          `<div class="panel"><h3>Contradictions <span class="why">— both sides recorded; nothing silently wins</span></h3>${cons
+            .map(
+              (c) => `<div style="margin:10px 0">
+          <span class="chip ${c.status === "open" ? "warn" : "num"}">${esc(c.status)}</span>
+          <p>“${esc((c.claimA || {}).text || "")}” <span class="why">(${esc((c.claimA || {}).provenance || "")})</span></p>
+          <p>“${esc((c.claimB || {}).text || "")}” <span class="why">(${esc((c.claimB || {}).provenance || "")})</span></p>
+          <p class="why">${esc(c.note || "")}</p>
+          ${c.resolution ? `<p class="why">Resolution: ${esc(c.resolution)}</p>` : ""}
+        </div>`,
+            )
+            .join("")}</div>`,
+        ),
+      );
+  }
 
   function renderRoleIntelligence(root, p) {
     root.append(
@@ -1991,6 +2426,146 @@ Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": str
       el(`<div class="panel"><h3>Pipeline</h3><p class="num">${done} of ${MODULE_ORDER.length - 2} modules generated · ${state.candidates.length} candidate${state.candidates.length === 1 ? "" : "s"}</p>
     <p class="why">Suggested order: Role Intelligence → HM Intake (answer the questions) → Success Profile → Market Intel → Strategy → Channels → Search Strings → Candidates.</p></div>`),
     );
+  }
+
+  /* ── Intake loop module (the adaptive reasoner's surface) ─────────────── */
+
+  function renderIntakeLoop(main) {
+    main.append(
+      el(
+        `<div class="mod-head"><h2>Intake loop</h2><span class="spacer"></span></div>`,
+      ),
+    );
+    main.append(
+      el(
+        `<p class="mod-desc">Record what the hiring manager actually said. Each statement is reasoned over once: requirements update with their provenance, uncertainties open and close, contradictions are recorded rather than resolved silently, and you get the single question worth asking next.</p>`,
+      ),
+    );
+
+    const intent = currentIntent();
+    if (!intent) {
+      main.append(
+        el(
+          `<div class="panel"><p class="why">Generate the <strong>Canonical IR</strong> first — the loop reasons over it. Nothing here re-reads the job description.</p></div>`,
+        ),
+      );
+      return;
+    }
+
+    const body = el(`<div></div>`);
+    main.append(body);
+
+    if (intent.nextQuestion) {
+      const q = intent.nextQuestion;
+      body.append(
+        el(`<div class="panel"><h3>Ask this next</h3>
+        <p class="qq">${esc(q.question)}</p>
+        <p class="why">Why it matters: ${esc(q.whyItMatters || "")}</p>
+        <p class="why">Information value: ${esc(q.informationValue || "")}</p></div>`),
+      );
+    }
+
+    const form =
+      el(`<div class="panel"><h3>Record a hiring-manager statement</h3>
+      <p class="why">Quote them. The verbatim text is kept as provenance and never rewritten.</p></div>`);
+    const speaker = el(
+      `<input type="text" value="hiring_manager" placeholder="Speaker — hiring_manager, board_chair, superintendent…" />`,
+    );
+    const context = el(
+      `<input type="text" placeholder="What prompted it — usually the question you asked" />`,
+    );
+    const text = el(
+      `<textarea rows="4" placeholder="What they said, in their own words…"></textarea>`,
+    );
+    const go = el(
+      `<button class="btn primary">Reason over this statement</button>`,
+    );
+    const stop = el(`<button class="btn small" hidden>Stop</button>`);
+    form.append(speaker, context, text);
+    form.append(el(`<div style="margin-top:8px"></div>`), go, stop);
+    body.append(form);
+
+    if (aiHidden || !sampleApi) {
+      go.disabled = true;
+      form.append(
+        el(`<div class="notice warning">${esc(copyFor("not_granted"))}</div>`),
+      );
+    }
+
+    let ctl = null;
+    stop.onclick = () => ctl && ctl.abort();
+    go.onclick = async () => {
+      const said = text.value.trim();
+      if (!said) return;
+      go.disabled = true;
+      stop.hidden = false;
+      const think = el(
+        `<div class="panel"><div class="thinking">Reasoning over the statement — Claude is thinking…</div><div class="stream"></div></div>`,
+      );
+      body.append(think);
+      const streamEl = $(".stream", think);
+      try {
+        const statement = {
+          id: uid(),
+          at: new Date().toISOString(),
+          speaker: speaker.value.trim() || "hiring_manager",
+          text: said,
+          context: context.value.trim() || undefined,
+        };
+        const result = await reasonOverStatement(statement, {
+          bindStop: (c) => {
+            ctl = c;
+          },
+          onText: ({ text: t }) => {
+            streamEl.textContent = t.slice(-1500);
+            streamEl.scrollTop = streamEl.scrollHeight;
+          },
+        });
+        state.artifacts.intent = result;
+        await store.saveArtifact(state.current.id, "intent", result);
+        render();
+      } catch (e) {
+        if (e && (e.code === "not_granted" || e.code === "sampling_disabled"))
+          aiHidden = true;
+        think.remove();
+        body.append(
+          el(
+            `<div class="notice error"><strong>Reasoning failed.</strong> ${esc(copyFor(e && e.code))}</div>`,
+          ),
+        );
+        go.disabled = false;
+        stop.hidden = true;
+      }
+    };
+
+    const rec = state.artifacts.intent;
+    if (rec && rec.traitWarnings && rec.traitWarnings.length)
+      body.append(
+        el(
+          `<div class="notice warning"><strong>Review required:</strong> the updated intelligence mentions ${esc(rec.traitWarnings.join(", "))}. Protected characteristics must never drive evaluation — edit before use.</div>`,
+        ),
+      );
+
+    const log = intent.statements || [];
+    if (log.length)
+      body.append(
+        el(
+          `<div class="panel"><h3>Statement log <span class="why">— verbatim, in order, revision ${esc(String(intent.revision || 0))}</span></h3>${log
+            .map(
+              (
+                st,
+              ) => `<div style="margin:10px 0;padding-top:8px;border-top:1px solid var(--line-soft)">
+          <span class="chip inference">${esc(st.speaker)}</span>
+          ${st.context ? `<p class="why">Asked: ${esc(st.context)}</p>` : ""}
+          <p>“${esc(st.text)}”</p></div>`,
+            )
+            .join("")}</div>`,
+        ),
+      );
+
+    const ir = el(`<div></div>`);
+    body.append(ir);
+    renderCanonicalIR(ir, intent);
   }
 
   /* ── Candidates module ────────────────────────────────────────────────── */
