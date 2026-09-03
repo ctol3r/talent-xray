@@ -82,3 +82,14 @@ string-expansion task:
 - **Corpus gap — no protected-trait case for sex or gender.** The text
   scanner had no gender pattern until W12 and the corpus would not have
   caught it; add a conversation where a manager genders the role.
+- **The artifact's IR shape is duplicated and untested** (D-017). The four
+  backstops and the rule text are held in place by
+  `tests/unit/artifact-hygiene.test.ts`, but the IR field names in
+  `artifact/talentos-lite.html` are not: rename a field in
+  `src/lib/core/ir.ts` and nothing fails until someone opens the artifact.
+  Cheapest fix is a test that reads the zod schema's field names and asserts
+  each appears in the artifact's shape strings.
+- **The artifact's ported brain has never been scored.** The corpus harness
+  needs a filesystem and a scorer, so a published page cannot run it. If a
+  key ever arrives, run the corpus against the artifact's prompts as well as
+  the app's — they have diverged before and will again.

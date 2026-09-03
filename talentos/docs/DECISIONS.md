@@ -453,3 +453,42 @@ overlap with the requirement's label, and the result is always a verbatim
 substring of the original. An abbreviation the label does not spell out
 ("AP") is not matched and the statement is left as-is — a missed narrowing is
 cheap, a wrong one is not.
+
+## D-017 — The Lite artifact is a port target, not a second implementation
+
+**Decision.** (2026-09-03.) `artifact/talentos-lite.html` carries the same
+brain as the app: the canonical IR is what it derives, the intake loop is
+what it runs, and the ten W12 rules and four deterministic backstops are
+copied into it. Where the two cannot share code, the copy is held in place
+by a test that reads the artifact's own source
+(`tests/unit/artifact-hygiene.test.ts`), not by discipline.
+
+**Why this needed deciding.** The artifact had drifted into a separate
+product. It predated W8.5 and produced a `role_intelligence` blob that every
+downstream module re-read the JD alongside; its intake was a generated
+question list with nowhere to put the answers. All ten defect classes the
+full corpus proved (S-1…S-10) were live in it, unfixed, while the app's
+copies were fixed — and the artifact is the surface actually opened. A fix
+that lands only in the surface nobody opens is not a fix.
+
+**The seam.** A single-file page cannot import from `src/`, so three things
+are duplicated: the backstop functions, the rule text, and the IR shape. The
+first is tested against the app's own cases by extracting the block from the
+HTML with `new Function`; the second is asserted present, in both prompts,
+by string match; the third is not tested and is the weak point — an IR field
+renamed in `src/lib/core/ir.ts` will not fail any test until someone opens
+the artifact.
+
+**What is not claimed.** The port is unmeasured. The corpus harness needs a
+filesystem, a model provider and a scorer, none of which exist inside a
+published page, so the ported rules carry exactly the evidence the app's
+prompt rules carry — the deterministic half is scored
+(`--project-hygiene`: 24 failures removed, 3 introduced), the prompt half
+is not. Porting moved the fixes to where they are used; it did not prove
+them.
+
+**Tradeoff.** Two implementations is a cost we are choosing to pay while
+TalentOS is incubating (ADR-001). The alternative — a build step that
+inlines `src/` into the artifact — buys correctness at the price of the one
+property that makes the artifact useful right now, that it is a single file
+someone can open. Revisit at extraction.

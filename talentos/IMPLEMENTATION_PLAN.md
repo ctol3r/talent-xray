@@ -264,3 +264,43 @@ Projection with all backstops: **24 failures removed, 0→3 introduced**, the
 three being wording literalism now visible because attribution is correct.
 No schema shape changed across S-1…S-10; `RequirementIR` has held through
 two rounds of fixes.
+
+## W12.5 — The W12 brain ships in the Lite artifact (CLOSED 2026-09-03)
+
+Owner instruction 2026-09-03, after `where can i start using this tool`
+established that the artifact — not the local Next.js app — is the surface
+actually opened. The artifact was a separate, pre-W8.5 implementation: it
+derived a `role_intelligence` blob from the JD, offered a static question
+list with no way to record what the manager answered, and had none of the
+ten defect fixes S-1…S-10. Every downstream module read the JD directly, so
+a manager's correction never reached the search plan.
+
+Ported into `artifact/talentos-lite.html`:
+
+- The four deterministic backstops from `src/lib/domain/intake-hygiene.ts`,
+  verbatim in behaviour — origin follows the statement (S-2), withdrawn
+  requirements leave the set (S-4), one requirement one source phrase
+  (S-10), market comparisons cannot close from inside the company (S-3).
+- `IR_RULES`, carrying all ten corpus-proven rules, interpolated into both
+  the JD-derivation task and the intake reasoner. Five of the corpus
+  failures were at the derivation step, which previously carried none of
+  them.
+- A `hiring_need` task producing the canonical IR, and an `intake_loop`
+  module that records `ManagerStatement`s and reasons over them, applying
+  the backstops on every turn.
+- `renderContext` is IR-first (the W8.5 correction): where the IR exists it
+  is emitted as the source of truth and downstream modules are told not to
+  re-derive requirements from the job description.
+
+`role_intelligence` and the old `intake` module still work and are still
+reachable; nothing was removed.
+
+Acceptance: `tests/unit/artifact-hygiene.test.ts` (15 tests) extracts the
+hygiene block straight out of the HTML with `new Function` and runs the same
+cases as the app's own `intake-hygiene.test.ts`, plus asserts the rule block
+reaches both prompts — so the copy cannot rot silently. `pnpm verify` green
+(18 files, 153 tests). Republished to the same artifact URL.
+
+**Unmeasured, and stated as such.** A single-file page cannot run the corpus
+harness against itself, so the ported brain is unproven in exactly the way
+the app's own prompt rules are: only the deterministic half has a score.
