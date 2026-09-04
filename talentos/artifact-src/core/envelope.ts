@@ -59,6 +59,20 @@ export const pivotProposalSchema = z.object({
 });
 export type PivotProposal = z.infer<typeof pivotProposalSchema>;
 
+/**
+ * An initiative groups action items under one intent ("close the ICU
+ * shortlist", "fix the pay-band question"). It holds no state of its own
+ * beyond why it exists — progress is derived from its actions.
+ */
+export const initiativeSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+  why: z.string().default(""),
+  createdAt: z.string(),
+  closedAt: z.string().optional(),
+});
+export type Initiative = z.infer<typeof initiativeSchema>;
+
 export const NEXT_STEP_LABELS = [
   "A",
   "B",

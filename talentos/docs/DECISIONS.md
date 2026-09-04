@@ -572,3 +572,113 @@ not taken. A contributor can no longer edit the published HTML directly —
 **What did not change.** Vanilla DOM rendering, no framework, one inline
 script, no external script host, the `sample`/`db` runtime contract, the
 localStorage key `talentos-lite-v1` and every stored document path.
+
+## D-020 — Navigation is derived, and Guided never hides a phase
+
+**Decision.** (2026-09-04, W14.) The artifact's modules are grouped into five
+phases — Define · Research · Plan · Execute · Learn — and a phase's status
+is computed from the module states already derived in `core/dependencies.ts`.
+A phase is `complete` only when every REQUIRED entry is `current` or `aging`;
+`blocked` is a real result and is never completion. Guided mode hides
+advanced entries (the pre-IR role read, the Golden Test); it does **not**
+hide a phase, and it does not prevent jumping ahead. A phase the earlier
+work has not fed is marked EARLY and says which output it is waiting on.
+
+**Why.** The rail was a flat list of twelve modules in dependency order,
+which is the shape of the graph rather than the shape of the work. Grouping
+them is navigation; deriving the group's state from the modules keeps it
+honest — there is no phase record to go stale, and no second source of truth
+about whether something is done.
+
+**Why Guided does not lock.** A locked step is a lie about who is in charge:
+a recruiter who wants to look at the channel map before the success profile
+exists has a reason, and the honest response is to show it with its state
+("Not started. Generate Success Profile first for best results"), not to
+refuse. Hiding _advanced_ entries is different — those are alternates and
+diagnostics, not steps.
+
+**Next best action.** One action, derived by a fixed precedence in
+`core/next-best-action.ts`: a failure, then a safety flag, then a blocked
+action item (a person waiting), then the first missing required output in
+phase order, then the intake loop's own question, then staleness, then
+research currency, then execution. It is a pure function over the same
+inputs the rail reads — no model call — and it returns a step routed
+through the same confirmation rules as any other suggested step. It may
+never propose sending outreach, advancing a stage, or approving anything;
+a test enforces that.
+
+## D-021 — "Connected" and "wired" are different states, and the page says which
+
+**Decision.** (2026-09-04, W14.) The artifact resolves the `mcp` capability
+and asks the viewer's own connectors what is true — not connected, lapsed
+auth, connected but missing the tools, connected — and reports that per
+connector in the Research screen. Separately it reports whether THIS BUILD
+has observed a real request/response pair for the tools it would call.
+Bigdata.com, the NPI Registry and PubMed/bioRxiv/Consensus are declared
+with their real server names and tool names, and all three are `wired:
+false`: the page will not call them.
+
+**Why the distinction is load-bearing.** "Not wired" alone was true but
+useless — it told a recruiter nothing about whether the thing could ever
+work for them. "Connected" alone would be worse than useless: it implies
+the page can use it. A page that calls a connector tool with a guessed
+argument shape produces either an error or, far worse, a result it
+misreads — and a misread result becomes a cited source. The capability
+contract is explicit that argument names and result encoding are not part
+of it, and must be observed.
+
+**Status, stated plainly.** The observation could not be made in this
+session: the Bigdata.com tool call was refused by the environment's
+permission classifier before it reached the connector. So the bridge ships
+complete — capability resolution, per-connector status, one branch per
+documented error code with the fix it actually has — and `retrieve()`
+returns nothing. When a request/response pair can be observed, `wired`
+becomes true for that adapter and only then.
+
+**What is deliberately NOT declared.** The artifact does not declare
+`capabilities.mcp`. Declaring it is a viewer-consented grant that bars
+public sharing of the page, and it should not be spent on connectors the
+build cannot call. The page therefore reports "no connector access in this
+view", which is the truth until the manifest is declared.
+
+## D-022 — Every metric is computed from recorded events, and an empty funnel is not a zero
+
+**Decision.** (2026-09-04, W15.) Pipeline events are append-only records of
+something a person already did: recorded outreach, a recorded reply, a stage
+they moved someone to, an exit with a reason. There is no update and no
+delete. Every metric in the four groups — Funnel, Responsiveness, Quality of
+submission, Velocity — is computed from those events and nothing else, and
+each one carries its formula, its numerator where it has one, and its
+denominator.
+
+**Why an empty pipeline reports nothing.** A conversion rate of "0%" from
+zero contacts is a lie that reads like a measurement, and it is the specific
+failure the brief names. Every rate declares a minimum sample (ten contacts
+before a reply rate means anything; three interviews before an
+interview-to-offer rate does) and reports `not_enough_data` with the count
+it has and the count it needs until then. A duration reports the median with
+its sample size as the denominator, so "3.5 days" can never be read without
+"across four candidates". "Days open" with no recorded open date says so
+explicitly — _it is not zero_.
+
+**Why the funnel counts "reached", not "is at".** A candidate who is now at
+Offer also reached Contacted and Replied. Counting current position would
+make every rate depend on how far the search has got rather than on how many
+people converted, and it would shrink the denominator of every earlier stage
+as the search progressed.
+
+**Nothing advances anyone.** Recording a stage asks for confirmation and
+says why: it is a decision about a person's application, and TalentOS does
+not make those. The exit reason is prompted for, because the reason is the
+only part a later search can learn from.
+
+**No breakdown by any candidate attribute, ever.** The metric registry is
+fixed. There is no grouping parameter, so there is nothing to point at a
+protected characteristic — a deliberate-defect check asserts the computed
+registry contains no such term, alongside the checks that no rate exceeds
+its own population and that an empty pipeline yields no measured zero.
+
+**A comparison needs both sides.** `compareMetric` refuses to report a
+direction unless both periods are measured and both meet their minimum
+sample, and it states both sample sizes when it does. "Improved" without
+that is a claim, not a measurement.

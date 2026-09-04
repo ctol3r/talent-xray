@@ -675,6 +675,168 @@ summary:focus-visible {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* ── W14: persistent header, phases, action queue ─────────────────── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 28px 8px;
+}
+.tb-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 6px;
+}
+.tb-row:last-child {
+  margin-bottom: 0;
+}
+.tb-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.tb-title .why {
+  font-weight: 400;
+}
+.tb-question {
+  margin: 0 0 6px;
+}
+.modes {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.mode-btn {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: 600 11.5px/1 var(--sans);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.mode-btn:hover {
+  color: var(--text);
+}
+.mode-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.phases {
+  gap: 6px;
+}
+.phase {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+.phase:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
+.phase.active {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--accent-soft);
+}
+.phase .ph-label {
+  font-weight: 600;
+}
+.phase .ph-count {
+  font-size: 11px;
+  color: var(--faint);
+}
+.nba {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 8px;
+}
+.nba-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.nba-text b {
+  font-size: 13px;
+}
+.phase-group {
+  margin-bottom: 6px;
+}
+.guided-hint {
+  margin: -8px 0 12px;
+  max-width: 62ch;
+}
+.action-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.action-row .qmeta {
+  width: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.action-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.action-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.action-controls select {
+  width: auto;
+  min-width: 150px;
+}
+.flash {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+@media (max-width: 720px) {
+  .topbar {
+    padding: 10px 16px 8px;
+    position: static;
+  }
+}
+
+/* ── W15: metric lists ────────────────────────────────────────────── */
+ul.metrics {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+ul.metrics li {
+  padding: 8px 0;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+ul.metrics li:first-child {
+  border-top: 0;
+}
+ul.metrics li .why {
+  flex-basis: 100%;
+  margin: 0;
+}
 </style>
 <link
   rel="stylesheet"
@@ -716,6 +878,11 @@ summary:focus-visible {
     </div>
   </nav>
   <main class="main" id="main-region">
+    <header
+      class="topbar"
+      id="topbar"
+      aria-label="Search status and next step"
+    ></header>
     <div class="main-inner" id="main" tabindex="-1"></div>
   </main>
 </div>
@@ -1320,16 +1487,16 @@ summary:focus-visible {
     { trait: "veteran status", pattern: /\bveteran status\b/i }
   ];
   function scanTextForProtectedTraits(text) {
-    const hits = [];
+    const hits2 = [];
     for (const { trait, pattern } of TEXT_SCAN_PATTERNS) {
       const match = pattern.exec(text);
       if (match) {
         const start = Math.max(0, match.index - 40);
         const end = Math.min(text.length, match.index + match[0].length + 40);
-        hits.push({ trait, excerpt: text.slice(start, end).trim() });
+        hits2.push({ trait, excerpt: text.slice(start, end).trim() });
       }
     }
-    return hits;
+    return hits2;
   }
   function scanPayloadForProtectedTraits(payload) {
     return scanTextForProtectedTraits(JSON.stringify(payload ?? ""));
@@ -2834,7 +3001,7 @@ summary:focus-visible {
       }
     });
   }
-  function installLazyProp(inst, key, make, enumerable) {
+  function installLazyProp(inst, key, make2, enumerable) {
     const proto = claim(inst, key);
     if (!proto)
       return;
@@ -2843,7 +3010,7 @@ summary:focus-visible {
       get() {
         const desc = { configurable: true, writable: true, enumerable, value: void 0 };
         Object.defineProperty(this, key, desc);
-        desc.value = make(this);
+        desc.value = make2(this);
         Object.defineProperty(this, key, desc);
         return desc.value;
       },
@@ -3030,12 +3197,12 @@ summary:focus-visible {
   var $ZodRealError = $constructor("$ZodError", initializer, void 0, {
     Parent: Error
   });
-  function node(obj, key, make) {
+  function node(obj, key, make2) {
     if (!Object.prototype.hasOwnProperty.call(obj, key)) {
       if (key === "__proto__") {
-        Object.defineProperty(obj, key, { value: make(), writable: true, enumerable: true, configurable: true });
+        Object.defineProperty(obj, key, { value: make2(), writable: true, enumerable: true, configurable: true });
       } else {
-        obj[key] = make();
+        obj[key] = make2();
       }
     }
     return obj[key];
@@ -17510,8 +17677,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         bySchema.set(entry.schema, entry);
     }
     const rewrites = /* @__PURE__ */ new Map();
-    for (const record2 of pendingRecords.get(ctx) ?? []) {
-      const seen = ctx.seen.get(record2);
+    for (const record3 of pendingRecords.get(ctx) ?? []) {
+      const seen = ctx.seen.get(record3);
       const names = (seen?.def ?? seen?.schema)?.propertyNames;
       if (!names || names === true || rewrites.has(names))
         continue;
@@ -18042,12 +18209,12 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
 
   // node_modules/.pnpm/zod@4.5.4/node_modules/zod/v4/classic/errors.js
   var _installedErrorProtos = /* @__PURE__ */ new WeakSet([Object.prototype, Error.prototype]);
-  function _lazyMethod(proto, key, make) {
+  function _lazyMethod(proto, key, make2) {
     Object.defineProperty(proto, key, {
       configurable: true,
       enumerable: false,
       get() {
-        const value = make(this);
+        const value = make2(this);
         Object.defineProperty(this, key, { value, configurable: true, writable: true });
         return value;
       },
@@ -21083,14 +21250,14 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       return value.map((entry) => ensureIds(entry, true));
     }
     if (value !== null && typeof value === "object") {
-      const record2 = { ...value };
-      if (isListItem && typeof record2.id !== "string") {
-        record2.id = crypto.randomUUID();
+      const record3 = { ...value };
+      if (isListItem && typeof record3.id !== "string") {
+        record3.id = crypto.randomUUID();
       }
-      for (const key of Object.keys(record2)) {
-        record2[key] = ensureIds(record2[key]);
+      for (const key of Object.keys(record3)) {
+        record3[key] = ensureIds(record3[key]);
       }
-      return record2;
+      return record3;
     }
     return value;
   }
@@ -21370,6 +21537,104 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     };
   }
 
+  // artifact-src/core/connectors.ts
+  var mcpApi = null;
+  function setMcp(api) {
+    mcpApi = api;
+  }
+  var MCP_ERROR_COPY = {
+    needs_reauth: "The connector's access has lapsed. Reconnect it in claude.ai Settings → Connectors.",
+    server_not_connected: "This connector is not on the viewer's account. Add it in claude.ai Settings → Connectors.",
+    selection_required: "More than one connector has this name; the viewer has not chosen which to use.",
+    server_not_found: "The connector no longer exists upstream.",
+    server_unavailable: "The connector is temporarily unreachable. This is worth one retry.",
+    not_in_manifest: "This page did not declare that tool, so the viewer never consented to it.",
+    blocked_by_policy: "An organisation policy blocks this tool for this viewer.",
+    approval_required: "This tool needs per-call approval, which artifacts cannot ask for yet.",
+    tool_error: "The connector answered and reported a failure.",
+    bad_request: "The page called the connector incorrectly.",
+    cancelled: "The call was cancelled; whether it ran upstream is unknown.",
+    rate_limited: "The page has exceeded its connector budget. Wait, then retry.",
+    not_granted: "This view did not grant connector access to the page. Research stays manual here.",
+    capability_disabled: "Connector access is not usable in this view. Research stays manual here.",
+    capability_removed: "This runtime does not serve connector access. Research stays manual here.",
+    transform_error: "The call's arguments could not be prepared.",
+    upstream_error: "The connector failed for an unstated reason."
+  };
+  function describeMcpError(error61) {
+    const e = error61 ?? {};
+    const code = typeof e.code === "string" ? e.code : "upstream_error";
+    const known = code in MCP_ERROR_COPY ? code : "upstream_error";
+    return {
+      code: known,
+      message: MCP_ERROR_COPY[known] + (typeof e.message === "string" && e.message ? ` (${e.message})` : ""),
+      retryable: e.retryable === true
+    };
+  }
+  async function describeConnector(input2) {
+    const { server, requiredTools, wired } = input2;
+    if (!mcpApi) {
+      return {
+        server,
+        state: "capability_unavailable",
+        reason: "This page has no connector access in this view, so nothing here can reach the outside world. Paste a source you checked yourself.",
+        tools: []
+      };
+    }
+    try {
+      const { servers } = await mcpApi.listTools();
+      const match = servers.find((s) => s.server === server);
+      if (!match) {
+        return {
+          server,
+          state: "not_connected",
+          reason: MCP_ERROR_COPY.server_not_connected,
+          tools: []
+        };
+      }
+      if (match.authStatus === "needs_reauth") {
+        return {
+          server,
+          state: "needs_reauth",
+          reason: MCP_ERROR_COPY.needs_reauth,
+          tools: match.tools.map((t) => t.name)
+        };
+      }
+      const names = match.tools.map((t) => t.name);
+      const missing = requiredTools.filter((t) => !names.includes(t));
+      if (missing.length) {
+        return {
+          server,
+          state: "missing_tools",
+          reason: `Connected, but it does not expose ${missing.join(", ")}.`,
+          tools: names
+        };
+      }
+      if (!wired) {
+        return {
+          server,
+          state: "connected_not_wired",
+          reason: "Connected and exposing the right tools — but this build has not observed a real request/response for them, so it will not call them and risk a fabricated citation.",
+          tools: names
+        };
+      }
+      return {
+        server,
+        state: "ready",
+        reason: "Connected and callable.",
+        tools: names
+      };
+    } catch (error61) {
+      const failure = describeMcpError(error61);
+      return {
+        server,
+        state: failure.code === "needs_reauth" ? "needs_reauth" : failure.code === "server_not_connected" ? "not_connected" : "capability_unavailable",
+        reason: failure.message,
+        tools: []
+      };
+    }
+  }
+
   // artifact-src/core/research.ts
   var researchStatusSchema = external_exports.enum([
     "current",
@@ -21596,7 +21861,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       asOf: asOf2
     };
   }
-  var has = (hay, ...needles) => needles.some((n) => hay.toLowerCase().includes(n));
+  var has = (hay2, ...needles) => needles.some((n) => hay2.toLowerCase().includes(n));
   var userSuppliedAdapter = {
     id: "user_supplied",
     label: "User-supplied sources",
@@ -21606,42 +21871,72 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       viable: true,
       reason: "Always available — paste a link or excerpt."
     }),
+    connectors: [],
     availability: async () => ({ state: "available" }),
     retrieve: async () => []
   };
-  function unwiredConnector(id, label, kinds, sourceType, applies) {
+  function connectorAdapter(input2) {
     return {
-      id,
-      label,
-      kinds,
-      sourceType,
-      applies,
-      availability: async () => ({
-        state: "unavailable",
-        reason: `${label} is not wired in this build (Phase 3: requires an observed request/response and viewer consent).`
-      }),
-      retrieve: async () => []
+      id: input2.id,
+      label: input2.label,
+      kinds: input2.kinds,
+      sourceType: input2.sourceType,
+      applies: input2.applies,
+      connectors: input2.connectors,
+      availability: async () => {
+        const statuses = await Promise.all(
+          input2.connectors.map(
+            (c) => describeConnector({
+              server: c.server,
+              requiredTools: c.tools,
+              wired: input2.wired
+            })
+          )
+        );
+        const ready = statuses.filter((s) => s.state === "ready");
+        if (ready.length > 0) {
+          return { state: "available", connectors: statuses };
+        }
+        const first = statuses[0];
+        return {
+          state: "unavailable",
+          reason: first ? `${first.server}: ${first.reason}` : `${input2.label} declares no connector.`,
+          connectors: statuses
+        };
+      },
+      retrieve: async () => {
+        if (!input2.wired) return [];
+        throw new Error(
+          `${input2.label} is marked wired but has no retrieve implementation.`
+        );
+      }
     };
   }
-  var bigdataAdapter = unwiredConnector(
-    "bigdata",
-    "Bigdata.com (company facts, news, filings)",
-    [
+  var bigdataAdapter = connectorAdapter({
+    id: "bigdata",
+    label: "Bigdata.com (company facts, news, filings)",
+    kinds: [
       "leadership",
       "layoffs",
       "company_initiatives",
       "competitor_moves",
       "job_openings"
     ],
-    "reputable_secondary",
-    (ctx) => ctx.company ? { viable: true, reason: `Company-level claims about ${ctx.company}.` } : { viable: false, reason: "No company named on this search." }
-  );
-  var npiAdapter = unwiredConnector(
-    "npi_registry",
-    "NPI Registry (US healthcare provider licences)",
-    ["licence_registry"],
-    "official",
-    (ctx) => {
+    sourceType: "reputable_secondary",
+    connectors: [
+      { server: "Bigdata.com", tools: ["find_securities", "bigdata_search"] }
+    ],
+    wired: false,
+    applies: (ctx) => ctx.company ? { viable: true, reason: `Company-level claims about ${ctx.company}.` } : { viable: false, reason: "No company named on this search." }
+  });
+  var npiAdapter = connectorAdapter({
+    id: "npi_registry",
+    label: "NPI Registry (US healthcare provider licences)",
+    kinds: ["licence_registry"],
+    sourceType: "official",
+    connectors: [{ server: "NPI Registry", tools: ["npi_search", "npi_lookup"] }],
+    wired: false,
+    applies: (ctx) => {
       const us = has(ctx.country, "united states", "usa", "us") || ctx.country.trim() === "";
       const health = has(
         `${ctx.industry} ${ctx.profession} ${ctx.roleFamily} ${ctx.selectedIndustryPack}`,
@@ -21664,13 +21959,19 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         reason: "US healthcare role — licence checks apply (candidate evidence only)."
       };
     }
-  );
-  var publicationsAdapter = unwiredConnector(
-    "publications",
-    "PubMed / bioRxiv / Consensus (publications)",
-    ["publications"],
-    "primary",
-    (ctx) => {
+  });
+  var publicationsAdapter = connectorAdapter({
+    id: "publications",
+    label: "PubMed / bioRxiv / Consensus (publications)",
+    kinds: ["publications"],
+    sourceType: "primary",
+    connectors: [
+      { server: "PubMed", tools: ["search_articles"] },
+      { server: "bioRxiv", tools: ["search_preprints"] },
+      { server: "Consensus", tools: ["search"] }
+    ],
+    wired: false,
+    applies: (ctx) => {
       const research = has(
         `${ctx.industry} ${ctx.profession} ${ctx.roleFamily} ${ctx.roleTitle} ${ctx.selectedIndustryPack}`,
         "research",
@@ -21690,7 +21991,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         reason: "Publication records do not bear on this role family."
       };
     }
-  );
+  });
   var RESEARCH_ADAPTERS = [
     userSuppliedAdapter,
     bigdataAdapter,
@@ -21792,6 +22093,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       numerator: external_exports.number(),
       denominator: external_exports.number()
     }).optional()
+  });
+  var initiativeSchema = external_exports.object({
+    id: external_exports.string(),
+    title: external_exports.string().min(1),
+    why: external_exports.string().default(""),
+    createdAt: external_exports.string(),
+    closedAt: external_exports.string().optional()
   });
   var NEXT_STEP_LABELS = [
     "A",
@@ -22388,14 +22696,14 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       }
       return out;
     },
-    async saveArtifact(searchId, task, record2) {
+    async saveArtifact(searchId, task, record3) {
       const done = await tryDb(async (db) => {
-        await db.doc(`searches/${searchId}/artifacts/${task}`).set(record2);
+        await db.doc(`searches/${searchId}/artifacts/${task}`).set(record3);
         return true;
       });
       if (done) return;
       const data = local.read();
-      local.shell(data, searchId).artifacts[task] = record2;
+      local.shell(data, searchId).artifacts[task] = record3;
       local.write(data);
     },
     async listCandidates(searchId) {
@@ -22473,11 +22781,534 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       s.actions = { ...s.actions ?? {}, [action.id]: action };
       local.write(data);
     },
+    async listInitiatives(searchId) {
+      const fromDb = await tryDb(async (db) => {
+        const snap = await db.doc("searches/" + searchId).collection("initiatives").get();
+        return snap.docs.map((d) => d.data());
+      });
+      return fromDb ?? Object.values(local.read().searches[searchId]?.initiatives ?? {});
+    },
+    async saveInitiative(searchId, initiative) {
+      const done = await tryDb(async (db) => {
+        await db.doc(`searches/${searchId}/initiatives/${initiative.id}`).set(initiative);
+        return true;
+      });
+      if (done) return;
+      const data = local.read();
+      const s = local.shell(data, searchId);
+      s.initiatives = { ...s.initiatives ?? {}, [initiative.id]: initiative };
+      local.write(data);
+    },
+    async listEvents(searchId) {
+      const fromDb = await tryDb(async (db) => {
+        const snap = await db.doc("searches/" + searchId).collection("events").get();
+        return snap.docs.map((d) => d.data());
+      });
+      const list = fromDb ?? Object.values(local.read().searches[searchId]?.events ?? {});
+      return list.sort((a, b) => a.at.localeCompare(b.at));
+    },
+    /** Events are append-only: there is no update and no delete. */
+    async appendEvent(searchId, event) {
+      const done = await tryDb(async (db) => {
+        await db.doc(`searches/${searchId}/events/${event.id}`).set(event);
+        return true;
+      });
+      if (done) return;
+      const data = local.read();
+      const s = local.shell(data, searchId);
+      s.events = { ...s.events ?? {}, [event.id]: event };
+      local.write(data);
+    },
     /** For tests and the migration check: the raw local blob. */
     _local: local
   };
 
+  // artifact-src/core/phases.ts
+  var PHASE_KEYS = [
+    "define",
+    "research",
+    "plan",
+    "execute",
+    "learn"
+  ];
+  var PHASES = {
+    define: {
+      key: "define",
+      label: "Define",
+      question: "What are we actually hiring for?",
+      purpose: "Turn the brief and the hiring manager's words into one canonical interpretation everything downstream consumes."
+    },
+    research: {
+      key: "research",
+      label: "Research",
+      question: "What does the outside world say?",
+      purpose: "Attach evidence with a date on it, and be explicit about what is model knowledge rather than current research."
+    },
+    plan: {
+      key: "plan",
+      label: "Plan",
+      question: "Where are these people and how do we reach them?",
+      purpose: "Turn the profile into a strategy, a channel map and queries that actually run on the platform you selected."
+    },
+    execute: {
+      key: "execute",
+      label: "Execute",
+      question: "Who have we found, and what happens next?",
+      purpose: "Work the queue: evidence against the profile, drafts you send yourself, actions with an owner."
+    },
+    learn: {
+      key: "learn",
+      label: "Learn",
+      question: "Is any of this actually working?",
+      purpose: "Check the system against deliberate defects, and record what the search taught you."
+    }
+  };
+  var mod = (key, phase, hint, opts = {}) => ({
+    key,
+    label: MODULES[key].label,
+    phase,
+    audience: opts.audience ?? "core",
+    moduleKey: key,
+    required: opts.required ?? true,
+    hint
+  });
+  var NAV = [
+    {
+      key: "overview",
+      label: "Brief",
+      phase: "define",
+      audience: "core",
+      required: false,
+      hint: "The shared context every module reads. Editing it re-versions the search."
+    },
+    mod("hiring_need", "define", "One canonical interpretation of the need."),
+    mod(
+      "intake_loop",
+      "define",
+      "Record what the hiring manager said; reason over it once."
+    ),
+    mod("intake", "define", "The interview to run with the hiring manager."),
+    mod(
+      "role_intelligence",
+      "define",
+      "The pre-IR role read. Superseded by the Canonical IR.",
+      {
+        audience: "advanced",
+        required: false
+      }
+    ),
+    mod(
+      "success_profile",
+      "define",
+      "The hiring contract: outcomes, must-haves, evidence signals."
+    ),
+    {
+      key: "research",
+      label: "Research",
+      phase: "research",
+      audience: "core",
+      required: true,
+      hint: "Sources with a date on them. Nothing here browses the web for you."
+    },
+    mod(
+      "market_intelligence",
+      "research",
+      "What the market looks like, labelled by how you know it."
+    ),
+    mod("sourcing_strategy", "plan", "Who to target, who to exclude, and why."),
+    mod("channels", "plan", "Where this population actually is."),
+    mod(
+      "search_strings",
+      "plan",
+      "Queries compiled against each platform's real limits."
+    ),
+    mod(
+      "candidates",
+      "execute",
+      "Evidence against the profile. You decide; nothing sends."
+    ),
+    {
+      key: "pipeline",
+      label: "Pipeline",
+      phase: "execute",
+      audience: "core",
+      required: false,
+      hint: "What actually happened to the people you approached, and what that measures."
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      phase: "execute",
+      audience: "core",
+      required: false,
+      hint: "The queue: what you accepted from a draft, who owns it, what is blocked."
+    },
+    mod(
+      "golden_test",
+      "learn",
+      "Eleven deliberate defects, and whether the system catches them.",
+      {
+        audience: "advanced",
+        required: false
+      }
+    )
+  ];
+  var NAV_ORDER = NAV.map((e) => e.key);
+  function navEntry(key) {
+    return NAV.find((e) => e.key === key);
+  }
+  function phaseOf(key) {
+    return navEntry(key)?.phase;
+  }
+  function entriesFor(phase, mode) {
+    return NAV.filter(
+      (e) => e.phase === phase && (mode === "expert" || e.audience === "core")
+    );
+  }
+  var PHASE_STATE_LABELS = {
+    not_started: "Not started",
+    in_progress: "In progress",
+    needs_attention: "Needs attention",
+    complete: "Complete"
+  };
+  var SETTLED = ["current", "aging"];
+  var ATTENTION = [
+    "failed",
+    "needs_review",
+    "blocked",
+    "stale"
+  ];
+  var STARTED = [
+    "current",
+    "aging",
+    "stale",
+    "blocked",
+    "generating",
+    "researching",
+    "needs_review"
+  ];
+  function phaseStatuses(input2) {
+    const out = [];
+    let earlierGap = "";
+    for (const key of PHASE_KEYS) {
+      const required2 = NAV.filter((e) => e.phase === key && e.required);
+      const states = required2.map(
+        (e) => input2.statuses[e.key]?.state ?? "not_started"
+      );
+      const done = states.filter((s) => SETTLED.includes(s)).length;
+      const attention = required2.filter((e, i) => ATTENTION.includes(states[i]));
+      let state2;
+      if (required2.length === 0) state2 = "complete";
+      else if (attention.length > 0) state2 = "needs_attention";
+      else if (done === required2.length) state2 = "complete";
+      else if (states.some((s) => STARTED.includes(s))) state2 = "in_progress";
+      else state2 = "not_started";
+      const reason = state2 === "needs_attention" ? `${attention.map((e) => e.label).join(", ")} ${attention.length === 1 ? "needs" : "need"} attention.` : state2 === "complete" ? required2.length ? `${done} of ${required2.length} outputs current.` : "Nothing to produce here." : `${done} of ${required2.length} outputs current.`;
+      out.push({
+        key,
+        label: PHASES[key].label,
+        state: state2,
+        reason,
+        ready: earlierGap === "",
+        earlyReason: earlierGap ? `${earlierGap} first — this phase reads its output.` : "",
+        done,
+        total: required2.length
+      });
+      if (!earlierGap) {
+        const missing = required2.find(
+          (e, i) => !STARTED.includes(states[i]) && states[i] !== "failed"
+        );
+        const failed = required2.find((e, i) => states[i] === "failed");
+        if (failed) earlierGap = `${failed.label} failed — fix it`;
+        else if (missing) earlierGap = `Generate ${missing.label}`;
+      }
+    }
+    return out;
+  }
+  function researchEntryStatus(status, asOf2) {
+    switch (status) {
+      case "current":
+        return {
+          state: "current",
+          reason: `Sources attached and in date${asOf2 ? ` (as of ${asOf2})` : ""}.`
+        };
+      case "aging":
+        return {
+          state: "aging",
+          reason: `Sources are ageing${asOf2 ? ` (as of ${asOf2})` : ""} — refresh before relying on time-sensitive claims.`
+        };
+      case "stale":
+        return {
+          state: "stale",
+          reason: `The attached research is out of date${asOf2 ? ` (as of ${asOf2})` : ""}.`
+        };
+      case "failed":
+        return { state: "failed", reason: "The last research attempt failed." };
+      default:
+        return {
+          state: "blocked",
+          reason: "No research attached. This runtime has no web access and no connector is wired — add a source you checked yourself, or generate on model knowledge and accept the label."
+        };
+    }
+  }
+  function activePhase(statuses) {
+    return statuses.find((p) => p.state === "needs_attention")?.key ?? statuses.find((p) => p.state !== "complete")?.key ?? "learn";
+  }
+
+  // artifact-src/core/next-best-action.ts
+  var CORE_MODULE_ORDER = NAV.filter(
+    (e) => e.moduleKey && e.required && e.audience === "core"
+  ).map((e) => e.moduleKey);
+  function make(step, why, urgency) {
+    return {
+      step: { label: "A", description: "", ...step },
+      why,
+      phase: phaseOf(step.targetId ?? "") ?? "define",
+      urgency
+    };
+  }
+  function nextBestAction(input2) {
+    const st = (k) => input2.states[k];
+    if (!input2.hasSearch) {
+      return make(
+        {
+          title: "Start a search by filling in the brief",
+          actionType: "edit_context",
+          targetId: "overview"
+        },
+        "Nothing is loaded yet. Everything downstream reads the brief.",
+        "normal"
+      );
+    }
+    const failed = CORE_MODULE_ORDER.find((k) => st(k)?.state === "failed");
+    if (failed) {
+      return make(
+        {
+          title: `Retry ${MODULES[failed].label} — the last attempt failed`,
+          actionType: "regenerate_module",
+          targetId: failed
+        },
+        st(failed)?.reason ?? "The last attempt failed.",
+        "attention"
+      );
+    }
+    const review = CORE_MODULE_ORDER.find((k) => st(k)?.state === "needs_review");
+    if (review) {
+      return make(
+        {
+          title: `Review ${MODULES[review].label} before using it`,
+          actionType: "navigate_module",
+          targetId: review
+        },
+        st(review)?.reason ?? "The output needs a human read.",
+        "attention"
+      );
+    }
+    const blocked = input2.actions.find((a) => a.status === "blocked");
+    if (blocked) {
+      return make(
+        {
+          title: `Unblock: ${blocked.title}`,
+          actionType: "open_action",
+          targetId: blocked.id
+        },
+        blocked.blockingReason || "This action is marked blocked.",
+        "blocked"
+      );
+    }
+    for (const key of CORE_MODULE_ORDER) {
+      const state2 = st(key);
+      if (!state2 || state2.state !== "not_started") continue;
+      if (key === "intake_loop") continue;
+      if (key === "candidates") {
+        return make(
+          {
+            title: "Add the first candidate",
+            actionType: "add_candidate",
+            targetId: "candidates"
+          },
+          "The plan is ready; nothing has been assessed against it yet.",
+          "normal"
+        );
+      }
+      const needsResearch = MODULES[key].requiresResearch;
+      const gateShut = needsResearch && (input2.researchStatus === "blocked" || input2.researchStatus === "stale" || input2.researchStatus === "failed");
+      if (gateShut && !input2.acknowledgedNoResearch) {
+        return make(
+          {
+            title: "Add a research source before the market work",
+            actionType: "add_source",
+            targetId: "research"
+          },
+          `${MODULES[key].label} makes market claims, and no current research is attached. Add a source you checked yourself, or generate anyway and accept the model-knowledge label.`,
+          "blocked"
+        );
+      }
+      if (!input2.aiAvailable) {
+        return make(
+          {
+            title: "Fill in the brief — AI generation is unavailable in this view",
+            actionType: "edit_context",
+            targetId: "overview"
+          },
+          "Claude is not available here, so nothing can be generated. The brief, research sources, candidates and the action queue all still work.",
+          "blocked"
+        );
+      }
+      return make(
+        {
+          title: `Generate ${MODULES[key].label}`,
+          actionType: "generate_module",
+          targetId: key
+        },
+        state2.reason,
+        "normal"
+      );
+    }
+    if (input2.nextQuestion) {
+      return make(
+        {
+          title: `Ask the hiring manager: ${input2.nextQuestion}`,
+          actionType: "record_statement",
+          targetId: "intake_loop"
+        },
+        "The intake loop derived this question from an open, consequential uncertainty.",
+        "normal"
+      );
+    }
+    const stale = CORE_MODULE_ORDER.find((k) => st(k)?.state === "stale");
+    if (stale && input2.aiAvailable) {
+      return make(
+        {
+          title: `Regenerate ${MODULES[stale].label} — its inputs changed`,
+          actionType: "regenerate_module",
+          targetId: stale
+        },
+        st(stale)?.reason ?? "An input changed since this was generated.",
+        "attention"
+      );
+    }
+    if (input2.researchStatus === "aging" || input2.researchStatus === "stale") {
+      return make(
+        {
+          title: "Refresh the research before relying on it",
+          actionType: "refresh_research",
+          targetId: "research"
+        },
+        "The attached sources are past their freshness window for what they claim.",
+        "attention"
+      );
+    }
+    const blockedModule = CORE_MODULE_ORDER.find(
+      (k) => st(k)?.state === "blocked"
+    );
+    if (blockedModule) {
+      return make(
+        {
+          title: "Attach a source to replace model knowledge",
+          actionType: "add_source",
+          targetId: "research"
+        },
+        `${MODULES[blockedModule].label} was generated on model knowledge only. A source would move it off "blocked".`,
+        "blocked"
+      );
+    }
+    if (input2.unansweredIntake > 0) {
+      return make(
+        {
+          title: `Record ${input2.unansweredIntake} outstanding intake answer${input2.unansweredIntake === 1 ? "" : "s"}`,
+          actionType: "answer_question",
+          targetId: "intake"
+        },
+        "Answers feed every downstream module; unanswered questions are the search's open assumptions.",
+        "normal"
+      );
+    }
+    if (input2.candidatesWithoutEvidence > 0) {
+      return make(
+        {
+          title: `Review ${input2.candidatesWithoutEvidence} candidate${input2.candidatesWithoutEvidence === 1 ? "" : "s"} against the profile`,
+          actionType: "review_candidate",
+          targetId: "candidates"
+        },
+        "Evidence alignment is advisory: it shows what is supported and what is missing. You decide.",
+        "normal"
+      );
+    }
+    if (input2.candidateCount > 0 && input2.pipelineEvents === 0) {
+      return make(
+        {
+          title: "Record what actually happened to these candidates",
+          actionType: "navigate_module",
+          targetId: "pipeline"
+        },
+        "Nothing is measurable until the pipeline has events. Every metric is computed from what you record — there is no seeded history.",
+        "normal"
+      );
+    }
+    const open2 = input2.actions.filter(
+      (a) => a.status === "open" || a.status === "in_progress"
+    );
+    if (open2.length > 0) {
+      return make(
+        {
+          title: `Work the action queue — ${open2.length} open`,
+          actionType: "open_action",
+          targetId: open2[0].id
+        },
+        `Next: ${open2[0].title}`,
+        "normal"
+      );
+    }
+    if (input2.candidateCount === 0) {
+      return make(
+        {
+          title: "Add the first candidate",
+          actionType: "add_candidate",
+          targetId: "candidates"
+        },
+        "Everything is current; nothing has been assessed against the profile yet.",
+        "normal"
+      );
+    }
+    if (!input2.goldenRun) {
+      return make(
+        {
+          title: "Run the defect checks",
+          actionType: "run_golden",
+          targetId: "golden_test"
+        },
+        "Eleven deliberate defects, no model call. It reports exactly which checks executed.",
+        "normal"
+      );
+    }
+    return make(
+      {
+        title: "Nothing is waiting — review the brief or add candidates",
+        actionType: "navigate_module",
+        targetId: "overview"
+      },
+      "Every module is current, research is in date, the queue is clear.",
+      "done"
+    );
+  }
+
   // artifact-src/app/state.ts
+  var MODE_KEY = "talentos-mode";
+  function readMode() {
+    try {
+      return localStorage.getItem(MODE_KEY) === "expert" ? "expert" : "guided";
+    } catch {
+      return "guided";
+    }
+  }
+  function setMode(mode) {
+    state.mode = mode;
+    try {
+      localStorage.setItem(MODE_KEY, mode);
+    } catch {
+    }
+  }
   var state = {
     searches: [],
     current: null,
@@ -22486,7 +23317,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     candidates: [],
     research: [],
     actions: [],
+    initiatives: [],
+    events: [],
     module: "overview",
+    mode: readMode(),
     inflight: {},
     acknowledgedNoResearch: /* @__PURE__ */ new Set(),
     now: nowIso()
@@ -22557,17 +23391,62 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     const research = liveResearchStatus();
     return allModuleStates((key) => {
       const recordKey = key === "intake_loop" ? "intent" : key;
-      const record2 = state.artifacts[recordKey];
-      const hasContent = key === "candidates" ? state.candidates.length > 0 : key === "intake_loop" ? (record2?.payload?.statements?.length ?? 0) > 0 : key === "golden_test" ? Boolean(record2?.payload) : Boolean(record2?.payload);
+      const record3 = state.artifacts[recordKey];
+      const hasContent = key === "candidates" ? state.candidates.length > 0 : key === "intake_loop" ? (record3?.payload?.statements?.length ?? 0) > 0 : key === "golden_test" ? Boolean(record3?.payload) : Boolean(record3?.payload);
       return {
-        record: record2,
+        record: record3,
         currentVersion: version2,
-        changedSince: ctx ? changedSince(record2?.meta?.inputVersion, ctx) : [],
+        changedSince: ctx ? changedSince(record3?.meta?.inputVersion, ctx) : [],
         researchStatus: research,
         researchSnapshotId: snap?.id,
         inflight: state.inflight[key],
         hasContent
       };
+    });
+  }
+  function entryStatuses() {
+    const states = moduleStates();
+    const snap = latestSnapshot();
+    const out = {};
+    for (const entry of NAV) {
+      if (entry.moduleKey) {
+        const st = states[entry.moduleKey];
+        out[entry.key] = { state: st.state, reason: st.reason };
+      } else if (entry.key === "research") {
+        out[entry.key] = researchEntryStatus(
+          liveResearchStatus(),
+          snap ? asOf(snap.completedAt ?? snap.startedAt) : void 0
+        );
+      }
+    }
+    return out;
+  }
+  function nextAction(aiAvailable2) {
+    const intake = state.artifacts.intake?.payload;
+    let unanswered = 0;
+    for (const cat of intake?.categories ?? []) {
+      for (const q of cat.questions ?? []) {
+        if (!q.answer || !q.answer.trim()) unanswered += 1;
+      }
+    }
+    const intent = currentIntent();
+    return nextBestAction({
+      hasSearch: Boolean(state.current),
+      states: moduleStates(),
+      researchStatus: liveResearchStatus(),
+      acknowledgedNoResearch: state.acknowledgedNoResearch.has(
+        state.current?.id ?? ""
+      ),
+      candidateCount: state.candidates.length,
+      candidatesWithoutEvidence: state.candidates.filter(
+        (c) => !c.evidence?.payload
+      ).length,
+      actions: state.actions,
+      unansweredIntake: unanswered,
+      nextQuestion: intent?.nextQuestion?.question ?? null,
+      pipelineEvents: state.events.length,
+      goldenRun: Boolean(state.artifacts.golden_test?.payload),
+      aiAvailable: aiAvailable2
     });
   }
   async function selectSearch(id) {
@@ -22580,28 +23459,42 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       state.contexts = [];
       state.research = [];
       state.actions = [];
+      state.initiatives = [];
+      state.events = [];
       return;
     }
-    const [artifacts, candidates, contexts, research, actions] = await Promise.all([
+    const [
+      artifacts,
+      candidates,
+      contexts,
+      research,
+      actions,
+      initiatives,
+      events
+    ] = await Promise.all([
       store.loadArtifacts(id),
       store.listCandidates(id),
       store.listContexts(id),
       store.listResearch(id),
-      store.listActions(id)
+      store.listActions(id),
+      store.listInitiatives(id),
+      store.listEvents(id)
     ]);
     state.artifacts = artifacts;
     state.candidates = candidates;
     state.contexts = contexts;
     state.research = research;
     state.actions = actions;
+    state.initiatives = initiatives;
+    state.events = events;
     await recordContextRevision();
   }
   async function reloadSearches() {
     state.searches = await store.listSearches();
   }
-  async function putArtifact(task, record2) {
-    state.artifacts = { ...state.artifacts, [task]: record2 };
-    if (state.current) await store.saveArtifact(state.current.id, task, record2);
+  async function putArtifact(task, record3) {
+    state.artifacts = { ...state.artifacts, [task]: record3 };
+    if (state.current) await store.saveArtifact(state.current.id, task, record3);
   }
   async function putCandidate(cand) {
     state.candidates = state.candidates.some((c) => c.id === cand.id) ? state.candidates.map((c) => c.id === cand.id ? cand : c) : [...state.candidates, cand];
@@ -22614,11 +23507,340 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     ];
     await store.saveResearch(snapshot);
   }
+  async function putAction(action) {
+    state.actions = state.actions.some((a) => a.id === action.id) ? state.actions.map((a) => a.id === action.id ? action : a) : [...state.actions, action];
+    if (state.current) await store.saveAction(state.current.id, action);
+  }
+  async function putInitiative(initiative) {
+    state.initiatives = state.initiatives.some((i) => i.id === initiative.id) ? state.initiatives.map((i) => i.id === initiative.id ? initiative : i) : [...state.initiatives, initiative];
+    if (state.current) await store.saveInitiative(state.current.id, initiative);
+  }
+  function suggestedActions() {
+    const taken = new Set(state.actions.map((a) => a.id));
+    const out = [];
+    for (const [key, rec] of Object.entries(state.artifacts)) {
+      const env = rec.envelope;
+      for (const action of env?.actionItems ?? []) {
+        if (!taken.has(action.id)) out.push({ action, fromModule: key });
+      }
+    }
+    return out;
+  }
+  async function appendEvent(event) {
+    state.events = [...state.events, event].sort(
+      (a, b) => a.at.localeCompare(b.at)
+    );
+    if (state.current) await store.appendEvent(state.current.id, event);
+  }
   async function saveFacts(facts) {
     const stamped = { ...facts, updatedAt: nowIso() };
     await store.saveSearch(stamped);
     state.searches = state.searches.some((s) => s.id === stamped.id) ? state.searches.map((s) => s.id === stamped.id ? stamped : s) : [stamped, ...state.searches];
     if (state.current?.id === stamped.id) state.current = stamped;
+  }
+
+  // artifact-src/core/industry-packs.ts
+  var hay = (ctx) => [
+    ctx.industry,
+    ctx.subindustry,
+    ctx.profession,
+    ctx.roleFamily,
+    ctx.roleTitle,
+    ctx.company,
+    ctx.jobDescription.slice(0, 2e3)
+  ].join(" ").toLowerCase();
+  var hits = (text, words) => words.filter((w) => text.includes(w));
+  function matcher(words, noun) {
+    return (ctx) => {
+      const found = hits(hay(ctx), words);
+      return found.length ? {
+        score: Math.min(1, found.length / 3),
+        reason: `${noun} vocabulary in the brief: ${found.slice(0, 4).join(", ")}.`
+      } : {
+        score: 0,
+        reason: `No ${noun.toLowerCase()} vocabulary in the brief.`
+      };
+    };
+  }
+  var UNIVERSAL_PACK = {
+    id: "universal",
+    label: "Universal",
+    summary: "The default. No field-specific assumptions — evidence is whatever the brief and the hiring manager define it to be.",
+    intakeThemes: [
+      "Why the role exists now, and what changes if it stays unfilled",
+      "What the first 90 and 180 days must produce",
+      "Which requirements are trainable and which are genuinely non-negotiable"
+    ],
+    evidenceNotes: [
+      "Evidence is whatever a person has publicly done that a requirement names. Say what would satisfy each requirement before searching for it."
+    ],
+    cautions: [
+      "Without a field-specific pack, do not assume a credential, a school or an employer means anything in particular. Name the construct instead."
+    ],
+    platformTags: [],
+    sourceKinds: ["job_openings", "compensation", "government_labor_statistics"],
+    applies: () => ({
+      score: 0.01,
+      reason: "Always applicable — the fallback when nothing more specific fits."
+    })
+  };
+  var INDUSTRY_PACKS = [
+    UNIVERSAL_PACK,
+    {
+      id: "healthcare",
+      label: "Healthcare & clinical",
+      summary: "Licensed and credentialed clinical roles. Registration status, scope of practice, setting and rota shape the population more than titles do.",
+      intakeThemes: [
+        "Registration body, licence type and whether it must be in hand on day one",
+        "Setting and acuity (ICU vs ward vs community) — the same title is a different job",
+        "Shift pattern, rota, on-call and unsocial-hours expectations",
+        "Supervision, scope of practice and what the post can and cannot do independently",
+        "Revalidation, mandatory training and any specialist competencies"
+      ],
+      evidenceNotes: [
+        "A licence or registration number in a public registry is checkable evidence; a claimed registration on a profile is not.",
+        "Setting and acuity are usually inferable from the employer and unit, not from the job title."
+      ],
+      cautions: [
+        "A registry entry proves enumeration, not that a person is currently licensed, credentialed or in good standing. Say which you actually checked.",
+        "Never infer health status, disability or caring responsibilities from a career gap or a shift preference."
+      ],
+      platformTags: [],
+      sourceKinds: [
+        "licence_registry",
+        "compensation",
+        "job_openings",
+        "government_labor_statistics"
+      ],
+      applies: matcher(
+        [
+          "nurse",
+          "nursing",
+          "clinician",
+          "clinical",
+          "physician",
+          "doctor",
+          "hospital",
+          "icu",
+          "healthcare",
+          "health care",
+          "patient",
+          "nhs",
+          "medical",
+          "midwife",
+          "paramedic",
+          "pharmacist",
+          "therapist"
+        ],
+        "Clinical"
+      )
+    },
+    {
+      id: "ai_ml_research",
+      label: "AI / ML research",
+      summary: "Research scientists and research engineers. Publication record, research taste and experimental execution matter more than years of service.",
+      intakeThemes: [
+        "Scientist versus engineer, and how much of each this post really is",
+        "Publication expectations: venues, first-authorship, and whether open-source artifacts count equally",
+        "Research taste — what a good problem choice looks like here, concretely",
+        "Scale of experiments the post will actually run, and the infrastructure they must build themselves",
+        "Mission alignment, publication freedom and what the team competes on when it loses candidates"
+      ],
+      evidenceNotes: [
+        "First-author papers, open-source research artifacts, benchmark and eval contributions, and cited preprints are observable.",
+        "A named lab or advisor on a profile is a proxy for training, not evidence of independent research judgment."
+      ],
+      cautions: [
+        "Citation counts measure attention and field size as much as quality. Never use them as a threshold on their own.",
+        "A PhD is a proxy: name what it stands for here, and put the proxy itself in the false signals."
+      ],
+      platformTags: ["research", "engineering"],
+      sourceKinds: [
+        "publications",
+        "leadership",
+        "competitor_moves",
+        "company_initiatives"
+      ],
+      applies: matcher(
+        [
+          "machine learning",
+          "deep learning",
+          "research scientist",
+          "research engineer",
+          "neurips",
+          "icml",
+          "iclr",
+          "llm",
+          "alignment",
+          "ai safety",
+          "pytorch",
+          "jax",
+          "model training",
+          "artificial intelligence"
+        ],
+        "Research"
+      )
+    },
+    {
+      id: "sales",
+      label: "Sales & revenue",
+      summary: "Quota-carrying roles. Segment, motion, deal size and cycle length define the population; attainment claims need context to mean anything.",
+      intakeThemes: [
+        "Motion and segment: inbound, outbound, PLG, enterprise, mid-market, SMB",
+        "Deal size, cycle length and who else sits in the room",
+        "Quota, ramp, territory and how much of the number is renewal versus new business",
+        "Who they sell to, and whether that buyer relationship is the transferable asset",
+        "What the top performer here does that the middle of the team does not"
+      ],
+      evidenceNotes: [
+        "Segment, deal size and buyer persona are usually visible from employer and title history.",
+        "Attainment percentages are self-reported and meaningless without the quota, the territory and the year."
+      ],
+      cautions: [
+        "President's Club and similar awards are employer-specific and not comparable across companies. Treat them as a proxy and name it.",
+        "A short tenure in this field is often a company failing, not a person failing. Do not read it as a disqualifier without asking."
+      ],
+      platformTags: [],
+      sourceKinds: [
+        "job_openings",
+        "compensation",
+        "competitor_moves",
+        "layoffs",
+        "company_initiatives"
+      ],
+      applies: matcher(
+        [
+          "account executive",
+          "sales",
+          "quota",
+          "revenue",
+          "business development",
+          "sdr",
+          "bdr",
+          "customer success",
+          "enterprise saas",
+          "pipeline generation",
+          "closing"
+        ],
+        "Sales"
+      )
+    },
+    {
+      id: "skilled_trades",
+      label: "Skilled trades & operations",
+      summary: "Certificated, hands-on and shift-based work. Tickets, machine and platform experience, and travel radius decide reachability.",
+      intakeThemes: [
+        "Tickets, cards and certifications: which are legally required and which are trainable",
+        "Specific machines, controls, materials or platforms the post must already know",
+        "Shift pattern, site location, travel radius and whether transport is realistic",
+        "Tolerance, safety and quality standards the work is actually held to",
+        "Whether the employer will fund a ticket, and how long that takes"
+      ],
+      evidenceNotes: [
+        "Named machines, controls and certifications on a profile or CV are concrete and checkable with the awarding body.",
+        "Years of service is a weak signal here; the machines and tolerances worked to are the strong one."
+      ],
+      cautions: [
+        "Public profiles are sparse in these fields. Absence of an online presence is not absence of skill — plan for rosters, directories and referrals.",
+        "Never treat a travel radius or shift constraint as a proxy for anything about the person's circumstances."
+      ],
+      platformTags: [],
+      sourceKinds: [
+        "job_openings",
+        "compensation",
+        "occupational_taxonomy",
+        "government_labor_statistics"
+      ],
+      applies: matcher(
+        [
+          "cnc",
+          "machinist",
+          "welder",
+          "electrician",
+          "technician",
+          "fabrication",
+          "maintenance",
+          "hvac",
+          "plumber",
+          "manufacturing",
+          "warehouse",
+          "forklift",
+          "apprenticeship",
+          "tooling"
+        ],
+        "Trades"
+      )
+    },
+    {
+      id: "finance",
+      label: "Finance & accounting",
+      summary: "Regulated and qualification-led roles. Standards, entity complexity and audit exposure define the population more than headcount does.",
+      intakeThemes: [
+        "Qualification required (and whether part-qualified or qualified-by-experience is genuinely acceptable)",
+        "Reporting standards and jurisdictions: IFRS, GAAP, statutory, multi-entity, multi-currency",
+        "Audit exposure, systems and the ERP the post must already know",
+        "Whether this is a technical, commercial or controls-heavy post — the same title covers all three",
+        "Regulatory regime and any approved-person or fit-and-proper requirement"
+      ],
+      evidenceNotes: [
+        "Qualification bodies, ERP systems and named standards are observable and specific.",
+        "Company size on a profile is a weak proxy for entity complexity, which is what actually transfers."
+      ],
+      cautions: [
+        "A Big Four background is a proxy for training and exposure; name the construct and list the proxy as a false signal.",
+        "Never infer anything from a regulatory register beyond what it actually records."
+      ],
+      platformTags: [],
+      sourceKinds: [
+        "compensation",
+        "leadership",
+        "company_initiatives",
+        "government_labor_statistics"
+      ],
+      applies: matcher(
+        [
+          "accountant",
+          "accounting",
+          "finance",
+          "controller",
+          "cfo",
+          "audit",
+          "ifrs",
+          "gaap",
+          "financial reporting",
+          "treasury",
+          "fp&a",
+          "tax",
+          "bookkeep"
+        ],
+        "Finance"
+      )
+    }
+  ];
+  function packById(id) {
+    return INDUSTRY_PACKS.find((p) => p.id === id) ?? UNIVERSAL_PACK;
+  }
+  function packFor(ctx) {
+    return packById(ctx.selectedIndustryPack);
+  }
+  function suggestPack(ctx) {
+    const scored = INDUSTRY_PACKS.filter((p) => p.id !== "universal").map((pack) => ({ pack, ...pack.applies(ctx) })).filter((x) => x.score > 0).sort((a, b) => b.score - a.score);
+    const best = scored[0];
+    if (!best || best.pack.id === ctx.selectedIndustryPack) return null;
+    return { pack: best.pack, reason: best.reason };
+  }
+  function renderPackSection(pack) {
+    return `## Industry pack: ${pack.label}
+${pack.summary}
+
+Cover these themes wherever they are relevant to this module:
+${pack.intakeThemes.map((t) => `- ${t}`).join("\n")}
+
+What counts as evidence here:
+${pack.evidenceNotes.map((t) => `- ${t}`).join("\n")}
+
+Field-specific cautions (mandatory):
+${pack.cautions.map((t) => `- ${t}`).join("\n")}`;
   }
 
   // artifact-src/ai/context.ts
@@ -22653,6 +23875,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     ].filter(Boolean).join("\n");
     const sections = [`## Search project
 ${facts}`];
+    const pack = packById(ctx.selectedIndustryPack);
+    if (pack.id !== "universal" || pack.cautions.length) {
+      sections.push(renderPackSection(pack));
+    }
     if (intent) {
       sections.push(
         `## Canonical hiring intelligence (IR) — SOURCE OF TRUTH
@@ -23050,7 +24276,7 @@ Non-negotiables:
   }
   async function recordFailure(task, e) {
     const existing = state.artifacts[task];
-    const record2 = existing ? {
+    const record3 = existing ? {
       ...existing,
       lastError: {
         at: nowIso(),
@@ -23066,7 +24292,7 @@ Non-negotiables:
         code: errorCode(e)
       }
     };
-    await putArtifact(task, record2);
+    await putArtifact(task, record3);
   }
   function toClaims(raw, bucket, knownSourceIds, gate) {
     if (!Array.isArray(raw)) return [];
@@ -23346,12 +24572,12 @@ ${built.issues.map((i) => `- ${i.message}`).join("\n")}`;
   async function generateModule(taskKey, ui, opts = {}) {
     state.inflight = { ...state.inflight, [taskKey]: "generating" };
     try {
-      const record2 = await runTask(taskKey, ui, {
+      const record3 = await runTask(taskKey, ui, {
         regenerate: Boolean(state.artifacts[taskKey]?.payload),
         ...opts
       });
-      await putArtifact(taskKey, record2);
-      return record2;
+      await putArtifact(taskKey, record3);
+      return record3;
     } catch (e) {
       await recordFailure(taskKey, e);
       throw e;
@@ -23412,9 +24638,9 @@ Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": str
   async function generateWithCritic(key, ui, tracker) {
     const task = TASKS[key];
     tracker?.start(key, "generate");
-    let record2;
+    let record3;
     try {
-      record2 = await generateModule(key, ui);
+      record3 = await generateModule(key, ui);
       tracker?.done(key, "generate");
     } catch (e) {
       tracker?.fail(key, "generate", errorMessage(e));
@@ -23424,14 +24650,14 @@ Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": str
     tracker?.start(key, "critic");
     let critique;
     try {
-      critique = await runCritic(task.label, JSON.stringify(record2.payload), ui);
+      critique = await runCritic(task.label, JSON.stringify(record3.payload), ui);
       tracker?.done(key, "critic");
     } catch (e) {
       tracker?.fail(key, "critic", errorMessage(e));
       throw e;
     }
-    record2 = { ...record2, critique };
-    await putArtifact(key, record2);
+    record3 = { ...record3, critique };
+    await putArtifact(key, record3);
     if (critique.verdict === "revise" && critique.issues.length > 0) {
       ui.step?.(
         `revising ${task.label.toLowerCase()} (${critique.issues.length} findings)`
@@ -23444,8 +24670,8 @@ Reply with ONLY one JSON object: {"verdict": "accept"|"revise", "strengths": str
 A reviewer flagged the previous draft. Produce a full corrected artifact that resolves every finding:
 ${critique.issues.map((i) => `- ${i}`).join("\n")}`
         });
-        record2 = { ...revised, critique: { ...critique, revised: true } };
-        await putArtifact(key, record2);
+        record3 = { ...revised, critique: { ...critique, revised: true } };
+        await putArtifact(key, record3);
         tracker?.done(key, "revise");
       } catch (e) {
         tracker?.fail(key, "revise", errorMessage(e));
@@ -23454,7 +24680,7 @@ ${critique.issues.map((i) => `- ${i}`).join("\n")}`
     } else {
       tracker?.skip(key, "revise", "critic accepted");
     }
-    return record2;
+    return record3;
   }
   async function runCrewForSearch(ui, tracker) {
     for (const key of CREW_ORDER) {
@@ -23951,6 +25177,29 @@ ${task.shape}`;
     void breadth;
     return null;
   }
+  function tagsFromPlatformNames(names) {
+    const out = /* @__PURE__ */ new Set();
+    for (const raw of names) {
+      const name = raw.trim().toLowerCase();
+      if (!name) continue;
+      const match = PLATFORM_CONSTRAINTS.find(
+        (p) => p.platform.toLowerCase() === name || p.id === name || p.id.replace(/_/g, " ") === name
+      );
+      if (match) {
+        out.add(match.tag);
+        continue;
+      }
+      if (["general", "engineering", "research", "design"].includes(name)) {
+        out.add(name);
+        continue;
+      }
+      const partial2 = PLATFORM_CONSTRAINTS.find(
+        (p) => p.sites.some((site) => name.includes(site.split(".")[0])) || p.platform.toLowerCase().includes(name)
+      );
+      if (partial2) out.add(partial2.tag);
+    }
+    return [...out];
+  }
   function compileQueries(input2, options = {}) {
     const tags = /* @__PURE__ */ new Set(["general", ...options.relevantTags ?? []]);
     const platforms = PLATFORM_CONSTRAINTS.filter(
@@ -24278,7 +25527,7 @@ ${task.shape}`;
     }
     root.append(panel);
   }
-  function compiledFor(p) {
+  function compiledFor(p, packTags = []) {
     return compileQueries(
       {
         titles: p.titles,
@@ -24291,11 +25540,17 @@ ${task.shape}`;
         companies: p.companies,
         exclusions: p.exclusions
       },
-      { relevantTags: p.relevantPlatforms }
+      {
+        relevantTags: [
+          ...tagsFromPlatformNames(p.relevantPlatforms ?? []),
+          ...packTags
+        ]
+      }
     );
   }
   function renderStrings(root, p) {
-    const compiled = compiledFor(p);
+    const ctx = currentContext();
+    const compiled = compiledFor(p, ctx ? packFor(ctx).platformTags : []);
     const runnable = compiled.filter((q) => q.runnable).length;
     const panel = el(
       `<div class="panel"><h3>Compiled queries <span class="why num">— ${runnable} runnable of ${compiled.length}, split and deduped per platform</span></h3></div>`
@@ -24446,7 +25701,6 @@ ${task.shape}`;
     aiHidden = true;
   }
   var aiAvailable = () => hasSample() && !aiHidden;
-  var MODULE_ORDER = ["overview", ...MODULE_KEYS];
   var customRenderers = {};
   function registerModule(key, render2) {
     customRenderers[key] = render2;
@@ -24488,19 +25742,25 @@ ${task.shape}`;
     if (!nav) return;
     nav.innerHTML = "";
     if (!state.current) return;
-    const states = moduleStates();
-    for (const key of MODULE_ORDER) {
-      const label = key === "overview" ? "Overview" : MODULES[key].label;
-      const st = key === "overview" ? void 0 : states[key];
-      const stateText = st ? STATE_LABELS[st.state] : "";
-      const item = el(
-        `<button class="mod-item ${state.module === key ? "active" : ""}" type="button" aria-current="${state.module === key ? "page" : "false"}" title="${esc(st?.reason ?? "")}"><span class="dot ${st ? STATE_CLASS[st.state] : ""}" aria-hidden="true"></span><span class="mod-label">${esc(label)}</span>${st ? `<span class="mod-state">${esc(stateText)}</span>` : ""}</button>`
+    const statuses = entryStatuses();
+    for (const phase of PHASE_KEYS) {
+      const entries = entriesFor(phase, state.mode);
+      if (!entries.length) continue;
+      const group = el(
+        `<div class="phase-group"><div class="rail-label" title="${esc(PHASES[phase].purpose)}">${esc(PHASES[phase].label)}</div></div>`
       );
-      item.onclick = () => {
-        state.module = key;
-        render();
-      };
-      nav.append(item);
+      for (const entry of entries) {
+        const st = statuses[entry.key];
+        const item = el(
+          `<button class="mod-item ${state.module === entry.key ? "active" : ""}" type="button" aria-current="${state.module === entry.key ? "page" : "false"}" title="${esc(st?.reason ?? entry.hint)}"><span class="dot ${st ? STATE_CLASS[st.state] : ""}" aria-hidden="true"></span><span class="mod-label">${esc(entry.label)}</span>${st ? `<span class="mod-state">${esc(STATE_LABELS[st.state])}</span>` : ""}</button>`
+        );
+        item.onclick = () => {
+          state.module = entry.key;
+          render();
+        };
+        group.append(item);
+      }
+      nav.append(group);
     }
     const foot = $("#rail-foot");
     if (foot) {
@@ -24518,6 +25778,18 @@ ${task.shape}`;
     const custom2 = customRenderers[state.module];
     if (custom2) {
       custom2(main);
+      return;
+    }
+    if (state.module === "research") {
+      renderResearchModule(main);
+      return;
+    }
+    if (!NAV.some((e) => e.key === state.module)) {
+      main.append(
+        el(
+          `<div class="notice warning">No module called "${esc(state.module)}". Pick one from the rail.</div>`
+        )
+      );
       return;
     }
     renderTaskModule(main, state.module);
@@ -24543,6 +25815,10 @@ ${task.shape}`;
       )
     );
     main.append(el(`<p class="mod-desc">${esc(task.desc)}</p>`));
+    const hint = navEntry(key)?.hint;
+    if (state.mode === "guided" && hint) {
+      main.append(el(`<p class="why guided-hint">${esc(hint)}</p>`));
+    }
     main.append(stateBadge(st));
     if (st.recovery && st.state !== "current" && st.state !== "generating") {
       const rb = el(
@@ -24744,6 +26020,35 @@ Generate without current research?`
       )
     );
   }
+  var CONNECTOR_LABEL = {
+    capability_unavailable: "NO CONNECTOR ACCESS",
+    not_connected: "NOT CONNECTED",
+    needs_reauth: "RECONNECT NEEDED",
+    missing_tools: "TOOLS MISSING",
+    connected_not_wired: "CONNECTED · NOT WIRED",
+    ready: "READY"
+  };
+  var CONNECTOR_CLASS = {
+    capability_unavailable: "unknown",
+    not_connected: "unknown",
+    needs_reauth: "bad",
+    missing_tools: "warn",
+    connected_not_wired: "warn",
+    ready: "ok"
+  };
+  function renderResearchModule(main) {
+    main.append(
+      el(
+        `<div class="mod-head"><h2>Research</h2><span class="spacer"></span></div>`
+      )
+    );
+    main.append(
+      el(
+        `<p class="mod-desc">Evidence with a date on it. This page never fetches anything: a source is either one you checked and pasted, or one a connector returned. An output can only be "current" or "aging" with a snapshot attached — without one it is generated on model knowledge and labelled that way.</p>`
+      )
+    );
+    renderResearchPanel(main);
+  }
   function renderResearchPanel(root) {
     const ctx = currentContext();
     if (!ctx) return;
@@ -24757,10 +26062,21 @@ Generate without current research?`
     panel.append(
       el(
         `<div><h4 class="first">Where evidence can come from for this search</h4><ul>${adapters.map(
-          ({ adapter, applicability }) => `<li><b>${esc(adapter.label)}</b> <span class="chip ${applicability.viable ? "ok" : "unknown"}">${applicability.viable ? "APPLIES" : "N/A"}</span> <span class="why">${esc(applicability.reason)}</span>${adapter.id !== "user_supplied" ? ' <span class="chip warn">NOT WIRED</span>' : ""}</li>`
+          ({ adapter, applicability }) => `<li><b>${esc(adapter.label)}</b> <span class="chip ${applicability.viable ? "ok" : "unknown"}">${applicability.viable ? "APPLIES" : "N/A"}</span> <span class="why">${esc(applicability.reason)}</span>${adapter.connectors.length ? ` <span class="conn" data-adapter="${esc(adapter.id)}"><span class="chip">CHECKING…</span></span>` : ""}</li>`
         ).join("")}</ul></div>`
       )
     );
+    for (const { adapter } of adapters) {
+      if (!adapter.connectors.length) continue;
+      void adapter.availability().then((availability) => {
+        const host = $(`.conn[data-adapter="${adapter.id}"]`, panel);
+        if (!host) return;
+        const statuses = availability.connectors ?? [];
+        host.innerHTML = statuses.length ? statuses.map(
+          (c) => `<span class="chip ${CONNECTOR_CLASS[c.state] ?? "warn"}" title="${esc(c.reason)}">${esc(c.server)}: ${esc(CONNECTOR_LABEL[c.state] ?? c.state)}</span>`
+        ).join(" ") : `<span class="chip warn">NOT WIRED</span>`;
+      });
+    }
     if (snap) {
       panel.append(
         el(
@@ -24826,6 +26142,12 @@ Generate without current research?`
     panel.append(form);
     root.append(panel);
   }
+  function focusActionRow(id) {
+    const row = document.querySelector(`[data-action-id="${CSS.escape(id)}"]`);
+    if (!row) return;
+    row.scrollIntoView({ block: "center" });
+    row.classList.add("flash");
+  }
   function performAction(step) {
     if (requiresConfirmation(step)) {
       const ok = window.confirm(
@@ -24836,8 +26158,8 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
       if (!ok) return;
     }
     const target = step.targetId ?? "";
-    const go = (mod) => {
-      state.module = mod;
+    const go = (mod2) => {
+      state.module = mod2;
       render();
       $("#main")?.scrollTo({ top: 0 });
     };
@@ -24851,7 +26173,7 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
         break;
       case "refresh_research":
       case "add_source":
-        go("overview");
+        go("research");
         setTimeout(
           () => $("#research-panel")?.scrollIntoView({ block: "start" }),
           0
@@ -24878,6 +26200,12 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
         break;
       case "run_golden":
         go("golden_test");
+        break;
+      case "open_action":
+      case "complete_action":
+      case "create_initiative":
+        go("actions");
+        if (target) setTimeout(() => focusActionRow(target), 0);
         break;
       default:
         go("overview");
@@ -24928,6 +26256,20 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
       w.append(input2);
       grid?.append(w);
     }
+    const packW = el(`<label class="field"><b>Industry pack</b></label>`);
+    const pack = el(
+      `<select name="selectedIndustryPack" aria-label="Industry pack">${INDUSTRY_PACKS.map(
+        (p) => `<option value="${esc(p.id)}"${(s.selectedIndustryPack ?? "universal") === p.id ? " selected" : ""}>${esc(p.label)}</option>`
+      ).join("")}</select>`
+    );
+    const packWhy = el(
+      `<span class="why">${esc(packById(s.selectedIndustryPack).summary)}</span>`
+    );
+    pack.onchange = () => {
+      packWhy.textContent = packById(pack.value).summary;
+    };
+    packW.append(pack, packWhy);
+    grid?.append(packW);
     const constraintsW = el(
       `<label class="field span"><b>Constraints (one per line)</b></label>`
     );
@@ -24953,17 +26295,18 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
     notes.value = s.recruiterNotes ?? "";
     notesW.append(notes);
     grid?.append(notesW);
-    const save = el(
+    const save2 = el(
       `<button class="btn primary" type="button">${isNew ? "Create search" : "Save brief"}</button>`
     );
     const msg = el(`<span class="why" role="status"></span>`);
-    save.onclick = async () => {
+    save2.onclick = async () => {
       const next = { ...s };
       for (const [key] of FIELDS) {
         const v = inputs[key]?.value.trim() ?? "";
         next[key] = v;
       }
       next.jd = jd.value;
+      next.selectedIndustryPack = pack.value;
       next.recruiterNotes = notes.value.trim();
       next.constraints = constraints.value.split("\n").map((x) => x.trim()).filter(Boolean);
       if (!next.roleTitle) {
@@ -24974,7 +26317,7 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
         next.name = `${next.companyName || "Search"} — ${next.roleTitle}`;
       await onSave(next);
     };
-    f.append(save, msg);
+    f.append(save2, msg);
     return f;
   }
   function renderNewSearchForm(main, standalone) {
@@ -25127,6 +26470,23 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
         )
       );
     }
+    const suggestion = ctx ? suggestPack(ctx) : null;
+    if (suggestion) {
+      const notice = el(
+        `<div class="notice" role="status"><strong>This reads like a ${esc(suggestion.pack.label)} search.</strong> <span class="why">${esc(suggestion.reason)} ${esc(suggestion.pack.summary)}</span> </div>`
+      );
+      const use = el(
+        `<button class="btn small" type="button">Switch to ${esc(suggestion.pack.label)}</button>`
+      );
+      use.onclick = async () => {
+        await saveFacts({ ...s, selectedIndustryPack: suggestion.pack.id });
+        const rev = await recordContextRevision();
+        render();
+        if (rev?.message) console.info(rev.message);
+      };
+      notice.append(use);
+      main.append(notice);
+    }
     const diffHost = el(`<div></div>`);
     main.append(diffHost);
     main.append(
@@ -25150,7 +26510,6 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
       )
     );
     renderStatusTable(main);
-    renderResearchPanel(main);
     renderCrewPanel(main);
   }
   registerModule("overview", renderOverview);
@@ -25600,6 +26959,288 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
   }
   registerModule("candidates", renderCandidates);
 
+  // artifact-src/core/pipeline.ts
+  var STAGES = [
+    "sourced",
+    "contacted",
+    "replied",
+    "screened",
+    "submitted",
+    "interviewing",
+    "offer",
+    "hired"
+  ];
+  var STAGE_LABELS = {
+    sourced: "Sourced",
+    contacted: "Contacted",
+    replied: "Replied",
+    screened: "Screened",
+    submitted: "Submitted to HM",
+    interviewing: "Interviewing",
+    offer: "Offer",
+    hired: "Hired"
+  };
+  var EXITS = ["rejected", "withdrawn", "on_hold"];
+  var EXIT_LABELS = {
+    rejected: "Rejected",
+    withdrawn: "Withdrew",
+    on_hold: "On hold"
+  };
+  var pipelineEventSchema = external_exports.object({
+    id: external_exports.string(),
+    candidateId: external_exports.string(),
+    at: external_exports.string(),
+    /** Who recorded it. Always a person; the page never writes one itself. */
+    recordedBy: external_exports.string().default("recruiter"),
+    type: external_exports.enum([
+      "stage_change",
+      "outreach_recorded",
+      "reply_recorded",
+      "exit",
+      "note"
+    ]),
+    fromStage: external_exports.enum(STAGES).optional(),
+    toStage: external_exports.enum(STAGES).optional(),
+    exit: external_exports.enum(EXITS).optional(),
+    /** For a reply: what the person actually said back. */
+    outcome: external_exports.enum(["interested", "not_interested", "unclear"]).optional(),
+    /** Free text the recruiter wrote. Never generated. */
+    note: external_exports.string().default("")
+  });
+  var stageIndex = (s) => STAGES.indexOf(s);
+  function furthestStage(candidateId, events) {
+    let best;
+    for (const e of events) {
+      if (e.candidateId !== candidateId) continue;
+      const stage = e.type === "stage_change" ? e.toStage : e.type === "outreach_recorded" ? "contacted" : e.type === "reply_recorded" ? "replied" : void 0;
+      if (!stage) continue;
+      if (!best || stageIndex(stage) > stageIndex(best)) best = stage;
+    }
+    return best;
+  }
+  function exitOf(candidateId, events) {
+    const found = events.filter((e) => e.candidateId === candidateId && e.type === "exit" && e.exit).sort((a, b) => a.at.localeCompare(b.at)).pop();
+    return found ? { exit: found.exit, at: found.at, note: found.note } : void 0;
+  }
+  function currentPosition(candidateId, events) {
+    const exit = exitOf(candidateId, events);
+    if (exit) return { kind: "exit", exit: exit.exit };
+    const stage = furthestStage(candidateId, events);
+    return stage ? { kind: "stage", stage } : { kind: "none" };
+  }
+  function reachedCounts(candidateIds, events) {
+    const counts = Object.fromEntries(STAGES.map((s) => [s, 0]));
+    for (const id of candidateIds) {
+      const furthest = furthestStage(id, events);
+      if (!furthest) continue;
+      for (const stage of STAGES) {
+        if (stageIndex(stage) <= stageIndex(furthest)) counts[stage] += 1;
+      }
+    }
+    return counts;
+  }
+  var DAY2 = 864e5;
+  function firstAt(candidateId, stage, events) {
+    const times = events.filter((e) => {
+      if (e.candidateId !== candidateId) return false;
+      if (e.type === "stage_change") return e.toStage === stage;
+      if (e.type === "outreach_recorded") return stage === "contacted";
+      if (e.type === "reply_recorded") return stage === "replied";
+      return false;
+    }).map((e) => new Date(e.at).getTime()).filter((t) => !Number.isNaN(t)).sort((a, b) => a - b);
+    return times[0];
+  }
+  function median(values) {
+    if (!values.length) return void 0;
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+  function durationMetric(input2) {
+    const min = input2.minimumSample ?? 3;
+    const value = median(input2.days);
+    if (input2.days.length < min || value === void 0) {
+      return metricResultSchema.parse({
+        id: input2.id,
+        label: input2.label,
+        formula: input2.formula,
+        numerator: void 0,
+        denominator: input2.days.length,
+        value: null,
+        unit: "days",
+        status: "not_enough_data",
+        minimumSample: min,
+        asOf: input2.asOf,
+        note: input2.note
+      });
+    }
+    return metricResultSchema.parse({
+      id: input2.id,
+      label: input2.label,
+      formula: input2.formula,
+      denominator: input2.days.length,
+      value: Math.round(value * 10) / 10,
+      unit: "days",
+      status: "measured",
+      minimumSample: min,
+      asOf: input2.asOf,
+      note: input2.note
+    });
+  }
+  function computeMetrics(input2) {
+    const { candidateIds, events, nowIso: nowIso2 } = input2;
+    const reached = reachedCounts(candidateIds, events);
+    const asOf2 = nowIso2;
+    const conversion = (from, to, minimumSample = 5) => rateMetric({
+      id: `funnel_${from}_${to}`,
+      label: `${STAGE_LABELS[from]} → ${STAGE_LABELS[to]}`,
+      formula: `candidates who reached ${STAGE_LABELS[to]} ÷ candidates who reached ${STAGE_LABELS[from]}`,
+      numerator: reached[to],
+      denominator: reached[from],
+      minimumSample,
+      asOf: asOf2
+    });
+    const replies = events.filter((e) => e.type === "reply_recorded");
+    const interested = replies.filter((e) => e.outcome === "interested").length;
+    const durations = (from, to) => candidateIds.map((id) => {
+      const a = firstAt(id, from, events);
+      const b = firstAt(id, to, events);
+      return a !== void 0 && b !== void 0 && b >= a ? (b - a) / DAY2 : void 0;
+    }).filter((d) => d !== void 0);
+    const exits = candidateIds.map((id) => exitOf(id, events)).filter((e) => Boolean(e));
+    const rejected = exits.filter((e) => e.exit === "rejected").length;
+    const daysOpen = input2.openedAt ? Math.max(
+      0,
+      (new Date(nowIso2).getTime() - new Date(input2.openedAt).getTime()) / DAY2
+    ) : void 0;
+    return [
+      {
+        key: "funnel",
+        label: "Funnel",
+        purpose: "Where the search loses people. Each rate is the share of those who reached the earlier stage — never a share of everyone.",
+        metrics: [
+          conversion("sourced", "contacted"),
+          conversion("contacted", "replied"),
+          conversion("replied", "screened"),
+          conversion("screened", "submitted"),
+          conversion("submitted", "interviewing"),
+          conversion("interviewing", "offer", 3),
+          conversion("offer", "hired", 1)
+        ]
+      },
+      {
+        key: "responsiveness",
+        label: "Responsiveness",
+        purpose: "Whether the approach is landing. A low reply rate is a message or targeting problem, not a candidate problem.",
+        metrics: [
+          rateMetric({
+            id: "reply_rate",
+            label: "Reply rate",
+            formula: "candidates who replied ÷ candidates contacted",
+            numerator: reached.replied,
+            denominator: reached.contacted,
+            minimumSample: 10,
+            asOf: asOf2,
+            note: "Ten contacts is the smallest sample worth reading as a rate."
+          }),
+          rateMetric({
+            id: "interested_rate",
+            label: "Interested replies",
+            formula: "replies recorded as interested ÷ replies recorded",
+            numerator: interested,
+            denominator: replies.length,
+            minimumSample: 5,
+            asOf: asOf2
+          }),
+          durationMetric({
+            id: "time_to_reply",
+            label: "Median time to first reply",
+            formula: "median days between the recorded contact and the recorded reply",
+            days: durations("contacted", "replied"),
+            asOf: asOf2
+          })
+        ]
+      },
+      {
+        key: "quality",
+        label: "Quality of submission",
+        purpose: "Whether the hiring manager agrees with the profile. This is the only honest read on whether the search is calibrated.",
+        metrics: [
+          rateMetric({
+            id: "hm_pass_through",
+            label: "Submitted → interviewing",
+            formula: "candidates who reached Interviewing ÷ candidates submitted to the hiring manager",
+            numerator: reached.interviewing,
+            denominator: reached.submitted,
+            minimumSample: 5,
+            asOf: asOf2,
+            note: "Below roughly half, the profile and the hiring manager disagree — that is a conversation, not a sourcing problem."
+          }),
+          rateMetric({
+            id: "interview_to_offer",
+            label: "Interviewing → offer",
+            formula: "candidates who reached Offer ÷ candidates who reached Interviewing",
+            numerator: reached.offer,
+            denominator: reached.interviewing,
+            minimumSample: 3,
+            asOf: asOf2
+          }),
+          rateMetric({
+            id: "offer_accept",
+            label: "Offer → hired",
+            formula: "candidates hired ÷ candidates who reached Offer",
+            numerator: reached.hired,
+            denominator: reached.offer,
+            minimumSample: 1,
+            asOf: asOf2
+          }),
+          rateMetric({
+            id: "rejection_share",
+            label: "Exits that were rejections",
+            formula: "exits recorded as rejected ÷ all recorded exits",
+            numerator: rejected,
+            denominator: exits.length,
+            minimumSample: 3,
+            asOf: asOf2,
+            note: "The rest withdrew or went on hold — a different problem with a different fix."
+          })
+        ]
+      },
+      {
+        key: "velocity",
+        label: "Velocity",
+        purpose: "How long the search actually takes, measured from what was recorded rather than from when the requisition opened.",
+        metrics: [
+          durationMetric({
+            id: "sourced_to_contacted",
+            label: "Median sourced → contacted",
+            formula: "median days between finding someone and recording the outreach",
+            days: durations("sourced", "contacted"),
+            asOf: asOf2
+          }),
+          durationMetric({
+            id: "sourced_to_submitted",
+            label: "Median sourced → submitted",
+            formula: "median days between finding someone and submitting them",
+            days: durations("sourced", "submitted"),
+            asOf: asOf2
+          }),
+          metricResultSchema.parse({
+            id: "days_open",
+            label: "Days open",
+            formula: "days between the recorded open date and today",
+            denominator: daysOpen === void 0 ? void 0 : 1,
+            value: daysOpen === void 0 ? null : Math.round(daysOpen),
+            unit: "days",
+            status: daysOpen === void 0 ? "not_enough_data" : "measured",
+            asOf: asOf2,
+            note: daysOpen === void 0 ? "No open date on the brief, so this cannot be computed. It is not zero." : void 0
+          })
+        ]
+      }
+    ];
+  }
+
   // artifact-src/core/defect-checks.ts
   function deepFreeze(value) {
     if (value && typeof value === "object" && !Object.isFrozen(value)) {
@@ -25951,15 +27592,15 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
       id: "protected_trait_caught",
       name: "10. A protected-trait recommendation trips the safety scan",
       run: () => {
-        const hits = scanPayloadForProtectedTraits({
+        const hits2 = scanPayloadForProtectedTraits({
           recommendation: "Prefer younger candidates; the team skews under 30 and pregnancy would be disruptive."
         });
-        const ok = hits.length > 0;
+        const ok = hits2.length > 0;
         return result(
           "protected_trait_caught",
           "Protected trait caught",
           ok,
-          hits.length ? `flagged: ${hits.map((h) => h.trait).join(", ")}` : "nothing flagged (defect)"
+          hits2.length ? `flagged: ${hits2.map((h) => h.trait).join(", ")}` : "nothing flagged (defect)"
         );
       }
     },
@@ -25977,6 +27618,59 @@ This is a human decision. TalentOS will not send, advance, or approve anything o
           "Verified downgraded immutably",
           ok,
           `downgrades=${out.downgrades}`
+        );
+      }
+    },
+    {
+      id: "empty_pipeline_not_zero",
+      name: "12. An empty pipeline reports not-enough-data, never a 0% conversion",
+      run: () => {
+        const empty = computeMetrics({
+          candidateIds: ["c1", "c2"],
+          events: [],
+          nowIso: NOW
+        });
+        const rates = empty.flatMap((g) => g.metrics);
+        const zeroed = rates.filter(
+          (m) => m.status === "measured" && m.value === 0
+        );
+        const grouped = JSON.stringify(empty).toLowerCase();
+        const demographic = [
+          "gender",
+          "ethnicit",
+          '"age"',
+          "religion",
+          "disabilit"
+        ].filter((t) => grouped.includes(t));
+        const events = [
+          {
+            id: "e1",
+            candidateId: "c1",
+            at: NOW,
+            type: "outreach_recorded"
+          },
+          {
+            id: "e2",
+            candidateId: "c1",
+            at: NOW,
+            type: "reply_recorded",
+            outcome: "interested"
+          }
+        ].map((e) => pipelineEventSchema.parse(e));
+        const real = computeMetrics({
+          candidateIds: ["c1", "c2"],
+          events,
+          nowIso: NOW
+        });
+        const overOne = real.flatMap((g) => g.metrics).filter(
+          (m) => m.status === "measured" && (m.value ?? 0) > 1 && m.unit !== "days"
+        );
+        const ok = zeroed.length === 0 && demographic.length === 0 && overOne.length === 0;
+        return result(
+          "empty_pipeline_not_zero",
+          "Empty pipeline is not a zero",
+          ok,
+          `${zeroed.length} metric(s) reported 0 from no data; ${demographic.length} demographic term(s) in the registry; ${overOne.length} rate(s) above 100%.`
         );
       }
     }
@@ -26232,13 +27926,13 @@ Familiarity with AI safety literature is preferred. A PhD is common among our re
       const intake = artifacts.intake?.payload;
       if (intake) {
         const text = intakeFullText(intake);
-        const hits = GOLDEN_CONCEPTS.map((c) => ({
+        const hits2 = GOLDEN_CONCEPTS.map((c) => ({
           concept: c.concept,
           hit: c.pattern.test(text)
         }));
-        const hitCount = hits.filter((h) => h.hit).length;
+        const hitCount = hits2.filter((h) => h.hit).length;
         benchmark = {
-          hits,
+          hits: hits2,
           hitCount,
           total: GOLDEN_CONCEPTS.length,
           threshold: GOLDEN_THRESHOLD
@@ -26485,10 +28179,512 @@ Familiarity with AI safety literature is preferred. A PhD is common among our re
   }
   registerModule("golden_test", renderGolden);
 
+  // artifact-src/ui/actions.ts
+  var STATUS_LABELS = {
+    open: "Open",
+    in_progress: "In progress",
+    blocked: "Blocked",
+    completed: "Completed",
+    dismissed: "Dismissed"
+  };
+  var STATUS_CLASS = {
+    open: "",
+    in_progress: "inference",
+    blocked: "bad",
+    completed: "ok",
+    dismissed: "unknown"
+  };
+  var OWNER_LABELS = {
+    recruiter: "Recruiter",
+    sourcer: "Sourcer",
+    hiring_manager: "Hiring manager",
+    interviewer: "Interviewer",
+    talent_leader: "Talent leader",
+    unassigned: "Unassigned"
+  };
+  var moduleLabel = (key) => key in MODULES ? MODULES[key].label : key;
+  function actionRow(action) {
+    const row = el(`<div class="qrow action-row" data-action-id="${esc(action.id)}">
+    <div class="qmeta">
+      <div class="plat">${esc(action.title)}</div>
+      <span class="chip ${STATUS_CLASS[action.status]}">${esc(STATUS_LABELS[action.status].toUpperCase())}</span>
+      <span class="chip">${esc(OWNER_LABELS[action.owner] ?? action.owner)}</span>
+      ${action.targetDate ? `<span class="chip num">by ${esc(action.targetDate)}</span>` : ""}
+    </div>
+  </div>`);
+    const body = el(`<div class="action-body"></div>`);
+    if (action.description) {
+      body.append(el(`<p class="why">${esc(action.description)}</p>`));
+    }
+    if (action.status === "blocked" && action.blockingReason) {
+      body.append(
+        el(`<p class="why"><b>Blocked:</b> ${esc(action.blockingReason)}</p>`)
+      );
+    }
+    if (action.status === "completed") {
+      body.append(
+        el(
+          `<p class="why">Completed ${esc(asOf(action.completedAt ?? ""))}${action.completionNote ? ` — ${esc(action.completionNote)}` : ""}</p>`
+        )
+      );
+    }
+    const controls = el(`<div class="action-controls"></div>`);
+    const owner = el(
+      `<select aria-label="Owner for: ${esc(action.title)}">${OWNERS.map((o) => `<option value="${o}"${o === action.owner ? " selected" : ""}>${esc(OWNER_LABELS[o] ?? o)}</option>`).join("")}</select>`
+    );
+    owner.onchange = () => {
+      void save({ ...action, owner: owner.value });
+    };
+    const status = el(
+      `<select aria-label="Status for: ${esc(action.title)}">${Object.keys(STATUS_LABELS).map(
+        (s) => `<option value="${s}"${s === action.status ? " selected" : ""}>${esc(STATUS_LABELS[s])}</option>`
+      ).join("")}</select>`
+    );
+    status.onchange = () => {
+      const next = status.value;
+      if (next === "completed") {
+        const note = window.prompt(
+          `Completing "${action.title}".
+
+What actually happened? (A queue where everything is "done" with no note stops meaning anything.)`,
+          ""
+        );
+        if (note === null) {
+          status.value = action.status;
+          return;
+        }
+        void save({
+          ...action,
+          status: next,
+          completedAt: nowIso(),
+          completionNote: note.trim()
+        });
+        return;
+      }
+      if (next === "blocked") {
+        const why = window.prompt(
+          `Blocking "${action.title}".
+
+What is it waiting on?`,
+          action.blockingReason ?? ""
+        );
+        if (why === null) {
+          status.value = action.status;
+          return;
+        }
+        void save({ ...action, status: next, blockingReason: why.trim() });
+        return;
+      }
+      void save({
+        ...action,
+        status: next,
+        completedAt: void 0,
+        completionNote: void 0
+      });
+    };
+    controls.append(owner, status);
+    body.append(controls);
+    row.append(body);
+    return row;
+  }
+  async function save(action) {
+    const parsed = actionItemSchema.safeParse(action);
+    if (!parsed.success) return;
+    await putAction(parsed.data);
+    render();
+  }
+  function renderActions(main) {
+    main.append(
+      el(
+        `<div class="mod-head"><h2>Actions</h2><span class="spacer"></span></div>`
+      )
+    );
+    main.append(
+      el(
+        `<p class="mod-desc">What the search owes someone. Modules draft action items inside their output; nothing reaches this queue until you add it. Completing an action asks what happened — the note is the record.</p>`
+      )
+    );
+    const suggestions = suggestedActions();
+    const suggestPanel = el(
+      `<div class="panel" id="suggested-actions"><h3>Drafted by your modules <span class="why num">${suggestions.length}</span></h3></div>`
+    );
+    if (!suggestions.length) {
+      suggestPanel.append(
+        el(
+          `<p class="why">Nothing outstanding. Generated modules propose actions in their output; they appear here until you add or ignore them.</p>`
+        )
+      );
+    }
+    for (const { action, fromModule } of suggestions) {
+      const row = el(`<div class="qrow">
+      <div class="qmeta"><div class="plat">${esc(action.title)}</div><span class="chip inference">from ${esc(moduleLabel(fromModule))}</span></div>
+      <div class="why">${esc(action.description)}</div>
+    </div>`);
+      const add = el(
+        `<button class="btn small" type="button">Add to queue</button>`
+      );
+      add.onclick = () => void save({ ...action, status: "open" });
+      row.append(add);
+      suggestPanel.append(row);
+    }
+    main.append(suggestPanel);
+    const initPanel = el(
+      `<div class="panel"><h3>Initiatives</h3><p class="why">A named intent several actions serve. Progress is counted from the actions, never set by hand.</p></div>`
+    );
+    const title = el(
+      `<input type="text" placeholder="Initiative title (e.g. 'Close the pay-band question')" aria-label="Initiative title">`
+    );
+    const why = el(
+      `<input type="text" placeholder="Why it exists" aria-label="Why this initiative exists">`
+    );
+    const create = el(
+      `<button class="btn small" type="button">Create initiative</button>`
+    );
+    const msg = el(`<span class="why" role="status"></span>`);
+    create.onclick = async () => {
+      if (!title.value.trim()) {
+        msg.textContent = "A title is required.";
+        return;
+      }
+      const parsed = initiativeSchema.safeParse({
+        id: `init-${uid().slice(0, 8)}`,
+        title: title.value.trim(),
+        why: why.value.trim(),
+        createdAt: nowIso()
+      });
+      if (!parsed.success) return;
+      await putInitiative(parsed.data);
+      render();
+    };
+    initPanel.append(title, why, create, msg);
+    main.append(initPanel);
+    const groups = [
+      ...state.initiatives.map((i) => ({
+        id: i.id,
+        label: i.title,
+        note: i.why
+      })),
+      {
+        id: "",
+        label: "Unfiled",
+        note: "Actions not attached to an initiative."
+      }
+    ];
+    for (const group of groups) {
+      const items = state.actions.filter(
+        (a) => (a.initiativeId ?? "") === group.id
+      );
+      if (!items.length && group.id === "") continue;
+      const done = items.filter((a) => a.status === "completed").length;
+      const panel = el(
+        `<div class="panel"><h3>${esc(group.label)} <span class="why num">${done}/${items.length} complete</span></h3>${group.note ? `<p class="why">${esc(group.note)}</p>` : ""}</div>`
+      );
+      if (!items.length) {
+        panel.append(
+          el(`<p class="why">No actions filed under this initiative yet.</p>`)
+        );
+      }
+      for (const action of items) panel.append(actionRow(action));
+      main.append(panel);
+    }
+    if (!state.actions.length) {
+      main.append(
+        el(
+          `<div class="panel"><p class="why">The queue is empty. That is a real state, not an error — it means nothing has been accepted from a draft yet.</p></div>`
+        )
+      );
+    }
+  }
+  registerModule("actions", renderActions);
+
+  // artifact-src/ui/pipeline.ts
+  function formatMetric(m) {
+    if (m.status !== "measured" || m.value === null) {
+      const have = m.denominator ?? 0;
+      const need = m.minimumSample ?? 1;
+      return `not enough data — ${have} of the ${need} needed`;
+    }
+    if (m.unit === "days") return `${m.value} days`;
+    return `${Math.round(m.value * 1e3) / 10}%`;
+  }
+  function metricRow(m) {
+    const measured = m.status === "measured" && m.value !== null;
+    return el(`<li>
+    <b>${esc(m.label)}</b>
+    <span class="chip ${measured ? "ok" : "unknown"}">${esc(formatMetric(m))}</span>
+    ${measured && typeof m.numerator === "number" ? `<span class="chip num">${m.numerator}/${m.denominator}</span>` : ""}
+    <div class="why">${esc(m.formula)}${m.note ? ` — ${esc(m.note)}` : ""}</div>
+  </li>`);
+  }
+  function renderPipeline(main) {
+    main.append(
+      el(
+        `<div class="mod-head"><h2>Pipeline</h2><span class="spacer"></span></div>`
+      )
+    );
+    main.append(
+      el(
+        `<p class="mod-desc">A record of what already happened, written by you. Nothing here contacts anyone, advances anyone or rejects anyone — moving a stage is a decision, so it asks first. Metrics are computed from these events and nothing else: there is no seeded history and no estimate.</p>`
+      )
+    );
+    const ctx = currentContext();
+    const ids = state.candidates.map((c) => c.id);
+    if (!state.candidates.length) {
+      main.append(
+        el(
+          `<div class="panel"><p class="why">No candidates yet, so there is no pipeline and nothing to measure. Add candidates first — an empty funnel is not a zero conversion rate.</p></div>`
+        )
+      );
+      return;
+    }
+    const reached = reachedCounts(ids, state.events);
+    const board = el(
+      `<div class="panel"><h3>Where everyone is <span class="why num">${state.candidates.length} candidate${state.candidates.length === 1 ? "" : "s"}</span></h3></div>`
+    );
+    const counts = el(
+      `<p class="why">Reached: ${STAGES.map((s) => `${esc(STAGE_LABELS[s])} ${reached[s]}`).join(" · ")}</p>`
+    );
+    board.append(counts);
+    for (const cand of state.candidates) {
+      const position = currentPosition(cand.id, state.events);
+      const label = position.kind === "stage" ? STAGE_LABELS[position.stage] : position.kind === "exit" ? EXIT_LABELS[position.exit] : "Not recorded";
+      const cls = position.kind === "exit" ? "unknown" : position.kind === "stage" ? "ok" : "";
+      const row = el(`<div class="qrow">
+      <div class="qmeta"><div class="plat">${esc(cand.name)}</div><span class="chip ${cls}">${esc(label.toUpperCase())}</span></div>
+    </div>`);
+      const controls = el(`<div class="action-controls"></div>`);
+      const stageSelect = el(
+        `<select aria-label="Record a stage for ${esc(cand.name)}"><option value="">Record a stage…</option>${STAGES.map(
+          (s) => `<option value="${s}">${esc(STAGE_LABELS[s])}</option>`
+        ).join("")}</select>`
+      );
+      stageSelect.onchange = async () => {
+        const to = stageSelect.value;
+        if (!to) return;
+        const from = position.kind === "stage" ? position.stage : void 0;
+        const ok = window.confirm(
+          `Record ${cand.name} as "${STAGE_LABELS[to]}".
+
+This is your decision, not a suggestion — TalentOS never moves anyone on its own. Continue?`
+        );
+        stageSelect.value = "";
+        if (!ok) return;
+        const note = window.prompt("What happened? (optional)", "") ?? "";
+        await record2({
+          candidateId: cand.id,
+          type: "stage_change",
+          fromStage: from,
+          toStage: to,
+          note
+        });
+      };
+      const exitSelect = el(
+        `<select aria-label="Record an exit for ${esc(cand.name)}"><option value="">Record an exit…</option>${EXITS.map(
+          (e) => `<option value="${e}">${esc(EXIT_LABELS[e])}</option>`
+        ).join("")}</select>`
+      );
+      exitSelect.onchange = async () => {
+        const exit = exitSelect.value;
+        if (!exit) return;
+        const ok = window.confirm(
+          `Record that ${cand.name} ${exit === "rejected" ? "was rejected" : exit === "withdrawn" ? "withdrew" : "is on hold"}.
+
+This is your decision. Continue?`
+        );
+        exitSelect.value = "";
+        if (!ok) return;
+        const note = window.prompt(
+          "Why? The reason is the only part of this a later search can learn from.",
+          ""
+        ) ?? "";
+        await record2({ candidateId: cand.id, type: "exit", exit, note });
+      };
+      const reply = el(
+        `<select aria-label="Record a reply from ${esc(cand.name)}"><option value="">Record a reply…</option><option value="interested">Replied — interested</option><option value="not_interested">Replied — not interested</option><option value="unclear">Replied — unclear</option></select>`
+      );
+      reply.onchange = async () => {
+        const outcome = reply.value;
+        reply.value = "";
+        if (!outcome) return;
+        await record2({ candidateId: cand.id, type: "reply_recorded", outcome });
+      };
+      const contacted = el(
+        `<button class="btn small" type="button">I contacted them</button>`
+      );
+      contacted.onclick = () => void record2({ candidateId: cand.id, type: "outreach_recorded" });
+      controls.append(contacted, reply, stageSelect, exitSelect);
+      const body = el(`<div class="action-body"></div>`);
+      body.append(controls);
+      const history = state.events.filter((e) => e.candidateId === cand.id);
+      if (history.length) {
+        body.append(
+          el(
+            `<details><summary class="why">${history.length} recorded event${history.length === 1 ? "" : "s"}</summary><ul>${history.map(
+              (e) => `<li class="why">${esc(asOf(e.at))} — ${esc(describeEvent(e))}${e.note ? `: ${esc(e.note)}` : ""}</li>`
+            ).join("")}</ul></details>`
+          )
+        );
+      }
+      row.append(body);
+      board.append(row);
+    }
+    main.append(board);
+    const groups = computeMetrics({
+      candidateIds: ids,
+      events: state.events,
+      nowIso: state.now,
+      openedAt: ctx?.openedAt || void 0
+    });
+    for (const group of groups) {
+      const measured = group.metrics.filter(
+        (m) => m.status === "measured"
+      ).length;
+      const panel = el(
+        `<div class="panel"><h3>${esc(group.label)} <span class="why num">${measured} of ${group.metrics.length} measurable</span></h3><p class="why">${esc(group.purpose)}</p></div>`
+      );
+      const list = el(`<ul class="metrics"></ul>`);
+      for (const m of group.metrics) list.append(metricRow(m));
+      panel.append(list);
+      main.append(panel);
+    }
+    main.append(
+      el(
+        `<p class="why">Every rate above states the population it is a share of. A metric with too few observations says so rather than showing a number that would move on the next candidate. No metric is broken down by any candidate attribute, and none can be.</p>`
+      )
+    );
+  }
+  function describeEvent(e) {
+    switch (e.type) {
+      case "stage_change":
+        return `moved${e.fromStage ? ` from ${STAGE_LABELS[e.fromStage]}` : ""} to ${e.toStage ? STAGE_LABELS[e.toStage] : "?"}`;
+      case "outreach_recorded":
+        return "outreach recorded";
+      case "reply_recorded":
+        return `reply recorded (${e.outcome ?? "unclear"})`;
+      case "exit":
+        return `exit recorded (${e.exit ? EXIT_LABELS[e.exit] : "?"})`;
+      default:
+        return "note";
+    }
+  }
+  async function record2(input2) {
+    const parsed = pipelineEventSchema.safeParse({
+      id: `ev-${uid().slice(0, 8)}`,
+      at: nowIso(),
+      recordedBy: "recruiter",
+      note: "",
+      ...input2
+    });
+    if (!parsed.success) return;
+    await appendEvent(parsed.data);
+    render();
+  }
+  registerModule("pipeline", renderPipeline);
+
+  // artifact-src/ui/header.ts
+  var PHASE_CLASS = {
+    not_started: "",
+    in_progress: "warn",
+    needs_attention: "bad",
+    complete: "ok"
+  };
+  var URGENCY_CLASS = {
+    blocked: "bad",
+    attention: "warn",
+    normal: "inference",
+    done: "ok"
+  };
+  function renderHeader() {
+    const bar = $("#topbar");
+    if (!bar) return;
+    bar.innerHTML = "";
+    if (!state.current) {
+      bar.append(
+        el(
+          `<div class="tb-row"><div class="tb-title">TalentOS <span class="why">— pick a search on the left, or start a new one.</span></div></div>`
+        )
+      );
+      return;
+    }
+    const ctx = currentContext();
+    const research = liveResearchStatus();
+    const researchClass = research === "current" ? "ok" : research === "aging" ? "warn" : "bad";
+    const pack = packFor(ctx ?? { selectedIndustryPack: "universal" });
+    const identity = el(`<div class="tb-row tb-identity">
+    <div class="tb-title">${esc(state.current.roleTitle)}<span class="why"> · ${esc(state.current.companyName ?? "")}${state.current.geography ? ` · ${esc(state.current.geography)}` : ""}</span></div>
+    <span class="chip num" title="Content-addressed version of the search brief. Outputs record the version they consumed.">BRIEF ${esc(ctx?.searchVersion ?? "—")}</span>
+    <span class="chip ${researchClass}" title="The live research status — what the gate reads.">RESEARCH ${esc(research.toUpperCase())}</span>
+    <span class="chip" title="${esc(pack.summary)}">PACK ${esc(pack.label.toUpperCase())}</span>
+    <span class="spacer"></span>
+  </div>`);
+    const modes = el(
+      `<div class="modes" role="group" aria-label="Detail level"></div>`
+    );
+    for (const m of ["guided", "expert"]) {
+      const btn = el(
+        `<button type="button" class="mode-btn ${state.mode === m ? "active" : ""}" aria-pressed="${state.mode === m}">${m === "guided" ? "Guided" : "Expert"}</button>`
+      );
+      btn.title = m === "guided" ? "The core path, in order. Advanced and legacy modules are hidden." : "Everything, including the legacy role read and the Golden Test.";
+      btn.onclick = () => {
+        setMode(m);
+        render();
+      };
+      modes.append(btn);
+    }
+    identity.append(modes);
+    bar.append(identity);
+    const statuses = phaseStatuses({ statuses: entryStatuses() });
+    const active = phaseOf(state.module) ?? activePhase(statuses);
+    const strip = el(
+      `<div class="tb-row phases" role="list" aria-label="Phases"></div>`
+    );
+    for (const p of statuses) {
+      const phase = PHASES[p.key];
+      const btn = el(
+        `<button type="button" role="listitem" class="phase ${p.key === active ? "active" : ""}" aria-current="${p.key === active ? "step" : "false"}">
+        <span class="ph-label">${esc(phase.label)}</span>
+        <span class="chip ${PHASE_CLASS[p.state]}">${esc(PHASE_STATE_LABELS[p.state].toUpperCase())}</span>
+        <span class="ph-count num">${p.done}/${p.total}</span>
+      </button>`
+      );
+      btn.title = p.ready ? `${phase.question} — ${p.reason}` : `${phase.question} — ${p.earlyReason}`;
+      btn.onclick = () => goToPhase(p.key);
+      strip.append(btn);
+    }
+    bar.append(strip);
+    const current = statuses.find((p) => p.key === active);
+    bar.append(
+      el(
+        `<p class="tb-question why">${esc(PHASES[active].question)}${current && !current.ready ? ` <span class="chip warn">EARLY</span> ${esc(current.earlyReason)}` : ""}</p>`
+      )
+    );
+    const nba = nextAction(aiAvailable());
+    const row = el(`<div class="tb-row nba">
+    <span class="chip ${URGENCY_CLASS[nba.urgency]}">NEXT</span>
+    <div class="nba-text"><b>${esc(nba.step.title)}</b><span class="why">${esc(nba.why)}</span></div>
+    <span class="spacer"></span>
+  </div>`);
+    if (nba.urgency !== "done") {
+      const go = el(
+        `<button class="btn small primary" type="button">Take me there</button>`
+      );
+      go.onclick = () => performAction(nba.step);
+      row.append(go);
+    }
+    bar.append(row);
+  }
+  function goToPhase(key) {
+    const entries = entriesFor(key, state.mode);
+    if (!entries.length) return;
+    state.module = entries[0].key;
+    render();
+  }
+
   // artifact-src/main.ts
-  var ARTIFACT_VERSION = true ? "0.1.0+e45473708b" : "dev";
+  var ARTIFACT_VERSION = true ? "0.1.0+a7c3d7bd60" : "dev";
   setRenderer(() => {
     renderRail();
+    renderHeader();
     renderMain();
   });
   $("#new-search-btn")?.addEventListener("click", () => {
@@ -26508,11 +28704,13 @@ Familiarity with AI safety literature is preferred. A PhD is common among our re
     await selectSearch(state.searches[0].id);
     render();
     const runtime = window.claude;
-    const [db, sample] = await Promise.all([
+    const [db, sample, mcp] = await Promise.all([
       runtime ? runtime.use("db").catch(() => null) : Promise.resolve(null),
-      runtime ? runtime.use("sample").catch(() => null) : Promise.resolve(null)
+      runtime ? runtime.use("sample").catch(() => null) : Promise.resolve(null),
+      runtime ? runtime.use("mcp").catch(() => null) : Promise.resolve(null)
     ]);
     setSample(sample);
+    setMcp(mcp);
     if (db) {
       attachDb(db);
       const existing = await store.listSearches();

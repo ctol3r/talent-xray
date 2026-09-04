@@ -17,7 +17,8 @@ import type { StoredRecord, StoredCandidate } from "../core/store";
 import { store, setDb, storageMode, type DbLike } from "../core/store";
 import type { ResearchSnapshot, ResearchStatus } from "../core/research";
 import { researchStatusOf } from "../core/research";
-import type { ActionItem } from "../core/envelope";
+import type { ActionItem, Initiative, OutputEnvelope } from "../core/envelope";
+import type { PipelineEvent } from "../core/pipeline";
 import {
   allModuleStates,
   affectedByChanges,
@@ -27,6 +28,35 @@ import {
 } from "../core/dependencies";
 import type { IntentPayload, HiringNeedPayload } from "../core/payloads";
 import { nowIso } from "../core/dom";
+import {
+  NAV,
+  researchEntryStatus,
+  type EntryStatus,
+  type Mode,
+} from "../core/phases";
+import { nextBestAction, type NextBestAction } from "../core/next-best-action";
+import { asOf } from "../core/dom";
+import type { IntakePayload } from "../core/payloads";
+
+const MODE_KEY = "talentos-mode";
+
+/** A per-viewer display preference — never part of the search's data. */
+function readMode(): Mode {
+  try {
+    return localStorage.getItem(MODE_KEY) === "expert" ? "expert" : "guided";
+  } catch {
+    return "guided";
+  }
+}
+
+export function setMode(mode: Mode): void {
+  state.mode = mode;
+  try {
+    localStorage.setItem(MODE_KEY, mode);
+  } catch {
+    /* private mode */
+  }
+}
 
 export interface AppState {
   searches: SearchFacts[];
@@ -36,7 +66,11 @@ export interface AppState {
   candidates: StoredCandidate[];
   research: ResearchSnapshot[];
   actions: ActionItem[];
+  initiatives: Initiative[];
+  events: PipelineEvent[];
   module: string;
+  /** Guided hides advanced entries; Expert shows everything. Per viewer. */
+  mode: Mode;
   inflight: Partial<Record<ModuleKey, "researching" | "generating">>;
   /** Per-search acknowledgement of generating without current research. */
   acknowledgedNoResearch: Set<string>;
@@ -52,7 +86,10 @@ export const state: AppState = {
   candidates: [],
   research: [],
   actions: [],
+  initiatives: [],
+  events: [],
   module: "overview",
+  mode: readMode(),
   inflight: {},
   acknowledgedNoResearch: new Set(),
   now: nowIso(),
@@ -174,6 +211,55 @@ export function moduleStates(): Record<ModuleKey, ModuleState> {
   });
 }
 
+/** The chip every nav entry shows. Research has no record, so it reads live. */
+export function entryStatuses(): Record<string, EntryStatus | undefined> {
+  const states = moduleStates();
+  const snap = latestSnapshot();
+  const out: Record<string, EntryStatus | undefined> = {};
+  for (const entry of NAV) {
+    if (entry.moduleKey) {
+      const st = states[entry.moduleKey];
+      out[entry.key] = { state: st.state, reason: st.reason };
+    } else if (entry.key === "research") {
+      out[entry.key] = researchEntryStatus(
+        liveResearchStatus(),
+        snap ? asOf(snap.completedAt ?? snap.startedAt) : undefined,
+      );
+    }
+  }
+  return out;
+}
+
+/** Everything the next-best-action rules read, gathered from state. */
+export function nextAction(aiAvailable: boolean): NextBestAction {
+  const intake = state.artifacts.intake?.payload as IntakePayload | undefined;
+  let unanswered = 0;
+  for (const cat of intake?.categories ?? []) {
+    for (const q of cat.questions ?? []) {
+      if (!q.answer || !q.answer.trim()) unanswered += 1;
+    }
+  }
+  const intent = currentIntent();
+  return nextBestAction({
+    hasSearch: Boolean(state.current),
+    states: moduleStates(),
+    researchStatus: liveResearchStatus(),
+    acknowledgedNoResearch: state.acknowledgedNoResearch.has(
+      state.current?.id ?? "",
+    ),
+    candidateCount: state.candidates.length,
+    candidatesWithoutEvidence: state.candidates.filter(
+      (c) => !c.evidence?.payload,
+    ).length,
+    actions: state.actions,
+    unansweredIntake: unanswered,
+    nextQuestion: intent?.nextQuestion?.question ?? null,
+    pipelineEvents: state.events.length,
+    goldenRun: Boolean(state.artifacts.golden_test?.payload),
+    aiAvailable,
+  });
+}
+
 export async function selectSearch(id: string): Promise<void> {
   state.current = state.searches.find((s) => s.id === id) ?? null;
   state.module = "overview";
@@ -184,21 +270,34 @@ export async function selectSearch(id: string): Promise<void> {
     state.contexts = [];
     state.research = [];
     state.actions = [];
+    state.initiatives = [];
+    state.events = [];
     return;
   }
-  const [artifacts, candidates, contexts, research, actions] =
-    await Promise.all([
-      store.loadArtifacts(id),
-      store.listCandidates(id),
-      store.listContexts(id),
-      store.listResearch(id),
-      store.listActions(id),
-    ]);
+  const [
+    artifacts,
+    candidates,
+    contexts,
+    research,
+    actions,
+    initiatives,
+    events,
+  ] = await Promise.all([
+    store.loadArtifacts(id),
+    store.listCandidates(id),
+    store.listContexts(id),
+    store.listResearch(id),
+    store.listActions(id),
+    store.listInitiatives(id),
+    store.listEvents(id),
+  ]);
   state.artifacts = artifacts;
   state.candidates = candidates;
   state.contexts = contexts;
   state.research = research;
   state.actions = actions;
+  state.initiatives = initiatives;
+  state.events = events;
   // First load of a legacy search: seed its first context revision.
   await recordContextRevision();
 }
@@ -236,6 +335,41 @@ export async function putAction(action: ActionItem): Promise<void> {
     ? state.actions.map((a) => (a.id === action.id ? action : a))
     : [...state.actions, action];
   if (state.current) await store.saveAction(state.current.id, action);
+}
+
+export async function putInitiative(initiative: Initiative): Promise<void> {
+  state.initiatives = state.initiatives.some((i) => i.id === initiative.id)
+    ? state.initiatives.map((i) => (i.id === initiative.id ? initiative : i))
+    : [...state.initiatives, initiative];
+  if (state.current) await store.saveInitiative(state.current.id, initiative);
+}
+
+/**
+ * Action items a module DRAFTED, that the recruiter has not accepted into
+ * the queue. Agents draft; humans decide — so an envelope's action item is
+ * a suggestion until someone adds it.
+ */
+export function suggestedActions(): Array<{
+  action: ActionItem;
+  fromModule: string;
+}> {
+  const taken = new Set(state.actions.map((a) => a.id));
+  const out: Array<{ action: ActionItem; fromModule: string }> = [];
+  for (const [key, rec] of Object.entries(state.artifacts)) {
+    const env = rec.envelope as OutputEnvelope | undefined;
+    for (const action of env?.actionItems ?? []) {
+      if (!taken.has(action.id)) out.push({ action, fromModule: key });
+    }
+  }
+  return out;
+}
+
+/** Events are append-only; recording one never rewrites another. */
+export async function appendEvent(event: PipelineEvent): Promise<void> {
+  state.events = [...state.events, event].sort((a, b) =>
+    a.at.localeCompare(b.at),
+  );
+  if (state.current) await store.appendEvent(state.current.id, event);
 }
 
 export async function saveFacts(facts: SearchFacts): Promise<void> {

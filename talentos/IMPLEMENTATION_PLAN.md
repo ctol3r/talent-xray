@@ -461,3 +461,144 @@ covered by importing the modules directly.
 Nothing in Phases 2–5 has a half-built counterpart in the tree: the
 contracts they need are complete and tested, and the surfaces they need are
 absent rather than stubbed.
+
+## W14 — TalentOS Universal, Phase 2: the shape of the work (CLOSED 2026-09-04)
+
+Owner instruction 2026-09-04 ("a", then "b"): take Phase 2 of the five-phase
+program, then start Phase 3's connector work.
+
+### Five phases, derived (D-020)
+
+`core/phases.ts` groups every module into **Define · Research · Plan ·
+Execute · Learn** and computes each phase's status from the module states
+`core/dependencies.ts` already derives. Nothing about a phase is stored.
+Two screens join the rail: **Research** (the panel that used to sit at the
+bottom of the brief now has the phase to itself) and **Actions**.
+
+A phase is complete only when every required entry is `current` or `aging`.
+A later phase is marked EARLY with the output it is waiting on, and is still
+reachable — Guided mode hides advanced entries, never a phase.
+
+### The persistent header
+
+Sticky above the module: role and company, the content-addressed brief
+version, the live research status, the selected industry pack, the mode
+switch, the five phases with their state and counts, the question the
+current phase answers, and **one next best action** with the reason it was
+chosen and a button that routes it.
+
+`core/next-best-action.ts` is a pure function over the same inputs the rail
+reads. Precedence: failure → safety flag → blocked action → first missing
+required output in phase order → the intake loop's own question → staleness
+→ research currency → outstanding intake answers → candidate review →
+queue → defect checks → "nothing is waiting". It never proposes sending
+outreach, advancing a stage, or approving anything.
+
+### Industry packs
+
+`core/industry-packs.ts` ships Universal plus healthcare, AI/ML research,
+sales, skilled trades and finance. A pack carries intake themes, what counts
+as evidence in that field, field-specific cautions, the platform tags worth
+compiling for and the research source kinds that bear on its claims. It is
+selected on the brief (a consequential field, so switching it re-versions
+the search), rendered into the prompt context, and read by the query
+compiler. `suggestPack()` only ever suggests; the recruiter selects.
+
+**A latent defect the packs exposed.** The model returns
+`relevantPlatforms` as platform NAMES while platform selection is by TAG, so
+a returned "Google (Scholar/arXiv x-ray)" never matched the "research" tag
+and those platforms were unreachable for every search since W10.
+`tagsFromPlatformNames()` maps names, ids and bare tag words onto tags.
+
+### Action queue and initiatives
+
+A module's envelope DRAFTS action items; they appear under "Drafted by your
+modules" and reach the queue only when a human adds them. In the queue an
+action has an owner and a status; marking one blocked asks what it is
+waiting on, and completing one asks what actually happened. Initiatives
+group actions and count progress from them. `Initiative` is a new stored
+document alongside actions; nothing existing changed shape.
+
+### Phase 3, started and honestly incomplete (D-021)
+
+`core/connectors.ts` resolves the `mcp` capability, asks `listTools()` what
+the viewer actually has, and reports per connector: no connector access /
+not connected / reconnect needed / tools missing / **connected but not
+wired** / ready. Every documented error code has a branch naming the fix it
+actually has. The three adapters now declare their real server and tool
+names.
+
+All three remain `wired: false` and retrieve nothing. **The reason is
+stated rather than worked around:** wiring a tool call requires observing a
+real request/response pair, and the Bigdata.com call in this session was
+refused by the environment's permission classifier before it reached the
+connector. The artifact also does not declare `capabilities.mcp` — that is
+a viewer-consented grant which bars public sharing, and it should not be
+spent on connectors the build cannot yet call.
+
+### Acceptance — what was actually run
+
+- `pnpm test` — 30 files, 299 tests. New: `artifact-phases` (12),
+  `artifact-industry-packs` (10), `artifact-next-best-action` (18),
+  `artifact-connectors` (11).
+- `pnpm e2e:artifact` — 17 Playwright tests against the committed HTML,
+  including the header's chips and phase strip, the next-best-action
+  button, Guided vs Expert (and that the choice survives a reload), and the
+  action queue: a drafted action reaching the queue only when a human adds
+  it, and completion demanding a note.
+- `pnpm verify` — green, including the artifact build-drift check.
+
+## W15 — TalentOS Universal, Phase 4: the metric contract gets a producer (CLOSED 2026-09-04)
+
+Owner instruction 2026-09-04 ("c"). W13 shipped `MetricResult` and
+`rateMetric` with no module emitting a metric; `OutputEnvelope.metrics` was
+always empty, which was honest and useless. This wave gives them a source.
+
+### Pipeline events (D-022)
+
+`core/pipeline.ts`: eight stages (sourced → hired) and three exits
+(rejected, withdrew, on hold). An event is append-only and human-recorded —
+`stage_change`, `outreach_recorded`, `reply_recorded`, `exit`, `note` — with
+no update and no delete in the store. A candidate's funnel position is the
+FURTHEST stage they reached, so an earlier stage's denominator does not
+shrink as the search progresses; their CURRENT position is their exit if
+they have one.
+
+The Pipeline screen (Execute phase) is a board of who is where plus the
+metrics. Recording a stage asks for confirmation and says why; recording an
+exit prompts for the reason.
+
+### The four groups
+
+| Group                 | Answers                                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Funnel                | Where the search loses people — seven stage-to-stage conversions                                                                 |
+| Responsiveness        | Whether the approach lands — reply rate, interested share, median time to reply                                                  |
+| Quality of submission | Whether the hiring manager agrees — submitted→interviewing, interviewing→offer, offer→hired, share of exits that were rejections |
+| Velocity              | How long it really takes — median sourced→contacted, sourced→submitted, days open                                                |
+
+Every rate states its formula and denominator and declares a minimum sample;
+below it, it reports `not_enough_data` with what it has and what it needs.
+Durations carry their sample size as the denominator. "Days open" with no
+recorded open date says so rather than reporting zero.
+
+### Acceptance — what was actually run
+
+- `pnpm test` — 31 files, 317 tests. New `artifact-pipeline` (16) covers
+  furthest-vs-current position, reached counts, the four groups' shape,
+  minimum samples, the empty-pipeline case, the missing open date, the
+  absence of any attribute breakdown, and that no rate exceeds its
+  population. Defect check 12 asserts the same three properties inside the
+  page's Golden Test.
+- `pnpm e2e:artifact` — 20 tests, including that declining the stage
+  confirmation records nothing, that accepting it drives the funnel, and
+  that an unmeasurable metric says how much data it needs.
+- `pnpm verify` — green, including the artifact build-drift check.
+
+### Not in this wave
+
+The HM command centre, the decision log and the pivot engine were listed
+under Phase 4 in the W13 continuation note and are NOT here — this wave is
+pipeline events and metrics, which is what was asked for. `pivotProposalSchema`
+still has no producer, and `compareMetric` has no caller: there is no stored
+period to compare against yet.

@@ -10,7 +10,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Dialog, type Page } from "@playwright/test";
 
 const ORIGIN = "https://talentos.test";
 const fragment = fs.readFileSync(
@@ -221,6 +221,8 @@ const openModule = (page: Page, label: string) =>
 /** The module's own Generate button, not the recovery shortcut with the same words. */
 const generateButton = (page: Page) =>
   page.locator(".mod-head button.btn", { hasText: /^(Generate|Regenerate)$/ });
+const setMode = (page: Page, mode: "Guided" | "Expert") =>
+  page.getByRole("button", { name: mode, exact: true }).click();
 
 test.describe("boot and shell", () => {
   test("loads offline, shows the example search and honest module states", async ({
@@ -234,6 +236,10 @@ test.describe("boot and shell", () => {
     const states = await page.locator(".mod-item .mod-state").allTextContents();
     expect(states.length).toBeGreaterThan(8);
     expect(new Set(states)).toContain("Not started");
+    // The rail is grouped into the five phases.
+    expect(await page.locator(".phase-group").count()).toBeGreaterThanOrEqual(
+      4,
+    );
     await expect(page.locator("#rail-foot")).toContainText(
       "Agents draft. Humans decide. Nothing sends automatically.",
     );
@@ -312,16 +318,22 @@ test.describe("P0-A · a frozen provider payload", () => {
 });
 
 test.describe("the research gate", () => {
-  test("the overview says plainly that there is no research and no way to get any here", async ({
+  test("the Research screen says plainly that there is no research and no way to get any here", async ({
     page,
   }) => {
     await openArtifact(page);
+    await openModule(page, "Research");
+    await expect(page.locator(".mod-head h2")).toHaveText("Research");
     await expect(page.locator("#research-panel")).toContainText("BLOCKED");
     await expect(page.locator("#research-panel")).toContainText(
       "no web access",
     );
-    await expect(page.locator("#research-panel")).toContainText("NOT WIRED");
     await expect(page.locator("#research-panel")).toContainText("Bigdata.com");
+    // Published without the mcp manifest, so the honest state is "no
+    // connector access" — not a claim that the connector is unavailable.
+    await expect(page.locator("#research-panel")).toContainText(
+      "NO CONNECTOR ACCESS",
+    );
     await expect(page.locator("#research-panel")).toContainText(
       "Where evidence can come from for this search",
     );
@@ -409,7 +421,7 @@ test.describe("P0-B · failures are state, not a flash of red", () => {
       page.locator(".mod-item", { hasText: "HM Intake" }),
     ).toContainText("Failed");
 
-    await openModule(page, "Overview");
+    await openModule(page, "Brief");
     await openModule(page, "HM Intake");
     await expect(
       page.locator(".mod-item", { hasText: "HM Intake" }),
@@ -458,6 +470,7 @@ test.describe("the Golden Test says exactly what it ran", () => {
     page,
   }) => {
     await openArtifact(page);
+    await setMode(page, "Expert");
     await openModule(page, "Golden Test");
     const before = await page.evaluate(
       () => ((window as unknown as { __calls: string[] }).__calls ?? []).length,
@@ -471,5 +484,236 @@ test.describe("the Golden Test says exactly what it ran", () => {
       () => ((window as unknown as { __calls: string[] }).__calls ?? []).length,
     );
     expect(after).toBe(before);
+  });
+});
+
+test.describe("the persistent header", () => {
+  test("names the search, the brief version, the research status and the pack", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    const chips = await page.locator("#topbar .chip").allTextContents();
+    expect(chips.some((c) => c.startsWith("BRIEF "))).toBe(true);
+    expect(chips).toContain("RESEARCH BLOCKED");
+    expect(chips.some((c) => c.startsWith("PACK "))).toBe(true);
+    await expect(page.locator("#topbar .tb-title")).toContainText(
+      "Research Scientist",
+    );
+  });
+
+  test("shows the five phases with derived state, and the question each one answers", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    const phases = page.locator("#topbar .phase");
+    await expect(phases).toHaveCount(5);
+    await expect(phases.first()).toContainText("Define");
+    await expect(phases.first()).toContainText("NOT STARTED");
+    await expect(page.locator(".tb-question")).toContainText(
+      "What are we actually hiring for?",
+    );
+
+    await phases.nth(2).click();
+    await expect(page.locator(".tb-question")).toContainText(
+      "Where are these people",
+    );
+  });
+
+  test("derives one next best action and takes you there", async ({ page }) => {
+    await openArtifact(page);
+    await expect(page.locator(".nba")).toContainText("Generate Canonical IR");
+    await page.getByRole("button", { name: "Take me there" }).click();
+    await expect(page.locator(".mod-head h2")).toHaveText("Canonical IR");
+  });
+
+  test("Guided hides the advanced modules; Expert shows them", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await expect(
+      page.locator(".mod-item", { hasText: "Golden Test" }),
+    ).toHaveCount(0);
+    await expect(
+      page.locator(".mod-item", { hasText: "Role Intelligence" }),
+    ).toHaveCount(0);
+
+    await setMode(page, "Expert");
+    await expect(
+      page.locator(".mod-item", { hasText: "Golden Test" }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(".mod-item", { hasText: "Role Intelligence" }),
+    ).toHaveCount(1);
+
+    // The choice is remembered for this viewer.
+    await page.reload();
+    await page.waitForFunction(() =>
+      Boolean((window as unknown as { __talentos?: unknown }).__talentos),
+    );
+    await expect(
+      page.locator(".mod-item", { hasText: "Golden Test" }),
+    ).toHaveCount(1);
+  });
+});
+
+test.describe("the action queue", () => {
+  test("a module drafts an action; it reaches the queue only when a human adds it", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Market Intel");
+    page.once("dialog", (d) => d.accept());
+    await generateButton(page).click();
+    await expect(
+      page.getByText("Supply is thinner than the brief assumes"),
+    ).toBeVisible();
+
+    await openModule(page, "Actions");
+    const suggested = page.locator("#suggested-actions");
+    await expect(suggested).toContainText(
+      "Confirm the pay band with the hiring manager",
+    );
+    await expect(suggested).toContainText("from Market Intel");
+    await expect(page.locator(".action-row")).toHaveCount(0);
+
+    await suggested.getByRole("button", { name: "Add to queue" }).click();
+    await expect(page.locator(".action-row")).toHaveCount(1);
+    await expect(page.locator(".action-row")).toContainText("OPEN");
+    await expect(suggested).not.toContainText("Confirm the pay band");
+  });
+
+  test("completing an action asks what happened, and the note is kept", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Market Intel");
+    page.once("dialog", (d) => d.accept());
+    await generateButton(page).click();
+    await openModule(page, "Actions");
+    await page
+      .locator("#suggested-actions")
+      .getByRole("button", { name: "Add to queue" })
+      .click();
+
+    page.once("dialog", (d) => {
+      expect(d.message()).toContain("What actually happened?");
+      return d.accept("Band confirmed at £41k; the ceiling is real.");
+    });
+    await page.locator(".action-row select").nth(1).selectOption("completed");
+    await expect(page.locator(".action-row")).toContainText("COMPLETED");
+    await expect(page.locator(".action-row")).toContainText(
+      "Band confirmed at £41k",
+    );
+  });
+
+  test("an initiative groups the queue and counts progress from the actions", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Actions");
+    await page
+      .getByPlaceholder("Initiative title (e.g. 'Close the pay-band question')")
+      .fill("Close the pay-band question");
+    await page
+      .getByPlaceholder("Why it exists")
+      .fill("Three candidates stalled on compensation.");
+    await page.getByRole("button", { name: "Create initiative" }).click();
+    await expect(
+      page.locator(".panel h3", { hasText: "Close the pay-band question" }),
+    ).toContainText("0/0 complete");
+  });
+});
+
+test.describe("the pipeline", () => {
+  test("says plainly that an empty pipeline is not a zero", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Pipeline");
+    await expect(page.locator("#main")).toContainText(
+      "an empty funnel is not a zero conversion rate",
+    );
+  });
+
+  test("recording a stage is a confirmed human decision, and it drives the metrics", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Candidates");
+    await page.locator('input[name="name"]').fill("Synthetic Test Candidate");
+    await page.getByRole("button", { name: "Add candidate" }).click();
+    await expect(page.locator("#main")).toContainText(
+      "Synthetic Test Candidate",
+    );
+
+    await openModule(page, "Pipeline");
+    await expect(page.locator("#main")).toContainText("NOT RECORDED");
+
+    // Declining the confirmation records nothing.
+    page.once("dialog", (d) => d.dismiss());
+    await page
+      .getByLabel("Record a stage for Synthetic Test Candidate")
+      .selectOption("submitted");
+    await expect(page.locator("#main")).toContainText("NOT RECORDED");
+
+    // Accepting records it, and the funnel counts it. One handler: Playwright
+    // delivers a dialog to every listener, so two `once` handlers would both
+    // fire on the confirm and the second would throw.
+    const messages: string[] = [];
+    const accept = (d: Dialog) => {
+      messages.push(d.message());
+      void d.accept("HM asked to see them");
+    };
+    page.on("dialog", accept);
+    await page
+      .getByLabel("Record a stage for Synthetic Test Candidate")
+      .selectOption("submitted");
+    await expect(page.locator(".qrow .chip").first()).toHaveText(
+      "SUBMITTED TO HM",
+    );
+    await expect(page.locator(".qrow details summary").first()).toHaveText(
+      "1 recorded event",
+    );
+    page.off("dialog", accept);
+    expect(messages[0]).toContain("never moves anyone on its own");
+    expect(messages[1]).toContain("What happened?");
+  });
+
+  test("every metric shows its formula, and an unmeasurable one says how much data it needs", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Candidates");
+    await page.locator('input[name="name"]').fill("Synthetic Test Candidate");
+    await page.getByRole("button", { name: "Add candidate" }).click();
+    await openModule(page, "Pipeline");
+
+    const groups = page.locator(".panel h3");
+    await expect(page.locator("#main")).toContainText("Funnel");
+    await expect(page.locator("#main")).toContainText("Responsiveness");
+    await expect(page.locator("#main")).toContainText("Quality of submission");
+    await expect(page.locator("#main")).toContainText("Velocity");
+    expect(await groups.count()).toBeGreaterThanOrEqual(5);
+
+    await expect(page.locator(".metrics").first()).toContainText(
+      "not enough data",
+    );
+    await expect(page.locator(".metrics").first()).toContainText("÷");
+    // No conversion is reported from an empty funnel — a 0% would be a lie
+    // that reads like a measurement.
+    await expect(
+      page
+        .locator(".panel", { hasText: "Funnel" })
+        .locator(".metrics .chip.ok"),
+    ).toHaveCount(0);
+    // "Days open" IS measurable: the search records when it opened.
+    await expect(
+      page.locator(".panel", { hasText: "Velocity" }).locator(".metrics"),
+    ).toContainText("Days open");
+    await expect(
+      page
+        .locator(".panel", { hasText: "Velocity" })
+        .locator(".metrics .chip.ok"),
+    ).toHaveCount(1);
   });
 });

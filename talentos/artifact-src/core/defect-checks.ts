@@ -28,6 +28,7 @@ import {
 } from "./envelope";
 import { compileQueries, countTerms } from "./query-compiler";
 import { findIdentityMatches } from "./identity";
+import { computeMetrics, pipelineEventSchema } from "./pipeline";
 
 export interface CheckResult {
   id: string;
@@ -460,6 +461,63 @@ export const DEFECT_CHECKS: DefectCheck[] = [
         "Verified downgraded immutably",
         ok,
         `downgrades=${out.downgrades}`,
+      );
+    },
+  },
+  {
+    id: "empty_pipeline_not_zero",
+    name: "12. An empty pipeline reports not-enough-data, never a 0% conversion",
+    run: () => {
+      const empty = computeMetrics({
+        candidateIds: ["c1", "c2"],
+        events: [],
+        nowIso: NOW,
+      });
+      const rates = empty.flatMap((g) => g.metrics);
+      const zeroed = rates.filter(
+        (m) => m.status === "measured" && m.value === 0,
+      );
+      const grouped = JSON.stringify(empty).toLowerCase();
+      const demographic = [
+        "gender",
+        "ethnicit",
+        '"age"',
+        "religion",
+        "disabilit",
+      ].filter((t) => grouped.includes(t));
+      const events = [
+        {
+          id: "e1",
+          candidateId: "c1",
+          at: NOW,
+          type: "outreach_recorded" as const,
+        },
+        {
+          id: "e2",
+          candidateId: "c1",
+          at: NOW,
+          type: "reply_recorded" as const,
+          outcome: "interested" as const,
+        },
+      ].map((e) => pipelineEventSchema.parse(e));
+      const real = computeMetrics({
+        candidateIds: ["c1", "c2"],
+        events,
+        nowIso: NOW,
+      });
+      const overOne = real
+        .flatMap((g) => g.metrics)
+        .filter(
+          (m) =>
+            m.status === "measured" && (m.value ?? 0) > 1 && m.unit !== "days",
+        );
+      const ok =
+        zeroed.length === 0 && demographic.length === 0 && overOne.length === 0;
+      return result(
+        "empty_pipeline_not_zero",
+        "Empty pipeline is not a zero",
+        ok,
+        `${zeroed.length} metric(s) reported 0 from no data; ${demographic.length} demographic term(s) in the registry; ${overOne.length} rate(s) above 100%.`,
       );
     },
   },

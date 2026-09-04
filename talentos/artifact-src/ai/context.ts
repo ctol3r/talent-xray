@@ -12,6 +12,7 @@ import type { StoredRecord } from "../core/store";
 import type { IntentPayload, IntakePayload } from "../core/payloads";
 import type { ResearchSnapshot } from "../core/research";
 import { sourceFreshness } from "../core/research";
+import { packById, renderPackSection } from "../core/industry-packs";
 
 export interface ContextInput {
   ctx: SearchContext;
@@ -58,6 +59,11 @@ export function renderContext(input: ContextInput): string {
     .join("\n");
 
   const sections = [`## Search project\n${facts}`];
+
+  const pack = packById(ctx.selectedIndustryPack);
+  if (pack.id !== "universal" || pack.cautions.length) {
+    sections.push(renderPackSection(pack));
+  }
 
   if (intent) {
     sections.push(

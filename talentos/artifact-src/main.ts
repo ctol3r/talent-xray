@@ -10,11 +10,14 @@ import "./ui/overview";
 import "./ui/intake-loop";
 import "./ui/candidates";
 import "./ui/golden";
+import "./ui/actions";
+import "./ui/pipeline";
 import { $ } from "./core/dom";
 import { EXAMPLE_SEARCH } from "./app/example";
 import { attachDb, reloadSearches, selectSearch, state } from "./app/state";
 import { store, type DbLike } from "./core/store";
 import { setSample, type SampleApi } from "./ai/tasks";
+import { setMcp, type McpApi } from "./core/connectors";
 import {
   hideAi,
   render,
@@ -23,6 +26,7 @@ import {
   setRenderer,
   aiAvailable,
 } from "./ui/shell";
+import { renderHeader } from "./ui/header";
 
 declare const __TALENTOS_ARTIFACT_VERSION__: string;
 export const ARTIFACT_VERSION =
@@ -33,6 +37,7 @@ export const ARTIFACT_VERSION =
 interface ClaudeRuntime {
   use(name: "db"): Promise<DbLike | null>;
   use(name: "sample"): Promise<SampleApi | null>;
+  use(name: "mcp"): Promise<McpApi | null>;
   use(name: string): Promise<unknown>;
 }
 declare global {
@@ -44,6 +49,7 @@ declare global {
 
 setRenderer(() => {
   renderRail();
+  renderHeader();
   renderMain();
 });
 
@@ -68,11 +74,13 @@ async function boot(): Promise<void> {
   render();
 
   const runtime = window.claude;
-  const [db, sample] = await Promise.all([
+  const [db, sample, mcp] = await Promise.all([
     runtime ? runtime.use("db").catch(() => null) : Promise.resolve(null),
     runtime ? runtime.use("sample").catch(() => null) : Promise.resolve(null),
+    runtime ? runtime.use("mcp").catch(() => null) : Promise.resolve(null),
   ]);
   setSample(sample);
+  setMcp(mcp);
   if (db) {
     attachDb(db);
     const existing = await store.listSearches();

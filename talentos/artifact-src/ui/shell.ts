@@ -6,7 +6,6 @@
  */
 import { $, el, esc, asOf, nowIso, uid } from "../core/dom";
 import {
-  MODULES,
   MODULE_KEYS,
   STATE_LABELS,
   type ModuleKey,
@@ -36,6 +35,14 @@ import {
   type SourceKind,
   sourceKindSchema,
 } from "../core/research";
+import {
+  NAV,
+  NAV_ORDER,
+  PHASES,
+  PHASE_KEYS,
+  entriesFor,
+  navEntry,
+} from "../core/phases";
 import { TASKS } from "../ai/prompts";
 import {
   generateModule,
@@ -46,6 +53,7 @@ import {
 import {
   currentContext,
   currentStorageMode,
+  entryStatuses,
   latestSnapshot,
   liveResearchStatus,
   moduleStates,
@@ -95,7 +103,8 @@ export function hideAi(): void {
 }
 export const aiAvailable = (): boolean => hasSample() && !aiHidden;
 
-export const MODULE_ORDER: string[] = ["overview", ...MODULE_KEYS];
+/** Route order is the nav's order — one list, five phases. */
+export const MODULE_ORDER: string[] = NAV_ORDER;
 
 type Renderer = (main: HTMLElement) => void;
 const customRenderers: Partial<Record<string, Renderer>> = {};
@@ -144,20 +153,25 @@ export function renderRail(): void {
   if (!nav) return;
   nav.innerHTML = "";
   if (!state.current) return;
-  const states = moduleStates();
-  for (const key of MODULE_ORDER) {
-    const label =
-      key === "overview" ? "Overview" : MODULES[key as ModuleKey].label;
-    const st = key === "overview" ? undefined : states[key as ModuleKey];
-    const stateText = st ? STATE_LABELS[st.state] : "";
-    const item = el<HTMLButtonElement>(
-      `<button class="mod-item ${state.module === key ? "active" : ""}" type="button" aria-current="${state.module === key ? "page" : "false"}" title="${esc(st?.reason ?? "")}"><span class="dot ${st ? STATE_CLASS[st.state] : ""}" aria-hidden="true"></span><span class="mod-label">${esc(label)}</span>${st ? `<span class="mod-state">${esc(stateText)}</span>` : ""}</button>`,
+  const statuses = entryStatuses();
+  for (const phase of PHASE_KEYS) {
+    const entries = entriesFor(phase, state.mode);
+    if (!entries.length) continue;
+    const group = el(
+      `<div class="phase-group"><div class="rail-label" title="${esc(PHASES[phase].purpose)}">${esc(PHASES[phase].label)}</div></div>`,
     );
-    item.onclick = () => {
-      state.module = key;
-      render();
-    };
-    nav.append(item);
+    for (const entry of entries) {
+      const st = statuses[entry.key];
+      const item = el<HTMLButtonElement>(
+        `<button class="mod-item ${state.module === entry.key ? "active" : ""}" type="button" aria-current="${state.module === entry.key ? "page" : "false"}" title="${esc(st?.reason ?? entry.hint)}"><span class="dot ${st ? STATE_CLASS[st.state] : ""}" aria-hidden="true"></span><span class="mod-label">${esc(entry.label)}</span>${st ? `<span class="mod-state">${esc(STATE_LABELS[st.state])}</span>` : ""}</button>`,
+      );
+      item.onclick = () => {
+        state.module = entry.key;
+        render();
+      };
+      group.append(item);
+    }
+    nav.append(group);
   }
   const foot = $("#rail-foot");
   if (foot) {
@@ -181,6 +195,18 @@ export function renderMain(): void {
   const custom = customRenderers[state.module];
   if (custom) {
     custom(main);
+    return;
+  }
+  if (state.module === "research") {
+    renderResearchModule(main);
+    return;
+  }
+  if (!NAV.some((e) => e.key === state.module)) {
+    main.append(
+      el(
+        `<div class="notice warning">No module called "${esc(state.module)}". Pick one from the rail.</div>`,
+      ),
+    );
     return;
   }
   renderTaskModule(main, state.module as ModuleKey);
@@ -210,6 +236,10 @@ export function renderTaskModule(main: HTMLElement, key: ModuleKey): void {
     ),
   );
   main.append(el(`<p class="mod-desc">${esc(task.desc)}</p>`));
+  const hint = navEntry(key)?.hint;
+  if (state.mode === "guided" && hint) {
+    main.append(el(`<p class="why guided-hint">${esc(hint)}</p>`));
+  }
   main.append(stateBadge(st));
   if (st.recovery && st.state !== "current" && st.state !== "generating") {
     const rb = el<HTMLButtonElement>(
@@ -442,6 +472,44 @@ export function paintArtifact(
   );
 }
 
+const CONNECTOR_LABEL: Record<string, string> = {
+  capability_unavailable: "NO CONNECTOR ACCESS",
+  not_connected: "NOT CONNECTED",
+  needs_reauth: "RECONNECT NEEDED",
+  missing_tools: "TOOLS MISSING",
+  connected_not_wired: "CONNECTED · NOT WIRED",
+  ready: "READY",
+};
+const CONNECTOR_CLASS: Record<string, string> = {
+  capability_unavailable: "unknown",
+  not_connected: "unknown",
+  needs_reauth: "bad",
+  missing_tools: "warn",
+  connected_not_wired: "warn",
+  ready: "ok",
+};
+
+// ── Research module ─────────────────────────────────────────────────────────
+
+/**
+ * The Research phase's own screen. It is deliberately blunt about the fact
+ * that this runtime cannot browse: everything here is either a source the
+ * recruiter checked themselves, or a connector that is not wired yet.
+ */
+export function renderResearchModule(main: HTMLElement): void {
+  main.append(
+    el(
+      `<div class="mod-head"><h2>Research</h2><span class="spacer"></span></div>`,
+    ),
+  );
+  main.append(
+    el(
+      `<p class="mod-desc">Evidence with a date on it. This page never fetches anything: a source is either one you checked and pasted, or one a connector returned. An output can only be "current" or "aging" with a snapshot attached — without one it is generated on model knowledge and labelled that way.</p>`,
+    ),
+  );
+  renderResearchPanel(main);
+}
+
 // ── Research panel ──────────────────────────────────────────────────────────
 
 export function renderResearchPanel(root: HTMLElement): void {
@@ -459,11 +527,29 @@ export function renderResearchPanel(root: HTMLElement): void {
       `<div><h4 class="first">Where evidence can come from for this search</h4><ul>${adapters
         .map(
           ({ adapter, applicability }) =>
-            `<li><b>${esc(adapter.label)}</b> <span class="chip ${applicability.viable ? "ok" : "unknown"}">${applicability.viable ? "APPLIES" : "N/A"}</span> <span class="why">${esc(applicability.reason)}</span>${adapter.id !== "user_supplied" ? ' <span class="chip warn">NOT WIRED</span>' : ""}</li>`,
+            `<li><b>${esc(adapter.label)}</b> <span class="chip ${applicability.viable ? "ok" : "unknown"}">${applicability.viable ? "APPLIES" : "N/A"}</span> <span class="why">${esc(applicability.reason)}</span>${adapter.connectors.length ? ` <span class="conn" data-adapter="${esc(adapter.id)}"><span class="chip">CHECKING…</span></span>` : ""}</li>`,
         )
         .join("")}</ul></div>`,
     ),
   );
+  // The connector's real state — per viewer, per connector — filled in
+  // when it answers. Never asserted before it does.
+  for (const { adapter } of adapters) {
+    if (!adapter.connectors.length) continue;
+    void adapter.availability().then((availability) => {
+      const host = $(`.conn[data-adapter="${adapter.id}"]`, panel);
+      if (!host) return;
+      const statuses = availability.connectors ?? [];
+      host.innerHTML = statuses.length
+        ? statuses
+            .map(
+              (c) =>
+                `<span class="chip ${CONNECTOR_CLASS[c.state] ?? "warn"}" title="${esc(c.reason)}">${esc(c.server)}: ${esc(CONNECTOR_LABEL[c.state] ?? c.state)}</span>`,
+            )
+            .join(" ")
+        : `<span class="chip warn">NOT WIRED</span>`;
+    });
+  }
   if (snap) {
     panel.append(
       el(
@@ -540,6 +626,13 @@ export function renderResearchPanel(root: HTMLElement): void {
 
 // ── A–H action router ───────────────────────────────────────────────────────
 
+function focusActionRow(id: string): void {
+  const row = document.querySelector(`[data-action-id="${CSS.escape(id)}"]`);
+  if (!row) return;
+  row.scrollIntoView({ block: "center" });
+  row.classList.add("flash");
+}
+
 export function performAction(step: SuggestedNextStep): void {
   if (requiresConfirmation(step)) {
     const ok = window.confirm(
@@ -567,7 +660,7 @@ export function performAction(step: SuggestedNextStep): void {
       break;
     case "refresh_research":
     case "add_source":
-      go("overview");
+      go("research");
       setTimeout(
         () => $("#research-panel")?.scrollIntoView({ block: "start" }),
         0,
@@ -595,8 +688,15 @@ export function performAction(step: SuggestedNextStep): void {
     case "run_golden":
       go("golden_test");
       break;
+    case "open_action":
+    case "complete_action":
+    case "create_initiative":
+      go("actions");
+      if (target) setTimeout(() => focusActionRow(target), 0);
+      break;
     default:
-      // Phase 2+ actions (action queue, initiatives, pivots, decisions) land on the overview until their modules exist.
+      // Phase 4/5 actions (pivots, stage moves, recorded decisions) have no
+      // module yet; land on the overview rather than pretending otherwise.
       go("overview");
   }
 }

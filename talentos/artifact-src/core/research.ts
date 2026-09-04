@@ -15,6 +15,7 @@
  */
 import { z } from "zod";
 import type { SearchContext } from "./search-context";
+import { describeConnector, type ConnectorStatus } from "./connectors";
 
 export const researchStatusSchema = z.enum([
   "current",
@@ -338,9 +339,9 @@ export interface AdapterApplicability {
   reason: string;
 }
 export type AdapterAvailability =
-  | { state: "available" }
-  | { state: "unavailable"; reason: string }
-  | { state: "blocked"; reason: string };
+  | { state: "available"; connectors?: ConnectorStatus[] }
+  | { state: "unavailable"; reason: string; connectors?: ConnectorStatus[] }
+  | { state: "blocked"; reason: string; connectors?: ConnectorStatus[] };
 
 export interface ResearchSourceAdapter {
   id: string;
@@ -350,6 +351,8 @@ export interface ResearchSourceAdapter {
   sourceType: ResearchSource["sourceType"];
   /** Chosen by industry, role family and location (owner decision). */
   applies(ctx: SearchContext): AdapterApplicability;
+  /** The viewer's connectors this adapter would call, and the tools it needs. */
+  connectors: Array<{ server: string; tools: string[] }>;
   availability(): Promise<AdapterAvailability>;
   /** Retrieve sources for a brief. Must never fabricate; empty means empty. */
   retrieve(brief: string, ctx: SearchContext): Promise<ResearchSource[]>;
@@ -367,55 +370,95 @@ export const userSuppliedAdapter: ResearchSourceAdapter = {
     viable: true,
     reason: "Always available — paste a link or excerpt.",
   }),
-  availability: async () => ({ state: "available" }),
+  connectors: [],
+  availability: async () => ({ state: "available" as const }),
   retrieve: async () => [],
 };
 
-/** Honest placeholder: declares where a connector WOULD apply, and that it is not wired. */
-function unwiredConnector(
-  id: string,
-  label: string,
-  kinds: SourceKind[],
-  sourceType: ResearchSource["sourceType"],
-  applies: (ctx: SearchContext) => AdapterApplicability,
-): ResearchSourceAdapter {
+/**
+ * A connector-backed adapter. It reports the viewer's REAL connector
+ * state — not connected, lapsed auth, connected — and, separately,
+ * whether this build has an observed request/response for the tools it
+ * would call. `wired: false` means it will not call them: a guessed
+ * argument shape is how a fabricated citation gets made.
+ */
+function connectorAdapter(input: {
+  id: string;
+  label: string;
+  kinds: SourceKind[];
+  sourceType: ResearchSource["sourceType"];
+  connectors: Array<{ server: string; tools: string[] }>;
+  wired: boolean;
+  applies: (ctx: SearchContext) => AdapterApplicability;
+}): ResearchSourceAdapter {
   return {
-    id,
-    label,
-    kinds,
-    sourceType,
-    applies,
-    availability: async () => ({
-      state: "unavailable",
-      reason: `${label} is not wired in this build (Phase 3: requires an observed request/response and viewer consent).`,
-    }),
-    retrieve: async () => [],
+    id: input.id,
+    label: input.label,
+    kinds: input.kinds,
+    sourceType: input.sourceType,
+    applies: input.applies,
+    connectors: input.connectors,
+    availability: async () => {
+      const statuses = await Promise.all(
+        input.connectors.map((c) =>
+          describeConnector({
+            server: c.server,
+            requiredTools: c.tools,
+            wired: input.wired,
+          }),
+        ),
+      );
+      const ready = statuses.filter((s) => s.state === "ready");
+      if (ready.length > 0) {
+        return { state: "available" as const, connectors: statuses };
+      }
+      const first = statuses[0];
+      return {
+        state: "unavailable" as const,
+        reason: first
+          ? `${first.server}: ${first.reason}`
+          : `${input.label} declares no connector.`,
+        connectors: statuses,
+      };
+    },
+    retrieve: async () => {
+      if (!input.wired) return [];
+      throw new Error(
+        `${input.label} is marked wired but has no retrieve implementation.`,
+      );
+    },
   };
 }
 
-export const bigdataAdapter = unwiredConnector(
-  "bigdata",
-  "Bigdata.com (company facts, news, filings)",
-  [
+export const bigdataAdapter = connectorAdapter({
+  id: "bigdata",
+  label: "Bigdata.com (company facts, news, filings)",
+  kinds: [
     "leadership",
     "layoffs",
     "company_initiatives",
     "competitor_moves",
     "job_openings",
   ],
-  "reputable_secondary",
-  (ctx) =>
+  sourceType: "reputable_secondary",
+  connectors: [
+    { server: "Bigdata.com", tools: ["find_securities", "bigdata_search"] },
+  ],
+  wired: false,
+  applies: (ctx) =>
     ctx.company
       ? { viable: true, reason: `Company-level claims about ${ctx.company}.` }
       : { viable: false, reason: "No company named on this search." },
-);
+});
 
-export const npiAdapter = unwiredConnector(
-  "npi_registry",
-  "NPI Registry (US healthcare provider licences)",
-  ["licence_registry"],
-  "official",
-  (ctx) => {
+export const npiAdapter = connectorAdapter({
+  id: "npi_registry",
+  label: "NPI Registry (US healthcare provider licences)",
+  kinds: ["licence_registry"],
+  sourceType: "official",
+  connectors: [{ server: "NPI Registry", tools: ["npi_search", "npi_lookup"] }],
+  wired: false,
+  applies: (ctx) => {
     const us =
       has(ctx.country, "united states", "usa", "us") ||
       ctx.country.trim() === "";
@@ -441,14 +484,20 @@ export const npiAdapter = unwiredConnector(
         "US healthcare role — licence checks apply (candidate evidence only).",
     };
   },
-);
+});
 
-export const publicationsAdapter = unwiredConnector(
-  "publications",
-  "PubMed / bioRxiv / Consensus (publications)",
-  ["publications"],
-  "primary",
-  (ctx) => {
+export const publicationsAdapter = connectorAdapter({
+  id: "publications",
+  label: "PubMed / bioRxiv / Consensus (publications)",
+  kinds: ["publications"],
+  sourceType: "primary",
+  connectors: [
+    { server: "PubMed", tools: ["search_articles"] },
+    { server: "bioRxiv", tools: ["search_preprints"] },
+    { server: "Consensus", tools: ["search"] },
+  ],
+  wired: false,
+  applies: (ctx) => {
     const research = has(
       `${ctx.industry} ${ctx.profession} ${ctx.roleFamily} ${ctx.roleTitle} ${ctx.selectedIndustryPack}`,
       "research",
@@ -471,7 +520,7 @@ export const publicationsAdapter = unwiredConnector(
           reason: "Publication records do not bear on this role family.",
         };
   },
-);
+});
 
 export const RESEARCH_ADAPTERS: ResearchSourceAdapter[] = [
   userSuppliedAdapter,

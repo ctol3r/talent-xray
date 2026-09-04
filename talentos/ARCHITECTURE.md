@@ -237,12 +237,13 @@ talentos/
 │   └── …
 ├── artifact-src/              # SOURCE of the published single-file artifact
 │   ├── core/                  #   payloads, search-context, dependencies,
-│   │                          #   research, envelope, query-compiler,
-│   │                          #   execution-plan, identity, store,
-│   │                          #   defect-checks
+│   │                          #   phases, industry-packs, next-best-action,
+│   │                          #   research, connectors, envelope,
+│   │                          #   query-compiler, execution-plan, identity,
+│   │                          #   store, defect-checks
 │   ├── ai/                    #   prompts, context rendering, task runner
 │   ├── app/                   #   in-page state
-│   ├── ui/                    #   vanilla-DOM shell and module renderers
+│   ├── ui/                    #   vanilla-DOM shell, header, module renderers
 │   ├── styles.css, template.html, main.ts
 ├── artifact/talentos-lite.html  # GENERATED — do not hand-edit (D-019)
 ├── scripts/build-artifact.mts   # esbuild bundle + inline; --check in verify

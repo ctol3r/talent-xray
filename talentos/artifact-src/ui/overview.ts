@@ -28,9 +28,9 @@ import {
   performAction,
   render,
   renderRail,
-  renderResearchPanel,
   registerModule,
 } from "./shell";
+import { INDUSTRY_PACKS, packById, suggestPack } from "../core/industry-packs";
 
 const FIELDS: Array<[keyof SearchFacts, string, string?]> = [
   ["name", "Search name"],
@@ -80,6 +80,22 @@ export function factsForm(
     w.append(input);
     grid?.append(w);
   }
+  const packW = el(`<label class="field"><b>Industry pack</b></label>`);
+  const pack = el<HTMLSelectElement>(
+    `<select name="selectedIndustryPack" aria-label="Industry pack">${INDUSTRY_PACKS.map(
+      (p) =>
+        `<option value="${esc(p.id)}"${(s.selectedIndustryPack ?? "universal") === p.id ? " selected" : ""}>${esc(p.label)}</option>`,
+    ).join("")}</select>`,
+  );
+  const packWhy = el(
+    `<span class="why">${esc(packById(s.selectedIndustryPack).summary)}</span>`,
+  );
+  pack.onchange = () => {
+    packWhy.textContent = packById(pack.value).summary;
+  };
+  packW.append(pack, packWhy);
+  grid?.append(packW);
+
   const constraintsW = el(
     `<label class="field span"><b>Constraints (one per line)</b></label>`,
   );
@@ -116,6 +132,7 @@ export function factsForm(
       (next as Record<string, unknown>)[key] = v;
     }
     next.jd = jd.value;
+    next.selectedIndustryPack = pack.value;
     next.recruiterNotes = notes.value.trim();
     next.constraints = constraints.value
       .split("\n")
@@ -305,6 +322,24 @@ export function renderOverview(main: HTMLElement): void {
       ),
     );
   }
+  const suggestion = ctx ? suggestPack(ctx) : null;
+  if (suggestion) {
+    const notice = el(
+      `<div class="notice" role="status"><strong>This reads like a ${esc(suggestion.pack.label)} search.</strong> <span class="why">${esc(suggestion.reason)} ${esc(suggestion.pack.summary)}</span> </div>`,
+    );
+    const use = el<HTMLButtonElement>(
+      `<button class="btn small" type="button">Switch to ${esc(suggestion.pack.label)}</button>`,
+    );
+    use.onclick = async () => {
+      await saveFacts({ ...s, selectedIndustryPack: suggestion.pack.id });
+      const rev = await recordContextRevision();
+      render();
+      if (rev?.message) console.info(rev.message);
+    };
+    notice.append(use);
+    main.append(notice);
+  }
+
   const diffHost = el(`<div></div>`);
   main.append(diffHost);
   main.append(
@@ -328,7 +363,6 @@ export function renderOverview(main: HTMLElement): void {
     ),
   );
   renderStatusTable(main);
-  renderResearchPanel(main);
   renderCrewPanel(main);
 }
 

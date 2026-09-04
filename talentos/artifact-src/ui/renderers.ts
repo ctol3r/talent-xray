@@ -19,13 +19,15 @@ import { withIntakeAnswer } from "../core/payloads";
 import type { StoredRecord } from "../core/store";
 import {
   compileQueries,
+  tagsFromPlatformNames,
   checkExtraQuery,
   type CompiledQuery,
 } from "../core/query-compiler";
 import type { OutputEnvelope, SuggestedNextStep } from "../core/envelope";
 import { requiresConfirmation } from "../core/envelope";
 import type { ResearchClaim } from "../core/research";
-import { putArtifact, state } from "../app/state";
+import { currentContext, putArtifact, state } from "../app/state";
+import { packFor } from "../core/industry-packs";
 import { nowIso } from "../core/dom";
 
 // ── Small helpers ───────────────────────────────────────────────────────────
@@ -367,7 +369,10 @@ export function renderChannels(root: HTMLElement, p: ChannelsPayload): void {
   root.append(panel);
 }
 
-export function compiledFor(p: SearchStringsPayload): CompiledQuery[] {
+export function compiledFor(
+  p: SearchStringsPayload,
+  packTags: string[] = [],
+): CompiledQuery[] {
   return compileQueries(
     {
       titles: p.titles,
@@ -380,7 +385,12 @@ export function compiledFor(p: SearchStringsPayload): CompiledQuery[] {
       companies: p.companies,
       exclusions: p.exclusions,
     },
-    { relevantTags: p.relevantPlatforms },
+    {
+      relevantTags: [
+        ...tagsFromPlatformNames(p.relevantPlatforms ?? []),
+        ...packTags,
+      ],
+    },
   );
 }
 
@@ -389,7 +399,8 @@ export function renderStrings(
   root: HTMLElement,
   p: SearchStringsPayload,
 ): void {
-  const compiled = compiledFor(p);
+  const ctx = currentContext();
+  const compiled = compiledFor(p, ctx ? packFor(ctx).platformTags : []);
   const runnable = compiled.filter((q) => q.runnable).length;
   const panel = el(
     `<div class="panel"><h3>Compiled queries <span class="why num">— ${runnable} runnable of ${compiled.length}, split and deduped per platform</span></h3></div>`,

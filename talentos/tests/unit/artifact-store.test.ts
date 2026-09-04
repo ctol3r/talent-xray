@@ -116,7 +116,7 @@ describe("legacy data survives", () => {
     expect(blob.searches.s_old.facts.name).toBe("CAIS — Research Engineer");
   });
 
-  it("round-trips the W13 additions: contexts, research snapshots and actions", async () => {
+  it("round-trips contexts, research snapshots, actions and initiatives", async () => {
     await store.saveContext({
       searchId: "s_old",
       searchVersion: "v1",
@@ -161,6 +161,37 @@ describe("legacy data survives", () => {
       status: "open",
       sourceOutputId: "env-1",
     });
+    await store.saveInitiative("s_old", {
+      id: "init-1",
+      title: "Close the pay-band question",
+      why: "Three candidates stalled on compensation.",
+      createdAt: "2026-09-04T00:00:00.000Z",
+    });
+    expect((await store.listInitiatives("s_old"))[0].title).toContain(
+      "pay-band",
+    );
+    await store.appendEvent("s_old", {
+      id: "ev-2",
+      candidateId: "c1",
+      at: "2026-09-04T10:00:00.000Z",
+      recordedBy: "recruiter",
+      type: "outreach_recorded",
+      note: "",
+    });
+    await store.appendEvent("s_old", {
+      id: "ev-1",
+      candidateId: "c1",
+      at: "2026-09-03T10:00:00.000Z",
+      recordedBy: "recruiter",
+      type: "stage_change",
+      toStage: "sourced",
+      note: "",
+    });
+    // Events come back in the order they happened, not the order written.
+    expect((await store.listEvents("s_old")).map((e) => e.id)).toEqual([
+      "ev-1",
+      "ev-2",
+    ]);
     expect((await store.listContexts("s_old"))[0].searchVersion).toBe("v1");
     expect((await store.listActions("s_old"))[0].title).toContain("on-call");
     // The legacy artifacts are untouched by the additions.

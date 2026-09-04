@@ -244,13 +244,16 @@ describe("adapter registry", () => {
     expect(publicationsAdapter.applies(mlCtx).viable).toBe(true);
   });
 
-  it("connector adapters report themselves unwired rather than pretending to browse", async () => {
+  it("connector adapters report the viewer's real connector state, and never browse", async () => {
+    // No `mcp` capability in a node test — the same state a viewer gets
+    // when the page was published without connector access.
     for (const adapter of [bigdataAdapter, npiAdapter, publicationsAdapter]) {
       const availability = await adapter.availability();
       expect(availability.state).toBe("unavailable");
       expect("reason" in availability && availability.reason).toContain(
-        "not wired",
+        "no connector access",
       );
+      expect(availability.connectors?.length).toBe(adapter.connectors.length);
       await expect(adapter.retrieve("brief", ctx)).resolves.toEqual([]);
     }
   });

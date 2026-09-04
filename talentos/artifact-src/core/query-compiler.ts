@@ -294,6 +294,42 @@ function splitOverBudget(
   return null;
 }
 
+/**
+ * The model is asked for `relevantPlatforms` as NAMES, while platform
+ * selection is by TAG — so a returned "Google (Scholar/arXiv x-ray)" never
+ * matched the "research" tag and those platforms were unreachable. Map
+ * names, ids and bare tag words onto tags.
+ */
+export function tagsFromPlatformNames(names: string[]): string[] {
+  const out = new Set<string>();
+  for (const raw of names) {
+    const name = raw.trim().toLowerCase();
+    if (!name) continue;
+    const match = PLATFORM_CONSTRAINTS.find(
+      (p) =>
+        p.platform.toLowerCase() === name ||
+        p.id === name ||
+        p.id.replace(/_/g, " ") === name,
+    );
+    if (match) {
+      out.add(match.tag);
+      continue;
+    }
+    if (["general", "engineering", "research", "design"].includes(name)) {
+      out.add(name);
+      continue;
+    }
+    // A partial name ("scholar", "github", "behance") still resolves.
+    const partial = PLATFORM_CONSTRAINTS.find(
+      (p) =>
+        p.sites.some((site) => name.includes(site.split(".")[0])) ||
+        p.platform.toLowerCase().includes(name),
+    );
+    if (partial) out.add(partial.tag);
+  }
+  return [...out];
+}
+
 export interface CompileOptions {
   /** Which platform tags the model judged relevant; "general" always included. */
   relevantTags?: string[];

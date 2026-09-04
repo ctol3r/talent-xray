@@ -11,7 +11,8 @@
 import type { SearchContext, SearchFacts } from "./search-context";
 import { searchFactsSchema } from "./search-context";
 import type { ResearchSnapshot } from "./research";
-import type { ActionItem } from "./envelope";
+import type { ActionItem, Initiative } from "./envelope";
+import type { PipelineEvent } from "./pipeline";
 import type { ResearchStatus } from "./research";
 
 export const LS_KEY = "talentos-lite-v1";
@@ -84,6 +85,8 @@ interface LocalShape {
       contexts?: Record<string, SearchContext>;
       research?: Record<string, ResearchSnapshot>;
       actions?: Record<string, ActionItem>;
+      initiatives?: Record<string, Initiative>;
+      events?: Record<string, PipelineEvent>;
     }
   >;
 }
@@ -382,6 +385,63 @@ export const store = {
     const data = local.read();
     const s = local.shell(data, searchId);
     s.actions = { ...(s.actions ?? {}), [action.id]: action };
+    local.write(data);
+  },
+
+  async listInitiatives(searchId: string): Promise<Initiative[]> {
+    const fromDb = await tryDb(async (db) => {
+      const snap = await db
+        .doc("searches/" + searchId)
+        .collection("initiatives")
+        .get();
+      return snap.docs.map((d) => d.data() as Initiative);
+    });
+    return (
+      fromDb ??
+      Object.values(local.read().searches[searchId]?.initiatives ?? {})
+    );
+  },
+
+  async saveInitiative(
+    searchId: string,
+    initiative: Initiative,
+  ): Promise<void> {
+    const done = await tryDb(async (db) => {
+      await db
+        .doc(`searches/${searchId}/initiatives/${initiative.id}`)
+        .set(initiative);
+      return true;
+    });
+    if (done) return;
+    const data = local.read();
+    const s = local.shell(data, searchId);
+    s.initiatives = { ...(s.initiatives ?? {}), [initiative.id]: initiative };
+    local.write(data);
+  },
+
+  async listEvents(searchId: string): Promise<PipelineEvent[]> {
+    const fromDb = await tryDb(async (db) => {
+      const snap = await db
+        .doc("searches/" + searchId)
+        .collection("events")
+        .get();
+      return snap.docs.map((d) => d.data() as PipelineEvent);
+    });
+    const list =
+      fromDb ?? Object.values(local.read().searches[searchId]?.events ?? {});
+    return list.sort((a, b) => a.at.localeCompare(b.at));
+  },
+
+  /** Events are append-only: there is no update and no delete. */
+  async appendEvent(searchId: string, event: PipelineEvent): Promise<void> {
+    const done = await tryDb(async (db) => {
+      await db.doc(`searches/${searchId}/events/${event.id}`).set(event);
+      return true;
+    });
+    if (done) return;
+    const data = local.read();
+    const s = local.shell(data, searchId);
+    s.events = { ...(s.events ?? {}), [event.id]: event };
     local.write(data);
   },
 

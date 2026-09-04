@@ -122,3 +122,51 @@ string-expansion task:
 - **The envelope's repair pass is one attempt.** A module whose next steps
   fail validation twice is stored with its issues visible and marked
   `needs_review`. Whether a second repair is worth the call is unmeasured.
+
+## Added by W14 (Phase 2, and the honest half of Phase 3)
+
+- **The three connectors are declared but not wired.** `core/connectors.ts`
+  reports each one's real state for the viewer; `retrieve()` returns
+  nothing. Wiring needs one observed request/response pair per tool — the
+  attempt in the W14 session was refused by the environment's permission
+  classifier. When that observation can be made, set `wired: true` for that
+  adapter only, and declare `capabilities.mcp` with the minimal manifest at
+  the same time.
+- **Declaring `capabilities.mcp` bars public sharing of the artifact.** That
+  is a product decision the owner has not been asked to make, and it should
+  be made when the first connector actually works, not before.
+- **`watchTool` is unused.** The bridge only ever calls `listTools()`. When
+  a connector is wired, displayed connector data should use `watchTool` so
+  it replays, refreshes and coalesces — `callTool` is for actions.
+- **Phase status ignores advanced entries entirely.** The Golden Test and
+  the legacy role read never count towards Learn or Define. That is
+  deliberate (they are diagnostics and alternates), but it means the Learn
+  phase reads "Complete" with nothing in it.
+- **The action queue has no target dates in the UI.** `ActionItem.targetDate`
+  is stored and rendered when present, but nothing sets it yet.
+- **Actions cannot be filed under an initiative from the UI.** The grouping
+  reads `initiativeId`; nothing assigns it yet, so every action lands in
+  "Unfiled" until that control exists.
+
+## Added by W15 (Phase 4: pipeline and metrics)
+
+- **`compareMetric` has no caller.** Comparing two periods needs a stored
+  measurement per period; today metrics are computed live from all events.
+  Snapshotting the metric set weekly would make "improved" reportable under
+  its own rules.
+- **The pivot engine has no producer.** `pivotProposalSchema` and the
+  approve/reject action types exist and are confirmed-gated; nothing emits a
+  pivot proposal yet. The trigger would naturally be a funnel metric below a
+  threshold with enough sample.
+- **No HM command centre or decision log.** Both are Phase 4 in the original
+  brief and are not built. The decision log's raw material — confirmed
+  actions, recorded exits with reasons, context revisions — is already
+  stored.
+- **Events cannot be corrected.** Append-only is right for an audit trail,
+  but a mis-recorded stage currently has no compensating entry. A
+  `correction` event type referencing the event it corrects would keep the
+  trail honest without allowing a rewrite.
+- **Time-to-reply uses the recorded times, not the real ones.** A recruiter
+  who records a week of outreach on Friday gets a median that measures their
+  admin habit. The metric says it is computed from recorded times; a
+  separate "when did this actually happen" field would be better.
