@@ -691,3 +691,23 @@ different model, holding `false_signal_recall` above 85 %, provenance at
   source that was never fetched, and the corpus panel stating what its
   numbers would and would not mean.
 - `pnpm verify` — green, including the artifact build-drift check.
+
+### Hotfix, same day — "+ New search" rendered blank
+
+Found by the owner on first use, minutes after the W16–W19 publish. The
+New-search screen's heading template had two root elements
+(`<div class="mod-head">…</div><p class="mod-desc">…</p>`). Under W13's
+`el()` that silently dropped the paragraph; under W14's guard it throws, so
+the first-run path — the one thing a new user does — went blank. The guard
+was right; the coverage was not: no test had ever created a search.
+
+Fixed by splitting the template. Two additions so this class cannot ship
+again: `tests/unit/artifact-templates.test.ts` statically scans every
+`el(\`…\`)`template in`artifact-src/ui/`(nested`${…}` respected) and
+fails on any with more than one root — run against the pre-fix file it
+reports exactly the one defect; and an e2e that presses "+ New search",
+creates a search, and checks it is current, persisted across a reload, and
+raised no page error.
+
+Lesson worth keeping: a guard that throws in the viewer's browser is the
+last line, not the first. The static scan is where it should have been.

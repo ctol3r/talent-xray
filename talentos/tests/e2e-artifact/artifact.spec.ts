@@ -858,3 +858,45 @@ test.describe("the corpus benchmark", () => {
     ).toBeVisible();
   });
 });
+
+test.describe("the first-run path", () => {
+  test("+ New search shows the brief form, and creating one makes it the current search", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    await page.getByRole("button", { name: "+ New search" }).click();
+    await expect(page.locator(".mod-head h2")).toHaveText("New search");
+    await expect(page.locator("#main")).toContainText(
+      "One search = one hiring need",
+    );
+    // Nothing selected yet: the header says so instead of showing a stale search.
+    await expect(page.locator("#topbar")).toContainText(
+      "pick a search on the left",
+    );
+
+    await page.locator('input[name="roleTitle"]').fill("Staff Nurse, ICU");
+    await page.locator('input[name="companyName"]').fill("Example Health");
+    await page.locator('input[name="geography"]').fill("Leeds");
+    await page.getByRole("button", { name: "Create search" }).click();
+
+    await expect(page.locator("#topbar .tb-title")).toContainText(
+      "Staff Nurse, ICU",
+    );
+    await expect(page.locator(".search-item")).toHaveCount(2);
+    await expect(page.locator(".search-item.active")).toContainText(
+      "Staff Nurse, ICU",
+    );
+    await expect(page.locator(".nba")).toContainText("Generate Canonical IR");
+
+    // It is persisted: still there after a reload.
+    await page.reload();
+    await page.waitForFunction(() =>
+      Boolean((window as unknown as { __talentos?: unknown }).__talentos),
+    );
+    await expect(page.locator(".search-item")).toHaveCount(2);
+    expect(errors).toEqual([]);
+  });
+});

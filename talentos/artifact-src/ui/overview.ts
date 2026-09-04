@@ -156,9 +156,10 @@ export function renderNewSearchForm(
   main: HTMLElement,
   standalone: boolean,
 ): void {
+  main.append(el(`<div class="mod-head"><h2>New search</h2></div>`));
   main.append(
     el(
-      `<div class="mod-head"><h2>New search</h2></div><p class="mod-desc">One search = one hiring need. The brief you enter here is versioned; every generated module records the version it consumed.</p>`,
+      `<p class="mod-desc">One search = one hiring need. The brief you enter here is versioned; every generated module records the version it consumed.</p>`,
     ),
   );
   const s: SearchFacts = { id: uid(), createdAt: nowIso(), roleTitle: "" };
