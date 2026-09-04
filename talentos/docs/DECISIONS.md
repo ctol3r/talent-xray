@@ -749,3 +749,88 @@ trace in the published page names the function that threw. Mangling
 identifiers is where most of the remaining bytes are and is also the only
 part that costs that. At 904 KB against a 16 MB limit there is no pressure
 worth trading a readable trace for.
+
+## D-026 — Candidate search runs on the Talent X-Ray engines by link-out, and the page never reads a result
+
+**Decision.** (2026-09-04, W20.) The artifact "conducts the search" the only
+way it honestly can: every runnable Google-dialect query — the compiler's
+own rows, and an editable box the recruiter can change — opens the live
+engine's results page in a new tab (`cse.google.com/cse?cx=…#gsc.q=…`, the
+reference console's own fallback link). Nothing on the page reads, fetches,
+stores or ranks a result. The recruiter adds the people they choose under
+Candidates, as before.
+
+**Why link-out and not results in the page.** The artifact runtime has no
+network: `fetch`, XHR and third-party scripts are blocked by the platform's
+CSP, and its capability roster (`sample`, `db`, `artifact`, `downloads`,
+`mcp`, `room`) contains nothing that reaches the Custom Search JSON API.
+The Next.js app already runs the same engines server-side with a
+bring-your-own key (D-010, W8), so the two surfaces now do the same thing at
+the two fidelities they can: the app shows results it fetched with your key;
+the artifact opens the engine with your query. Neither ever fetches a result
+_page_.
+
+**Why the engine gets the compiler's row unchanged.** The reference
+composer sends a plain boolean and adds a `site:` group only to narrow the
+already-restricted corpus — exactly what the x-ray rows do. So the open-web
+row is the engine's native query, the LinkedIn/GitHub/Scholar rows are its
+narrowings, and LinkedIn's native boolean (AND/NOT) is never offered because
+Google reads those as words. The editable box is re-checked against the same
+32-word limit on every keystroke: an empty or over-budget query has no link,
+and says why, rather than a link that silently truncates.
+
+**What changed in the next best action.** With current queries and no
+candidates, the derived next step is now "run a compiled query on Talent
+X-Ray, then add who you find" rather than "add the first candidate" — the
+product's own answer to where candidates come from.
+
+## D-027 — The wheel and the deck are views of existing state, not new sources of it
+
+**Decision.** (2026-09-04, W20.) Two of the three owner-supplied concepts
+are rendered as pure views over contracts that already exist:
+
+- **The next-steps wheel** is the eight lettered steps A–H of the freshest
+  envelope (the current module's if it has one), drawn as a ring around a
+  hub that shows the derived next best action. Exactly eight slots because
+  the envelope contract is exactly eight (§9). A segment click goes through
+  `performAction`, so confirmation rules, module routing and "nothing sends"
+  are unchanged. With no envelope the ring is empty and says so; it never
+  invents steps to fill the slots.
+- **The candidate deck** is every candidate record as a fanned card, front
+  card first and then the order they were added in. A card shows only what
+  the record holds — title, company, geography, a link that is labelled
+  NOT FETCHED, the recorded pipeline position, and the dossier's
+  quote-verified count. There is no score and the deck says "nothing here
+  ranks anyone". The front card is the recruiter's choice, kept only for the
+  session; it is not persisted because it is not a fact about anyone.
+
+**Why views and not features.** The brief's anti-drift rule is that a
+feature not named in the wave goes to the backlog. These were named — by
+picture — and the honest translation of a picture of a radial menu is "the
+things you can do next, arranged radially", which TalentOS already has as a
+validated list. Building a second source of next steps for the wheel, or a
+ranking for the deck to order by, would have been the duplicate half-system
+the program forbids.
+
+## D-028 — Parallel pages: a ribbon exists exactly where the evidence check passed
+
+**Decision.** (2026-09-04, W20.) The third concept — a source document on
+one side, a structured output on the other, and bands connecting passages
+to the items they produced — is the dossier's provenance made visible. The
+pasted source is laid beside the dossier; each quote that `verifyEvidence`
+found in that source is marked in the text, and an SVG ribbon joins the mark
+to its claim. A claim with no ribbon says why, in the check's own words
+(quote not in any source; source is a link; no quote given).
+
+**Why the locator is a second implementation of the same normalization.**
+`quoteAppearsIn` compares normalized strings (case, curly quotes, whitespace
+runs). To mark the quote in the _original_ text the same transform is
+re-done character by character with a map back to raw offsets
+(`normalizeWithMap`), and a unit test asserts the two produce the same
+normalized string on the awkward inputs. A verified quote that could not be
+located is reported as such rather than drawn approximately; overlapping
+spans keep the earlier one rather than drawing two ribbons from one passage.
+
+**What it is not.** It is a view of the recruiter's own text and the check
+already made. It does not fetch anything, it does not run a model, and it
+does not turn an unsupported claim into a supported one by drawing a line.

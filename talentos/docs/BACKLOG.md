@@ -194,3 +194,26 @@ string-expansion task:
   extraction-condition corpus run cannot be executed from a Claude Code web
   session as configured. It needs either a key in the environment or a local
   run.
+
+## Added by W20
+
+- **The engine link-out cannot be observed from here.** The URL format is
+  the reference console's own and the two `cx` values are the live engines,
+  but no test in this repo opens `cse.google.com`. The first real run is the
+  owner's, in a browser; if Google changes the hosted-page hash format, the
+  app's JSON-API provider is unaffected and the artifact's link needs one
+  constant changed.
+- **Results stay in the other tab.** Adding a person from the engine's
+  results page is still copy-paste into the Add-candidate form. A
+  "paste a result URL" quick-add that pre-fills the profile link is a small
+  addition; anything that reads the result page is not allowed.
+- **The wheel's short labels truncate at 26 characters.** Real step titles
+  are sentences; the full title is in the hub on hover/focus and in the
+  button's accessible name. A two-line label would fit more.
+- **The deck's front card is session-only.** Deliberately (D-027); a
+  per-viewer preference could keep it without making it a fact about anyone.
+- **Parallel pages shows one text source at a time.** A candidate with both
+  pasted text and notes gets a selector; ribbons never cross sources.
+- **The deck could host outreach drafts.** The owner's concept was a
+  template gallery; the same component would fan a candidate's outreach
+  steps if that proves more useful than the candidate view.

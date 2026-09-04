@@ -280,6 +280,17 @@ export function nextBestAction(input: NbaInput): NextBestAction {
   }
 
   if (input.candidateCount === 0) {
+    if (input.states.search_strings?.state === "current") {
+      return make(
+        {
+          title: "Run a compiled query on Talent X-Ray, then add who you find",
+          actionType: "copy_query",
+          targetId: "search_strings",
+        },
+        "The queries are current. The engines open in a new tab; nothing here reads the results — you add the people you choose to keep.",
+        "normal",
+      );
+    }
     return make(
       {
         title: "Add the first candidate",

@@ -26,14 +26,19 @@ import {
   type CandidateSource,
 } from "../core/evidence";
 import { copyText } from "../core/dom";
+import { renderDeck } from "./deck";
+import { renderParallel } from "./parallel";
 
 export function renderCandidates(main: HTMLElement): void {
   main.append(el(`<div class="mod-head"><h2>Candidates</h2></div>`));
   main.append(
     el(
-      `<p class="mod-desc">Paste what's publicly observable, then compare it to the success profile. Evidence alignment is advisory decision support — you decide, and everything is editable. Profiles link out; nothing is fetched or scraped. Similar names are flagged for review, never merged.</p>`,
+      `<p class="mod-desc">Find people by running a compiled query on Talent X-Ray (Search Strings), then paste what's publicly observable and compare it to the success profile. Evidence alignment is advisory decision support — you decide, and everything is editable. Profiles link out; nothing is fetched or scraped. Similar names are flagged for review, never merged.</p>`,
     ),
   );
+  const deck = el(`<div class="deck-root"></div>`);
+  renderDeck(deck);
+  main.append(deck);
   const form = el(
     `<div class="panel"><h3>Add candidate</h3><div class="form-grid"></div></div>`,
   );
@@ -214,6 +219,21 @@ function renderCandidateCard(cand: StoredCandidate): HTMLElement {
           ),
         );
       }
+      const ppWrap = el(`<div class="pp-wrap"></div>`);
+      const ppBtn = el<HTMLButtonElement>(
+        `<button class="btn small" type="button" aria-expanded="false" title="Lay the pasted text beside the dossier, with a ribbon from every verified quote to its claim">Parallel pages</button>`,
+      );
+      ppBtn.onclick = () => {
+        const open = ppBtn.getAttribute("aria-expanded") === "true";
+        if (open) {
+          ppWrap.innerHTML = "";
+          ppBtn.setAttribute("aria-expanded", "false");
+        } else {
+          renderParallel(ppWrap, dossier);
+          ppBtn.setAttribute("aria-expanded", "true");
+        }
+      };
+      body.append(ppBtn, ppWrap);
       body.append(
         el(
           `<p class="why"><b>Suggested review priority (advisory):</b> ${esc(evidence.reviewPriority.suggestion ?? "")} — ${esc(evidence.reviewPriority.reasoning ?? "")}</p>`,

@@ -711,3 +711,82 @@ raised no page error.
 
 Lesson worth keeping: a guard that throws in the viewer's browser is the
 last line, not the first. The static scan is where it should have been.
+
+## W20 — Search on the engines, and three owner-supplied views (CLOSED 2026-09-04)
+
+The owner asked two things: "can we have it conduct search of candidates
+with the platform?" and for the functionality in three attached concepts —
+a radial menu, a fanned card gallery, and a screen recording of "parallel
+pages" (a source document beside a structured outline, with bands joining
+each highlighted passage to the item it produced). One wave, four parts,
+each a view over a contract that already existed. Nothing here fetches,
+ranks, sends or persists anything new.
+
+### W20.1 — Run a compiled query on Talent X-Ray (D-026)
+
+`core/talent-xray.ts` holds the two live engines and the reference
+console's own link format. In Search Strings, every runnable Google-dialect
+row gains **Run ↗** (Core) and **Use**; a "Run on Talent X-Ray" panel at the
+top holds an editable query with **Run on Core** and **Run on Verified &
+Reach**, re-checked against the 32-word limit on every keystroke. Empty or
+over budget: no link, and the reason. Every link is `target="_blank"
+rel="noopener"`. The next best action, with current queries and no
+candidates, now points at running one.
+
+The page never reads a result. The app's `TalentXRayCandidateDiscoveryProvider`
+(W8) is unchanged and remains the only place results are fetched, with a key.
+
+### W20.2 — The next-steps wheel (D-027)
+
+`core/radial.ts` (pure geometry) and `ui/radial.ts`. A **Wheel** button in
+the header opens a dialog: eight ring segments A–H from the freshest
+envelope, the recommended one tinted, a hub showing the derived next best
+action until a segment is hovered or focused, and a click routed through
+`performAction`. Escape, backdrop click and a close button dismiss it;
+arrow keys move between segments; the ring is empty and says so when no
+module has been generated.
+
+### W20.3 — The candidate deck (D-027)
+
+`core/deck.ts` (order and poses) and `ui/deck.ts`. The Candidates module
+opens with every record as a fanned card: name, title · company, geography,
+the profile link labelled NOT FETCHED, the recorded pipeline position and
+the dossier's quote-verified count. **+** brings a card forward; **Open
+record** jumps to the full panel; ← → cycle with the deck focused. The deck
+says "nothing here ranks anyone" and contains no score.
+
+### W20.4 — Parallel pages (D-028)
+
+`core/parallel.ts` (`normalizeWithMap`, `locateQuote`, `segmentSource`,
+`ribbonPath`) and `ui/parallel.ts`. Under a dossier, **Parallel pages**
+lays the pasted text beside the claims; every quote the evidence check
+found is marked in the text and joined to its claim by an SVG ribbon that
+redraws on scroll and resize. Hovering either end lights both. A claim
+with no ribbon says why in the check's own words. The locator re-does the
+evidence normalization with an offset map, and a unit test holds the two
+to the same output.
+
+### Acceptance — what was actually run
+
+- `pnpm test` — 38 files, 397 tests. New: `artifact-talent-xray` (9),
+  `artifact-radial` (8), `artifact-deck` (8), `artifact-parallel` (10),
+  two W20 cases in `artifact-next-best-action`; the template scanner
+  covers the three new UI files automatically.
+- `pnpm e2e:artifact` — 28 tests against the committed HTML: the engine
+  links (format, `rel`, editing, refusal, per-row, LinkedIn native never
+  offered), the wheel (eight slots empty then filled, hover previews,
+  click routes), the deck (fan, bring forward, keyboard, open record),
+  and parallel pages (one mark, one ribbon, the fabricated quote gets
+  none). One existing assertion was tightened: the profile link now
+  renders twice (deck and record) and both carry `rel="noopener"`.
+- `pnpm verify` — green, including the artifact build-drift check.
+- Screenshots of all four surfaces were taken from the built page with
+  the e2e stub and inspected; a suspected missing dialog backdrop turned
+  out to be the preview's contrast, confirmed by sampling pixels.
+
+### Not run, and why
+
+The engine link has not been opened against `cse.google.com` from this
+environment: no test here leaves the page, by design. The URL is the
+reference console's own and the `cx` values are the live engines; the
+first real run is the owner's.

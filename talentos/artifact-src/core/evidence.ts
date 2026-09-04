@@ -78,7 +78,7 @@ export interface DossierItem {
 }
 
 /** Whitespace- and case-insensitive containment, so wrapping never matters. */
-function normalize(text: string): string {
+export function normalize(text: string): string {
   return text
     .toLowerCase()
     .replace(/[‘’]/g, "'")

@@ -241,10 +241,12 @@ talentos/
 │   │                          #   research, connectors, envelope, pipeline,
 │   │                          #   evidence, corpus, query-compiler,
 │   │                          #   execution-plan, identity, store,
-│   │                          #   defect-checks
+│   │                          #   defect-checks, talent-xray (engine
+│   │                          #   link-out), radial, deck, parallel
 │   ├── ai/                    #   prompts, context rendering, task runner
 │   ├── app/                   #   in-page state
-│   ├── ui/                    #   vanilla-DOM shell, header, module renderers
+│   ├── ui/                    #   vanilla-DOM shell, header, module renderers,
+│   │                          #   radial (next-steps wheel), deck, parallel
 │   ├── styles.css, template.html, main.ts
 ├── artifact/talentos-lite.html  # GENERATED — do not hand-edit (D-019)
 ├── scripts/build-artifact.mts   # esbuild bundle + inline; --check in verify

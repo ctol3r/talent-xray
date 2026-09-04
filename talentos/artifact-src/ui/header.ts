@@ -26,6 +26,7 @@ import {
   state,
 } from "../app/state";
 import { aiAvailable, performAction, render } from "./shell";
+import { openWheel } from "./radial";
 
 const PHASE_CLASS: Record<string, string> = {
   not_started: "",
@@ -123,6 +124,11 @@ export function renderHeader(): void {
     <div class="nba-text"><b>${esc(nba.step.title)}</b><span class="why">${esc(nba.why)}</span></div>
     <span class="spacer"></span>
   </div>`);
+  const wheel = el<HTMLButtonElement>(
+    `<button class="btn small wheel-btn" type="button" aria-haspopup="dialog" title="The eight lettered next steps of the latest output, as a wheel"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"></circle><circle cx="8" cy="8" r="2" fill="currentColor"></circle><path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3" stroke="currentColor" stroke-width="1.6"></path></svg> Wheel</button>`,
+  );
+  wheel.onclick = () => openWheel(wheel);
+  row.append(wheel);
   if (nba.urgency !== "done") {
     const go = el<HTMLButtonElement>(
       `<button class="btn small primary" type="button">Take me there</button>`,

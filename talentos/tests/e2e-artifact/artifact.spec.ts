@@ -805,9 +805,14 @@ test.describe("candidate evidence dossiers", () => {
     await expect(page.locator("#main")).toContainText(
       "Nothing on this page reads that page",
     );
-    const link = page.locator('a[href="https://example.com/p"]');
-    await expect(link).toHaveAttribute("rel", "noopener");
-    await expect(link).toHaveAttribute("target", "_blank");
+    // The link is rendered twice — on the deck card and in the record's
+    // source list — and every rendering opens a new tab with rel=noopener.
+    const links = page.locator('a[href="https://example.com/p"]');
+    await expect(links).toHaveCount(2);
+    for (const link of await links.all()) {
+      await expect(link).toHaveAttribute("rel", "noopener");
+      await expect(link).toHaveAttribute("target", "_blank");
+    }
   });
 
   test("a quote that is not in the pasted source is caught and struck through", async ({
@@ -836,6 +841,220 @@ test.describe("candidate evidence dossiers", () => {
     await expect(fabricated).not.toContainText(/strong/i);
     await expect(fabricated).toContainText(/unknown/i);
     await expect(fabricated).toHaveClass(/unsupported/);
+  });
+});
+
+test.describe("W20 · parallel pages", () => {
+  const PASTED =
+    "SYNTHETIC PROFILE FOR TESTING — not a real person. Built the distributed evaluation harness used across the lab (PyTorch, Ray, 256-GPU runs).";
+
+  test("draws a ribbon only for the quote that was actually found in the pasted text", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Success Profile");
+    await generateButton(page).click();
+    await expect(page.locator("#main")).toContainText(
+      "Built evaluation infrastructure",
+    );
+    await openModule(page, "Candidates");
+    await page.locator('input[name="name"]').fill("Synthetic Ribbon Candidate");
+    await page.locator('textarea[name="pastedText"]').fill(PASTED);
+    await page.getByRole("button", { name: "Add candidate" }).click();
+    await page.getByRole("button", { name: "Evidence alignment" }).click();
+    await expect(page.locator("#main")).toContainText("1 of 2 quote-verified");
+
+    await page.getByRole("button", { name: "Parallel pages" }).click();
+    const pp = page.locator(".parallel");
+    await expect(pp).toContainText("1 RIBBON");
+    await expect(pp).toContainText(
+      "A ribbon exists only where a verbatim quote was found",
+    );
+    const marks = pp.locator("mark.pp-mark");
+    await expect(marks).toHaveCount(1);
+    await expect(marks).toHaveText(
+      "Built the distributed evaluation harness used across the lab",
+    );
+    await expect(pp.locator(".pp-ribbons path.ribbon")).toHaveCount(1);
+
+    const unsupported = pp.locator(".pp-item.unsupported");
+    await expect(unsupported).toHaveCount(1);
+    await expect(unsupported).toContainText("Led a team of twelve");
+    await expect(unsupported).toContainText("no ribbon");
+    await expect(unsupported).toContainText("do not use it");
+
+    // Hovering a claim lights its ribbon and its quote, and nothing else.
+    await pp.locator(".pp-item.supported").hover();
+    await expect(pp.locator("path.ribbon.hot")).toHaveCount(1);
+    await expect(pp.locator("mark.pp-mark.hot")).toHaveCount(1);
+
+    // The view is the recruiter's own text: no request left the page for it.
+    await page.getByRole("button", { name: "Parallel pages" }).click();
+    await expect(pp).toHaveCount(0);
+  });
+});
+
+test.describe("W20 · run on Talent X-Ray", () => {
+  test("offers every runnable Google query on the live engines as a link out, and nothing more", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Search Strings");
+    page.once("dialog", (d) => d.accept());
+    await generateButton(page).click();
+    await page.getByText("Full analysis").click();
+
+    const panel = page.locator("#run-panel");
+    await expect(panel).toContainText("nothing on this page reads the results");
+    const core = panel.locator('a[data-engine="core"]');
+    const reach = panel.locator('a[data-engine="reach"]');
+    await expect(core).toHaveAttribute("target", "_blank");
+    await expect(core).toHaveAttribute("rel", "noopener");
+    await expect(reach).toHaveAttribute("rel", "noopener");
+    const href = (await core.getAttribute("href")) ?? "";
+    expect(href).toMatch(
+      /^https:\/\/cse\.google\.com\/cse\?cx=a157d37906e1141cc#gsc\.q=/,
+    );
+    expect(decodeURIComponent(href.split("#gsc.q=")[1])).toContain(
+      "Research Engineer",
+    );
+    await expect(reach).toHaveAttribute("href", /cx=918bc00e18d0c46e5/);
+
+    // What runs is exactly what the box says.
+    const box = panel.locator('textarea[name="engineQuery"]');
+    await box.fill('"ICU Nurse" CCRN Houston');
+    expect(
+      decodeURIComponent(
+        ((await core.getAttribute("href")) ?? "").split("#gsc.q=")[1],
+      ),
+    ).toBe('"ICU Nurse" CCRN Houston');
+
+    // An empty or over-budget query is not offered, and says why.
+    await box.fill("");
+    await expect(core).toHaveAttribute("aria-disabled", "true");
+    await expect(core).not.toHaveAttribute("href");
+    await box.fill(Array.from({ length: 40 }, (_, i) => `w${i}`).join(" "));
+    await expect(core).toHaveAttribute("aria-disabled", "true");
+    await expect(panel).toContainText("exceeds");
+
+    // Per-row links: runnable Google rows run; LinkedIn's native boolean never does.
+    const rowLinks = page.locator(".qrow a.run-link");
+    expect(await rowLinks.count()).toBeGreaterThan(0);
+    for (const link of await rowLinks.all()) {
+      await expect(link).toHaveAttribute("rel", "noopener");
+      await expect(link).toHaveAttribute("target", "_blank");
+      await expect(link).toHaveAttribute("href", /cse\.google\.com/);
+    }
+    expect(
+      await page
+        .locator(".qrow", { hasText: "LinkedIn (native boolean)" })
+        .locator("a.run-link")
+        .count(),
+    ).toBe(0);
+    expect(await page.locator(".qrow.not-runnable a.run-link").count()).toBe(0);
+
+    // "Use" loads a row into the box instead of running it.
+    await page.locator(".qrow button", { hasText: "Use" }).first().click();
+    await expect(box).not.toHaveValue("");
+    await expect(core).not.toHaveAttribute("aria-disabled", "true");
+  });
+});
+
+test.describe("W20 · the next-steps wheel", () => {
+  test("shows eight lettered slots — empty until a module exists — and routes a click through the same router", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await page.getByRole("button", { name: "Wheel" }).click();
+    const dialog = page.getByRole("dialog", { name: "Next steps wheel" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator(".seg-btn")).toHaveCount(8);
+    await expect(dialog.locator(".seg-btn.empty")).toHaveCount(8);
+    await expect(dialog).toContainText("No module output yet");
+    await expect(dialog.locator(".wheel-hub .hub-title")).not.toHaveText("");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+
+    await openModule(page, "Market Intel");
+    page.once("dialog", (d) => d.accept());
+    await generateButton(page).click();
+    await expect(
+      page.getByText("Supply is thinner than the brief assumes"),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Wheel" }).click();
+    await expect(dialog.locator(".seg-btn:not(.empty)")).toHaveCount(8);
+    await expect(dialog).toContainText("Market Intel");
+    const b = dialog.locator('.seg-btn[aria-label^="B — "]');
+    await b.hover();
+    await expect(dialog.locator(".wheel-hub")).toContainText(
+      "Open the hiring_need module and check it",
+    );
+    await b.click();
+    await expect(dialog).toHaveCount(0);
+    await expect(page.locator("#main .mod-head h2").first()).toHaveText(
+      "Canonical IR",
+    );
+  });
+});
+
+test.describe("W20 · the candidate deck", () => {
+  test("fans every record and brings the chosen one forward, without ranking anyone", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Candidates");
+    await expect(page.locator(".deck")).toHaveCount(0);
+    for (const [name, slug] of [
+      ["Synthetic Deck Alpha", "alpha"],
+      ["Synthetic Deck Bravo", "bravo"],
+    ]) {
+      await page.locator('input[name="name"]').fill(name);
+      await page
+        .locator('input[name="profileUrl"]')
+        .fill(`https://example.com/${slug}`);
+      await page.getByRole("button", { name: "Add candidate" }).click();
+      await expect(page.locator(".cand-list")).toContainText(name);
+    }
+    const cards = page.locator(".deck-card");
+    await expect(cards).toHaveCount(2);
+    await expect(page.locator(".deck-card.front")).toHaveCount(1);
+    await expect(page.locator(".deck-card.front")).toContainText(
+      "NO STAGE RECORDED",
+    );
+    await expect(page.locator(".deck-card.front")).toContainText(
+      "NOT ASSESSED",
+    );
+    await expect(page.locator(".deck-card.front")).toContainText(
+      "LINK — NOT FETCHED",
+    );
+    // The deck says what it is not: no score, no rank, no ordering it chose.
+    await expect(page.locator(".deck-panel")).toContainText(
+      "nothing here ranks anyone",
+    );
+    await expect(page.locator(".deck-panel")).not.toContainText(/score/i);
+
+    await page
+      .getByRole("button", { name: "Bring Synthetic Deck Bravo to the front" })
+      .click();
+    await expect(page.locator(".deck-card.front")).toContainText(
+      "Synthetic Deck Bravo",
+    );
+    await expect(page.locator(".deck-card.front")).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    await page.locator(".deck").focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(".deck-card.front")).toContainText(
+      "Synthetic Deck Alpha",
+    );
+
+    await page.locator(".deck-card.front a.deck-open").click();
+    await expect(page.locator(".panel.flash h3")).toContainText(
+      "Synthetic Deck Alpha",
+    );
   });
 });
 

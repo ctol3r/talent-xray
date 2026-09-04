@@ -4,6 +4,14 @@
  * chips carry text, never colour alone.
  */
 import { el, esc, asOf, copyText } from "../core/dom";
+import {
+  TALENT_XRAY_ENGINES,
+  checkEngineQuery,
+  defaultEngineRow,
+  engineRunnable,
+  engineSearchUrl,
+  type EngineId,
+} from "../core/talent-xray";
 import type {
   ChannelsPayload,
   HiringNeedPayload,
@@ -394,6 +402,71 @@ export function compiledFor(
   );
 }
 
+/**
+ * W20.1 — run a query on the two live Talent X-Ray engines. The page has no
+ * network: the link opens the engine's own results page in a new tab, the
+ * way the reference console does when embedding is blocked. What runs is
+ * exactly the text in the box, re-checked against Google's limits on every
+ * keystroke; nothing on this page reads the results.
+ */
+function renderEnginePanel(root: HTMLElement): {
+  set(query: string, focus?: boolean): void;
+} {
+  const panel = el(
+    `<div class="panel run-panel" id="run-panel"><h3>Run on Talent X-Ray <span class="why">— the two live people-only engines. Opens in a new tab; nothing on this page reads the results. Add the people you choose under Candidates.</span></h3></div>`,
+  );
+  const field = el(
+    `<label class="field"><b>Query to run</b> <span class="why">editable — what runs is exactly what you see here</span></label>`,
+  );
+  const box = el<HTMLTextAreaElement>(
+    `<textarea class="mono" name="engineQuery" rows="3" spellcheck="false"></textarea>`,
+  );
+  field.append(box);
+  panel.append(field);
+  const row = el(`<div class="run-row"></div>`);
+  const terms = el(`<span class="chip num">0 terms</span>`);
+  row.append(terms);
+  const links = TALENT_XRAY_ENGINES.map((e) => {
+    const a = el<HTMLAnchorElement>(
+      `<a class="btn small ${e.id === "core" ? "primary" : ""}" target="_blank" rel="noopener" data-engine="${e.id}" title="${esc(e.description)}">Run on ${esc(e.short)} ↗</a>`,
+    );
+    row.append(a);
+    return a;
+  });
+  const note = el(`<span class="why" role="status"></span>`);
+  row.append(note);
+  panel.append(row);
+  const sync = () => {
+    const check = checkEngineQuery(box.value);
+    terms.textContent = `${check.termCount} terms`;
+    terms.className = `chip ${check.runnable ? "num" : "bad"}`;
+    for (const a of links) {
+      const id = a.dataset.engine as EngineId;
+      if (check.runnable) {
+        a.href = engineSearchUrl(id, box.value);
+        a.removeAttribute("aria-disabled");
+      } else {
+        a.removeAttribute("href");
+        a.setAttribute("aria-disabled", "true");
+      }
+    }
+    note.textContent = check.runnable ? "" : check.violations.join(" ");
+  };
+  box.addEventListener("input", sync);
+  sync();
+  root.append(panel);
+  return {
+    set(query, focus = false) {
+      box.value = query;
+      sync();
+      if (focus) {
+        panel.scrollIntoView({ block: "start" });
+        box.focus();
+      }
+    },
+  };
+}
+
 /** Search Strings (P0-D): a query is offered as runnable only when it is. */
 export function renderStrings(
   root: HTMLElement,
@@ -402,6 +475,9 @@ export function renderStrings(
   const ctx = currentContext();
   const compiled = compiledFor(p, ctx ? packFor(ctx).platformTags : []);
   const runnable = compiled.filter((q) => q.runnable).length;
+  const engine = renderEnginePanel(root);
+  const preload = defaultEngineRow(compiled);
+  if (preload) engine.set(preload.query);
   const panel = el(
     `<div class="panel"><h3>Compiled queries <span class="why num">— ${runnable} runnable of ${compiled.length}, split and deduped per platform</span></h3></div>`,
   );
@@ -424,6 +500,16 @@ export function renderStrings(
       );
       btn.onclick = () => copyText(q.query, btn);
       row.append(btn);
+      if (engineRunnable(q)) {
+        const run = el<HTMLAnchorElement>(
+          `<a class="btn small run-link" target="_blank" rel="noopener" href="${esc(engineSearchUrl("core", q.query))}" title="Open this query on Talent X-Ray · Core in a new tab">Run ↗</a>`,
+        );
+        const use = el<HTMLButtonElement>(
+          `<button class="btn small" type="button" title="Load this query into the editable box above">Use</button>`,
+        );
+        use.onclick = () => engine.set(q.query, true);
+        row.append(run, use);
+      }
     } else {
       row.append(
         el(

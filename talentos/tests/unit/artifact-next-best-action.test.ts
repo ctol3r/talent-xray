@@ -276,3 +276,23 @@ describe("what it will never do", () => {
     }
   });
 });
+
+describe("W20 — finding people runs through the engines", () => {
+  it("with current queries and no candidates, sends you to run one on Talent X-Ray", () => {
+    const nba = nextBestAction(input({ candidateCount: 0, pipelineEvents: 0 }));
+    expect(nba.step.actionType).toBe("copy_query");
+    expect(nba.step.targetId).toBe("search_strings");
+    expect(nba.step.title).toMatch(/Talent X-Ray/);
+    expect(nba.why).toMatch(/nothing here reads the results/);
+  });
+  it("still asks for a first candidate when the queries are not current", () => {
+    const nba = nextBestAction(
+      input({
+        candidateCount: 0,
+        pipelineEvents: 0,
+        states: states("current", { search_strings: "aging" }),
+      }),
+    );
+    expect(nba.step.actionType).toBe("add_candidate");
+  });
+});
