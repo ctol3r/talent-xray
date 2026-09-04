@@ -324,3 +324,140 @@ introduced, `contradiction_detection` 20/26.
 prior contradiction, the set never shrank on any of them. This closes a
 shape. The measurement's own first answer was wrong and is written up,
 because the exact-text key it implied would have made the record worse.
+
+## W13 — TalentOS Universal, Phase 1: truthful state (CLOSED 2026-09-04)
+
+Owner instruction 2026-09-04 (the "TalentOS Universal" brief, §1–22). The
+brief describes a five-phase program; its own sequencing rule is that
+Phase 1 is finished and validated before any partially connected downstream
+work, and that is what this wave is. Phases 2–5 are specified and not
+started; the continuation note is at the end of this section.
+
+The product is renamed **TalentOS**. "Universal" is the name of the default
+industry pack (`selectedIndustryPack: "universal"`), not a second product.
+
+### The build (D-019)
+
+`artifact/talentos-lite.html` is generated from `talentos/artifact-src/`
+(TypeScript, strict, no `any`) by `scripts/build-artifact.mts`. The bundle
+imports the app's own zod schemas, composer and hygiene, so the artifact and
+the app can no longer disagree about a field name. `pnpm verify` now runs
+`build:artifact:check`, which fails if the committed HTML is not what the
+sources produce.
+
+### The four P0 defects
+
+**P0-A — a frozen provider payload crashed the HM Intake.** The old renderer
+did `if (!q.id) q.id = uid()` on the object the provider returned; under
+strict mode on a non-extensible object that threw `Cannot add property id`,
+and the module rendered "Render failed — use Edit JSON below". Fixed at the
+boundary, not in the renderer: `normalizeGenerated(task, raw)` deep-copies,
+zod-parses, then assigns ids with the app's own `ensureIds`. Answers are
+recorded by `withIntakeAnswer`, which returns a new payload.
+`downgradeVerified` is pure. Nothing in the artifact mutates a value it did
+not create. The regression test feeds a deeply frozen payload through
+render, answer, store and reload.
+
+**P0-B — there was no module state.** A module was "done" if a truthy
+payload existed, and a failure lived in the DOM until the next render. Now
+every module has exactly one state, derived on read and never stored:
+`not_started · researching · generating · current · aging · stale · blocked ·
+failed · needs_review`, each with a reason, the generation time, the input
+version it consumed, the research snapshot it used, and a recovery action.
+`SearchContext` is content-addressed over 29 consequential fields, so
+changing one produces a new `searchVersion`, a human-readable diff
+("Workplace model changed from on-site required to hybrid preferred. Market
+Intel, Strategy, Search Strings, and 7 candidate assessments are now
+stale.") and staleness that propagates down the dependency graph. Failures
+persist as `lastError` on the record and survive navigation and reload.
+
+**P0-C — three different call counts, all literals.** The crew panel said
+`CREW_ORDER.length * 2`, the Golden Test said "About 9 Claude calls", the
+overview counted a module that was never an artifact key. All three are gone:
+`planExecution(scope)` returns the steps, the module list, a min–max model-call
+range (revision passes are optional, so it is a range), research ops and a
+one-line summary, and `ProgressTracker` reports elapsed, completed, skipped,
+retries, failures and whether a failed run is resumable.
+
+**P0-D — over-budget queries were offered as runnable.** They now compile
+against `PLATFORM_CONSTRAINTS`: Google's 32 counted terms (OR/AND/NOT and
+brackets are free), LinkedIn's 1,000 characters with `NOT` instead of a
+leading minus and no `site:`. An over-budget OR group is split into numbered
+parts that each fit; when no split can fit, the query is shown NOT RUNNABLE
+with the reason and no Copy button. Each breadth variant carries an
+explanation of what it tests. The validated composer is wrapped, not
+redesigned (CLAUDE.md).
+
+### Research Gate (owner decision, 2026-09-04)
+
+This runtime has capabilities `sample, db, artifact, downloads, mcp, room`
+and **no web access**, so the honest design fails closed on _currency_, not
+on generation. Without a usable `ResearchSnapshot` a module is `blocked`; the
+user may still generate it after an explicit acknowledgement, and the output
+is labelled MODEL KNOWLEDGE ONLY with every claim `self_attested`. Freshness
+is per source kind, not one TTL — job openings age in 7 days and go stale at
+21; an occupational taxonomy has a year and three years — and each window
+records why it is what it is. A provider failure is `failed` and an empty
+result is `blocked`; neither is ever an empty success. The adapter registry
+selects sources by industry, role and location (Bigdata.com, NPI Registry,
+PubMed/bioRxiv/Consensus); all three report themselves **unwired** in this
+build and return nothing, because wiring them needs an observed
+request/response and viewer consent (Phase 3).
+
+### Output envelope and the eight next steps
+
+Substantive modules return an `OutputEnvelope`: headline, executive summary,
+claims split by kind and evidence state, implications, action items, pivot
+proposals, the module content, and **exactly eight next steps labelled A–H**.
+The count is validated at runtime, not asserted in prose: eight labels once
+each, every step actionable and pointing at something that exists, filler
+rejected, at most two recommended, and the outward or decisive actions
+(outreach, stage change, pivot approval, stakeholder update, recorded
+decision) flagged as requiring a human confirmation. A failing envelope gets
+one repair pass; if it still fails, the record is kept with its validation
+issues visible rather than presented as clean. Metrics carry a formula and a
+denominator, and 0/0 is `not_enough_data`, never zero.
+
+### Acceptance — what was actually run
+
+- `pnpm test` — 26 files, 248 tests, green. New: `artifact-payloads`,
+  `artifact-context`, `artifact-research`, `artifact-envelope`,
+  `artifact-query-compiler`, `artifact-execution`, `artifact-defect-checks`,
+  `artifact-store`, `artifact-build`.
+- `pnpm e2e:artifact` — 10 Playwright tests against the **committed** HTML,
+  served from a routed origin with a stub `window.claude` that returns
+  deeply frozen objects and can fail on demand.
+- `pnpm build:artifact:check`, `pnpm typecheck`, `pnpm lint`,
+  `pnpm format:check`, `pnpm build` — all green in `pnpm verify`.
+- The eleven deliberate-defect checks run in the page with no model call and
+  in vitest, and the Golden Test reports which checks executed and which did
+  not.
+
+`tests/unit/artifact-hygiene.test.ts` is deleted: it sliced the HTML between
+comment markers, which a build product does not have. The same behaviour is
+covered by importing the modules directly.
+
+### Continuation note — Phases 2 to 5, not started
+
+1. **Phase 2, five-phase IA and modes.** Group the modules into Define ·
+   Research · Plan · Execute · Learn behind a persistent header whose "next
+   best action" is derived from `moduleStates()` and the action queue, with
+   Guided and Expert modes. The state machine it needs already exists
+   (`core/dependencies.ts`); this is navigation, not new truth.
+2. **Phase 3, connectors.** Wire `bigdataAdapter`, `npiAdapter` and
+   `publicationsAdapter` through the `mcp` capability. Each needs a real
+   request/response observed in session before it is written, per-viewer
+   consent, and a rule that a connector-backed artifact is never published
+   publicly. `availability()` already returns the honest unavailable state,
+   so nothing lies while this is pending.
+3. **Phase 4, pipeline and metrics.** Pipeline events, the four metric
+   groups with formulas and denominators (`metricResultSchema` and
+   `rateMetric` are in place), the HM command centre, the decision log and
+   the pivot engine over `pivotProposalSchema`.
+4. **Phase 5, candidate evidence dossiers.** Per-criterion evidence with
+   source links, the conservative identity resolution already implemented in
+   `core/identity.ts`, and outreach that a human still sends.
+
+Nothing in Phases 2–5 has a half-built counterpart in the tree: the
+contracts they need are complete and tested, and the surfaces they need are
+absent rather than stubbed.

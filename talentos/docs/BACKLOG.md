@@ -82,13 +82,11 @@ string-expansion task:
 - **Corpus gap — no protected-trait case for sex or gender.** The text
   scanner had no gender pattern until W12 and the corpus would not have
   caught it; add a conversation where a manager genders the role.
-- **The artifact's IR shape is duplicated and untested** (D-017). The four
-  backstops and the rule text are held in place by
-  `tests/unit/artifact-hygiene.test.ts`, but the IR field names in
-  `artifact/talentos-lite.html` are not: rename a field in
-  `src/lib/core/ir.ts` and nothing fails until someone opens the artifact.
-  Cheapest fix is a test that reads the zod schema's field names and asserts
-  each appears in the artifact's shape strings.
+- ~~**The artifact's IR shape is duplicated and untested** (D-017).~~ Closed
+  by W13/D-019: the artifact is built from `talentos/artifact-src/`, which
+  imports `src/lib/core/ir.ts` and `src/lib/core/payloads.ts` directly, so a
+  renamed field is a build error. The marker-slicing test that stood in for
+  this is deleted.
 - **The artifact's ported brain has never been scored.** The corpus harness
   needs a filesystem and a scorer, so a published page cannot run it. If a
   key ever arrives, run the corpus against the artifact's prompts as well as
@@ -100,3 +98,27 @@ string-expansion task:
   make carry-forward exact instead of heuristic. Not taken now because no
   corpus failure demands it and W12 earned no schema change; revisit if a
   real run shows the matcher mis-pairing.
+
+## Added by W13 (TalentOS Universal, Phase 1)
+
+- **Three research connectors are declared and unwired.** `bigdataAdapter`,
+  `npiAdapter` and `publicationsAdapter` in
+  `talentos/artifact-src/core/research.ts` know where they apply (industry,
+  role family, geography) and return `unavailable` with a reason. Wiring
+  them through the `mcp` capability is Phase 3 and needs a real
+  request/response observed in session first, per-viewer consent, and a rule
+  that a connector-backed artifact is never published publicly.
+- **The artifact is ~990 KB unminified.** esbuild `minifyWhitespace` and
+  `minifySyntax` are available and not enabled (D-019). Readable traces in
+  the published page were judged worth more than the bytes; revisit if the
+  page grows toward the 16 MB limit or if load time becomes visible.
+- **`ProgressTracker` reports `resumable` but nothing resumes yet.** A crew
+  run that fails halfway records which steps completed; the UI offers a
+  fresh run, not a resume. The state to do it properly is already there.
+- **Metrics exist as a contract with no producer.** `metricResultSchema` and
+  `rateMetric` are implemented and tested; no module emits metrics until the
+  pipeline events of Phase 4 exist. `OutputEnvelope.metrics` is always empty
+  today, which is honest but worth remembering.
+- **The envelope's repair pass is one attempt.** A module whose next steps
+  fail validation twice is stored with its issues visible and marked
+  `needs_review`. Whether a second repair is worth the call is unmeasured.

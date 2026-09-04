@@ -1,0 +1,50 @@
+<title>TalentOS</title>
+<style>
+  /*__STYLES__*/
+</style>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+/>
+<div id="app">
+  <a class="sr-only" href="#main">Skip to content</a>
+  <nav class="rail" aria-label="Searches and modules">
+    <div class="brand">
+      <h1>Talent<span>OS</span></h1>
+      <small>AI recruiting workroom · runs on your Claude</small>
+    </div>
+    <div class="rail-section">
+      <div class="rail-label" id="searches-label">Searches</div>
+      <div id="search-list" role="list" aria-labelledby="searches-label"></div>
+      <button
+        class="btn small"
+        id="new-search-btn"
+        type="button"
+        style="margin: 8px 6px 0"
+      >
+        + New search
+      </button>
+    </div>
+    <div class="rail-section">
+      <div class="rail-label" id="modules-label">Modules</div>
+      <div
+        class="modnav"
+        id="mod-nav"
+        role="list"
+        aria-labelledby="modules-label"
+      ></div>
+    </div>
+    <div class="rail-foot" id="rail-foot">
+      Agents draft. Humans decide. Nothing sends automatically.
+    </div>
+    <div class="rail-foot ver">
+      TalentOS artifact <span id="artifact-version">dev</span>
+    </div>
+  </nav>
+  <main class="main" id="main-region">
+    <div class="main-inner" id="main" tabindex="-1"></div>
+  </main>
+</div>
+<script>
+  /*__BUNDLE__*/
+</script>

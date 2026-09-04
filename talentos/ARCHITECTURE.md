@@ -235,10 +235,31 @@ talentos/
 │   │   ├── services/          # application services (incl. intelligence.ts)
 │   │   └── actions/           # server actions (zod at the boundary)
 │   └── …
+├── artifact-src/              # SOURCE of the published single-file artifact
+│   ├── core/                  #   payloads, search-context, dependencies,
+│   │                          #   research, envelope, query-compiler,
+│   │                          #   execution-plan, identity, store,
+│   │                          #   defect-checks
+│   ├── ai/                    #   prompts, context rendering, task runner
+│   ├── app/                   #   in-page state
+│   ├── ui/                    #   vanilla-DOM shell and module renderers
+│   ├── styles.css, template.html, main.ts
+├── artifact/talentos-lite.html  # GENERATED — do not hand-edit (D-019)
+├── scripts/build-artifact.mts   # esbuild bundle + inline; --check in verify
 └── tests/
-    ├── unit/                  # vitest — domain, schemas, guardrails
-    └── e2e/                   # playwright — critical path (mock provider)
+    ├── unit/                  # vitest — domain, schemas, guardrails,
+    │                          #   and the artifact's own modules
+    ├── e2e/                   # playwright — critical path (mock provider)
+    └── e2e-artifact/          # playwright — the committed artifact HTML
 ```
+
+**The artifact is a second front end over the same contracts.** It renders
+with vanilla DOM into one inline `<script>` and talks only to the viewer's
+own Claude (`sample`) and the artifact document store (`db`, with a
+localStorage fallback). It imports `src/lib/core/ir.ts`,
+`src/lib/core/payloads.ts` and the pure modules under `src/lib/domain/`
+directly, so the two surfaces cannot drift on a field name; `pnpm verify`
+fails if the committed HTML is not what `artifact-src/` produces.
 
 ## 7. Data layer
 

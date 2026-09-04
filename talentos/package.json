@@ -19,9 +19,12 @@
     "golden:cais": "tsx scripts/golden-cais.mts",
     "golden:session": "tsx scripts/golden-cais-session.mts",
     "crew:work": "tsx scripts/crew-worker.mts",
-    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm build:artifact:check && pnpm test && pnpm build",
     "eval:w12": "tsx scripts/eval-w12.mts",
-    "eval:w12:fulfil": "tsx scripts/eval-w12-fulfil.mts"
+    "eval:w12:fulfil": "tsx scripts/eval-w12-fulfil.mts",
+    "build:artifact": "tsx scripts/build-artifact.mts",
+    "build:artifact:check": "tsx scripts/build-artifact.mts --check",
+    "e2e:artifact": "playwright test -c playwright.artifact.config.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
@@ -40,6 +43,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.10",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.2",
     "prettier": "^3.9.6",
