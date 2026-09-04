@@ -602,3 +602,92 @@ under Phase 4 in the W13 continuation note and are NOT here — this wave is
 pipeline events and metrics, which is what was asked for. `pivotProposalSchema`
 still has no producer, and `compareMetric` has no caller: there is no stored
 period to compare against yet.
+
+## W16–W19 — Phase 5, resume, in-page scoring, minification (CLOSED 2026-09-04)
+
+Owner instruction 2026-09-04: the remaining options from the W15 report,
+requested as **d, e, f, g, h**. Four are built; **E could not be run and is
+recorded as blocked rather than approximated.**
+
+### W16 (D) — Candidate evidence dossiers (D-023)
+
+`core/evidence.ts`. A candidate's sources are only what a human supplied:
+the pasted text, the links they added, their notes. Every evidence item now
+carries a verbatim `quote` and the `sourceId` it came from, and
+`verifyEvidence()` checks the quote against that source's text.
+
+| Situation                       | Result                                                                 |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| Quote found in the named source | Stays as claimed; QUOTE FOUND IN SOURCE                                |
+| Quote not found                 | Downgraded to `unknown`, struck through, "do not use it"               |
+| Source is a link                | Capped at `partial` — the page never fetched it                        |
+| No source named                 | `unknown`; "a model inference about a real person. It is not evidence" |
+| No quote given                  | Capped at `partial`; nothing can be checked                            |
+
+The dossier also names the success-profile criteria nobody assessed
+("absence here is absence of an answer, not absence of the skill"), and the
+prompt now tells the model that a quote is checked automatically, so
+paraphrasing into the field is worse than leaving it empty. Defect check 13
+injects a fabricated quote and asserts it is caught.
+
+### W17 (G) — A crew run covers only what still needs work
+
+`crewRemaining()` drops modules already `current` for the current input
+version; anything failed, stale, blocked, aging or needing review is in the
+run. The button reads "Resume crew — N modules left", names what it is
+skipping, and disables itself when there is nothing to do. The call estimate
+comes from a plan built over the remaining modules, so a resumed run
+advertises its real cost.
+
+### W18 (H) — The artifact scores its own prompts (D-024)
+
+`core/corpus.ts` imports `checkTurn`, `mergeTallies` and `ZERO_TARGET_METRICS`
+from `eval/w12/checks.ts` and four conversations from the corpus — imported,
+not ported, so the page and the harness cannot disagree about what a failure
+is. The Golden Test can run those fixtures through the artifact's own
+prompts on the viewer's Claude and score them deterministically.
+
+**The generating model never sees the expectations.** They stay in the page
+and are applied afterwards. That is the independence every run in
+`eval/w12/results/` lacked, and it arrives from an unexpected direction: the
+`sample` capability makes the model call one the page controls end to end.
+
+The report cannot flatter itself: nothing executed is FAIL, any zero-target
+violation is FAIL, an incomplete run is PARTIAL, a metric never exercised
+reads "not exercised", and the caveat naming the sample size, the missing
+judge and the 53-conversation corpus travels with every number.
+
+### W19 (F) — Minified whitespace and syntax (D-025)
+
+1.20 MB → **904 KB**, while gaining the corpus. Identifiers are kept and
+`keepNames` is on, so a stack trace in the published page still names the
+function that threw.
+
+### E — NOT RUN, and why
+
+The remaining option was "run the full W12 corpus against an API key so the
+generations are independent of whoever reads the expectations, and with the
+judge on a different model". **There is no Anthropic credential in this
+environment** (`ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN` are both
+unset), so the run cannot happen here.
+
+It was not approximated. Re-running the corpus through the session provider
+would mean the same person who can read the expectations writing 251
+generations again — the exact corpus-optimisation W12 was built to avoid,
+and the thing `REPORT.md` already discounts 25 checks for. W18 is not a
+substitute either: four conversations on a viewer's model tier is a sample,
+not the corpus, and the judge still does not run.
+
+**The extraction condition is unchanged**: full corpus, API key, judge on a
+different model, holding `false_signal_recall` above 85 %, provenance at
+100 %, and `RequirementIR` unchanged.
+
+### Acceptance — what was actually run
+
+- `pnpm test` — 33 files, 349 tests. New: `artifact-evidence` (14),
+  `artifact-corpus` (12), plus crew-resume cases in `artifact-execution`.
+- `pnpm e2e:artifact` — 25 tests against the committed HTML, including a
+  fabricated quote being struck through in the real page, a link shown as a
+  source that was never fetched, and the corpus panel stating what its
+  numbers would and would not mean.
+- `pnpm verify` — green, including the artifact build-drift check.

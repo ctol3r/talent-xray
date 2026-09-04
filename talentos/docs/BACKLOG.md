@@ -170,3 +170,27 @@ string-expansion task:
   who records a week of outreach on Friday gets a median that measures their
   admin habit. The metric says it is computed from recorded times; a
   separate "when did this actually happen" field would be better.
+
+## Added by W16–W19
+
+- **The corpus benchmark has never been run.** W18 built the runner and the
+  scoring; nobody has clicked it. Its first real run belongs in a session
+  where the result can be read and recorded — and it will cost roughly
+  4 fixtures × (1 + turns) model calls on the viewer's account.
+- **Four fixtures is a sample, not the corpus.** Widening it is a one-line
+  change to `FIXTURE_IDS`, bounded by bundle size and run time. The bundle
+  currently carries three corpus files; adding all twelve would be ~another
+  200 KB before minification.
+- **W18 measures the artifact's prompts, not the app's.** They have diverged
+  before. A corresponding in-app scorer would need no new checkers, only a
+  runner.
+- **Evidence quotes are matched on normalized substring.** A model that
+  paraphrases inside quotation marks is caught; one that quotes a real span
+  and mis-attributes what it means is not. The check is about provenance,
+  not interpretation, and should not be sold as more.
+- **`compareMetric`, the pivot engine and the HM command centre still have
+  no producer** (carried from W15).
+- **`ANTHROPIC_API_KEY` is unset in the remote environment**, so the
+  extraction-condition corpus run cannot be executed from a Claude Code web
+  session as configured. It needs either a key in the environment or a local
+  run.

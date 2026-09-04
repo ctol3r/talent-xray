@@ -682,3 +682,70 @@ its own population and that an empty pipeline yields no measured zero.
 direction unless both periods are measured and both meet their minimum
 sample, and it states both sample sizes when it does. "Improved" without
 that is a claim, not a measurement.
+
+## D-023 — A claim about a person is evidence only if its quote is in a source a human supplied
+
+**Decision.** (2026-09-04, W16.) Every candidate evidence item carries a
+`quote` — a verbatim span — and a `sourceId` naming which attached source it
+came from. `verifyEvidence()` checks that span against the source's text
+deterministically. A quote that is not found there is downgraded to
+`unknown`, marked NOT IN ANY SOURCE, struck through, and accompanied by
+"do not use it". A claim with no quote, or no source, cannot be `strong`.
+
+**Why this and not a prompt rule.** "Never invent facts about this person"
+has been in the prompt since W6 and the W12 corpus measured zero fabricated
+figures — but that was about market numbers. A fabricated _quote attributed
+to a named individual_ is a different and worse failure: it reads as
+verbatim, it is the most persuasive thing in a dossier, and a recruiter
+would repeat it to a hiring manager. Prompt rules are unmeasurable
+mid-flight; a substring check is not. This is the same reasoning as the W12
+deterministic backstops: state the rule to the model AND enforce the part
+that can be enforced.
+
+**A link is not a source.** The page never fetches anything, so a URL's
+contents are unknown to it. An item quoting a link is capped at `partial`
+with "open it and check the claim yourself" — the honest state, and one the
+model cannot argue with.
+
+**Uncovered criteria are named.** A dossier lists the success-profile
+criteria the assessment never mentioned, with "absence here is absence of an
+answer, not absence of the skill". Silence on a criterion previously looked
+identical to a considered "missing".
+
+## D-024 — The artifact scores its own prompts, and the generating model never sees the expectations
+
+**Decision.** (2026-09-04, W18.) The artifact imports the W12 deterministic
+checkers and four corpus conversations directly from `eval/w12/` — not a
+port — and the Golden Test can run them through the page's own prompts on
+the viewer's Claude. Scoring happens afterwards, in code.
+
+**Why this is better evidence than the runs already in the repo.** Every run
+in `eval/w12/results/` was hand-fulfilled through the session provider: the
+same person who could read the expectations wrote the generations. The
+REPORT says so and discounts 25 checks for exactly that reason. Here the
+model receives the fixture's project facts, JD and scripted statements and
+nothing else; the expectations stay in the page. That is the independence
+the extraction condition asked for — arriving from an unexpected direction,
+because the artifact's `sample` capability makes a model call the page
+controls end to end.
+
+**What it still is not.** Four conversations out of 53, on whatever model
+tier the viewer's Claude serves, with the LLM judge still not running. The
+report carries a caveat naming all three, a metric never exercised is
+reported as "not exercised" rather than as a pass, a run where nothing
+executed is FAIL rather than a vacuous PASS, and any zero-target violation
+is FAIL whatever else passed. It does not replace the API-key run; it makes
+the artifact's brain measurable at all, which it was not.
+
+## D-025 — Minify whitespace and syntax, keep identifiers
+
+**Decision.** (2026-09-04, W19.) The artifact build enables esbuild's
+`minifyWhitespace` and `minifySyntax` with `minifyIdentifiers: false` and
+`keepNames: true`. The page went from 1.20 MB to 904 KB — 25 % — while
+gaining the corpus fixtures and checkers.
+
+**Why not the other half.** D-019 left the bundle unminified so a stack
+trace in the published page names the function that threw. Mangling
+identifiers is where most of the remaining bytes are and is also the only
+part that costs that. At 904 KB against a 16 MB limit there is no pressure
+worth trading a readable trace for.

@@ -207,6 +207,13 @@ export const evidenceItemSchema = z.object({
   criterion: z.string(),
   status: z.string(),
   evidenceText: z.string().optional(),
+  /**
+   * W16: the verbatim span the claim rests on, and which attached source
+   * it came from. Optional so older stored records still load; an item
+   * without them cannot be supported evidence (see core/evidence.ts).
+   */
+  quote: z.string().optional(),
+  sourceId: z.string().optional(),
 });
 export const evidencePayloadSchema = z.object({
   items: z.array(evidenceItemSchema),

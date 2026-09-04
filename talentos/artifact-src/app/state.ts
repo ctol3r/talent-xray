@@ -76,6 +76,12 @@ export interface AppState {
   acknowledgedNoResearch: Set<string>;
   /** "as of" for derived views — updated on every render. */
   now: string;
+  /**
+   * W18: a benchmark run swaps in a throwaway search. While this is true
+   * nothing is written to the store — a corpus fixture must never end up
+   * in the recruiter's saved searches.
+   */
+  ephemeral: boolean;
 }
 
 export const state: AppState = {
@@ -93,6 +99,7 @@ export const state: AppState = {
   inflight: {},
   acknowledgedNoResearch: new Set(),
   now: nowIso(),
+  ephemeral: false,
 };
 
 export function attachDb(db: DbLike | null): void {
@@ -312,14 +319,16 @@ export async function putArtifact(
   record: StoredRecord,
 ): Promise<void> {
   state.artifacts = { ...state.artifacts, [task]: record };
-  if (state.current) await store.saveArtifact(state.current.id, task, record);
+  if (state.current && !state.ephemeral)
+    await store.saveArtifact(state.current.id, task, record);
 }
 
 export async function putCandidate(cand: StoredCandidate): Promise<void> {
   state.candidates = state.candidates.some((c) => c.id === cand.id)
     ? state.candidates.map((c) => (c.id === cand.id ? cand : c))
     : [...state.candidates, cand];
-  if (state.current) await store.saveCandidate(state.current.id, cand);
+  if (state.current && !state.ephemeral)
+    await store.saveCandidate(state.current.id, cand);
 }
 
 export async function putResearch(snapshot: ResearchSnapshot): Promise<void> {
@@ -327,21 +336,23 @@ export async function putResearch(snapshot: ResearchSnapshot): Promise<void> {
     ...state.research.filter((s) => s.id !== snapshot.id),
     snapshot,
   ];
-  await store.saveResearch(snapshot);
+  if (!state.ephemeral) await store.saveResearch(snapshot);
 }
 
 export async function putAction(action: ActionItem): Promise<void> {
   state.actions = state.actions.some((a) => a.id === action.id)
     ? state.actions.map((a) => (a.id === action.id ? action : a))
     : [...state.actions, action];
-  if (state.current) await store.saveAction(state.current.id, action);
+  if (state.current && !state.ephemeral)
+    await store.saveAction(state.current.id, action);
 }
 
 export async function putInitiative(initiative: Initiative): Promise<void> {
   state.initiatives = state.initiatives.some((i) => i.id === initiative.id)
     ? state.initiatives.map((i) => (i.id === initiative.id ? initiative : i))
     : [...state.initiatives, initiative];
-  if (state.current) await store.saveInitiative(state.current.id, initiative);
+  if (state.current && !state.ephemeral)
+    await store.saveInitiative(state.current.id, initiative);
 }
 
 /**
@@ -369,7 +380,47 @@ export async function appendEvent(event: PipelineEvent): Promise<void> {
   state.events = [...state.events, event].sort((a, b) =>
     a.at.localeCompare(b.at),
   );
-  if (state.current) await store.appendEvent(state.current.id, event);
+  if (state.current && !state.ephemeral)
+    await store.appendEvent(state.current.id, event);
+}
+
+/**
+ * Run something against a throwaway search — the benchmark's fixtures.
+ * Nothing is persisted, and the recruiter's own state is restored even if
+ * the run throws.
+ */
+export async function withEphemeralSearch<T>(
+  facts: SearchFacts,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const saved = {
+    current: state.current,
+    artifacts: state.artifacts,
+    candidates: state.candidates,
+    contexts: state.contexts,
+    research: state.research,
+    actions: state.actions,
+    initiatives: state.initiatives,
+    events: state.events,
+    module: state.module,
+    ephemeral: state.ephemeral,
+  };
+  state.current = facts;
+  state.artifacts = {};
+  state.candidates = [];
+  state.contexts = [];
+  state.research = [];
+  state.actions = [];
+  state.initiatives = [];
+  state.events = [];
+  state.ephemeral = true;
+  const ctx = currentContext();
+  if (ctx) state.contexts = [ctx];
+  try {
+    return await fn();
+  } finally {
+    Object.assign(state, saved);
+  }
 }
 
 export async function saveFacts(facts: SearchFacts): Promise<void> {

@@ -238,9 +238,10 @@ talentos/
 ├── artifact-src/              # SOURCE of the published single-file artifact
 │   ├── core/                  #   payloads, search-context, dependencies,
 │   │                          #   phases, industry-packs, next-best-action,
-│   │                          #   research, connectors, envelope,
-│   │                          #   query-compiler, execution-plan, identity,
-│   │                          #   store, defect-checks
+│   │                          #   research, connectors, envelope, pipeline,
+│   │                          #   evidence, corpus, query-compiler,
+│   │                          #   execution-plan, identity, store,
+│   │                          #   defect-checks
 │   ├── ai/                    #   prompts, context rendering, task runner
 │   ├── app/                   #   in-page state
 │   ├── ui/                    #   vanilla-DOM shell, header, module renderers
@@ -253,6 +254,9 @@ talentos/
     ├── e2e/                   # playwright — critical path (mock provider)
     └── e2e-artifact/          # playwright — the committed artifact HTML
 ```
+
+The artifact also imports `eval/w12/checks.ts` and a few corpus fixtures, so
+the page can score its own prompts with the harness's own checkers (D-024).
 
 **The artifact is a second front end over the same contracts.** It renders
 with vanilla DOM into one inline `<script>` and talks only to the viewer's

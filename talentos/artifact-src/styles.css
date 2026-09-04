@@ -835,3 +835,34 @@ ul.metrics li .why {
   flex-basis: 100%;
   margin: 0;
 }
+
+/* ── W16: evidence dossier ────────────────────────────────────────── */
+ul.dossier {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+.dossier-item {
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.dossier-item:first-child {
+  border-top: 0;
+}
+.dossier-item.unsupported {
+  opacity: 0.85;
+}
+blockquote.quote {
+  margin: 6px 0;
+  padding: 6px 10px;
+  border-left: 2px solid var(--line);
+  font: 12.5px/1.6 var(--mono);
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.dossier-item.unsupported blockquote.quote {
+  border-left-color: var(--bad);
+  text-decoration: line-through;
+  color: var(--muted);
+}

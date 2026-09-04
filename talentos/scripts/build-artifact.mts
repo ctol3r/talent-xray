@@ -33,7 +33,14 @@ async function bundle(version: string): Promise<string> {
     format: "iife",
     platform: "browser",
     target: ["es2022"],
-    minify: false,
+    // Whitespace and syntax only: identifiers stay, so a stack trace in
+    // the published page still names the function that threw (D-019 kept
+    // the bundle unminified for exactly that; W19 takes the ~40% the safe
+    // half gives and keeps the traces).
+    minifyWhitespace: true,
+    minifySyntax: true,
+    minifyIdentifiers: false,
+    keepNames: true,
     legalComments: "none",
     logLevel: "silent",
     alias: { "@": path.join(root, "src") },

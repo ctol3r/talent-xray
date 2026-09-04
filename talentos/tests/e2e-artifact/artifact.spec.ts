@@ -107,6 +107,44 @@ const RESPONSES = {
     },
     suggestedNextSteps: eightSteps(TARGETS),
   },
+  // Success Profile is not an envelope task: the content IS the payload.
+  profile: {
+    mission: "Stand up evaluation capacity — the bar is a builder-researcher.",
+    outcomes: [],
+    mustHave: [{ text: "Built evaluation infrastructure", provenance: "jd" }],
+    preferred: [],
+    trainable: [],
+    evidenceSignals: [
+      { text: "Open-source research artifacts", provenance: "jd" },
+    ],
+    negativeSignals: [],
+    sellingPoints: [],
+    candidateMotivators: [],
+    unresolvedQuestions: [],
+  },
+  evidence: {
+    items: [
+      {
+        criterion: "Built evaluation infrastructure",
+        status: "strong",
+        evidenceText: "They built the harness themselves.",
+        quote: "Built the distributed evaluation harness used across the lab",
+        sourceId: "__CAND__:pasted",
+      },
+      {
+        criterion: "Led a team of twelve",
+        status: "strong",
+        evidenceText: "They led a large team.",
+        quote: "Led a team of twelve engineers across three sites.",
+        sourceId: "__CAND__:pasted",
+      },
+    ],
+    reviewPriority: {
+      suggestion: "review_first",
+      reasoning: "Infrastructure match is unusually direct.",
+    },
+    questionsToValidate: ["Ask what they owned versus what the team owned."],
+  },
   strings: {
     headline: "Vocabulary is wide enough to need splitting",
     executiveSummary:
@@ -180,7 +218,13 @@ async function openArtifact(
                     ? "market"
                     : /query-expansion vocabulary/.test(prompt)
                       ? "strings"
-                      : "other";
+                      : /evidence alignment for this candidate/.test(prompt)
+                        ? "evidence"
+                        : /Compile the success profile for this search now/.test(
+                              prompt,
+                            )
+                          ? "profile"
+                          : "other";
               if (failTasks.includes(which)) {
                 return Promise.reject(
                   Object.assign(new Error("rate_limited by the stub"), {
@@ -196,9 +240,17 @@ async function openArtifact(
                 );
               }
               // Frozen, exactly like a provider-owned object (the P0-A condition).
-              return Promise.resolve(
-                freeze(JSON.parse(JSON.stringify(responses[which]))),
-              );
+              const body = JSON.parse(JSON.stringify(responses[which]));
+              if (which === "evidence") {
+                // Source ids are per candidate; read the real one out of the
+                // prompt the page built rather than guessing it.
+                const id =
+                  /### Source id: (\S+):pasted/.exec(prompt)?.[1] ?? "";
+                for (const item of body.items) {
+                  item.sourceId = String(item.sourceId).replace("__CAND__", id);
+                }
+              }
+              return Promise.resolve(freeze(body));
             },
           });
         },
@@ -715,5 +767,94 @@ test.describe("the pipeline", () => {
         .locator(".panel", { hasText: "Velocity" })
         .locator(".metrics .chip.ok"),
     ).toHaveCount(1);
+  });
+});
+
+test.describe("candidate evidence dossiers", () => {
+  const PASTED =
+    "SYNTHETIC PROFILE FOR TESTING — not a real person. Built the distributed evaluation harness used across the lab (PyTorch, Ray, 256-GPU runs).";
+
+  async function addCandidate(page: Page) {
+    // Evidence alignment is assessed against the success profile, so it has
+    // to exist first — the page says so rather than guessing criteria.
+    await openModule(page, "Success Profile");
+    await generateButton(page).click();
+    await expect(page.locator("#main")).toContainText(
+      "Built evaluation infrastructure",
+    );
+    await openModule(page, "Candidates");
+    await page.locator('input[name="name"]').fill("Synthetic Test Candidate");
+    await page.locator('textarea[name="pastedText"]').fill(PASTED);
+    await page.getByRole("button", { name: "Add candidate" }).click();
+    await expect(page.locator("#main")).toContainText(
+      "Synthetic Test Candidate",
+    );
+  }
+
+  test("a link is shown as a source that was never fetched", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await openModule(page, "Candidates");
+    await page.locator('input[name="name"]').fill("Linked Candidate");
+    await page
+      .locator('input[name="profileUrl"]')
+      .fill("https://example.com/p");
+    await page.getByRole("button", { name: "Add candidate" }).click();
+    await expect(page.locator("#main")).toContainText("LINK — NOT FETCHED");
+    await expect(page.locator("#main")).toContainText(
+      "Nothing on this page reads that page",
+    );
+    const link = page.locator('a[href="https://example.com/p"]');
+    await expect(link).toHaveAttribute("rel", "noopener");
+    await expect(link).toHaveAttribute("target", "_blank");
+  });
+
+  test("a quote that is not in the pasted source is caught and struck through", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await addCandidate(page);
+    await page.getByRole("button", { name: "Evidence alignment" }).click();
+
+    await expect(page.locator("#main")).toContainText("1 of 2 quote-verified");
+    await expect(page.locator(".notice.error")).toContainText(
+      "1 claim downgraded",
+    );
+
+    const verified = page.locator(".dossier-item", {
+      hasText: "Built evaluation infrastructure",
+    });
+    await expect(verified).toContainText("QUOTE FOUND IN SOURCE");
+    await expect(verified).toContainText(/strong/i);
+
+    const fabricated = page.locator(".dossier-item", {
+      hasText: "Led a team of twelve",
+    });
+    await expect(fabricated).toContainText("QUOTE NOT IN ANY SOURCE");
+    await expect(fabricated).toContainText("do not use it");
+    await expect(fabricated).not.toContainText(/strong/i);
+    await expect(fabricated).toContainText(/unknown/i);
+    await expect(fabricated).toHaveClass(/unsupported/);
+  });
+});
+
+test.describe("the corpus benchmark", () => {
+  test("offers a scored run and says what the number would and would not mean", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await setMode(page, "Expert");
+    await openModule(page, "Golden Test");
+    await expect(page.locator("#main")).toContainText(
+      "Score the brain against the W12 corpus",
+    );
+    await expect(page.locator("#main")).toContainText(
+      "never sees the expectations",
+    );
+    await expect(page.locator("#main")).toContainText("judge does not run");
+    await expect(
+      page.getByRole("button", { name: "Run the corpus benchmark" }),
+    ).toBeVisible();
   });
 });

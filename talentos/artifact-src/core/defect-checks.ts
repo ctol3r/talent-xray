@@ -29,6 +29,7 @@ import {
 import { compileQueries, countTerms } from "./query-compiler";
 import { findIdentityMatches } from "./identity";
 import { computeMetrics, pipelineEventSchema } from "./pipeline";
+import { buildDossier } from "./evidence";
 
 export interface CheckResult {
   id: string;
@@ -518,6 +519,71 @@ export const DEFECT_CHECKS: DefectCheck[] = [
         "Empty pipeline is not a zero",
         ok,
         `${zeroed.length} metric(s) reported 0 from no data; ${demographic.length} demographic term(s) in the registry; ${overOne.length} rate(s) above 100%.`,
+      );
+    },
+  },
+  {
+    id: "fabricated_quote_caught",
+    name: "13. A quote that is not in the source is downgraded, not shown as evidence",
+    run: () => {
+      const candidate = {
+        id: "cand-check",
+        name: "Synthetic Check Candidate",
+        profileUrls: ["https://example.com/profile"],
+        pastedText:
+          "SYNTHETIC PROFILE FOR CHECKING — not a real person. Built the distributed evaluation harness used across the lab.",
+        createdAt: NOW,
+      };
+      const dossier = buildDossier({
+        candidate,
+        rawItems: [
+          {
+            criterion: "Built evaluation infrastructure",
+            status: "strong",
+            evidenceText: "They built the harness.",
+            quote:
+              "Built the distributed evaluation harness used across the lab.",
+            sourceId: "cand-check:pasted",
+          },
+          {
+            criterion: "Led a team of twelve",
+            status: "strong",
+            evidenceText: "They led a large team.",
+            quote: "Led a team of twelve engineers across three sites.",
+            sourceId: "cand-check:pasted",
+          },
+          {
+            criterion: "Published at NeurIPS",
+            status: "strong",
+            evidenceText: "Their profile page lists papers.",
+            quote: "First-author NeurIPS paper.",
+            sourceId: "cand-check:link:0",
+          },
+        ],
+        criteria: [
+          "Built evaluation infrastructure",
+          "Led a team of twelve",
+          "Ships production code",
+        ],
+      });
+      const real = dossier.items[0];
+      const fabricated = dossier.items[1];
+      const fromLink = dossier.items[2];
+      const ok =
+        real.supported &&
+        real.status === "strong" &&
+        !fabricated.supported &&
+        fabricated.status === "unknown" &&
+        fabricated.check === "not_found_in_source" &&
+        !fromLink.supported &&
+        fromLink.status !== "strong" &&
+        dossier.downgraded === 2 &&
+        dossier.uncovered.includes("Ships production code");
+      return result(
+        "fabricated_quote_caught",
+        "Fabricated quote caught",
+        ok,
+        `verified=${real.supported}; fabricated→${fabricated.status}/${fabricated.check}; link-quote→${fromLink.status}; downgraded=${dossier.downgraded}; uncovered=${dossier.uncovered.length}.`,
       );
     },
   },

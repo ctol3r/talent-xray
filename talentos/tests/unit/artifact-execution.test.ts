@@ -10,7 +10,11 @@ import {
   planExecution,
 } from "../../artifact-src/core/execution-plan";
 import { findIdentityMatches } from "../../artifact-src/core/identity";
-import { CREW_ORDER } from "../../artifact-src/ai/tasks";
+import {
+  CREW_ORDER,
+  crewPlan,
+  crewRemaining,
+} from "../../artifact-src/ai/tasks";
 import { MODULES } from "../../artifact-src/core/dependencies";
 
 const modules = [
@@ -189,5 +193,60 @@ describe("identity resolution never merges by itself", () => {
         existing,
       ),
     ).toEqual([]);
+  });
+});
+
+describe("W17 · a crew run covers only what still needs work", () => {
+  const states = (over: Partial<Record<string, string>> = {}) =>
+    Object.fromEntries(
+      CREW_ORDER.map((k) => [k, { state: over[k] ?? "not_started" }]),
+    );
+
+  it("a fresh search runs every crew module", () => {
+    expect(crewRemaining(states())).toEqual([...CREW_ORDER]);
+  });
+
+  it("skips only the modules that are current for this input version", () => {
+    const remaining = crewRemaining(
+      states({ hiring_need: "current", success_profile: "current" }),
+    );
+    expect(remaining).not.toContain("hiring_need");
+    expect(remaining).not.toContain("success_profile");
+    expect(remaining.length).toBe(CREW_ORDER.length - 2);
+  });
+
+  it("re-runs anything failed, stale, blocked or needing review — those are not done", () => {
+    const remaining = crewRemaining(
+      states({
+        hiring_need: "failed",
+        market_intelligence: "stale",
+        channels: "blocked",
+        search_strings: "needs_review",
+        success_profile: "aging",
+      }),
+    );
+    for (const key of [
+      "hiring_need",
+      "market_intelligence",
+      "channels",
+      "search_strings",
+      "success_profile",
+    ]) {
+      expect(remaining, key).toContain(key);
+    }
+  });
+
+  it("a fully current search has nothing to run, and the plan says so", () => {
+    const remaining = crewRemaining(
+      Object.fromEntries(CREW_ORDER.map((k) => [k, { state: "current" }])),
+    );
+    expect(remaining).toEqual([]);
+  });
+
+  it("the resumed plan costs less than the full one", () => {
+    const full = crewPlan();
+    const partial = crewPlan(crewRemaining(states({ hiring_need: "current" })));
+    expect(partial.modelCalls.max).toBeLessThan(full.modelCalls.max);
+    expect(partial.modules).not.toContain("hiring_need");
   });
 });

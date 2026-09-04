@@ -18,6 +18,13 @@ import {
 import { putCandidate, state } from "../app/state";
 import { chipFor } from "./renderers";
 import { aiAvailable, copyFor, hideAi, registerModule, render } from "./shell";
+import {
+  QUOTE_LABELS,
+  buildDossier,
+  criteriaFromProfile,
+  sourcesFor,
+  type CandidateSource,
+} from "../core/evidence";
 import { copyText } from "../core/dom";
 
 export function renderCandidates(main: HTMLElement): void {
@@ -141,41 +148,81 @@ function renderCandidateCard(cand: StoredCandidate): HTMLElement {
       ),
     );
   }
-  for (const url of cand.profileUrls)
-    card.append(
-      el(
-        `<p><a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a></p>`,
-      ),
-    );
   const body = el(`<div></div>`);
   card.append(body);
   const paint = () => {
     body.innerHTML = "";
     const evidence = cand.evidence?.payload as EvidencePayload | undefined;
+
+    const sources = sourcesFor(cand);
+    if (sources.length) {
+      body.append(
+        el(
+          `<div><h4>Sources <span class="chip num">${sources.length}</span></h4><ul>${sources
+            .map((src: CandidateSource) =>
+              src.kind === "link"
+                ? `<li><a href="${esc(src.url ?? "")}" target="_blank" rel="noopener">${esc(src.label)}</a> <span class="chip warn">LINK — NOT FETCHED</span> <span class="why">Nothing on this page reads that page. Open it yourself.</span></li>`
+                : `<li><b>${esc(src.label)}</b> <span class="chip ok">${src.text.trim().length} chars supplied</span></li>`,
+            )
+            .join("")}</ul></div>`,
+        ),
+      );
+    }
+
     if (evidence) {
-      const items = evidence.items;
-      const missing = items.filter(
-        (i) => i.status === "missing" || i.status === "unknown",
-      ).length;
+      const profile = state.artifacts.success_profile?.payload;
+      const dossier = buildDossier({
+        candidate: cand,
+        rawItems: evidence.items,
+        criteria: criteriaFromProfile(profile),
+        questions: evidence.questionsToValidate,
+      });
       body.append(
         el(
-          `<h4>Evidence vs success profile <span class="chip inference">model inference</span> <span class="chip num">${items.length - missing} with evidence · ${missing} missing/unknown</span></h4>`,
+          `<div><h4>Evidence vs success profile <span class="chip inference">model inference</span> <span class="chip ${dossier.downgraded ? "bad" : "num"}">${dossier.supportedCount} of ${dossier.items.length} quote-verified</span></h4><p class="why">${esc(dossier.summary)}</p></div>`,
         ),
       );
-      body.append(
-        el(
-          `<ul>${items.map((i) => `<li><b>${esc(i.criterion)}</b> ${chipFor(i.status)}<div class="why">${esc(i.evidenceText ?? "")}</div></li>`).join("")}</ul>`,
-        ),
-      );
+      if (dossier.downgraded > 0) {
+        body.append(
+          el(
+            `<div class="notice error" role="alert"><strong>${dossier.downgraded} claim${dossier.downgraded === 1 ? "" : "s"} downgraded.</strong> A quote was named that is not in the source it cited. Those rows are marked below and must not be used — this is exactly the failure that would put words in a real person's mouth.</div>`,
+          ),
+        );
+      }
+      const list = el(`<ul class="dossier"></ul>`);
+      for (const item of dossier.items) {
+        list.append(
+          el(
+            `<li class="dossier-item ${item.supported ? "" : "unsupported"}">
+              <div><b>${esc(item.criterion)}</b> ${chipFor(item.status)} <span class="chip ${item.supported ? "ok" : item.check === "not_found_in_source" ? "bad" : "unknown"}">${esc(QUOTE_LABELS[item.check].toUpperCase())}</span>${item.sourceLabel ? ` <span class="chip">${esc(item.sourceLabel.slice(0, 40))}</span>` : ""}</div>
+              ${item.quote ? `<blockquote class="quote">${esc(item.quote)}</blockquote>` : ""}
+              <div class="why">${esc(item.evidenceText)}</div>
+              <div class="why">${esc(item.note)}</div>
+            </li>`,
+          ),
+        );
+      }
+      body.append(list);
+      if (dossier.uncovered.length) {
+        body.append(
+          el(
+            `<div><h4>Not assessed <span class="chip warn">${dossier.uncovered.length}</span></h4><ul>${dossier.uncovered
+              .map((c) => `<li class="why">${esc(c)}</li>`)
+              .join(
+                "",
+              )}</ul><p class="why">These criteria are in the success profile and the assessment did not mention them. Absence here is absence of an answer, not absence of the skill.</p></div>`,
+          ),
+        );
+      }
       body.append(
         el(
           `<p class="why"><b>Suggested review priority (advisory):</b> ${esc(evidence.reviewPriority.suggestion ?? "")} — ${esc(evidence.reviewPriority.reasoning ?? "")}</p>`,
         ),
       );
-      if (evidence.questionsToValidate.length)
+      if (dossier.questions.length)
         body.append(
           el(
-            `<p class="why"><b>Validate:</b> ${esc(evidence.questionsToValidate.join(" · "))}</p>`,
+            `<p class="why"><b>Validate with a human:</b> ${esc(dossier.questions.join(" · "))}</p>`,
           ),
         );
     }

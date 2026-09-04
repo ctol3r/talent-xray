@@ -33,6 +33,15 @@ import {
 import { putArtifact, putCandidate, selectSearch, state } from "../app/state";
 import { compiledFor } from "./renderers";
 import {
+  CORPUS_FIXTURES,
+  metricRate,
+  scoreCorpusRun,
+  type CorpusReport,
+  type CorpusTurnOutcome,
+  type MetricId,
+} from "../core/corpus";
+import { runCorpusFixture } from "../ai/tasks";
+import {
   aiAvailable,
   copyFor,
   hideAi,
@@ -541,6 +550,65 @@ export function renderGolden(main: HTMLElement): void {
     }
   };
   quick.onclick = () => runIt(false, quick);
+
+  // ── W18: score the artifact's own prompts against the corpus ──────────
+  const corpusPanel = el(
+    `<div class="panel"><h3>Score the brain against the W12 corpus <span class="chip inference">${CORPUS_FIXTURES.length} fixtures</span></h3><p class="why">Runs ${CORPUS_FIXTURES.length} adversarial conversations from <code>eval/w12/corpus</code> through this page's OWN prompts on your Claude, then scores them with the harness's own deterministic checkers — imported, not re-implemented. <b>The generating model never sees the expectations</b>; they stay here and are applied afterwards in code. That independence is what the file-handoff runs could not have. It is still a handful of conversations out of 53, the LLM judge does not run, and no number here supports a claim about the corpus as a whole.</p></div>`,
+  );
+  const corpusBtn = el<HTMLButtonElement>(
+    `<button class="btn" type="button">Run the corpus benchmark</button>`,
+  );
+  if (aiAvailable()) corpusPanel.append(corpusBtn);
+  else
+    corpusPanel.append(
+      el(`<p class="why">Needs Claude in this view; unavailable here.</p>`),
+    );
+  const corpusOut = el(`<div></div>`);
+  corpusPanel.append(corpusOut);
+  corpusBtn.onclick = async () => {
+    corpusBtn.disabled = true;
+    corpusOut.innerHTML = "";
+    const progress = el(
+      `<div class="panel" role="status" aria-live="polite"><h4 class="first">Running…</h4><ul class="run-log"></ul></div>`,
+    );
+    corpusOut.append(progress);
+    const log = $(".run-log", progress);
+    const outcomes: CorpusTurnOutcome[] = [];
+    const t0 = Date.now();
+    for (const fixture of CORPUS_FIXTURES) {
+      try {
+        await runCorpusFixture(
+          fixture,
+          {
+            step: (name) =>
+              log?.append(
+                el(
+                  `<li>${esc(name)} <span class="why num">${formatElapsed(Date.now() - t0)}</span></li>`,
+                ),
+              ),
+          },
+          (outcome) => {
+            outcomes.push(outcome);
+            log?.append(
+              el(
+                `<li class="why">${esc(outcome.conversationId)} ${esc(outcome.label)} — ${outcome.executed ? `${outcome.findings.filter((f) => f.severity === "fail").length} failure(s)` : `NOT EXECUTED (${esc(outcome.notExecutedReason)})`}</li>`,
+              ),
+            );
+          },
+        );
+      } catch (e) {
+        log?.append(
+          el(
+            `<li class="why">${esc(fixture.id)} stopped: ${esc(errorMessage(e))}</li>`,
+          ),
+        );
+      }
+    }
+    corpusOut.innerHTML = "";
+    corpusOut.append(renderCorpusReport(scoreCorpusRun(outcomes, nowIso())));
+    corpusBtn.disabled = false;
+  };
+  main.append(corpusPanel);
   full.onclick = () => runIt(true, full);
 
   if (rec?.payload) {
@@ -584,6 +652,89 @@ export function renderGolden(main: HTMLElement): void {
       ),
     );
   }
+}
+
+const REPORTED_METRICS: MetricId[] = [
+  "provenance_preservation",
+  "silent_mutation",
+  "fabrication",
+  "protected_traits",
+  "requirement_recall",
+  "must_not_exist",
+  "construct_named",
+  "false_signal_recall",
+  "contradiction_detection",
+  "uncertainty_detection",
+  "proxy_identified",
+];
+
+export function renderCorpusReport(report: CorpusReport): HTMLElement {
+  const cls =
+    report.verdict === "PASS"
+      ? "ok"
+      : report.verdict === "PARTIAL"
+        ? "warn"
+        : "bad";
+  const root = el(`<div></div>`);
+  root.append(
+    el(
+      `<div class="notice"><strong>Corpus benchmark: <span class="chip ${cls}">${esc(report.verdict)}</span></strong> — ${report.executed} turn${report.executed === 1 ? "" : "s"} executed, ${report.notExecuted} not executed, across ${report.fixtureIds.length} fixture${report.fixtureIds.length === 1 ? "" : "s"}. Finished ${esc(asOf(report.ranAt))}.</div>`,
+    ),
+  );
+  root.append(el(`<p class="why">${esc(report.caveat)}</p>`));
+
+  if (report.zeroTargetViolations.length) {
+    root.append(
+      el(
+        `<div class="notice error" role="alert"><strong>Zero-target violations.</strong> ${report.zeroTargetViolations
+          .map((v) => `${esc(v.metric)}: ${v.count}`)
+          .join(
+            ", ",
+          )}. These metrics must be zero; any count is a failure whatever else passed.</div>`,
+      ),
+    );
+  }
+
+  const rows = REPORTED_METRICS.map((metric) => {
+    const { pass, total, rate } = metricRate(report.tally, metric);
+    return `<tr><td>${esc(metric)}</td><td class="num">${total === 0 ? "not exercised" : `${pass}/${total}`}</td><td class="num">${rate === null ? "—" : `${Math.round(rate * 1000) / 10}%`}</td></tr>`;
+  }).join("");
+  root.append(
+    el(
+      `<div class="panel"><h4 class="first">Metrics</h4><div class="table-wrap"><table class="status"><thead><tr><th>Metric</th><th>Passed</th><th>Rate</th></tr></thead><tbody>${rows}</tbody></table></div><p class="why">"Not exercised" means these fixtures never put that metric to the test — it is not a pass.</p></div>`,
+    ),
+  );
+
+  const failures = report.outcomes
+    .filter((o) => o.executed)
+    .flatMap((o) =>
+      o.findings
+        .filter((f) => f.severity === "fail")
+        .map(
+          (f) =>
+            `<li><b>${esc(o.conversationId)} ${esc(o.label)}</b> <span class="chip bad">${esc(f.metric)}</span> <span class="why">${esc(f.detail)}</span></li>`,
+        ),
+    );
+  root.append(
+    el(
+      `<div class="panel"><h4 class="first">Failures <span class="why num">${failures.length}</span></h4>${failures.length ? `<ul>${failures.join("")}</ul>` : `<p class="why">None in what executed.</p>`}</div>`,
+    ),
+  );
+
+  const skipped = report.outcomes.filter((o) => !o.executed);
+  if (skipped.length) {
+    root.append(
+      el(
+        `<div class="panel"><h4 class="first">Not executed <span class="why num">${skipped.length}</span></h4><ul>${skipped
+          .map(
+            (o) =>
+              `<li><span class="chip unknown">SKIPPED</span> ${esc(o.conversationId)} ${esc(o.label)} <span class="why">${esc(o.notExecutedReason)}</span></li>`,
+          )
+          .join("")}</ul></div>`,
+      ),
+    );
+  }
+  return root;
 }
 
 registerModule("golden_test", renderGolden);

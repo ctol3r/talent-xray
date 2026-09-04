@@ -272,10 +272,13 @@ export const CANDIDATE_TASKS: Record<
     rules: `This is recruiter decision support, NOT candidate selection. Compare the candidate's observable, job-related professional evidence against the search's success-profile criteria.
 For each relevant criterion produce an item:
 - status: "strong" (clear supporting evidence in the provided material), "partial", "missing" (criterion matters, no evidence found — absence of evidence, not evidence of absence), "contradictory", "unknown".
-- evidenceText: quote or precisely describe the evidence FROM THE PROVIDED MATERIAL ONLY. Never invent facts about this person. For "missing"/"unknown", say what was looked for and not found.
+- evidenceText: describe the evidence FROM THE PROVIDED MATERIAL ONLY. Never invent facts about this person. For "missing"/"unknown", say what was looked for and not found.
+- QUOTE AND SOURCE ARE MANDATORY FOR ANY SUPPORTED CLAIM. "quote" is a VERBATIM span copied character-for-character out of one attached source, and "sourceId" is that source's id from the "Attached sources" list. The quote is checked against the source text automatically: a quote that is not found there is downgraded to unsupported and shown to the recruiter as a failed check, so paraphrasing into the quote field is worse than leaving it empty.
+- When a criterion has no supporting span, use status "missing" or "unknown" with an empty quote and no sourceId. That is a correct, useful answer. Never manufacture a quote to fill the field.
+- A source whose id ends in ":link" is a URL. Its contents are NOT available to you — nothing is fetched. Never quote from a link.
 - reviewPriority.suggestion is advisory only ("review_first"|"review"|"review_later") with reasoning; the recruiter decides.`,
     ask: "Produce the evidence alignment for this candidate now.",
-    shape: `{"items": [{"criterion": string, "status": "strong"|"partial"|"missing"|"contradictory"|"unknown", "evidenceText": string}], "reviewPriority": {"suggestion": "review_first"|"review"|"review_later", "reasoning": string}, "questionsToValidate": string[]}`,
+    shape: `{"items": [{"criterion": string, "status": "strong"|"partial"|"missing"|"contradictory"|"unknown", "evidenceText": string, "quote": string, "sourceId": string}], "reviewPriority": {"suggestion": "review_first"|"review"|"review_later", "reasoning": string}, "questionsToValidate": string[]}`,
     envelope: false,
   },
   outreach: {

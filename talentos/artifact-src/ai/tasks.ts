@@ -8,6 +8,7 @@
 import { scanPayloadForProtectedTraits } from "@/lib/domain/fair-hiring";
 import { applyIntakeHygiene } from "@/lib/domain/intake-hygiene";
 import type { ManagerStatement } from "@/lib/core/ir";
+import type { SearchFacts } from "../core/search-context";
 import { clip, nowIso, uid } from "../core/dom";
 import {
   PAYLOAD_SCHEMAS,
@@ -17,6 +18,7 @@ import {
   normalizeGenerated,
   type EvidencePayload,
   type IntentPayload,
+  type HiringNeedPayload,
   type PayloadOf,
   type PayloadTaskKey,
 } from "../core/payloads";
@@ -48,6 +50,13 @@ import {
   type ExecutionPlan,
 } from "../core/execution-plan";
 import { MODULES, type ModuleKey } from "../core/dependencies";
+import { sourcesFor } from "../core/evidence";
+import {
+  checkTurn,
+  projectFacts,
+  type CorpusTurnOutcome,
+  type ParsedConversation,
+} from "../core/corpus";
 import {
   currentContext,
   currentIntent,
@@ -55,6 +64,7 @@ import {
   putArtifact,
   putCandidate,
   state,
+  withEphemeralSearch,
 } from "../app/state";
 import { renderContext } from "./context";
 import {
@@ -664,12 +674,24 @@ export const CREW_ORDER: ModuleKey[] = [
   "search_strings",
 ];
 
-export function crewPlan(): ExecutionPlan {
+export function crewPlan(modules: ModuleKey[] = CREW_ORDER): ExecutionPlan {
   return planExecution({
     kind: "crew",
-    modules: CREW_ORDER.map((k) => ({ key: k, label: MODULES[k].label })),
+    modules: modules.map((k) => ({ key: k, label: MODULES[k].label })),
     withCritic: true,
   });
+}
+
+/**
+ * Which crew modules still need work (W17). A module already `current` for
+ * the CURRENT input version is skipped: regenerating it would spend a call
+ * to produce the same thing. Anything else — never started, failed, stale,
+ * blocked, needs review — is in the run.
+ */
+export function crewRemaining(
+  states: Partial<Record<ModuleKey, { state: string }>>,
+): ModuleKey[] {
+  return CREW_ORDER.filter((key) => states[key]?.state !== "current");
 }
 
 export async function generateWithCritic(
@@ -725,12 +747,184 @@ export async function generateWithCritic(
 export async function runCrewForSearch(
   ui: UiHooks,
   tracker: ProgressTracker,
+  modules: ModuleKey[] = CREW_ORDER,
 ): Promise<void> {
-  for (const key of CREW_ORDER) {
+  for (const key of modules) {
     ui.step?.(`${MODULES[key].label} agent`);
     await generateWithCritic(key, ui, tracker);
   }
   tracker.finish();
+}
+
+// ── W12 corpus fixture runner (W18) ─────────────────────────────────────────
+
+/**
+ * Run one corpus fixture through the ARTIFACT'S OWN prompts and score it.
+ *
+ * The generating model receives the fixture's project facts, JD and
+ * scripted statements — and nothing else. The expectations stay here and
+ * are applied afterwards by `checkTurn`. That is what makes the numbers
+ * mean something: the model cannot be writing to the test.
+ */
+export async function runCorpusFixture(
+  conversation: ParsedConversation,
+  ui: UiHooks | undefined,
+  onOutcome: (outcome: CorpusTurnOutcome) => void,
+): Promise<void> {
+  const facts: SearchFacts = {
+    id: `w12-${conversation.id}`,
+    createdAt: nowIso(),
+    example: true,
+    name: `Benchmark fixture ${conversation.id} — ${conversation.title}`,
+    companyName: conversation.project.companyName ?? "",
+    roleTitle: conversation.project.roleTitle,
+    geography: conversation.project.geography ?? "",
+    country: conversation.project.country ?? "",
+    industry: conversation.project.industry ?? "",
+    seniority: conversation.project.seniority ?? "",
+    businessObjective: conversation.project.businessObjective ?? "",
+    jd: conversation.jd,
+  };
+  const inputs = {
+    jd: conversation.jd,
+    projectFacts: projectFacts(conversation),
+  };
+
+  await withEphemeralSearch(facts, async () => {
+    // Turn -1: derive the canonical IR from the job description.
+    ui?.step?.(`${conversation.id} — canonical IR from the JD`);
+    let intent: IntentPayload;
+    try {
+      const record = await runTask("hiring_need", ui, { regenerate: true });
+      await putArtifact("hiring_need", record);
+      const derived = record.payload as HiringNeedPayload;
+      intent = {
+        need: derived.need,
+        requirements: derived.requirements,
+        uncertainties: derived.uncertainties,
+        contradictions: derived.contradictions,
+        statements: [],
+        revision: 0,
+        nextQuestion: null,
+      };
+      await putArtifact("intent", { ...record, payload: intent });
+      onOutcome({
+        conversationId: conversation.id,
+        turnIndex: -1,
+        label: "Canonical IR from the JD",
+        executed: true,
+        notExecutedReason: "",
+        ...scoreOne(
+          conversation,
+          -1,
+          conversation.initial,
+          undefined,
+          intent,
+          derived,
+          {
+            ...inputs,
+            statements: [],
+          },
+        ),
+      });
+    } catch (e) {
+      onOutcome({
+        conversationId: conversation.id,
+        turnIndex: -1,
+        label: "Canonical IR from the JD",
+        executed: false,
+        notExecutedReason: `${errorCode(e)}: ${errorMessage(e)}`,
+        findings: [],
+        tally: {},
+      });
+      return; // Every later turn reasons over an IR that does not exist.
+    }
+
+    const statements: string[] = [];
+    for (const [i, turn] of conversation.turns.entries()) {
+      statements.push(turn.text);
+      ui?.step?.(
+        `${conversation.id} — turn ${i + 1} of ${conversation.turns.length}`,
+      );
+      const before = intent;
+      try {
+        const statement: ManagerStatement = {
+          id: uid(),
+          at: nowIso(),
+          speaker: "hiring_manager",
+          text: turn.text,
+        };
+        const record = await reasonOverStatement(statement, ui);
+        const next = record.payload as IntentPayload;
+        await putArtifact("intent", record);
+        intent = next;
+        onOutcome({
+          conversationId: conversation.id,
+          turnIndex: i,
+          label: `Turn ${i + 1}`,
+          executed: true,
+          notExecutedReason: "",
+          ...scoreOne(
+            conversation,
+            i,
+            turn.expect,
+            before,
+            next,
+            {
+              extractedClaims: [],
+              requirements: next.requirements,
+              uncertainties: next.uncertainties,
+              contradictions: next.contradictions,
+              nextQuestion: next.nextQuestion ?? undefined,
+            },
+            { ...inputs, statements: [...statements] },
+          ),
+        });
+      } catch (e) {
+        onOutcome({
+          conversationId: conversation.id,
+          turnIndex: i,
+          label: `Turn ${i + 1}`,
+          executed: false,
+          notExecutedReason: `${errorCode(e)}: ${errorMessage(e)}`,
+          findings: [],
+          tally: {},
+        });
+        return; // The conversation's state is now unknown; stop this fixture.
+      }
+    }
+  });
+}
+
+/** Deterministic scoring of one turn. No model call; no expectations in a prompt. */
+function scoreOne(
+  conversation: ParsedConversation,
+  turnIndex: number,
+  expectation: ParsedConversation["initial"],
+  before: IntentPayload | undefined,
+  after: IntentPayload,
+  output: unknown,
+  inputs: { jd: string; projectFacts: string; statements: string[] },
+): {
+  findings: CorpusTurnOutcome["findings"];
+  tally: CorpusTurnOutcome["tally"];
+} {
+  const toIR = (p: IntentPayload) => ({
+    need: p.need,
+    requirements: p.requirements,
+    uncertainties: p.uncertainties,
+    contradictions: p.contradictions,
+  });
+  const check = checkTurn({
+    conversation,
+    turnIndex,
+    expectation,
+    before: before ? (toIR(before) as never) : undefined,
+    after: toIR(after) as never,
+    output: output as never,
+    inputs,
+  });
+  return { findings: check.findings, tally: check.tally };
 }
 
 // ── Adaptive intake reasoner ────────────────────────────────────────────────
@@ -841,17 +1035,28 @@ export function candidateContext(cand: StoredCandidate): string {
     cand.currentTitle ? `Current title: ${cand.currentTitle}` : "",
     cand.currentCompany ? `Current company: ${cand.currentCompany}` : "",
     cand.geography ? `Geography: ${cand.geography}` : "",
-    cand.profileUrls.length
-      ? `Profile URLs: ${cand.profileUrls.join(", ")}`
-      : "",
     cand.notes ? `Recruiter notes: ${cand.notes}` : "",
-    cand.pastedText
-      ? `Resume / pasted profile text:\n${clip(cand.pastedText, 6000)}`
-      : "",
   ]
     .filter(Boolean)
     .join("\n");
-  return `## Candidate\n${lines}`;
+
+  // Sources are listed with their ids so an evidence item can name the one
+  // it quotes, and a link is explicitly marked as content this page does
+  // not hold — nothing is ever fetched.
+  const sources = sourcesFor(cand);
+  const rendered = sources
+    .map((src) =>
+      src.kind === "link"
+        ? `### Source id: ${src.id} (LINK — contents NOT available; never quote from this)\n${src.url ?? src.label}`
+        : `### Source id: ${src.id} (${src.label})\n${clip(src.text, 6000)}`,
+    )
+    .join("\n\n");
+
+  return `## Candidate\n${lines}\n\n## Attached sources\n${
+    sources.length
+      ? `Quote only from these, verbatim, and name the source id you quoted.\n\n${rendered}`
+      : 'None. Nothing has been supplied about this person, so every criterion is "unknown" with no quote.'
+  }`;
 }
 
 export async function runCandidateTask(
