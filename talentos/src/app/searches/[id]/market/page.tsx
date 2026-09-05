@@ -1,4 +1,6 @@
 import { getDb } from "@/lib/db/client";
+import { compensationWorkspace } from "@/lib/services/compensation";
+import { CompensationWorkbench } from "@/components/compensation-workbench";
 import { getMarketResearch } from "@/lib/services/artifacts";
 import { generateMarketIntelligenceAction } from "@/lib/actions/generate";
 import { ArtifactMeta } from "@/components/artifact-meta";
@@ -21,7 +23,7 @@ export default async function MarketPage({
     <div>
       <PageHeader
         title="Market Intelligence"
-        description="How difficult is this search and why. Every claim carries a certainty label — nothing is presented as fact unless it is. Live web research arrives with the Phase 2 research provider."
+        description="Understand search difficulty and review source-backed compensation evidence. Model suggestions remain labeled; research can be supplied through a keyless session."
         actions={
           <GenerateButton
             action={generateMarketIntelligenceAction}
@@ -31,6 +33,12 @@ export default async function MarketPage({
           />
         }
       />
+      <div className="mb-6">
+        <CompensationWorkbench
+          projectId={id}
+          workspace={compensationWorkspace(getDb(), id)}
+        />
+      </div>
       {!payload ? (
         <EmptyState
           title="No market assessment yet"
