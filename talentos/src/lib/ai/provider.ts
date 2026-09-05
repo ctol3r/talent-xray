@@ -42,7 +42,8 @@ export function resolveProviderKind(): ProviderKind {
   const configured = process.env.TALENTOS_MODEL_PROVIDER?.toLowerCase();
   if (configured === "mock") return "mock";
   if (configured === "session") return "session";
-  return "anthropic";
+  if (configured === "anthropic") return "anthropic";
+  return "session";
 }
 
 export function resolveModelId(): string {

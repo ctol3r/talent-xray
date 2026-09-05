@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --hostname 127.0.0.1",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
@@ -19,18 +19,22 @@
     "golden:cais": "tsx scripts/golden-cais.mts",
     "golden:session": "tsx scripts/golden-cais-session.mts",
     "crew:work": "tsx scripts/crew-worker.mts",
-    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm build:artifact:check && pnpm test && pnpm build",
+    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm build:artifact:check && pnpm test && pnpm build && pnpm check:private-build",
     "eval:w12": "tsx scripts/eval-w12.mts",
     "eval:w12:fulfil": "tsx scripts/eval-w12-fulfil.mts",
     "build:artifact": "tsx scripts/build-artifact.mts",
     "build:artifact:check": "tsx scripts/build-artifact.mts --check",
-    "e2e:artifact": "playwright test -c playwright.artifact.config.ts"
+    "e2e:artifact": "playwright test -c playwright.artifact.config.ts",
+    "test:documents:defects": "tsx scripts/check-document-defects.mts",
+    "check:private-build": "tsx scripts/check-private-build.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.2",
+    "mammoth": "^1.12.2",
     "next": "16.3.2",
+    "pdfjs-dist": "^6.3.289",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "zod": "^4.5.4"

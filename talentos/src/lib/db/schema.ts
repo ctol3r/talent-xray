@@ -683,3 +683,73 @@ export const settings = sqliteTable("settings", {
   value: text("value", { mode: "json" }).$type<unknown>(),
   updatedAt: updatedAt(),
 });
+
+// Versioned user-supplied documents. Search-result snippets never enter this store.
+export const documentVersions = sqliteTable("document_versions", {
+  id: uuid(),
+  searchProjectId: text("search_project_id")
+    .notNull()
+    .references(() => searchProjects.id),
+  candidateId: text("candidate_id").references(() => candidates.id, {
+    onDelete: "cascade",
+  }),
+  kind: text("kind").notNull().$type<"cv" | "jd">(),
+  text: text("text").notNull(),
+  contentHash: text("content_hash").notNull(),
+  originalFileId: text("original_file_id"),
+  filename: text("filename"),
+  mediaType: text("media_type"),
+  extractionStatus: text("extraction_status")
+    .notNull()
+    .$type<"needs_review" | "confirmed" | "legacy">(),
+  previousId: text("previous_id"),
+  createdAt: createdAt(),
+});
+export const documentComparisons = sqliteTable("document_comparisons", {
+  id: uuid(),
+  searchProjectId: text("search_project_id")
+    .notNull()
+    .references(() => searchProjects.id),
+  candidateId: text("candidate_id")
+    .notNull()
+    .references(() => candidates.id, { onDelete: "cascade" }),
+  cvVersionId: text("cv_version_id")
+    .notNull()
+    .references(() => documentVersions.id),
+  jdVersionId: text("jd_version_id")
+    .notNull()
+    .references(() => documentVersions.id),
+  requirements: text("requirements", { mode: "json" })
+    .notNull()
+    .$type<import("@/lib/documents/contracts").ReviewRequirement[]>(),
+  contextHash: text("context_hash").notNull(),
+  meta: text("meta", { mode: "json" }).$type<GenerationMeta>(),
+  conclusion: text("conclusion").notNull().default(""),
+  createdAt: createdAt(),
+});
+export const documentLinks = sqliteTable("document_links", {
+  id: uuid(),
+  comparisonId: text("comparison_id")
+    .notNull()
+    .references(() => documentComparisons.id, { onDelete: "cascade" }),
+  payload: text("payload", { mode: "json" })
+    .notNull()
+    .$type<import("@/lib/documents/contracts").LinkInput>(),
+  provenance: text("provenance")
+    .notNull()
+    .$type<"manual" | "model_inference" | "mock">(),
+  generationMeta: text("generation_meta", {
+    mode: "json",
+  }).$type<GenerationMeta>(),
+  createdAt: createdAt(),
+});
+export const documentReviews = sqliteTable("document_reviews", {
+  id: uuid(),
+  linkId: text("link_id")
+    .notNull()
+    .references(() => documentLinks.id, { onDelete: "cascade" }),
+  actor: text("actor").notNull(),
+  decision: text("decision").notNull().$type<"accepted" | "dismissed">(),
+  note: text("note").notNull(),
+  createdAt: createdAt(),
+});

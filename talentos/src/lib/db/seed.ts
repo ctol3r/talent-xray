@@ -1,3 +1,4 @@
+import { saveDocument } from "@/lib/services/documents";
 /**
  * Seed: owner user + the six golden fixtures (PRODUCT_SPEC.md) proving the
  * architecture generalizes across radically different searches.
@@ -9,7 +10,6 @@ import { DEFAULT_PIPELINE_STAGES } from "@/lib/domain/pipeline";
 import type { Db } from "./client";
 import {
   companies,
-  jobDescriptions,
   pipelineStages,
   searchProjects,
   settings,
@@ -155,10 +155,11 @@ async function seedFixture(db: Db, fixture: FixtureDefinition): Promise<void> {
       businessObjective: fixture.businessObjective,
     })
     .returning();
-  await db.insert(jobDescriptions).values({
+  saveDocument(db, {
     searchProjectId: project.id,
-    source: "pasted",
-    rawText: fixture.jd,
+    kind: "jd",
+    text: fixture.jd,
+    confirmed: true,
   });
   await db.insert(pipelineStages).values(
     DEFAULT_PIPELINE_STAGES.map((stage) => ({

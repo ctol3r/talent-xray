@@ -46,7 +46,7 @@ function outboxDir(): string {
     process.env.TALENTOS_SESSION_OUTBOX ?? "./data/session-outbox";
   return path.isAbsolute(configured)
     ? configured
-    : path.join(process.cwd(), configured);
+    : path.join(/* turbopackIgnore: true */ process.cwd(), configured);
 }
 
 export function createSessionResearchProvider(): ResearchProvider {
