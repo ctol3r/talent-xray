@@ -29,25 +29,29 @@ Read the docs first:
 
 ```bash
 cd talentos
-pnpm install
-cp .env.example .env       # add ANTHROPIC_API_KEY for real generation
-pnpm db:migrate            # creates data/talentos.db and applies migrations
-pnpm db:seed               # seeds the six golden-fixture searches (once)
-pnpm dev                   # http://localhost:3000
+pnpm install --frozen-lockfile
+TALENTOS_MODEL_PROVIDER=session pnpm dev   # http://127.0.0.1:3000
 ```
 
-Without an API key the app runs fully — AI features show an honest
-"provider not configured" state instead of generating. `TALENTOS_MODEL`
-overrides the default model (`claude-opus-5`).
+The default model provider is now the keyless session handoff. CV–JD review
+uses an explicit **Codex or Claude artifact request/response**: prepare the
+request locally, use it in the chosen session, and import the JSON suggestions.
+The app does not make a model API request for this comparison flow. An artifact
+is an interface and structured handoff, not an embedded language model.
 
-No API key at all? `TALENTOS_MODEL_PROVIDER=session` makes a Claude session
-the model: each generation writes a request file (prompt + JSON schema) to
-`data/session-outbox/`, a Claude Code / claude.ai session writes the output
-JSON back, and the normal pipeline (zod validation, fair-hiring scan, audit,
-persist) resumes on re-run. Model usage is covered by your Claude
-subscription — see docs/DECISIONS.md D-008. The CAIS golden benchmark runs
-key-free this way via `pnpm golden:session` (API-key edition:
-`pnpm golden:cais`).
+For other modules, the session provider writes requests to
+`data/session-outbox/`; a Codex or Claude session can fulfill the schema and
+write the response for the app to validate on re-run. Availability depends on
+the session you use. Existing API-provider configuration is opt-in legacy
+functionality; this release does not need an AI API key. If an old `.env` selects
+`anthropic`, override it with `TALENTOS_MODEL_PROVIDER=session` as above.
+
+New databases initialize on first use. Existing databases with pending
+migrations stop before changing schema. Back up the SQLite database (including
+any live WAL state) and the private document directory; only after owner
+authorization run `pnpm db:migrate`. The implementation work does not authorize
+migrating your personal database. See [connected-review release notes](docs/CONNECTED_REVIEW.md)
+for the storage, rollback, and validation boundaries.
 
 `TALENTOS_MODEL_PROVIDER=mock` enables the deterministic, watermarked mock
 provider used by tests — mock output is labeled MOCK in the UI and is never
@@ -56,7 +60,7 @@ real analysis.
 ## Verify
 
 ```bash
-pnpm verify   # format check, typecheck, lint, unit tests (51), build
+pnpm verify   # format check, typecheck, lint, unit tests, build
 pnpm smoke    # headless 20-step critical path through the real services (mock provider)
 pnpm e2e      # the same critical path driven through the real UI (Playwright)
 ```
