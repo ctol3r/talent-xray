@@ -1,3 +1,4 @@
+import { CandidateDeck } from "@/components/candidate-deck";
 import Link from "next/link";
 import { inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
@@ -68,6 +69,15 @@ export default async function CandidatesPage({
         description="Ordered as a review queue — candidates to review first based on currently available job-related evidence. Advisory only; you decide."
         actions={<AddCandidateForm searchProjectId={id} />}
       />
+      <p className="mb-4">
+        <Link
+          className="underline text-teal-800"
+          href={`/searches/${id}/review-shortlist`}
+        >
+          Prepare reviewed shortlist
+        </Link>
+      </p>
+      <CandidateDeck searchProjectId={id} candidates={sorted} />
       {sorted.length === 0 ? (
         <EmptyState
           title="No candidates yet"

@@ -9,6 +9,7 @@ import { defineConfig } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests/e2e",
+  outputDir: "./test-results/standalone",
   timeout: 180_000,
   workers: 1,
   use: {
@@ -26,6 +27,7 @@ export default defineConfig({
     env: {
       TALENTOS_MODEL_PROVIDER: "mock",
       TALENTOS_DATABASE_PATH: "./data/e2e.db",
+      TALENTOS_DOCUMENT_DIR: "/tmp/talentos-e2e-documents",
     },
   },
 });

@@ -7,6 +7,7 @@ import { defineConfig } from "@playwright/test";
  * is the only runtime the artifact talks to.
  */
 export default defineConfig({
+  outputDir: "./test-results/artifact",
   testDir: "./tests/e2e-artifact",
   timeout: 60_000,
   workers: 1,
