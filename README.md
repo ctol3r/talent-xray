@@ -10,16 +10,17 @@ load-bearing.
 
 ## Layout
 
-| Path                   | Purpose                                                                                                                                             |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/`                 | Next.js App Router routes                                                                                                                           |
-| `components/`          | UI components                                                                                                                                       |
-| `lib/`                 | Domain logic — query composer, corpus, facets                                                                                                       |
-| `lib/corpus/`          | The 100-domain corpus, facets, recipes                                                                                                              |
-| `supabase/migrations/` | SQL migrations (RLS policies live with their tables)                                                                                                |
-| `reference/`           | Home of `talent-xray.html`, the validated reference console (read-only; placed by Chris before W2 — see [reference/README.md](reference/README.md)) |
-| `docs/`                | ADRs, [LEGAL.md](docs/LEGAL.md), [BACKLOG.md](docs/BACKLOG.md)                                                                                      |
-| `tests/`               | Vitest unit tests (Playwright arrives with the first UI wave)                                                                                       |
+| Path                   | Purpose                                                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`                 | Next.js App Router routes                                                                                                                                        |
+| `components/`          | UI components                                                                                                                                                    |
+| `lib/`                 | Domain logic — query composer, corpus, facets                                                                                                                    |
+| `lib/corpus/`          | The 100-domain corpus, facets, recipes                                                                                                                           |
+| `supabase/migrations/` | SQL migrations (RLS policies live with their tables)                                                                                                             |
+| `reference/`           | Home of `talent-xray.html`, the validated reference console (read-only; placed by Chris before W2 — see [reference/README.md](reference/README.md))              |
+| `docs/`                | ADRs, [LEGAL.md](docs/LEGAL.md), [BACKLOG.md](docs/BACKLOG.md)                                                                                                   |
+| `tests/`               | Vitest unit tests (Playwright arrives with the first UI wave)                                                                                                    |
+| `talentos/`            | A separate, self-contained app: TalentOS, Chris's local-first AI recruiting workstation (own lockfile & pipeline — see [talentos/README.md](talentos/README.md)) |
 
 ## Develop
 

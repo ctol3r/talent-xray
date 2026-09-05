@@ -1,0 +1,129 @@
+{
+  "runName": "afterfix",
+  "provider": "session",
+  "corpusSize": 53,
+  "attempted": ["b-02", "d-04", "e-02"],
+  "done": ["b-02", "d-04", "e-02"],
+  "pending": [],
+  "errored": [],
+  "categoriesCovered": [2, 5, 6, 7, 10, 11, 17, 18, 19, 20],
+  "metrics": {
+    "provenance_preservation": {
+      "pass": 81,
+      "total": 81,
+      "rate": 1,
+      "violations": 0
+    },
+    "protected_traits": {
+      "pass": 13,
+      "total": 13,
+      "rate": 1,
+      "violations": 0
+    },
+    "requirement_recall": {
+      "pass": 10,
+      "total": 10,
+      "rate": 1,
+      "violations": 0
+    },
+    "silent_mutation": {
+      "pass": 2,
+      "total": 2,
+      "rate": 1,
+      "violations": 0
+    },
+    "evidence_signal_recall": {
+      "pass": 2,
+      "total": 2,
+      "rate": 1,
+      "violations": 0
+    },
+    "false_signal_recall": {
+      "pass": 2,
+      "total": 2,
+      "rate": 1,
+      "violations": 0
+    },
+    "must_not_exist": {
+      "pass": 3,
+      "total": 3,
+      "rate": 1,
+      "violations": 0
+    },
+    "uncertainty_detection": {
+      "pass": 12,
+      "total": 12,
+      "rate": 1,
+      "violations": 0
+    },
+    "next_question_targeting": {
+      "pass": 3,
+      "total": 3,
+      "rate": 1,
+      "violations": 0
+    },
+    "replan_signal": {
+      "pass": 4,
+      "total": 4,
+      "rate": 1,
+      "violations": 0
+    },
+    "replan_correctness": {
+      "pass": 11,
+      "total": 11,
+      "rate": 1,
+      "violations": 0
+    },
+    "fabrication": {
+      "pass": 10,
+      "total": 10,
+      "rate": 1,
+      "violations": 0
+    },
+    "unknown_preserved": {
+      "pass": 1,
+      "total": 1,
+      "rate": 1,
+      "violations": 0
+    },
+    "construct_named": {
+      "pass": 1,
+      "total": 1,
+      "rate": 1,
+      "violations": 0
+    },
+    "contradiction_detection": {
+      "pass": 2,
+      "total": 2,
+      "rate": 1,
+      "violations": 0
+    },
+    "heuristic_mutation": {
+      "pass": 1,
+      "total": 1,
+      "rate": 1,
+      "violations": 0
+    }
+  },
+  "judge": {
+    "conversations": 0,
+    "averages": {
+      "constructDefinition": null,
+      "proxyIdentification": null,
+      "nextQuestionValue": null,
+      "challengeAppropriateness": null,
+      "replanCorrectness": null
+    },
+    "unsupportedInferences": 0,
+    "modelsIntentAverage": null
+  },
+  "findings": [
+    {
+      "metric": "silent_mutation",
+      "severity": "warn",
+      "detail": "untouched key \"integrity\" has no earlier expectation to resolve it",
+      "conversation": "e-02",
+      "turn": 1
+    }
+  ]
+}

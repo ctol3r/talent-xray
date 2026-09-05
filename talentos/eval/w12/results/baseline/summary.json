@@ -1,0 +1,215 @@
+{
+  "runName": "baseline",
+  "provider": "session",
+  "corpusSize": 53,
+  "attempted": [
+    "a-01",
+    "b-02",
+    "c-01",
+    "d-04",
+    "e-02",
+    "f-01",
+    "g-05",
+    "h-03",
+    "i-01",
+    "j-05"
+  ],
+  "done": [
+    "a-01",
+    "b-02",
+    "c-01",
+    "d-04",
+    "e-02",
+    "f-01",
+    "g-05",
+    "h-03",
+    "i-01",
+    "j-05"
+  ],
+  "pending": [],
+  "errored": [],
+  "categoriesCovered": [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+  ],
+  "metrics": {
+    "provenance_preservation": {
+      "pass": 260,
+      "total": 260,
+      "rate": 1,
+      "violations": 0
+    },
+    "protected_traits": {
+      "pass": 38,
+      "total": 38,
+      "rate": 1,
+      "violations": 0
+    },
+    "requirement_recall": {
+      "pass": 49,
+      "total": 51,
+      "rate": 0.9607843137254902,
+      "violations": 0
+    },
+    "uncertainty_detection": {
+      "pass": 21,
+      "total": 22,
+      "rate": 0.9545454545454546,
+      "violations": 0
+    },
+    "silent_mutation": {
+      "pass": 22,
+      "total": 22,
+      "rate": 1,
+      "violations": 0
+    },
+    "construct_named": {
+      "pass": 8,
+      "total": 8,
+      "rate": 1,
+      "violations": 0
+    },
+    "evidence_signal_recall": {
+      "pass": 12,
+      "total": 12,
+      "rate": 1,
+      "violations": 0
+    },
+    "false_signal_recall": {
+      "pass": 4,
+      "total": 7,
+      "rate": 0.5714285714285714,
+      "violations": 0
+    },
+    "proxy_identified": {
+      "pass": 3,
+      "total": 3,
+      "rate": 1,
+      "violations": 0
+    },
+    "must_not_exist": {
+      "pass": 9,
+      "total": 9,
+      "rate": 1,
+      "violations": 0
+    },
+    "contradiction_detection": {
+      "pass": 4,
+      "total": 4,
+      "rate": 1,
+      "violations": 0
+    },
+    "next_question_targeting": {
+      "pass": 6,
+      "total": 6,
+      "rate": 1,
+      "violations": 0
+    },
+    "replan_signal": {
+      "pass": 16,
+      "total": 16,
+      "rate": 1,
+      "violations": 0
+    },
+    "replan_correctness": {
+      "pass": 17,
+      "total": 19,
+      "rate": 0.8947368421052632,
+      "violations": 0
+    },
+    "fabrication": {
+      "pass": 35,
+      "total": 35,
+      "rate": 1,
+      "violations": 0
+    },
+    "unknown_preserved": {
+      "pass": 1,
+      "total": 1,
+      "rate": 1,
+      "violations": 0
+    },
+    "heuristic_mutation": {
+      "pass": 4,
+      "total": 4,
+      "rate": 1,
+      "violations": 0
+    }
+  },
+  "judge": {
+    "conversations": 0,
+    "averages": {
+      "constructDefinition": null,
+      "proxyIdentification": null,
+      "nextQuestionValue": null,
+      "challengeAppropriateness": null,
+      "replanCorrectness": null
+    },
+    "unsupportedInferences": 0,
+    "modelsIntentAverage": null
+  },
+  "findings": [
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"ECMO nursing experience\": status needs_clarification (expected explicit)",
+      "conversation": "b-02",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"ECMO nursing experience\" falseSignals lack seen the machine / cardiac / observed",
+      "conversation": "b-02",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"ECMO nursing experience\" falseSignals lack perfusionist",
+      "conversation": "b-02",
+      "turn": 1
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Experience selling to CFOs\" falseSignals lack on a call / attended",
+      "conversation": "c-01",
+      "turn": 1
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: \"relocation\" is present but must not be",
+      "conversation": "d-04",
+      "turn": "replan"
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: \"twenty-six\" is present but must not be",
+      "conversation": "d-04",
+      "turn": "replan"
+    },
+    {
+      "metric": "silent_mutation",
+      "severity": "warn",
+      "detail": "untouched key \"integrity\" has no earlier expectation to resolve it",
+      "conversation": "e-02",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Fix the close and the control environment\": status needs_clarification (expected explicit)",
+      "conversation": "e-02",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'strategic partner to the CEO' means concretely\": status resolved (expected open)",
+      "conversation": "e-02",
+      "turn": 1
+    }
+  ]
+}

@@ -1,0 +1,800 @@
+{
+  "runName": "full2",
+  "provider": "session",
+  "corpusSize": 53,
+  "attempted": [
+    "a-01",
+    "a-02",
+    "a-03",
+    "a-04",
+    "a-05",
+    "b-01",
+    "b-02",
+    "b-03",
+    "b-04",
+    "b-05",
+    "c-01",
+    "c-02",
+    "c-03",
+    "c-04",
+    "c-05",
+    "d-01",
+    "d-02",
+    "d-03",
+    "d-04",
+    "d-05",
+    "e-01",
+    "e-02",
+    "e-03",
+    "e-04",
+    "e-05",
+    "f-01",
+    "f-02",
+    "f-03",
+    "f-04",
+    "f-05",
+    "g-01",
+    "g-02",
+    "g-03",
+    "g-04",
+    "g-05",
+    "h-01",
+    "h-02",
+    "h-03",
+    "h-04",
+    "h-05",
+    "i-01",
+    "i-02",
+    "i-03",
+    "i-04",
+    "i-05",
+    "j-01",
+    "j-02",
+    "j-03",
+    "j-04",
+    "j-05",
+    "x-01",
+    "x-02",
+    "x-03"
+  ],
+  "done": [],
+  "pending": [
+    {
+      "id": "a-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-78e547fc6621.request.json"
+    },
+    {
+      "id": "a-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-66b889cf7336.request.json"
+    },
+    {
+      "id": "a-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-afb5ac1c63cb.request.json"
+    },
+    {
+      "id": "a-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-861a023e765c.request.json"
+    },
+    {
+      "id": "a-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-db3201288633.request.json"
+    },
+    {
+      "id": "b-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-61a169e750cd.request.json"
+    },
+    {
+      "id": "b-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-a480485b8ab2.request.json"
+    },
+    {
+      "id": "b-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-6be74f3b111b.request.json"
+    },
+    {
+      "id": "b-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-d8d781002be2.request.json"
+    },
+    {
+      "id": "b-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-e345484623c6.request.json"
+    },
+    {
+      "id": "c-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-5b7072baf694.request.json"
+    },
+    {
+      "id": "c-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-31fe43f888e4.request.json"
+    },
+    {
+      "id": "c-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-d84006152008.request.json"
+    },
+    {
+      "id": "c-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-9a538e96e33d.request.json"
+    },
+    {
+      "id": "c-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-0c7cb97128b9.request.json"
+    },
+    {
+      "id": "d-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-3566ac9798b3.request.json"
+    },
+    {
+      "id": "d-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-840ae55355d0.request.json"
+    },
+    {
+      "id": "d-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-6d1d4d89b538.request.json"
+    },
+    {
+      "id": "d-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-772b92b2f047.request.json"
+    },
+    {
+      "id": "d-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-9e96e86a3649.request.json"
+    },
+    {
+      "id": "e-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-85cae78f67b0.request.json"
+    },
+    {
+      "id": "e-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-10026b9b88ea.request.json"
+    },
+    {
+      "id": "e-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-250c27ad6933.request.json"
+    },
+    {
+      "id": "e-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-1b14af87ccb7.request.json"
+    },
+    {
+      "id": "e-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/AudiencePersonas-d1061750f9a5.request.json"
+    },
+    {
+      "id": "f-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-ca00500ceaa6.request.json"
+    },
+    {
+      "id": "f-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-c6d74c1acf9a.request.json"
+    },
+    {
+      "id": "f-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-e52c13cdbba7.request.json"
+    },
+    {
+      "id": "f-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-93ca97ee2f21.request.json"
+    },
+    {
+      "id": "f-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-5a59cc4c52bd.request.json"
+    },
+    {
+      "id": "g-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-ff30efb88aff.request.json"
+    },
+    {
+      "id": "g-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-9df27378dcb8.request.json"
+    },
+    {
+      "id": "g-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-20692fa2fd49.request.json"
+    },
+    {
+      "id": "g-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-41b0527174c9.request.json"
+    },
+    {
+      "id": "g-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-404978af3b1c.request.json"
+    },
+    {
+      "id": "h-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-0c985debdbc4.request.json"
+    },
+    {
+      "id": "h-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-0bcd224b7940.request.json"
+    },
+    {
+      "id": "h-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-fb056b1e49bb.request.json"
+    },
+    {
+      "id": "h-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-c737f86e524a.request.json"
+    },
+    {
+      "id": "h-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-e4d38fd4f231.request.json"
+    },
+    {
+      "id": "i-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-28ef45f0fe7d.request.json"
+    },
+    {
+      "id": "i-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-30d6d998ffc1.request.json"
+    },
+    {
+      "id": "i-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-ced736a74365.request.json"
+    },
+    {
+      "id": "i-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-a633629dddac.request.json"
+    },
+    {
+      "id": "i-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-20b69e6de727.request.json"
+    },
+    {
+      "id": "j-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-57ce28c190ab.request.json"
+    },
+    {
+      "id": "j-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-07e4fae0eaf1.request.json"
+    },
+    {
+      "id": "j-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-28f2eeb75393.request.json"
+    },
+    {
+      "id": "j-04",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-01b682d93b49.request.json"
+    },
+    {
+      "id": "j-05",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-770b502edcd4.request.json"
+    },
+    {
+      "id": "x-01",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-0417c89842e4.request.json"
+    },
+    {
+      "id": "x-02",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-970a8dbb5aed.request.json"
+    },
+    {
+      "id": "x-03",
+      "request": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-34d29bcf2896.request.json"
+    }
+  ],
+  "errored": [],
+  "categoriesCovered": [],
+  "metrics": {
+    "provenance_preservation": {
+      "pass": 854,
+      "total": 854,
+      "rate": 1,
+      "violations": 0
+    },
+    "protected_traits": {
+      "pass": 132,
+      "total": 134,
+      "rate": 0.9850746268656716,
+      "violations": 2
+    },
+    "requirement_recall": {
+      "pass": 142,
+      "total": 157,
+      "rate": 0.9044585987261147,
+      "violations": 0
+    },
+    "uncertainty_detection": {
+      "pass": 43,
+      "total": 59,
+      "rate": 0.7288135593220338,
+      "violations": 0
+    },
+    "silent_mutation": {
+      "pass": 11,
+      "total": 11,
+      "rate": 1,
+      "violations": 0
+    },
+    "construct_named": {
+      "pass": 16,
+      "total": 18,
+      "rate": 0.8888888888888888,
+      "violations": 0
+    },
+    "evidence_signal_recall": {
+      "pass": 16,
+      "total": 20,
+      "rate": 0.8,
+      "violations": 0
+    },
+    "false_signal_recall": {
+      "pass": 14,
+      "total": 19,
+      "rate": 0.7368421052631579,
+      "violations": 0
+    },
+    "heuristic_mutation": {
+      "pass": 14,
+      "total": 14,
+      "rate": 1,
+      "violations": 0
+    },
+    "proxy_identified": {
+      "pass": 17,
+      "total": 19,
+      "rate": 0.8947368421052632,
+      "violations": 0
+    },
+    "next_question_targeting": {
+      "pass": 30,
+      "total": 31,
+      "rate": 0.967741935483871,
+      "violations": 0
+    },
+    "replan_signal": {
+      "pass": 29,
+      "total": 29,
+      "rate": 1,
+      "violations": 0
+    },
+    "replan_correctness": {
+      "pass": 101,
+      "total": 104,
+      "rate": 0.9711538461538461,
+      "violations": 0
+    },
+    "proxy_as_filter": {
+      "pass": 19,
+      "total": 19,
+      "rate": 1,
+      "violations": 0
+    },
+    "fabrication": {
+      "pass": 124,
+      "total": 124,
+      "rate": 1,
+      "violations": 0
+    },
+    "must_not_exist": {
+      "pass": 17,
+      "total": 18,
+      "rate": 0.9444444444444444,
+      "violations": 1
+    },
+    "unknown_preserved": {
+      "pass": 8,
+      "total": 11,
+      "rate": 0.7272727272727273,
+      "violations": 0
+    },
+    "contradiction_detection": {
+      "pass": 5,
+      "total": 8,
+      "rate": 0.625,
+      "violations": 0
+    }
+  },
+  "judge": {
+    "conversations": 0,
+    "averages": {
+      "constructDefinition": null,
+      "proxyIdentification": null,
+      "nextQuestionValue": null,
+      "challengeAppropriateness": null,
+      "replanCorrectness": null
+    },
+    "unsupportedInferences": 0,
+    "modelsIntentAverage": null
+  },
+  "findings": [
+    {
+      "metric": "evidence_signal_recall",
+      "severity": "fail",
+      "detail": "\"Research taste\" evidenceSpec lacks self-initiated / became benchmarks / other people run",
+      "conversation": "a-01",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of startup / infrastructure / harness / Kaggle present after re-plan",
+      "conversation": "a-02",
+      "turn": "replan"
+    },
+    {
+      "metric": "protected_traits",
+      "severity": "fail",
+      "detail": "age referenced in a requirement's defining text: \"tic AI evaluation is a field only a few years old, so no candidate anywhere has ten years\"",
+      "conversation": "a-05",
+      "turn": -1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'calm under pressure' concretely means in this unit and how it will be assessed\": consequential=false (expected true)",
+      "conversation": "b-01",
+      "turn": -1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'calm under pressure' concretely means in this unit and how it will be assessed\": consequential=false (expected true)",
+      "conversation": "b-01",
+      "turn": 0
+    },
+    {
+      "metric": "evidence_signal_recall",
+      "severity": "fail",
+      "detail": "\"Has nursed ECMO patients\" evidenceSpec lacks nursed / ECMO patients / cannulat / circuit",
+      "conversation": "b-02",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Which specialist therapies the unit runs (for example renal replacement or extracorporeal support) and whether experience with them is expected\": status resolved (expected open)",
+      "conversation": "b-02",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Permanent Band 6 post\": origin jd (expected manager_statement)",
+      "conversation": "b-03",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Permanent Band 6 post\": status explicit (expected needs_clarification)",
+      "conversation": "b-03",
+      "turn": 0
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-employment\" not recorded",
+      "conversation": "b-03",
+      "turn": 0
+    },
+    {
+      "metric": "must_not_exist",
+      "severity": "fail",
+      "detail": "\"Lives within a manageable commute of the unit\" exists as a preferred requirement but must not (No requirement may encode age.)",
+      "conversation": "b-05",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'hungry' and 'hunter' concretely mean to this hiring manager\": consequential=false (expected true)",
+      "conversation": "c-01",
+      "turn": -1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'executive presence' means here in observable terms\": consequential=false (expected true)",
+      "conversation": "c-01",
+      "turn": -1
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"Owns new-logo enterprise deals\" definition does not name the construct (new logo / opened themselves / seventy percent / 70)",
+      "conversation": "c-01",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'hungry' and 'hunter' concretely mean to this hiring manager\": consequential=false (expected true)",
+      "conversation": "c-01",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'executive presence' means here in observable terms\": consequential=false (expected true)",
+      "conversation": "c-01",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "expected uncertainty \"unc-proxy\" (Salesforce) not recorded",
+      "conversation": "c-02",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Average deal size and sales-cycle length behind the $1.5M quota\": status resolved (expected open)",
+      "conversation": "c-03",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Remote is acceptable\": status explicit (expected needs_clarification)",
+      "conversation": "c-04",
+      "turn": 0
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-location\" not recorded",
+      "conversation": "c-04",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Set up and run five-axis machining centres\": origin jd (expected manager_statement)",
+      "conversation": "d-01",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "expected uncertainty \"unc-adjacent\" (who else) not recorded",
+      "conversation": "d-05",
+      "turn": 0
+    },
+    {
+      "metric": "next_question_targeting",
+      "severity": "fail",
+      "detail": "next question does not address who else / other / trades / mold / tool / adjacent / background: \"That is the most useful thing I have been told about this seat — it tells me which shops to look in \"",
+      "conversation": "d-05",
+      "turn": 0
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"Lead finance through IPO readiness\" definition does not name the construct (S-1 / IPO readiness / SOX / led / roadshow)",
+      "conversation": "e-01",
+      "turn": 0
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"Lead finance through IPO readiness\": proxy (public-company CFO / CFO title) is neither a false signal nor contextualized by the construct",
+      "conversation": "e-01",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Lead finance through IPO readiness\" falseSignals lack title / investor dinners",
+      "conversation": "e-01",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Lead finance through IPO readiness\": origin jd (expected manager_statement)",
+      "conversation": "e-01",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of VP Finance / VP of Finance / number two / Chief Accounting Officer present after re-plan",
+      "conversation": "e-01",
+      "turn": "replan"
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'strategic partner to the CEO' means concretely\": consequential=false (expected true)",
+      "conversation": "e-02",
+      "turn": -1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'strategic partner to the CEO' means concretely\": consequential=false (expected true)",
+      "conversation": "e-02",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"The equity component of the package\": status resolved (expected open)",
+      "conversation": "e-03",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Whether relocation to Austin is financially supported\": status resolved (expected open)",
+      "conversation": "e-03",
+      "turn": 0
+    },
+    {
+      "metric": "unknown_preserved",
+      "severity": "fail",
+      "detail": "\"unc-reloc\" should remain unknown but requirement \"Based in Austin; relocation expected\" asserts it",
+      "conversation": "e-05",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "expected uncertainty \"unc-adjacent\" (adjacent) not recorded",
+      "conversation": "f-01",
+      "turn": 0
+    },
+    {
+      "metric": "protected_traits",
+      "severity": "fail",
+      "detail": "national origin referenced in a requirement's defining text: \"t, and using them would be screening on national origin.\nThe employer's own documented U.S.-per\"",
+      "conversation": "f-02",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"U.S. person as defined by ITAR\" falseSignals lack accent / foreign degree / national origin",
+      "conversation": "f-02",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Has fired engines, breadth over brand\" falseSignals lack one valve / big-company / brand",
+      "conversation": "f-03",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Familiarity with test-stand operations\": origin jd (expected manager_statement)",
+      "conversation": "f-04",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "expected requirement \"pedigree\" (TSMC) is missing",
+      "conversation": "g-02",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"PhD (corporate posting standard, not a bar)\": kind preferred (expected must_have)",
+      "conversation": "g-02",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Named-fab preference (the manager's own example refutes it)\": kind preferred (expected trainable)",
+      "conversation": "g-02",
+      "turn": 0
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "adjacent: none of 200mm / analog / trailing / mature node present after re-plan",
+      "conversation": "g-02",
+      "turn": "replan"
+    },
+    {
+      "metric": "unknown_preserved",
+      "severity": "fail",
+      "detail": "\"unc-sponsor\" should remain unknown but requirement \"Own a process module through ramp\" asserts it",
+      "conversation": "g-03",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Which process module this seat owns\": status resolved (expected open)",
+      "conversation": "g-04",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Nanosheet development exposure (pilot line acceptable)\": kind preferred (expected must_have)",
+      "conversation": "g-05",
+      "turn": 0
+    },
+    {
+      "metric": "evidence_signal_recall",
+      "severity": "fail",
+      "detail": "\"Bilingual Spanish\" evidenceSpec lacks fluen / proficien / conduct / meetings in Spanish",
+      "conversation": "h-03",
+      "turn": 0
+    },
+    {
+      "metric": "proxy_identified",
+      "severity": "fail",
+      "detail": "\"Doctorate (a board member's preference, not a bar)\": proxy (Harvard / Stanford / Columbia) is neither a false signal nor contextualized by the construct",
+      "conversation": "h-04",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Doctorate (a board member's preference, not a bar)\" falseSignals lack Columbia / Ivy / brand / program",
+      "conversation": "h-04",
+      "turn": 0
+    },
+    {
+      "metric": "evidence_signal_recall",
+      "severity": "fail",
+      "detail": "\"Retains a brigade\" evidenceSpec lacks retention / turnover / stayed",
+      "conversation": "i-01",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Oversee banquets and in-room dining\": origin jd (expected manager_statement)",
+      "conversation": "i-02",
+      "turn": 0
+    },
+    {
+      "metric": "unknown_preserved",
+      "severity": "fail",
+      "detail": "\"unc-housing\" should remain unknown but requirement \"Housing not provided\" asserts it",
+      "conversation": "i-03",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "expected requirement \"no-hotel\" (hotel people) is missing",
+      "conversation": "i-04",
+      "turn": 0
+    },
+    {
+      "metric": "contradiction_detection",
+      "severity": "fail",
+      "detail": "expected contradiction \"con-chain\" not recorded",
+      "conversation": "i-05",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Data-centre time (rule of thumb, waivable)\" falseSignals lack years",
+      "conversation": "j-01",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Simultaneous and consecutive modes\": origin jd (expected manager_statement)",
+      "conversation": "x-01",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Troubleshoot converters and pitch systems\": origin jd (expected manager_statement)",
+      "conversation": "x-02",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"EDC systems (Medidata Rave)\": origin jd (expected manager_statement)",
+      "conversation": "x-03",
+      "turn": 0
+    }
+  ]
+}

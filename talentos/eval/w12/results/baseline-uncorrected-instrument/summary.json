@@ -1,0 +1,299 @@
+{
+  "runName": "baseline",
+  "provider": "session",
+  "corpusSize": 53,
+  "attempted": [
+    "a-01",
+    "b-02",
+    "c-01",
+    "d-04",
+    "e-02",
+    "f-01",
+    "g-05",
+    "h-03",
+    "i-01",
+    "j-05"
+  ],
+  "done": [
+    "a-01",
+    "b-02",
+    "c-01",
+    "d-04",
+    "e-02",
+    "f-01",
+    "g-05",
+    "h-03",
+    "i-01",
+    "j-05"
+  ],
+  "pending": [],
+  "errored": [],
+  "categoriesCovered": [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+  ],
+  "metrics": {
+    "provenance_preservation": {
+      "pass": 260,
+      "total": 260,
+      "rate": 1,
+      "violations": 0
+    },
+    "protected_traits": {
+      "pass": 38,
+      "total": 38,
+      "rate": 1,
+      "violations": 0
+    },
+    "requirement_recall": {
+      "pass": 46,
+      "total": 51,
+      "rate": 0.9019607843137255,
+      "violations": 0
+    },
+    "uncertainty_detection": {
+      "pass": 20,
+      "total": 22,
+      "rate": 0.9090909090909091,
+      "violations": 0
+    },
+    "silent_mutation": {
+      "pass": 21,
+      "total": 22,
+      "rate": 0.9545454545454546,
+      "violations": 1
+    },
+    "construct_named": {
+      "pass": 7,
+      "total": 8,
+      "rate": 0.875,
+      "violations": 0
+    },
+    "evidence_signal_recall": {
+      "pass": 9,
+      "total": 12,
+      "rate": 0.75,
+      "violations": 0
+    },
+    "false_signal_recall": {
+      "pass": 4,
+      "total": 7,
+      "rate": 0.5714285714285714,
+      "violations": 0
+    },
+    "proxy_identified": {
+      "pass": 3,
+      "total": 3,
+      "rate": 1,
+      "violations": 0
+    },
+    "must_not_exist": {
+      "pass": 9,
+      "total": 9,
+      "rate": 1,
+      "violations": 0
+    },
+    "contradiction_detection": {
+      "pass": 4,
+      "total": 4,
+      "rate": 1,
+      "violations": 0
+    },
+    "next_question_targeting": {
+      "pass": 6,
+      "total": 6,
+      "rate": 1,
+      "violations": 0
+    },
+    "replan_signal": {
+      "pass": 16,
+      "total": 16,
+      "rate": 1,
+      "violations": 0
+    },
+    "replan_correctness": {
+      "pass": 16,
+      "total": 19,
+      "rate": 0.8421052631578947,
+      "violations": 0
+    },
+    "fabrication": {
+      "pass": 40,
+      "total": 42,
+      "rate": 0.9523809523809523,
+      "violations": 2
+    },
+    "unknown_preserved": {
+      "pass": 1,
+      "total": 1,
+      "rate": 1,
+      "violations": 0
+    },
+    "heuristic_mutation": {
+      "pass": 4,
+      "total": 4,
+      "rate": 1,
+      "violations": 0
+    }
+  },
+  "judge": {
+    "conversations": 0,
+    "averages": {
+      "constructDefinition": null,
+      "proxyIdentification": null,
+      "nextQuestionValue": null,
+      "challengeAppropriateness": null,
+      "replanCorrectness": null
+    },
+    "unsupportedInferences": 0,
+    "modelsIntentAverage": null
+  },
+  "findings": [
+    {
+      "metric": "fabrication",
+      "severity": "fail",
+      "detail": "number \"18\" appears in the output but in no input",
+      "conversation": "b-02",
+      "turn": -1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"ECMO nursing experience\": status needs_clarification (expected explicit)",
+      "conversation": "b-02",
+      "turn": 0
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"ECMO nursing experience\" falseSignals lack seen the machine / cardiac / observed",
+      "conversation": "b-02",
+      "turn": 0
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"Which sub-specialty case mix the unit runs beyond general ICU\": status resolved (expected open)",
+      "conversation": "b-02",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"ICU experience (two years)\": status needs_clarification (expected explicit)",
+      "conversation": "b-02",
+      "turn": 1
+    },
+    {
+      "metric": "evidence_signal_recall",
+      "severity": "fail",
+      "detail": "\"ICU experience (two years)\" evidenceSpec lacks competency / signed off / bedside",
+      "conversation": "b-02",
+      "turn": 1
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"ICU experience (two years)\" falseSignals lack perfusionist",
+      "conversation": "b-02",
+      "turn": 1
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "strings: \"perfusionist\" is present but must not be",
+      "conversation": "b-02",
+      "turn": "replan"
+    },
+    {
+      "metric": "evidence_signal_recall",
+      "severity": "fail",
+      "detail": "\"Executive presence\" evidenceSpec lacks signed / closed / economic buyer",
+      "conversation": "c-01",
+      "turn": 1
+    },
+    {
+      "metric": "false_signal_recall",
+      "severity": "fail",
+      "detail": "\"Executive presence\" falseSignals lack on a call / attended",
+      "conversation": "c-01",
+      "turn": 1
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: \"relocation\" is present but must not be",
+      "conversation": "d-04",
+      "turn": "replan"
+    },
+    {
+      "metric": "replan_correctness",
+      "severity": "fail",
+      "detail": "persona: \"twenty-six\" is present but must not be",
+      "conversation": "d-04",
+      "turn": "replan"
+    },
+    {
+      "metric": "silent_mutation",
+      "severity": "warn",
+      "detail": "untouched key \"integrity\" has no earlier expectation to resolve it",
+      "conversation": "e-02",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Lead finance through IPO readiness\": origin jd (expected manager_statement)",
+      "conversation": "e-02",
+      "turn": 1
+    },
+    {
+      "metric": "uncertainty_detection",
+      "severity": "fail",
+      "detail": "\"What 'strategic partner to the CEO' means concretely\": status resolved (expected open)",
+      "conversation": "e-02",
+      "turn": 1
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"LOX/RP-1 systems\": kind preferred (expected trainable)",
+      "conversation": "f-01",
+      "turn": 1
+    },
+    {
+      "metric": "fabrication",
+      "severity": "fail",
+      "detail": "number \"7\" appears in the output but in no input",
+      "conversation": "g-05",
+      "turn": 0
+    },
+    {
+      "metric": "requirement_recall",
+      "severity": "fail",
+      "detail": "\"Advanced-node etch experience (5+ years)\": kind must_have (expected preferred)",
+      "conversation": "g-05",
+      "turn": 0
+    },
+    {
+      "metric": "silent_mutation",
+      "severity": "fail",
+      "detail": "untouched requirement \"Advanced-node etch experience (5+ years)\" changed (definition, evidenceSpec, falseSignals) on a statement that did not address it",
+      "conversation": "g-05",
+      "turn": 1
+    },
+    {
+      "metric": "construct_named",
+      "severity": "fail",
+      "detail": "\"Creative, seasonal fine-dining leadership\" definition does not name the construct (retention / brigade stays / turnover)",
+      "conversation": "i-01",
+      "turn": 0
+    },
+    {
+      "metric": "evidence_signal_recall",
+      "severity": "fail",
+      "detail": "\"Creative, seasonal fine-dining leadership\" evidenceSpec lacks retention / turnover / stayed",
+      "conversation": "i-01",
+      "turn": 0
+    }
+  ]
+}
