@@ -790,3 +790,20 @@ The engine link has not been opened against `cse.google.com` from this
 environment: no test here leaves the page, by design. The URL is the
 reference console's own and the `cx` values are the live engines; the
 first real run is the owner's.
+
+### Hotfix, same day — the engine link opened nothing in the viewer
+
+The owner pressed Run and no tab appeared. The link was right; the
+artifact viewer frames the page in a sandbox that can refuse to open
+windows, and an `<a target="_blank">` then fails silently. Every outbound
+link now goes through one delegated handler (`ui/linkout.ts`): try
+`window.open` inside the click gesture and, if the viewer returns
+nothing, show the URL in a selectable field with a Copy button and the
+browser-menu route spelled out. The Run panel gained a permanent
+"Copy link" button. Two e2e tests stub `window.open` both ways (30 e2e
+in total after the hotfix).
+
+Observed 2026-09-05, reported by the owner: the next Run click after the
+hotfix opened a tab and the fallback never showed — the handler took its
+success path. That is the first real run of a compiled query on Talent
+X-Ray from the artifact.
