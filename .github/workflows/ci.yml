@@ -68,8 +68,26 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Exclude private runtime data from packaging
+        run: pnpm check:private-build
+
       - name: Headless critical path (mock provider)
         run: pnpm smoke
         env:
           TALENTOS_MODEL_PROVIDER: mock
           TALENTOS_DATABASE_PATH: ./data/ci-smoke.db
+
+      - name: Check preserved artifact build
+        run: pnpm build:artifact:check
+
+      - name: Prove document safety guards detect deliberate defects
+        run: pnpm test:documents:defects
+
+      - name: Install browser for acceptance tests
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Standalone acceptance tests
+        run: pnpm e2e
+
+      - name: Artifact acceptance tests
+        run: pnpm e2e:artifact

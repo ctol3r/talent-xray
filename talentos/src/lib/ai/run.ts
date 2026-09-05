@@ -47,6 +47,9 @@ export interface AiRunResult<T> {
 }
 
 interface RunOptions {
+  /** Explicit, user-imported artifact response; still passes the full validation pipeline. */
+  suppliedResponse?: unknown;
+  redactErrors?: boolean;
   db: Db;
   searchProjectId?: string;
   candidateId?: string;
@@ -71,7 +74,15 @@ export async function runAiTask<C, T>(
   ctx: C,
   options: RunOptions,
 ): Promise<AiRunResult<T>> {
-  const status = getProviderStatus();
+  const supplied = "suppliedResponse" in options;
+  const status = supplied
+    ? {
+        kind: "session" as const,
+        model: "imported-artifact (author unverified)",
+        configured: true,
+        detail: "User-imported artifact; no model API request.",
+      }
+    : getProviderStatus();
   if (!status.configured) {
     throw new ProviderNotConfiguredError(status.detail);
   }
@@ -100,7 +111,9 @@ export async function runAiTask<C, T>(
 
   let raw: T;
   try {
-    if (status.kind === "mock") {
+    if (supplied) {
+      raw = def.schema.parse(options.suppliedResponse);
+    } else if (status.kind === "mock") {
       raw = def.mock(ctx);
     } else {
       const provider: ModelProvider =
@@ -118,11 +131,16 @@ export async function runAiTask<C, T>(
   } catch (error) {
     // A pending session handoff is not a failed generation — no audit row.
     if (error instanceof SessionFulfillmentPendingError) throw error;
-    const message = error instanceof Error ? error.message : String(error);
+    const message = options.redactErrors
+      ? "Document analysis failed. No source text was recorded in the error log."
+      : error instanceof Error
+        ? error.message
+        : String(error);
     await audit(
       error instanceof GenerationRefusedError ? "refused" : "failed",
       message,
     );
+    if (options.redactErrors) throw new Error(message);
     throw error;
   }
 

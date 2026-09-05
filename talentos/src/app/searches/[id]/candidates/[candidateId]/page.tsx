@@ -1,3 +1,4 @@
+import { ReviewResumeLink } from "@/components/review-resume-link";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
@@ -81,6 +82,12 @@ export default async function CandidatePage({
         }
         actions={
           <div className="flex items-start gap-3">
+            <ReviewResumeLink
+              className="underline text-teal-800"
+              href={`/searches/${id}/candidates/${candidateId}/review`}
+            >
+              Review CV ↔ JD
+            </ReviewResumeLink>
             <GenerateButton
               action={kickoffCandidateCrewAction}
               input={{ candidateId }}

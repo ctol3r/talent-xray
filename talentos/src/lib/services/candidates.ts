@@ -1,8 +1,19 @@
+import { MAX_DOCUMENT_CHARS } from "@/lib/documents/contracts";
+import { reviewWorkspace } from "./document-review";
+import { saveDocument, removeOriginal } from "./documents";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { emptyCandidateProfile } from "@/lib/core/payloads";
 import type { Db } from "@/lib/db/client";
 import {
+  documentVersions,
+  documentComparisons,
+  candidatePackets,
+  candidateSourceEvidence,
+  searchLearnings,
+  tasks,
+  aiGenerations,
+  crewJobs,
   candidateEvidence,
   candidateSources,
   candidates,
@@ -23,7 +34,7 @@ export const createCandidateInput = z.object({
   currentTitle: z.string().optional(),
   currentCompany: z.string().optional(),
   geography: z.string().optional(),
-  resumeText: z.string().optional(),
+  resumeText: z.string().max(MAX_DOCUMENT_CHARS).optional(),
   recruiterNotes: z.string().optional(),
   profileUrls: z.array(z.string()).default([]),
   stage: z.string().default("identified"),
@@ -33,30 +44,47 @@ export async function createCandidate(
   db: Db,
   input: z.infer<typeof createCandidateInput>,
 ) {
-  const { profileUrls, ...fields } = input;
-  const [candidate] = await db
-    .insert(candidates)
-    .values({ ...fields, profile: emptyCandidateProfile() })
-    .returning();
-  if (profileUrls.length > 0) {
-    await db.insert(candidateSources).values(
-      profileUrls
-        .filter((url) => url.trim() !== "")
-        .map((url) => ({
-          candidateId: candidate.id,
-          url: url.trim(),
-          addedVia: "manual",
-        })),
-    );
-  }
-  // Every candidate enters the pipeline with an event — the analytics substrate.
-  await db.insert(pipelineEvents).values({
-    searchProjectId: input.searchProjectId,
-    candidateId: candidate.id,
-    fromStage: null,
-    toStage: input.stage,
+  const { profileUrls, resumeText, ...fields } =
+    createCandidateInput.parse(input);
+  return db.transaction((tx) => {
+    const candidate = tx
+      .insert(candidates)
+      .values({ ...fields, profile: emptyCandidateProfile() })
+      .returning()
+      .get();
+    if (resumeText?.trim())
+      saveDocument(tx, {
+        searchProjectId: fields.searchProjectId,
+        candidateId: candidate.id,
+        kind: "cv",
+        text: resumeText,
+        confirmed: true,
+      });
+    const urls = profileUrls.map((url) => url.trim()).filter(Boolean);
+    if (urls.length)
+      tx.insert(candidateSources)
+        .values(
+          urls.map((url) => ({
+            candidateId: candidate.id,
+            url,
+            addedVia: "manual",
+          })),
+        )
+        .run();
+    tx.insert(pipelineEvents)
+      .values({
+        searchProjectId: fields.searchProjectId,
+        candidateId: candidate.id,
+        fromStage: null,
+        toStage: fields.stage,
+      })
+      .run();
+    return tx
+      .select()
+      .from(candidates)
+      .where(eq(candidates.id, candidate.id))
+      .get()!;
   });
-  return candidate;
 }
 
 export const updateCandidateInput = z.object({
@@ -65,7 +93,7 @@ export const updateCandidateInput = z.object({
   currentTitle: z.string().optional(),
   currentCompany: z.string().optional(),
   geography: z.string().optional(),
-  resumeText: z.string().optional(),
+  resumeText: z.string().max(MAX_DOCUMENT_CHARS).optional(),
   recruiterNotes: z.string().optional(),
   compensationNote: z.string().optional(),
   nextAction: z.string().optional(),
@@ -79,13 +107,29 @@ export async function updateCandidate(
   db: Db,
   input: z.infer<typeof updateCandidateInput>,
 ) {
-  const { id, ...fields } = input;
-  const [candidate] = await db
-    .update(candidates)
-    .set({ ...fields, updatedAt: new Date().toISOString() })
-    .where(eq(candidates.id, id))
-    .returning();
-  return candidate;
+  const { id, resumeText, ...fields } = updateCandidateInput.parse(input);
+  return db.transaction((tx) => {
+    const owner = tx
+      .select()
+      .from(candidates)
+      .where(eq(candidates.id, id))
+      .get();
+    if (!owner) throw new Error("Candidate not found.");
+    if (resumeText !== undefined && resumeText !== owner.resumeText)
+      saveDocument(tx, {
+        searchProjectId: owner.searchProjectId,
+        candidateId: id,
+        kind: "cv",
+        text: resumeText,
+        confirmed: true,
+      });
+    return tx
+      .update(candidates)
+      .set({ ...fields, updatedAt: new Date().toISOString() })
+      .where(eq(candidates.id, id))
+      .returning()
+      .get();
+  });
 }
 
 export const moveCandidateStageInput = z.object({
@@ -188,28 +232,50 @@ export async function getPipelineEvents(db: Db, projectId: string) {
 
 /** Privacy: full deletion of a candidate and every dependent record. */
 export async function deleteCandidate(db: Db, candidateId: string) {
-  await db.delete(scorecards).where(eq(scorecards.candidateId, candidateId));
-  await db.delete(offers).where(eq(offers.candidateId, candidateId));
-  await db.delete(closePlans).where(eq(closePlans.candidateId, candidateId));
-  await db
-    .delete(onboardingPlans)
-    .where(eq(onboardingPlans.candidateId, candidateId));
-  await db
-    .delete(outreachMessages)
-    .where(eq(outreachMessages.candidateId, candidateId));
-  await db
-    .delete(outreachSequences)
-    .where(eq(outreachSequences.candidateId, candidateId));
-  await db
-    .delete(candidateEvidence)
-    .where(eq(candidateEvidence.candidateId, candidateId));
-  await db
-    .delete(candidateSources)
-    .where(eq(candidateSources.candidateId, candidateId));
-  await db
-    .delete(pipelineEvents)
-    .where(eq(pipelineEvents.candidateId, candidateId));
-  await db.delete(candidates).where(eq(candidates.id, candidateId));
+  const originals = db
+    .select()
+    .from(documentVersions)
+    .where(eq(documentVersions.candidateId, candidateId))
+    .all()
+    .flatMap((d) => (d.originalFileId ? [d.originalFileId] : []));
+  db.transaction((tx) => {
+    tx.delete(documentComparisons)
+      .where(eq(documentComparisons.candidateId, candidateId))
+      .run();
+    tx.delete(documentVersions)
+      .where(eq(documentVersions.candidateId, candidateId))
+      .run();
+    for (const table of [
+      scorecards,
+      offers,
+      closePlans,
+      onboardingPlans,
+      outreachMessages,
+      outreachSequences,
+      candidateEvidence,
+      candidateSources,
+      pipelineEvents,
+      candidatePackets,
+      candidateSourceEvidence,
+      searchLearnings,
+      tasks,
+      aiGenerations,
+      crewJobs,
+    ]) {
+      tx.delete(table).where(eq(table.candidateId, candidateId)).run();
+    }
+    tx.delete(candidates).where(eq(candidates.id, candidateId)).run();
+  });
+  for (const id of new Set(originals)) {
+    if (
+      !db
+        .select()
+        .from(documentVersions)
+        .where(eq(documentVersions.originalFileId, id))
+        .get()
+    )
+      removeOriginal(id);
+  }
 }
 
 /** Privacy: export everything held about a candidate as one JSON document. */
@@ -253,6 +319,7 @@ export async function exportCandidate(db: Db, candidateId: string) {
       .where(eq(pipelineEvents.candidateId, candidateId)),
   ]);
   return {
+    documentReview: reviewWorkspace(db, candidate.searchProjectId, candidateId),
     exportedAt: new Date().toISOString(),
     candidate,
     sources,

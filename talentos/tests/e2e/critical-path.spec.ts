@@ -116,12 +116,14 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
       "Built distributed training infrastructure; two first-author workshop papers.",
     );
   await page.click('form button:has-text("Add candidate")');
-  await expect(page.getByRole("link", { name: "Evelyn Example" })).toBeVisible({
+  await expect(
+    page.getByRole("link", { name: "Evelyn Example", exact: true }),
+  ).toBeVisible({
     timeout: 15_000,
   });
 
   // 12. Evidence alignment — advisory, never a decision.
-  await page.getByRole("link", { name: "Evelyn Example" }).click();
+  await page.getByRole("link", { name: "Evelyn Example", exact: true }).click();
   await page.click('button:has-text("Align evidence")');
   await expect(
     page.getByText("advisory review priority — you decide"),

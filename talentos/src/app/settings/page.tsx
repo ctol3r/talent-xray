@@ -11,7 +11,9 @@ export default function SettingsPage() {
   const provider = getProviderStatus();
   const research = getResearchProvider();
   const discovery = getCandidateDiscoveryProvider();
+  // A runtime data location for display, not a bundled asset.
   const dbPath = path.resolve(
+    /* turbopackIgnore: true */
     process.env.TALENTOS_DATABASE_PATH ?? "./data/talentos.db",
   );
 

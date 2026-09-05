@@ -1,3 +1,4 @@
+import { saveDocument } from "./documents";
 import { and, desc, eq, inArray, lte } from "drizzle-orm";
 import { z } from "zod";
 import { computeOutreachStats } from "@/lib/domain/analytics";
@@ -125,8 +126,24 @@ export async function saveJobDescription(
   db: Db,
   input: z.infer<typeof saveJobDescriptionInput>,
 ) {
-  const [jd] = await db.insert(jobDescriptions).values(input).returning();
-  return jd;
+  const parsed = saveJobDescriptionInput.parse(input);
+  saveDocument(
+    db,
+    {
+      searchProjectId: parsed.searchProjectId,
+      kind: "jd",
+      text: parsed.rawText,
+      confirmed: true,
+    },
+    undefined,
+    { source: parsed.source, url: parsed.url },
+  );
+  return db
+    .select()
+    .from(jobDescriptions)
+    .where(eq(jobDescriptions.searchProjectId, input.searchProjectId))
+    .orderBy(desc(jobDescriptions.createdAt))
+    .get()!;
 }
 
 export const saveHiringManagerInput = z.object({

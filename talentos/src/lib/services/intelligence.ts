@@ -373,3 +373,64 @@ export async function derivePersonas(
   await persist(db, projectId, { ...latest.payload, personas }, meta);
   return { personas, findings, droppedCitations, warnings };
 }
+
+/** Manual intake stays available with no model credentials. This is the canonical writer. */
+export async function addReviewRequirement(db: Db, raw: unknown) {
+  const input = z
+    .object({
+      searchProjectId: z.string().min(1),
+      statement: z.string().trim().min(1).max(4000),
+      origin: z.enum(["jd", "manager_statement"]),
+      jdVersionId: z.string().optional(),
+      anchor: z
+        .object({
+          start: z.number().int().nonnegative(),
+          end: z.number().int().positive(),
+          quote: z.string(),
+        })
+        .optional(),
+    })
+    .parse(raw);
+  const { listDocuments } = await import("./documents");
+  const { validateAnchor } = await import("@/lib/documents/contracts");
+  const jd = listDocuments(db, input.searchProjectId, undefined, "jd")[0];
+  if (input.origin === "jd") {
+    if (!jd || jd.id !== input.jdVersionId || !input.anchor)
+      throw new Error("Select a passage in the current JD first.");
+    validateAnchor(jd.text, input.anchor);
+    if (input.statement !== input.anchor.quote.trim())
+      throw new Error("The JD requirement must preserve the selected wording.");
+  }
+  const existing = await getIntelligence(db, input.searchProjectId);
+  const intent: HiringIntentIR = existing?.payload.intent ?? {
+    need: { businessProblem: "", roleSummary: "", claims: [], unknowns: [] },
+    requirements: [],
+    uncertainties: [],
+    contradictions: [],
+    statements: [],
+    revision: 0,
+  };
+  intent.requirements = [
+    ...intent.requirements,
+    {
+      id: crypto.randomUUID(),
+      label: input.statement.slice(0, 80),
+      statement: input.statement,
+      definition: input.statement,
+      kind: "must_have",
+      origin: input.origin,
+      evidenceSpec: [],
+      falseSignals: [],
+      status: "explicit",
+      linkedUncertaintyIds: [],
+    },
+  ];
+  intent.revision++;
+  await persist(
+    db,
+    input.searchProjectId,
+    { ...existing?.payload, intent },
+    existing?.meta ?? undefined,
+  );
+  return intent.requirements.at(-1)!;
+}
