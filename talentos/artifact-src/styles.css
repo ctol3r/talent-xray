@@ -1258,3 +1258,33 @@ mark.pp-mark:focus-visible {
     grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr);
   }
 }
+
+/* link-out fallback (W20.1 hotfix) */
+.linkout {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(640px, 94vw);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  display: grid;
+  gap: 8px;
+}
+.linkout-text {
+  font-size: 13px;
+}
+.linkout-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.linkout-row input {
+  flex: 1;
+  min-width: 0;
+  font: 12px/1.4 var(--mono);
+}

@@ -217,3 +217,11 @@ string-expansion task:
 - **The deck could host outreach drafts.** The owner's concept was a
   template gallery; the same component would fan a candidate's outreach
   steps if that proves more useful than the candidate view.
+- **The viewer may refuse new tabs.** On the owner's first real click the
+  engine link opened nothing: a sandboxed frame can decline `window.open`
+  and an `<a target="_blank">` then fails silently. Every outbound link now
+  goes through one handler that tries to open the tab and, if refused, shows
+  the URL to copy with the right-click route spelled out. What the viewer
+  actually allows is still undocumented (2026-09-04); a tab that opens but
+  arrives sandboxed would show a blank engine page, and the same copy-the-
+  link route is the answer there too.

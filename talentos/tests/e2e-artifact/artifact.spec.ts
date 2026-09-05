@@ -1058,6 +1058,76 @@ test.describe("W20 · the candidate deck", () => {
   });
 });
 
+test.describe("W20 · link-out when the viewer blocks new tabs", () => {
+  async function toStrings(page: Page) {
+    await openArtifact(page);
+    await openModule(page, "Search Strings");
+    page.once("dialog", (d) => d.accept());
+    await generateButton(page).click();
+    await page.getByText("Full analysis").click();
+  }
+
+  test("a refused window.open shows the URL to copy instead of failing silently", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __opened: string[] };
+      w.__opened = [];
+      window.open = () => null; // what a sandbox without allow-popups does
+    });
+    await toStrings(page);
+    const core = page.locator('#run-panel a[data-engine="core"]');
+    const href = (await core.getAttribute("href")) ?? "";
+    await core.click();
+    const fallback = page.locator("#linkout-fallback");
+    await expect(fallback).toBeVisible();
+    await expect(fallback).toContainText("The viewer blocked the new tab");
+    await expect(fallback).toContainText("right-click");
+    await expect(fallback.locator("input")).toHaveValue(href);
+    await expect(fallback.locator("input")).toBeFocused();
+    await expect(
+      fallback.getByRole("button", { name: "Copy link" }),
+    ).toBeVisible();
+    // The page itself did not navigate away.
+    await expect(page.locator(".brand h1")).toHaveText("TalentOS");
+    await page.keyboard.press("Escape");
+    await expect(fallback).toHaveCount(0);
+  });
+
+  test("when the viewer allows it, the click opens exactly the link's URL and shows no fallback", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __opened: string[] };
+      w.__opened = [];
+      window.open = (url?: string | URL) => {
+        w.__opened.push(String(url));
+        return { opener: {} } as unknown as Window;
+      };
+    });
+    await toStrings(page);
+    const core = page.locator('#run-panel a[data-engine="core"]');
+    const href = (await core.getAttribute("href")) ?? "";
+    await core.click();
+    await expect(page.locator("#linkout-fallback")).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () => (window as unknown as { __opened: string[] }).__opened,
+      ),
+    ).toEqual([href]);
+    // A per-row Run link goes through the same path.
+    await page.locator(".qrow a.run-link").first().click();
+    expect(
+      (
+        await page.evaluate(
+          () => (window as unknown as { __opened: string[] }).__opened,
+        )
+      ).length,
+    ).toBe(2);
+    await expect(page.locator("#linkout-fallback")).toHaveCount(0);
+  });
+});
+
 test.describe("the corpus benchmark", () => {
   test("offers a scored run and says what the number would and would not mean", async ({
     page,

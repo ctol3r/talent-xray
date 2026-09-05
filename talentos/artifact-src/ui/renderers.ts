@@ -12,6 +12,7 @@ import {
   engineSearchUrl,
   type EngineId,
 } from "../core/talent-xray";
+import { showLinkFallback } from "./linkout";
 import type {
   ChannelsPayload,
   HiringNeedPayload,
@@ -433,9 +434,23 @@ function renderEnginePanel(root: HTMLElement): {
     row.append(a);
     return a;
   });
+  const copyLink = el<HTMLButtonElement>(
+    `<button class="btn small" type="button" title="Copy the Core engine link, for a browser that will not open new tabs from this page">Copy link</button>`,
+  );
+  copyLink.onclick = () =>
+    showLinkFallback(
+      engineSearchUrl("core", box.value),
+      "Paste this into a new tab to run it on Talent X-Ray · Core.",
+    );
+  row.append(copyLink);
   const note = el(`<span class="why" role="status"></span>`);
   row.append(note);
   panel.append(row);
+  panel.append(
+    el(
+      `<p class="why">If nothing opens when you press Run, the viewer is refusing new tabs from this page: you will be shown the link to copy, or right-click the button and choose “Open link in new tab”.</p>`,
+    ),
+  );
   const sync = () => {
     const check = checkEngineQuery(box.value);
     terms.textContent = `${check.termCount} terms`;
@@ -450,6 +465,7 @@ function renderEnginePanel(root: HTMLElement): {
         a.setAttribute("aria-disabled", "true");
       }
     }
+    copyLink.disabled = !check.runnable;
     note.textContent = check.runnable ? "" : check.violations.join(" ");
   };
   box.addEventListener("input", sync);

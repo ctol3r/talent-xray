@@ -27,6 +27,7 @@ import {
   aiAvailable,
 } from "./ui/shell";
 import { renderHeader } from "./ui/header";
+import { installLinkOut } from "./ui/linkout";
 
 declare const __TALENTOS_ARTIFACT_VERSION__: string;
 export const ARTIFACT_VERSION =
@@ -52,6 +53,7 @@ setRenderer(() => {
   renderHeader();
   renderMain();
 });
+installLinkOut();
 
 $("#new-search-btn")?.addEventListener("click", () => {
   state.current = null;
