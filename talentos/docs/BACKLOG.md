@@ -334,3 +334,34 @@ decide whether to narrow it to age-bearing phrases; and CLAUDE_HANDOFF.md
 step 4 still says the next work is chosen from pilot evidence. These were
 owner-directed, which is the exception the anti-drift rule allows, but the
 3×5 pilot has not run and nothing here should be read as its result.
+
+## Added by the hireEZ-alternatives read (2026-09-05)
+
+Source: `docs/COMPETITIVE-HIREEZ-ALTERNATIVES-2026-09-05.md`. Not built;
+appended per the anti-drift rule.
+
+- **Rediscovery first.** Before any external discovery run, rank the
+  recruiter's own saved candidates against the new search's canonical
+  requirements using the existing anchor machinery, and show that list
+  ahead of the engine link-outs. Gem sells this as "AI Rediscovery"; on a
+  local SQLite it is a query over tables that already exist.
+- **TalentOS as a local MCP server.** Expose the search context, the
+  requirement set and "validate and import suggestions" as tools a Claude
+  session can call, replacing the outbox copy-paste of D-008 without giving
+  the app a model key (the session still holds the model). SeekOut MCP does
+  the inverse (vendor data into the assistant); here the assistant comes to
+  the recruiter's local data. Generalises the "session provider in the UI"
+  item above.
+- **Determinism metric.** Re-run a stored string N minutes later and record
+  result overlap in the yield ledger (`search_query_runs` already has the
+  shape). Published figure to set against the 14 % shortlist self-overlap
+  reported for AI screeners.
+- **Wording, not code:** replace "explainable" with "verifiable" in product
+  copy (every vendor on the list now prints a reason beside a score; none
+  lets you check it against the source); Wave E labels read
+  "registry-matched · CMS NPPES", never "verified" (Findem + Glider own that
+  word for assessment-time identity checks).
+- **Browser companion guardrail** before the uncommitted Codex work lands:
+  capture only on explicit recruiter save, per-site opt-in, and a plain
+  warning that LinkedIn suspends accounts for extension-driven sourcing
+  (Juicebox is the documented case).
