@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { Db } from "@/lib/db/client";
 import { searchProjects, settings } from "@/lib/db/schema";
+import { scanPayloadForProtectedTraits } from "@/lib/domain/fair-hiring";
 import {
   compensationInputSchema,
   recommendCompensation,
@@ -38,12 +39,15 @@ export function compensationWorkspace(db: Db, projectId: string) {
     .from(settings)
     .where(eq(settings.key, `compensation:${projectId}`))
     .get();
-  const saved = row ? recordSchema.parse(row.value) : null;
+  // An unreadable record must not take the whole Market page down with it.
+  const parsed = row ? recordSchema.safeParse(row.value) : null;
+  const saved = parsed?.success ? parsed.data : null;
   const stale = Boolean(saved && saved.contextHash !== contextHash);
   return {
     context,
     contextHash,
     saved,
+    unreadable: Boolean(parsed && !parsed.success),
     stale,
     recommendation: saved && !stale ? recommendCompensation(saved.input) : null,
   };
@@ -56,6 +60,15 @@ export function saveCompensation(db: Db, raw: unknown) {
       input: compensationInputSchema,
     })
     .parse(raw);
+  const hits = scanPayloadForProtectedTraits(p.input);
+  if (hits.length)
+    throw new Error(
+      `Source text references a protected characteristic (${hits
+        .map((h) => `${h.trait}: "${h.excerpt}"`)
+        .join(
+          "; ",
+        )}). Keep excerpts and comparability notes to the pay facts before saving.`,
+    );
   const w = compensationWorkspace(db, p.projectId);
   if (w.contextHash !== p.contextHash)
     throw new Error(

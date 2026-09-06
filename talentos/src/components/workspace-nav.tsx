@@ -13,6 +13,7 @@ const MODULES: { path: string; label: string; exact?: boolean }[] = [
   { path: "/market", label: "Market" },
   { path: "/strategy", label: "Strategy" },
   { path: "/sources", label: "Sources" },
+  { path: "/graph", label: "Knowledge graph" },
   { path: "/strings", label: "Strings" },
   { path: "/discover", label: "Discover" },
   { path: "/candidates", label: "Candidates" },
@@ -52,6 +53,12 @@ export function WorkspaceNav({ projectId }: { projectId: string }) {
           </Link>
         );
       })}
+      <Link
+        href={`/capture?search=${encodeURIComponent(projectId)}`}
+        className="px-2.5 py-1.5 text-[12.5px] text-ink-muted hover:text-ink"
+      >
+        Browser companion ↗
+      </Link>
     </nav>
   );
 }

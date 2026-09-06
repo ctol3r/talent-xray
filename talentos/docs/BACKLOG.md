@@ -225,3 +225,114 @@ string-expansion task:
   actually allows is still undocumented (2026-09-04); a tab that opens but
   arrives sandboxed would show a blank engine page, and the same copy-the-
   link route is the answer there too.
+
+## Owner ideas of 2026-09-05 — what was built, what was not, and why
+
+Five ideas arrived in one message: a compensation range, Athens/Roam-style
+bi-directional links and a knowledge graph, recommended sources for both
+exposure and candidate sourcing, a Chrome extension, and an autonomous
+"agentic CRM companion" that recognises profiles, bios, emails and phone
+numbers while the recruiter browses and gathers them as it goes. Each was
+assessed against root CLAUDE.md, LEGAL.md and the decision records by five
+independent review passes before anything landed; a Codex session then built
+the doctrine-compliant shape of each on this branch the same afternoon
+(compensation in `4a23c86`; the other four uncommitted at the time of
+writing). What follows is the residue — the part of each wish doctrine does
+not allow, what the built version still owes, and the questions only the
+owner can answer. Source: owner request 2026-09-05.
+
+- **Compensation band (built: Market page, `docs/COMPENSATION.md`).** Lands
+  as an evidence workbench: keyless request, findings import as unreviewed,
+  deterministic median-of-bounds band labelled provisional. Since the first
+  cut it also binds the pasted response to the request's context hash, scans
+  source text for protected-trait references before saving, survives an
+  unreadable saved record, and counts a publisher once across scheme/`www.`.
+  Still owed: store the research request alongside the saved record (rule 2
+  and D-013 store the query, not just the findings); an `origin` field so an
+  imported source carries a visible "imported · unverified" badge rather than
+  only an unticked box; an e2e for the stale-context path (unit-tested only);
+  a decision record. Dropped by doctrine: a figure the product authors from
+  its own knowledge or a model estimate, percentile or market-position claims
+  (no licensed pay data, no research backend — D-010 `none`), any use of a
+  candidate's salary history, automatic propagation into the JD, personas or
+  offers. Owner questions: is the band for the search brief only, or meant to
+  become the posted good-faith range (that decides the pay-transparency
+  posture: CO, CA, NY, WA, IL and EU Directive 2023/970)? Base pay only, or a
+  separately labelled total-compensation band for OTE roles?
+- **Knowledge graph (built: `/graph`, a derived projection plus recruiter
+  links in `settings`).** Nodes and edges are read from existing rows and
+  payload id references at render time; manual links are a labelled,
+  actor-stamped, 500-cap JSON blob per search — no migration, no graph
+  database. Dropped by doctrine: Roam/Athens free-form `[[pages]]`, `#tags`
+  and blocks (a free-form-adjacent structure that LEGAL.md guardrail 4's grep
+  cannot see), a graph store as system of record (D-002/D-003, CLAUDE_HANDOFF
+  step 4), unlinked-reference mining of CV text (D-013), fetch-to-expand
+  nodes (rule 1), edges for unsaved results (rule 2), centrality or degree
+  sizing of candidate nodes (drifts from navigation toward automated ranking —
+  D-027; EU AI Act Annex III treats recruitment as high-risk). Still owed:
+  manual links are not yet included in `exportCandidate`/`deleteCandidate`,
+  so the DSAR path (guardrail 5) under-reports them — add them in the same
+  change as any further link feature; a corrupt blob throws and blanks the
+  page (same class of defect the compensation service just fixed). Owner
+  question: cross-search edges (shared company rows, shared saved URLs) or
+  not, given the product has no cross-search person identity by design?
+- **Source recommendations (built: Sources page — keyless request with a
+  context hash, preview, protected-trait scan, explicit save into
+  `source_channels`).** Exposure and sourcing are one `purpose` label per
+  venue (sourcing / exposure / both). "Best" is priority + why-relevant + cost
+  - cited evidence; certainty stays `inferred` (or `unknown` with no evidence)
+    until a recruiter verifies. Dropped by doctrine: any synthetic score (D-010
+    rule 2), confirming a venue by fetching it, posting or syndicating the role,
+    and audience targeting keyed to a protected characteristic — including a
+    "diversity venue" toggle. Still owed: `purpose` and evidence live inside the
+    channel `note` as tagged JSON; a real column needs the owner's explicit
+    migration instruction; per-channel performance needs candidate→channel
+    attribution plus D-022 minimum samples. Owner question, legal in nature:
+    may exposure recommendations name affinity-group venues at all? The text
+    scanner cannot decide that; the prompt currently forbids protected-trait
+    targeting and says nothing about affinity venues.
+- **Chrome extension (built: `browser-extension/` — Manifest V3, `activeTab`
+  only, no host permissions, no content script, no background worker; it
+  opens the local `/capture` page with the tab URL and title in a URL
+  fragment).** A bookmarklet does the same for any browser; a paste form is
+  the fallback. Dropped by doctrine: the cross-device half of "travels with
+  you" (it would need internet exposure of a no-auth server; that case is the
+  Lite artifact's), any reading of page content, background capture, site
+  automation, candidate data in extension storage. Still owed: Safari needs a
+  separately signed wrapper; Firefox is untested; store publication needs a
+  privacy policy and review (sideloading needs none). Grey area for the
+  owner: the **tab title** is captured as an editable label. LEGAL.md §1
+  names "just the title tag" as content we never request; nothing is
+  requested here (the tab is already open), but on linkedin.com the title
+  encodes name · headline · company, so a saved label is a small piece of
+  profile text. Keep it (editable, one per click, reviewed before save) or
+  drop to URL-only — the owner's call.
+- **Agentic CRM companion (not built as asked; the companion above is the
+  compliant subset).** Dropped, with the rule that drops it: reading visited
+  pages (rule 1; LEGAL.md guardrail 1; LinkedIn User Agreement §8.2 names
+  "browser plugins and add-ons" that copy profile data), extracting emails and
+  phone numbers (guardrail 3 admits only name-pattern hypotheses labelled
+  unverified), persisting extracted fields (rule 2; DATA_MODEL "deliberately
+  absent"), auto-linking or merging people (`identity.ts` never merges),
+  auto-connect or auto-message (ARCHITECTURE §11; CLAUDE_HANDOFF out of
+  scope), model recognition inside the extension (no API key; D-008 rejected
+  that path because it bypasses schema validation, the fair-hiring scan and
+  the audit log). Legal landscape on file: GDPR Art. 14 notice when data is
+  not collected from the subject; CCPA/CPRA covering applicants since 2023;
+  hiQ v. LinkedIn (no CFAA liability, but the contract claim survived and the
+  case ended in an injunction); Meta v. BrandTotal (an extension reading pages
+  inside logged-in sessions); FTC data-broker orders on aggregating "public"
+  data into dossiers. Survives: one click per page, the URL (and reviewed
+  title), recruiter-typed notes, suggested matches from data already held,
+  render-only unverified contact hypotheses. Owner question: does "makes
+  connections as you go" mean (a) links between records the product already
+  holds, or (b) sending LinkedIn connection requests? Only (a) exists or can.
+
+Common residue across the four new surfaces: none has a DECISIONS.md entry
+or an IMPLEMENTATION_PLAN.md wave section yet; the fair-hiring age pattern
+was widened in the same batch (`candidates over 10 …` now matches), which
+will refuse imports on ordinary JD phrasing about years of experience —
+decide whether to narrow it to age-bearing phrases; and CLAUDE_HANDOFF.md
+step 4 still says the next work is chosen from pilot evidence. These were
+owner-directed, which is the exception the anti-drift rule allows, but the
+3×5 pilot has not run and nothing here should be read as its result.

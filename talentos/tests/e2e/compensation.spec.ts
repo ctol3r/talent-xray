@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 test("keyless salary findings require review, persist and invalidate on editing", async ({
   page,
 }) => {
+  page.setDefaultTimeout(10000);
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "Compensation fixture");
   await page.fill('input[name="roleTitle"]', "Engineer");
@@ -16,6 +17,11 @@ test("keyless salary findings require review, persist and invalidate on editing"
   await page
     .getByText("Research with Codex / Claude — no API key", { exact: true })
     .click();
+  // The pasted response must answer the request that is on screen.
+  const request = JSON.parse(
+    await page.getByLabel("Compensation research request").inputValue(),
+  ) as { kind: string; contextHash: string };
+  expect(request.kind).toBe("talentos-compensation-research-v1");
   const source = {
     title: "Synthetic source",
     url: "https://one.example/pay",
@@ -32,8 +38,19 @@ test("keyless salary findings require review, persist and invalidate on editing"
     comparability: "Same role and level",
     reviewed: true,
   };
-  await page.getByLabel("Compensation findings JSON").fill(
+  const findings = page.getByLabel("Compensation findings JSON");
+  await findings.fill(JSON.stringify({ contextHash: "stale", sources: [] }));
+  await page
+    .getByRole("button", { name: "Import unreviewed findings" })
+    .click();
+  await expect(
+    page.getByText("These findings answer a different role context", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await findings.fill(
     JSON.stringify({
+      contextHash: request.contextHash,
       sources: [
         source,
         {
@@ -48,6 +65,12 @@ test("keyless salary findings require review, persist and invalidate on editing"
   await page
     .getByRole("button", { name: "Import unreviewed findings" })
     .click();
+  await expect(
+    page.getByText(
+      "Findings imported as unreviewed. Check each source before including it.",
+      { exact: true },
+    ),
+  ).toBeVisible();
   const reviews = page.getByRole("checkbox", {
     name: "I checked the source amounts, date and comparability",
   });

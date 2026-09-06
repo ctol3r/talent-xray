@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "TalentOS companion",
+  "description": "Review an explicitly selected tab URL and title in your local TalentOS workspace.",
+  "version": "0.1.0",
+  "permissions": ["activeTab"],
+  "action": {
+    "default_title": "Save a link to TalentOS",
+    "default_popup": "popup.html"
+  }
+}

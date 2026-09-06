@@ -51,7 +51,11 @@ export const BLOCKED_FIELD_PATTERNS: RegExp[] = [
 const TEXT_SCAN_PATTERNS: { trait: string; pattern: RegExp }[] = [
   { trait: "race/ethnicity", pattern: /\brace\b|\bethnicit/i },
   { trait: "religion", pattern: /\breligio(n|us)\b/i },
-  { trait: "age", pattern: /\bage\b|\byears?\s+old\b/i },
+  {
+    trait: "age",
+    pattern:
+      /\bage\b|\byears?\s+old\b|\b(?:young|older|elderly)\s+(?:candidates?|applicants?|people|professionals?)\b|\b(?:candidates?|applicants?|people|professionals?)\s+(?:under|over|between)\s+\d/i,
+  },
   {
     trait: "sex/gender identity",
     pattern: /\bgender\b|\btransgender\b|\bnon-?binary\b|\bsex\b/i,

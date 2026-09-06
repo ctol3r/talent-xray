@@ -23,7 +23,7 @@ export default async function MarketPage({
     <div>
       <PageHeader
         title="Market Intelligence"
-        description="Understand search difficulty and review source-backed compensation evidence. Model suggestions remain labeled; research can be supplied through a keyless session."
+        description="How difficult is this search and why, and what recruiter-reviewed sources say about base pay. Every claim carries a certainty label and every pay figure is a provisional band from sources you checked — nothing is presented as fact unless it is. Research arrives through a keyless Codex/Claude request, never a model API key."
         actions={
           <GenerateButton
             action={generateMarketIntelligenceAction}

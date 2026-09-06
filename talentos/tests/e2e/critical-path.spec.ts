@@ -92,7 +92,9 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
 
   // 9. Channels — model suggestions land as 'inferred', never invented facts.
   await moduleNav(page, "Sources").click();
-  await page.click('button:has-text("Map channels")');
+  // The generator now sits under a collapsed "Existing channel generator" section.
+  await page.getByText("Existing channel generator", { exact: true }).click();
+  await page.click('button:has-text("Run existing channel generator")');
   await expect(page.getByText("Google Scholar")).toBeVisible({
     timeout: 30_000,
   });

@@ -932,6 +932,12 @@ export function DocumentReview({
             <details>
               <summary>References and backlinks</summary>
               <Link
+                href={`/searches/${searchProjectId}/graph?node=${encodeURIComponent(`candidate:${w.candidate.id}`)}`}
+              >
+                Explore candidate connections
+              </Link>
+              <br />
+              <Link
                 href={`/searches/${searchProjectId}/candidates/${w.candidate.id}`}
               >
                 Candidate record
