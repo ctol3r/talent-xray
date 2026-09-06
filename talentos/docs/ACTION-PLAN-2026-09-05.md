@@ -1,4 +1,5 @@
 <!-- Action plan derived from COMPETITIVE-2026-09-05.md. Owner decisions 2026-09-05. Executor: Claude. -->
+
 # TalentOS action plan — beating Metaview, hireEZ and Heartbeat.ai
 
 ## Context
@@ -17,10 +18,11 @@ discovery, JDs pasted by the owner (no JD-discovery engine, no rule changes);
 healthcare is "sometimes", so registry match stays but after imports and guidance.
 
 Facts that shape sequencing:
+
 - No personal TalentOS database exists yet (`talentos/data/` holds only `e2e.db`,
   `~/.local/share/talentos/documents` is empty). A fresh DB applies every committed
   migration silently, so the "personal migration authorization" gate has nothing to
-  protect *today*. It bites the moment the pilot creates a real DB — so schema waves
+  protect _today_. It bites the moment the pilot creates a real DB — so schema waves
   (A, D, E) run **before** the pilot DB is created, or each later migration needs an
   explicit owner backup + `pnpm db:migrate` step.
 - Discovery needs the owner's Google Custom Search JSON API key in
@@ -47,15 +49,15 @@ Facts that shape sequencing:
 
 ## Wave order
 
-| Wave | Name | Attacks | Migration |
-| --- | --- | --- | --- |
-| A | String Lab QA + yield ledger | hireEZ opaque match, own B grade | 0006 |
-| B | Decision-to-query calibration loop | Metaview's moat | 0006 (shared) |
-| D | Bring-your-own-data imports | turns hireEZ/Heartbeat/LinkedIn into suppliers | none |
-| E | Registry-verified identity (NPPES) | Heartbeat/hireEZ on the verification axis | 0007 |
-| P | Pilot corpus through TalentOS (3 searches × 5 candidates) | proves every claim above | none — creates the personal DB |
-| F | Two-sided guidance v2 | uncontested by all three | none |
-| G | Transparency: pricing model + "what we will not do" | every competitor complaint page | none |
+| Wave | Name                                                      | Attacks                                        | Migration                      |
+| ---- | --------------------------------------------------------- | ---------------------------------------------- | ------------------------------ |
+| A    | String Lab QA + yield ledger                              | hireEZ opaque match, own B grade               | 0006                           |
+| B    | Decision-to-query calibration loop                        | Metaview's moat                                | 0006 (shared)                  |
+| D    | Bring-your-own-data imports                               | turns hireEZ/Heartbeat/LinkedIn into suppliers | none                           |
+| E    | Registry-verified identity (NPPES)                        | Heartbeat/hireEZ on the verification axis      | 0007                           |
+| P    | Pilot corpus through TalentOS (3 searches × 5 candidates) | proves every claim above                       | none — creates the personal DB |
+| F    | Two-sided guidance v2                                     | uncontested by all three                       | none                           |
+| G    | Transparency: pricing model + "what we will not do"       | every competitor complaint page                | none                           |
 
 Only two migrations exist in the program (0006 in Wave A, 0007 in Wave E) and both
 land **before** Wave P creates the personal DB, so the owner never runs a manual
@@ -65,7 +67,7 @@ extension, JSON profile, `tasks` rows). Wave F is migration-free (`settings` key
 
 ---
 
-## Wave A — String Lab QA + yield ledger  (migration 0006)
+## Wave A — String Lab QA + yield ledger (migration 0006)
 
 **Goal.** Every string in the String Lab shows a word count, QA warnings, part labels
 when split, and a yield line. No OR-group or cross-surface duplicates are persisted.
@@ -75,6 +77,7 @@ attributed to the stored query that produced it, rolled up per search and per no
 role title.
 
 **Decisions.**
+
 - Transformations that change what is persisted (OR-group dedupe, budget split, cross-
   surface dedupe, platform pruning) run once in a shared module and are recorded in a
   `qa_meta` JSON column. String-level checks (parens, quotes, operators, word budget) and
@@ -82,7 +85,7 @@ role title.
   `QueryEditor` are checked without a write path. Warnings never hide a string.
 - Ledger = new `search_query_runs` table + nullable `query_id` on `research_sources` and
   `candidate_source_evidence`. A run records the text actually sent (edited flag), engine,
-  result *count*, time. A save is credited to the stored string only when the run text was
+  result _count_, time. A save is credited to the stored string only when the run text was
   verbatim. Rollups are live GROUP BYs, not cached in `settings`.
 - Migration 0006 also carries Wave B's reserved columns (`calibration`,
   `linked_requirement_ids`) so Wave B is migration-free.
@@ -107,6 +110,7 @@ role title.
 `docs/DECISIONS.md` (one record).
 
 **Schema (drizzle, generated — do not hand-write SQL).**
+
 ```ts
 // search_queries +
 qaMeta: json QueryQaMeta|null; calibration: json|null (Wave B); linkedRequirementIds: json string[]|null (Wave B)
@@ -115,6 +119,7 @@ search_query_runs(id, search_project_id FK, query_id FK set null, query_text, ed
 // research_sources +, candidate_source_evidence +
 query_id FK search_queries
 ```
+
 Wave prompt must say: generate 0006 with `pnpm db:generate`, commit sql + snapshot + journal;
 migrate only disposable DBs. Column names checked against `BLOCKED_FIELD_PATTERNS`.
 
@@ -157,7 +162,7 @@ out, mock discovery + `discovery-yield.spec.ts` go to BACKLOG and the wave stays
 
 ---
 
-## Wave B — Decision-to-query calibration loop  (no migration; columns reserved in 0006)
+## Wave B — Decision-to-query calibration loop (no migration; columns reserved in 0006)
 
 **Goal.** Accept/dismiss/correct decisions on exact CV passages, across all candidates of a
 search, deterministically reshape the String Lab vocabulary before composition, and every
@@ -229,7 +234,7 @@ added term visible and editable; say so in DECISIONS and panel copy.
 
 ---
 
-## Wave D — Bring-your-own-data imports  (no migration)
+## Wave D — Bring-your-own-data imports (no migration)
 
 **Goal.** Upload a CSV/JSON export from hireEZ, LinkedIn Recruiter, a generic ATS or a
 Heartbeat file-upload result; see a dry-run preview (counts, dropped protected columns,
@@ -238,6 +243,7 @@ through `createCandidate` with a visible source label. Nothing auto-merges; noth
 `resume_text`. Positioning: "keep your data vendor; put TalentOS on top".
 
 **Decisions.**
+
 - Hand-written RFC 4180 parser (~80 lines), no dependency (lockfile churn,
   `check:private-build`).
 - Mappers are **allow-lists only** (header aliases per canonical field). They never
@@ -304,7 +310,7 @@ vendor match scores (dropped by D-010).
 
 ---
 
-## Wave E — Registry-verified identity, NPPES first  (migration 0007)
+## Wave E — Registry-verified identity, NPPES first (migration 0007)
 
 **Goal.** From a candidate page, query the public CMS NPPES v2.1 JSON API (no key) by name
 (+state), see records ranked by identity-match strength, pick one by hand, persist an
@@ -336,11 +342,13 @@ record" link-out, "Clear match"), `tests/fixtures/nppes-fixtures.ts` (payload wi
 `drizzle/0007_registry_matches.sql` + snapshot via `pnpm db:generate --name registry_matches`.
 
 **Schema.**
+
 ```ts
 candidate_registry_matches(id, candidate_id FK cascade, registry "nppes", registry_id,
   matched_fields json NppesRecord, match_strength, matched_at, matched_by default "local-owner",
   created_at, UNIQUE(candidate_id, registry))
 ```
+
 Wave prompt sentence: "You are authorized to generate one migration for
 `candidate_registry_matches` and to run it only against disposable databases via
 `TALENTOS_ALLOW_MIGRATIONS=1`." (`tests/unit/document-migration.test.ts` filters idx<4, unaffected.)
@@ -374,7 +382,7 @@ freshness re-check.
 
 ---
 
-## Wave P — Pilot corpus through TalentOS (3 searches × 5 candidates)  (no code by default)
+## Wave P — Pilot corpus through TalentOS (3 searches × 5 candidates) (no code by default)
 
 **Goal.** Produce the measured evidence every competitive claim depends on, using TalentOS
 itself: candidates found through discovery, JDs pasted by the owner, reviews done in the
@@ -387,6 +395,7 @@ outbox; three real JDs (pasted); consent to store the CV text of the candidates 
 (owner's own CV may be one of the five for one search, as a stand-in).
 
 **Procedure per search (Claude drives, owner pastes).**
+
 1. Create search → paste JD → intake → derive plan → Generate strings and Compose from
    search plan (Waves A/B active: coverage panel, QA, calibration panel empty).
 2. Discover: run ≥5 strings across both engines; save ≥5 candidate results explicitly with
@@ -412,7 +421,7 @@ briefs are run in hireEZ (`CONNECTED_REVIEW.md`).
 
 ---
 
-## Wave F — Two-sided guidance v2  (no migration)
+## Wave F — Two-sided guidance v2 (no migration)
 
 **Goal.** Every next-best action carries its evidence (`reason`); the guide page shows a
 one-line "next move" per thread; an HM calibration checkpoint fires after every 5 reviewed
@@ -463,7 +472,7 @@ thresholds (needs a `pipeline_stages` column → migration); close-plan consumin
 
 ---
 
-## Wave G — Transparency: cost model and "what we will not do"  (no migration)
+## Wave G — Transparency: cost model and "what we will not do" (no migration)
 
 **Goal.** Publish the cost model and the refusals as product surface, because each refusal is
 a line on a competitor's complaint page.

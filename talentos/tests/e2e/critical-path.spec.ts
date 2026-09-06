@@ -106,6 +106,10 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   await expect(page.getByText("site:linkedin.com/in").first()).toBeVisible({
     timeout: 30_000,
   });
+  // Wave A: every Google string shows its word budget; channel coverage
+  // is checked against the strategy's named channels.
+  await expect(page.getByText(/\d+\/32 words/).first()).toBeVisible();
+  await expect(page.getByText("Channel coverage")).toBeVisible();
 
   // 11. Add a candidate.
   await moduleNav(page, "Candidates").click();

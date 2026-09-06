@@ -5,23 +5,26 @@ Ideas and known gaps land here instead of creeping into the current work
 
 ## Search String Lab — findings from the CAIS golden-test judge review (2026-09-01)
 
-The qualitative judge review of the first live CAIS golden run (Claude
-session provider) graded the overall output B and named the search strings
-as the weakest deliverable. Concrete follow-ups for the composer and the
-string-expansion task:
+CLOSED by Wave A (2026-09-05, `docs/WAVE-A-REPORT.md`): per-engine word
+budget with split-not-truncate, cross-surface dedupe by normalized text,
+profession-aware platform pruning from the strategy's channels, channel
+coverage check, and string-level QA warnings — all in
+`src/lib/domain/query-normalization.ts`, shared by both composer callers.
+Remaining follow-ups from that wave:
 
-- **Google's ~32-word query limit**: long templated booleans exceed it and
-  silently truncate. The composer should count words per engine and split or
-  trim, with a per-platform budget.
-- **Cross-surface dedupe**: near-duplicate variants repeat verbatim across
-  platforms; dedupe by normalized query text before persisting.
-- **Profession-aware platform pruning**: portfolio x-rays (Behance/Dribbble)
-  are zero-yield for ML researchers; the platform matrix should be filtered
-  by the role's channel ecosystem, not emitted wholesale.
-- **Strategy coverage check**: emit at least one query per channel the
-  sourcing strategy names, and flag channels with no query.
-- **String-level QA**: a validation pass (parenthesis balance, quote
-  balance, word count, operator sanity) with visible warnings in the lab.
+- **`countTerms` lives twice** — `src/lib/domain/query-normalization.ts`
+  and `artifact-src/core/query-compiler.ts` — kept in parity by a unit
+  fixture, not by a shared module. Consolidate when the artifact's
+  compiler and the app's normalization are next touched together.
+- **Operator dialects** (`NOT` vs `-`) for non-Google platforms: the app
+  has no such platform yet; the artifact compiler already models them.
+- **Per-channel candidate attribution** (which channel a saved candidate
+  came from) — the yield ledger attributes to strings and engines only;
+  D-022's minimum-sample rule still applies before any channel is judged.
+- **Browser-companion captures carry no query** by construction, so they
+  never appear in the yield ledger. Acceptable; noted so nobody "fixes" it.
+- **Yield rollups by industry or geography** — only the normalized role
+  title is rolled up today.
 
 ## Other
 
@@ -33,14 +36,9 @@ string-expansion task:
   `sample` runtime capability (Claude calls billed to the owner's
   subscription, no API key) with `db` persistence — candidate for a
   lightweight on-the-go surface; the local app stays the system of record.
-- **Composer OR-group de-duplication**: `composeQueries` concatenates
-  titles + alternate titles (and must-have + any-of) without de-duplicating,
-  so overlapping model output yields `("A" OR "B" OR "A" …)`. The IR path
-  (`composeDiscoveryQueries`) de-duplicates before calling the composer;
-  the String Lab path (`generateSearchStrings`) does not yet. Fixing it
-  inside the composer touches the validated reference port (root CLAUDE.md:
-  do not redesign), so do it as a pre-composer normalization shared by both
-  callers. Found by the W8.5 golden-path walkthrough, 2026-09-02.
+- **Composer OR-group de-duplication** — CLOSED by Wave A:
+  `normalizeStringLabInput` de-duplicates within and across vocabulary
+  tiers before either caller reaches the composer.
 - **Audience research query phrasing**: `audienceQueries` concatenates the
   industry string with fixed phrases, which can repeat words ("AI safety
   research research team"). Searches still worked in the W11 live run; a

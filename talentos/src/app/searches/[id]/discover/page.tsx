@@ -1,7 +1,9 @@
 import { getDb } from "@/lib/db/client";
 import { discoveryStatus, listSavedSources } from "@/lib/services/discovery";
+import { queryYieldForProject } from "@/lib/services/query-yield";
 import { listQueries } from "@/lib/services/workflow";
 import { DiscoveryPanel } from "@/components/discovery-panel";
+import { ProjectYieldCard } from "@/components/query-qa";
 import { Card, EmptyState, PageHeader } from "@/components/ui";
 
 export const metadata = { title: "Discover" };
@@ -14,9 +16,10 @@ export default async function DiscoverPage({
   const { id } = await params;
   const db = getDb();
   const status = discoveryStatus();
-  const [queries, saved] = await Promise.all([
+  const [queries, saved, yieldByProject] = await Promise.all([
     listQueries(db, id),
     listSavedSources(db, id),
+    queryYieldForProject(db, id),
   ]);
 
   return (
@@ -33,13 +36,26 @@ export default async function DiscoverPage({
       ) : (
         <DiscoveryPanel
           projectId={id}
-          queries={queries.map((q) => ({
-            id: q.id,
-            platform: q.platform,
-            breadth: q.breadth,
-            query: q.query,
-          }))}
+          queries={queries.map((q) => {
+            const y = yieldByProject.byQuery.get(q.id);
+            return {
+              id: q.id,
+              platform: q.platform,
+              breadth: q.breadth,
+              query: q.query,
+              yield: y ? { runs: y.runs, savedUrls: y.savedUrls } : undefined,
+            };
+          })}
         />
+      )}
+
+      {yieldByProject.totals.runs > 0 && (
+        <div className="mt-6">
+          <ProjectYieldCard
+            totals={yieldByProject.totals}
+            zeroYieldCount={yieldByProject.zeroYield.length}
+          />
+        </div>
       )}
 
       {saved.length > 0 && (

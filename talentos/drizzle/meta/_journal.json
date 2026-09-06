@@ -43,6 +43,13 @@
       "when": 1788583262389,
       "tag": "0005_misty_smiling_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788661463662,
+      "tag": "0006_yield_ledger",
+      "breakpoints": true
     }
   ]
 }

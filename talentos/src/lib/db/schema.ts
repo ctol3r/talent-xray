@@ -26,6 +26,7 @@ import type {
   VerificationStatus,
 } from "@/lib/core/enums";
 import type { CanonicalIntelligence } from "@/lib/core/ir";
+import type { QueryQaMeta } from "@/lib/domain/query-normalization";
 import type {
   CandidateProfilePayload,
   CandidatePacketPayload,
@@ -39,6 +40,7 @@ import type {
   MarketResearchPayload,
   OnboardingPlanPayload,
   OutreachSequencePayload,
+  QueryCalibration,
   RoleIntelligencePayload,
   RoleKnowledgePayload,
   ScreenGuidePayload,
@@ -256,8 +258,41 @@ export const searchQueries = sqliteTable("search_queries", {
     .$type<ProvenanceSource>()
     .default("model_inference"),
   archived: integer("archived", { mode: "boolean" }).notNull().default(false),
+  /** Normalization notes, term count and split part (Wave A). */
+  qaMeta: text("qa_meta", { mode: "json" }).$type<QueryQaMeta | null>(),
+  /** Reserved for Wave B: per-term calibration decisions with reasons. */
+  calibration: text("calibration", {
+    mode: "json",
+  }).$type<QueryCalibration | null>(),
+  /** Reserved for Wave B: canonical requirement ids this string serves. */
+  linkedRequirementIds: text("linked_requirement_ids", { mode: "json" }).$type<
+    string[] | null
+  >(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+});
+
+/**
+ * Yield ledger (Wave A): one row per discovery run. Records the query text
+ * actually sent (recruiter edits included, flagged `edited`), the engine
+ * and a result COUNT — never the results themselves (product rule 2).
+ * `queryId` credits the stored string only when the text ran verbatim.
+ */
+export const searchQueryRuns = sqliteTable("search_query_runs", {
+  id: uuid(),
+  searchProjectId: text("search_project_id")
+    .notNull()
+    .references(() => searchProjects.id),
+  queryId: text("query_id").references(() => searchQueries.id, {
+    onDelete: "set null",
+  }),
+  queryText: text("query_text").notNull(),
+  edited: integer("edited", { mode: "boolean" }).notNull().default(false),
+  engine: text("engine").notNull(),
+  resultCount: integer("result_count").notNull(),
+  ranAt: text("ran_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
 });
 
 // ── Candidates ──────────────────────────────────────────────────────────────
@@ -338,6 +373,8 @@ export const candidateSourceEvidence = sqliteTable(
       .notNull()
       .$type<SourceEvidenceProvenance>()
       .default("search_result"),
+    /** The stored string this evidence was saved from, when run verbatim. */
+    queryId: text("query_id").references(() => searchQueries.id),
     createdAt: createdAt(),
   },
 );
@@ -583,6 +620,8 @@ export const researchSources = sqliteTable("research_sources", {
   retrievedAt: text("retrieved_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
+  /** The stored string this URL was saved from, when run verbatim. */
+  queryId: text("query_id").references(() => searchQueries.id),
   createdAt: createdAt(),
 });
 

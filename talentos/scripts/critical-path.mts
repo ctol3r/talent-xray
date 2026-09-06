@@ -9,6 +9,7 @@
 import assert from "node:assert";
 import { getDb } from "../src/lib/db/client";
 import { computeFunnel } from "../src/lib/domain/analytics";
+import { normalizeQueryKey } from "../src/lib/domain/query-normalization";
 import {
   generateChannels,
   generateClosePlan,
@@ -119,6 +120,17 @@ const queries = await listQueries(db, project.id);
 assert(
   queries.some((q) => q.query.includes("site:")),
   "x-ray queries composed",
+);
+// Wave A: no two stored strings share a normalized text, and every row
+// carries QA metadata.
+const queryKeys = queries.map((q) => normalizeQueryKey(q.query));
+assert(
+  new Set(queryKeys).size === queryKeys.length,
+  "no duplicate normalized query keys",
+);
+assert(
+  queries.every((q) => q.qaMeta !== null),
+  "every query carries qa metadata",
 );
 
 // 11–12: candidate + evidence

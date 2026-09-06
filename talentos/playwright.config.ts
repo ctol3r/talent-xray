@@ -26,6 +26,7 @@ export default defineConfig({
     timeout: 60_000,
     env: {
       TALENTOS_MODEL_PROVIDER: "mock",
+      TALENTOS_DISCOVERY_PROVIDER: "mock",
       TALENTOS_DATABASE_PATH: "./data/e2e.db",
       TALENTOS_DOCUMENT_DIR: "/tmp/talentos-e2e-documents",
     },

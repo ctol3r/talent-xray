@@ -126,14 +126,28 @@ export async function generateSearchStringsAction(
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { added, warnings } = await generateSearchStrings(
+    const { added, warnings, qa } = await generateSearchStrings(
       getDb(),
       searchProjectId,
     );
     revalidateProject(searchProjectId);
+    const extras: string[] = [];
+    if (qa.pruned.length > 0) {
+      extras.push(
+        `${qa.pruned.length} surface${qa.pruned.length === 1 ? "" : "s"} pruned`,
+      );
+    }
+    if (qa.droppedDuplicates > 0) {
+      extras.push(
+        `${qa.droppedDuplicates} duplicate${qa.droppedDuplicates === 1 ? "" : "s"} dropped`,
+      );
+    }
+    if (qa.split > 0) extras.push(`${qa.split} split to fit the word budget`);
     return {
       warnings,
-      note: `${added} quer${added === 1 ? "y" : "ies"} added`,
+      note: [`${added} quer${added === 1 ? "y" : "ies"} added`, ...extras].join(
+        ", ",
+      ),
     };
   });
 }

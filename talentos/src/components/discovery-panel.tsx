@@ -14,6 +14,8 @@ interface QueryOption {
   platform: string;
   breadth: string;
   query: string;
+  /** Yield ledger: runs and explicit saves credited to this stored string. */
+  yield?: { runs: number; savedUrls: number };
 }
 
 /**
@@ -31,10 +33,20 @@ export function DiscoveryPanel({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(queries[0]?.query ?? "");
+  const [selectedId, setSelectedId] = useState<string | undefined>(
+    queries[0]?.id,
+  );
   const [engine, setEngine] = useState<"core" | "reach">("core");
   const [results, setResults] = useState<DiscoveryResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedUrls, setSavedUrls] = useState<Record<string, string>>({});
+
+  const selected = queries.find((q) => q.id === selectedId);
+  // An edited string is still run, but the stored string is never credited
+  // with what the edit produced (yield ledger, Wave A).
+  const edited =
+    selected !== undefined && query.trim() !== selected.query.trim();
+  const creditedQueryId = selected && !edited ? selected.id : undefined;
 
   const run = () =>
     startTransition(async () => {
@@ -44,6 +56,8 @@ export function DiscoveryPanel({
         searchProjectId: projectId,
         query,
         engine,
+        queryId: selected?.id,
+        edited,
       });
       if (r.ok) setResults(r.data.results);
       else setError(r.error);
@@ -62,6 +76,7 @@ export function DiscoveryPanel({
         providerRank: result.providerRank,
         retrievedAt: result.retrievedAt,
         candidateName: candidateName || undefined,
+        queryId: creditedQueryId,
       });
       if (r.ok) {
         setSavedUrls((prev) => ({
@@ -84,16 +99,28 @@ export function DiscoveryPanel({
               className="mt-1 w-full rounded border border-edge bg-canvas px-2 py-1.5 text-[12.5px]"
               onChange={(e) => {
                 const chosen = queries.find((q) => q.id === e.target.value);
-                if (chosen) setQuery(chosen.query);
+                if (chosen) {
+                  setSelectedId(chosen.id);
+                  setQuery(chosen.query);
+                }
               }}
             >
               {queries.map((q) => (
                 <option key={q.id} value={q.id}>
                   [{q.platform} · {q.breadth}] {q.query.slice(0, 90)}
+                  {q.yield && q.yield.savedUrls > 0
+                    ? ` · ${q.yield.savedUrls} saved`
+                    : ""}
                 </option>
               ))}
             </select>
           </label>
+        )}
+        {edited && (
+          <p className="mb-2 text-[11.5px] text-ink-faint">
+            Edited from the stored string — this run is recorded, but saves will
+            not be credited to the stored string.
+          </p>
         )}
         <label className="block text-[12px] text-ink-muted">
           Query (editable — what you search is always visible)

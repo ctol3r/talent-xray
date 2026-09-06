@@ -834,3 +834,45 @@ spans keep the earlier one rather than drawing two ribbons from one passage.
 **What it is not.** It is a view of the recruiter's own text and the check
 already made. It does not fetch anything, it does not run a model, and it
 does not turn an unsupported claim into a supported one by drawing a line.
+
+## D-029 — Normalize around the composer, ledger the yield, never cache the rollup
+
+**Decision.** (2026-09-05, Wave A.) Every caller of the validated composer
+goes through one pre/post-normalization path
+(`src/lib/domain/query-normalization.ts`, `prepareQueries`): vocabulary
+de-duplication within and across tiers, profession-aware platform pruning
+from the strategy's named channels, a 32-term budget on Google surfaces
+resolved by re-composing with a sliced OR group, cross-surface
+de-duplication by normalized text, and deterministic QA warnings. The
+composer itself is untouched. Transformations that change what is
+persisted are recorded on the row (`search_queries.qa_meta`); checks that
+merely describe a string (parens, quotes, operators, budget) and channel
+coverage are recomputed at render, so a recruiter edit is checked without a
+write path and a warning never hides a string.
+
+Discovery runs are recorded in `search_query_runs` — query text, engine,
+and a result COUNT — and explicit saves carry the stored string's id only
+when the text ran verbatim. An edited run is recorded but never credits the
+stored string. Rollups (per string, per search, per normalized role title)
+are live GROUP BYs, not a cached blob in `settings`.
+
+**Alternatives.** (a) Trim over-budget strings at 32 words — rejected, it
+silently changes the search. (b) Put the QA fixes inside `composeQueries`
+— rejected by the root doctrine (do not redesign the validated composer).
+(c) A `settings`-keyed cached rollup — rejected: single-user tables make a
+GROUP BY cheaper than a cache-invalidation bug. (d) A taxonomy for role
+families — rejected: `normalizeRoleTitle` collides only titles whose
+tokens match after stripping seniority words, so a rollup is never shown
+across roles a recruiter would not consider the same.
+
+**Reason.** The CAIS judge graded the strings the weakest deliverable for
+exactly these defects; hireEZ's opaque "AI match" is the competitor
+complaint TalentOS answers with strings you can read, count and audit.
+The ledger gives the pilot its own yield metric without persisting a
+single result (product rule 2).
+
+**Tradeoffs.** `countTerms` exists twice (app and artifact), held in
+parity by a test. The mock discovery provider
+(`TALENTOS_DISCOVERY_PROVIDER=mock`) exists only so the ledger can be
+driven through the UI in e2e; it is watermarked and never configured by
+default.

@@ -259,6 +259,18 @@ export const querySuggestionSchema = z.object({
 });
 export type QuerySuggestion = z.infer<typeof querySuggestionSchema>;
 
+/**
+ * Reserved for Wave B (decision-to-query calibration). Persisted on
+ * `search_queries.calibration`; the column exists so the personal database
+ * needs no second migration. Empty until Wave B lands.
+ */
+export const queryCalibrationSchema = z.object({
+  generatedAt: z.string(),
+  reviewedLinks: z.number().int().min(0),
+  decisions: z.array(z.unknown()),
+});
+export type QueryCalibration = z.infer<typeof queryCalibrationSchema>;
+
 export const querySuggestionsPayloadSchema = z.object({
   queries: z.array(querySuggestionSchema),
   synonymGroups: z.array(

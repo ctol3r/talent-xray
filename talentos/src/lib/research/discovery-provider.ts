@@ -12,6 +12,7 @@
  * - Result order is reported as providerRank (1-based). No implementation
  *   may fabricate a relevance score from it.
  */
+import { createMockDiscoveryProvider } from "./mock-discovery";
 import { createTalentXRayDiscoveryProvider } from "./talent-xray";
 
 export interface DiscoveryResult {
@@ -56,5 +57,6 @@ export const noneDiscoveryProvider: CandidateDiscoveryProvider = {
 export function getCandidateDiscoveryProvider(): CandidateDiscoveryProvider {
   const configured = process.env.TALENTOS_DISCOVERY_PROVIDER?.toLowerCase();
   if (configured === "none") return noneDiscoveryProvider;
+  if (configured === "mock") return createMockDiscoveryProvider();
   return createTalentXRayDiscoveryProvider();
 }

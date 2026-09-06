@@ -11,17 +11,27 @@ import {
   setEvidenceVerification,
   setEvidenceVerificationInput,
 } from "@/lib/services/discovery";
+import { recordQueryRun } from "@/lib/services/query-yield";
 import { act, type ActionResult } from "./helpers";
 
 export async function runDiscoveryAction(
   input: unknown,
-): Promise<ActionResult<{ results: DiscoveryResult[] }>> {
+): Promise<ActionResult<{ results: DiscoveryResult[]; runId: string }>> {
   return act(async () => {
     const parsed = runDiscoveryInput.parse(input);
     const results = await runDiscovery(parsed);
-    // Deliberately no persistence here: results are transient until the
-    // recruiter saves one explicitly.
-    return { results };
+    // Results stay transient until the recruiter saves one explicitly. The
+    // yield ledger records the run itself — query text, engine and a result
+    // COUNT — which is a query record, not a result record (product rule 2).
+    const run = await recordQueryRun(getDb(), {
+      searchProjectId: parsed.searchProjectId,
+      queryId: parsed.queryId,
+      queryText: parsed.query,
+      edited: parsed.edited,
+      engine: parsed.engine,
+      resultCount: results.length,
+    });
+    return { results, runId: run.id };
   });
 }
 

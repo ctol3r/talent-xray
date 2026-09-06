@@ -32,6 +32,10 @@ export const runDiscoveryInput = z.object({
   query: z.string().min(2),
   engine: z.enum(["core", "reach"]).default("core"),
   limit: z.number().int().min(1).max(10).default(10),
+  /** The stored string this run came from (yield ledger, Wave A). */
+  queryId: z.string().optional(),
+  /** True when the text differs from the stored string. */
+  edited: z.boolean().default(false),
 });
 
 export async function runDiscovery(
@@ -57,6 +61,12 @@ export const saveDiscoveryResultInput = z.object({
   retrievedAt: z.string().optional(),
   /** When set, also create a candidate from this saved result. */
   candidateName: z.string().min(1).optional(),
+  /**
+   * The stored string that produced this result, only when it ran verbatim.
+   * An edited run leaves this unset so the stored string is never credited
+   * with a save it did not produce.
+   */
+  queryId: z.string().optional(),
 });
 
 export async function saveDiscoveryResult(
@@ -75,6 +85,7 @@ export async function saveDiscoveryResult(
       snippet: input.snippet,
       source: sourceLabel,
       query: input.query,
+      queryId: input.queryId,
       ...(input.retrievedAt ? { retrievedAt: input.retrievedAt } : {}),
     })
     .returning();
@@ -106,6 +117,7 @@ export async function saveDiscoveryResult(
       providerRank: input.providerRank,
       verificationStatus: "unverified",
       provenance: "search_result",
+      queryId: input.queryId,
     });
   }
   return { saved, candidateId };

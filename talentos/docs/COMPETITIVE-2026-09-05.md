@@ -3,7 +3,7 @@
 Date: 2026-09-05. Desk research only (public pages, review sites, pricing
 aggregators). No product was trialled. Per `CONNECTED_REVIEW.md`, a superiority
 claim still requires equivalent briefs run through both products; this
-document tells you *where* that comparison can be won, not that it has been.
+document tells you _where_ that comparison can be won, not that it has been.
 
 ## 1. What each competitor actually is
 
@@ -24,7 +24,7 @@ document tells you *where* that comparison can be won, not that it has been.
   bundle has no published price.
 - **Weaknesses on record:** sourcing product has almost no independent
   review coverage; 200 profiles/month is thin for an active desk; the
-  calibration loop only works if you run *their* recording bot on every
+  calibration loop only works if you run _their_ recording bot on every
   interview (consent burden varies by jurisdiction); non-English and
   accented transcription is unreliable; summaries go generic on technical
   interviews.
@@ -62,34 +62,34 @@ document tells you *where* that comparison can be won, not that it has been.
 
 ### The category's admitted gap
 
-Every 2026 roundup lands on the same sentence: *almost no single tool covers
-the entire funnel well*. The working stack is a sourcing engine + a separate
+Every 2026 roundup lands on the same sentence: _almost no single tool covers
+the entire funnel well_. The working stack is a sourcing engine + a separate
 enrichment vendor + a separate outreach layer. Nobody owns the intelligence
 that sits across all three, and nobody guides the hiring manager or the
 candidate through the process.
 
 ## 2. Honest scorecard
 
-| Dimension | Metaview | hireEZ | Heartbeat.ai | TalentOS today | TalentOS can win? |
-| --- | --- | --- | --- | --- | --- |
-| Candidate index | ATS + open web (secondary) | 800M scraped | 11M clinicians | Two 50-domain people-only CSEs, link-out | **No** on volume. Yes on precision and auditability |
-| Verified contact data | none | emails, ~30 % bounce | cell + email, 82–95 % | name-pattern "unverified" only | **No** on personal contact. Yes on *identity* verification via public registries |
-| Calibration loop | interview recordings → ranking, 12–18 mo | none | none | append-only accept/dismiss/correct history with exact anchors | **Yes** — same loop, no recording bot, usable from search one |
-| Transparency of the search | ranked list "with reasons" | opaque AI match | filter list | composed query always visible/editable; every suggestion carries an exact quote | **Yes** — already a hard rule |
-| Lifecycle coverage | source → screen → notes → scorecard | source → outreach → CRM | source → contact | intake → strategy → strings → review → shortlist → close | **Yes** — plus HM and candidate threads (roadmap) |
-| Hiring-manager guidance | debrief notes | none | none | intake + calibration checkpoints (roadmap) | **Yes**, uncontested |
-| Candidate guidance | AI screening calls | sequences | none | drafts only, recruiter sends | **Yes**, uncontested |
-| Interview capture | bot on every call | none | none | none, by design | No, and don't chase it |
-| Sequencing / auto-send | yes | yes | via Zapier | drafts only | No, by design |
-| Privacy posture | records candidates | GDPR complaint | not a CRA, no safe harbour | local SQLite, no scraping, stores only what the recruiter saves | **Yes**, strongest in the set |
-| Price / control | $100–300 per user-month + quoted bundle | ~$13k/yr median, escalating | ~$750/mo | owner's Claude subscription + Google BYOK at $5/1,000 queries, no seats, no credits | **Yes**, by an order of magnitude |
-| ATS write-back | 47 ATSs | 45+ | Bullhorn, Apploi | none (out of scope) | Not now |
+| Dimension                  | Metaview                                 | hireEZ                      | Heartbeat.ai               | TalentOS today                                                                      | TalentOS can win?                                                                |
+| -------------------------- | ---------------------------------------- | --------------------------- | -------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Candidate index            | ATS + open web (secondary)               | 800M scraped                | 11M clinicians             | Two 50-domain people-only CSEs, link-out                                            | **No** on volume. Yes on precision and auditability                              |
+| Verified contact data      | none                                     | emails, ~30 % bounce        | cell + email, 82–95 %      | name-pattern "unverified" only                                                      | **No** on personal contact. Yes on _identity_ verification via public registries |
+| Calibration loop           | interview recordings → ranking, 12–18 mo | none                        | none                       | append-only accept/dismiss/correct history with exact anchors                       | **Yes** — same loop, no recording bot, usable from search one                    |
+| Transparency of the search | ranked list "with reasons"               | opaque AI match             | filter list                | composed query always visible/editable; every suggestion carries an exact quote     | **Yes** — already a hard rule                                                    |
+| Lifecycle coverage         | source → screen → notes → scorecard      | source → outreach → CRM     | source → contact           | intake → strategy → strings → review → shortlist → close                            | **Yes** — plus HM and candidate threads (roadmap)                                |
+| Hiring-manager guidance    | debrief notes                            | none                        | none                       | intake + calibration checkpoints (roadmap)                                          | **Yes**, uncontested                                                             |
+| Candidate guidance         | AI screening calls                       | sequences                   | none                       | drafts only, recruiter sends                                                        | **Yes**, uncontested                                                             |
+| Interview capture          | bot on every call                        | none                        | none                       | none, by design                                                                     | No, and don't chase it                                                           |
+| Sequencing / auto-send     | yes                                      | yes                         | via Zapier                 | drafts only                                                                         | No, by design                                                                    |
+| Privacy posture            | records candidates                       | GDPR complaint              | not a CRA, no safe harbour | local SQLite, no scraping, stores only what the recruiter saves                     | **Yes**, strongest in the set                                                    |
+| Price / control            | $100–300 per user-month + quoted bundle  | ~$13k/yr median, escalating | ~$750/mo                   | owner's Claude subscription + Google BYOK at $5/1,000 queries, no seats, no credits | **Yes**, by an order of magnitude                                                |
+| ATS write-back             | 47 ATSs                                  | 45+                         | Bullhorn, Apploi           | none (out of scope)                                                                 | Not now                                                                          |
 
 ## 3. Where TalentOS beats all three — the thesis
 
 **Metaview is right that calibration beats Boolean, and wrong that it needs a
 recording bot.** hireEZ and Heartbeat sell data and admit it decays. TalentOS
-should be the calibrated intelligence and workflow layer that sits *on top of*
+should be the calibrated intelligence and workflow layer that sits _on top of_
 whichever data the recruiter already has, wins on evidence and cost, and
 never fabricates.
 
@@ -129,7 +129,7 @@ no auto-send, no model API key, unverified emails labelled).
      composer widens terms that produced accepted evidence and drops ones
      that only produced dismissals. Pre-composer normalization only, so the
      validated reference composer stays untouched.
-   - Show the recruiter *why* a term moved ("3 accepted anchors, 0
+   - Show the recruiter _why_ a term moved ("3 accepted anchors, 0
      dismissed"). This is Metaview's "shortlist with reasons" done in the
      open.
 
@@ -146,7 +146,7 @@ no auto-send, no model API key, unverified emails labelled).
 
 4. **Registry-verified identity** (attacks Heartbeat and hireEZ on the axis
    they cannot claim).
-   - Heartbeat sells *reachability*; nobody sells *verification*. The CMS
+   - Heartbeat sells _reachability_; nobody sells _verification_. The CMS
      NPPES registry is public, free, authoritative, and returns name,
      credential, taxonomy, practice address and office phone. Match a found
      clinician to their NPI record and label the identity "registry-matched"

@@ -13,7 +13,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { GenerationMeta } from "@/lib/core/enums";
 import type { Db } from "@/lib/db/client";
-import { hiringIntelligence } from "@/lib/db/schema";
+import { hiringIntelligence, sourceChannels } from "@/lib/db/schema";
 import {
   type AudiencePersonaIR,
   type CanonicalIntelligence,
@@ -22,9 +22,10 @@ import {
   type NextQuestion,
 } from "@/lib/core/ir";
 import {
-  composeQueries,
-  type ComposedQuery,
-} from "@/lib/domain/search-strings";
+  prepareQueries,
+  type PreparedQuery,
+  type PrepareResult,
+} from "@/lib/domain/query-normalization";
 import { loadProjectContext } from "@/lib/ai/context";
 import { runAiTask } from "@/lib/ai/run";
 import { hiringNeedTask } from "@/lib/ai/tasks/hiring-need";
@@ -231,20 +232,8 @@ export interface PlannedQueries {
   segmentLabel: string;
   linkedRequirementIds: string[];
   rationale: string;
-  queries: ComposedQuery[];
-}
-
-/** Case-insensitive de-duplication, also dropping anything in `against`. */
-function dedupeTerms(terms: string[], against: string[] = []): string[] {
-  const seen = new Set(against.map((t) => t.trim().toLowerCase()));
-  const out: string[] = [];
-  for (const term of terms) {
-    const key = term.trim().toLowerCase();
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    out.push(term.trim());
-  }
-  return out;
+  queries: PreparedQuery[];
+  qa: Pick<PrepareResult, "pruned" | "droppedDuplicates" | "inputNotes">;
 }
 
 /**
@@ -262,29 +251,40 @@ export async function composeDiscoveryQueries(
   if (!plan) {
     throw new Error("No SearchPlanIR yet — derive the search plan first.");
   }
+  const channels = await db
+    .select({
+      name: sourceChannels.name,
+      kind: sourceChannels.kind,
+      url: sourceChannels.url,
+      status: sourceChannels.status,
+    })
+    .from(sourceChannels)
+    .where(eq(sourceChannels.searchProjectId, projectId));
   return plan.queryPlans.map((queryPlan) => {
-    const titles = dedupeTerms(queryPlan.titles);
-    const alternateTitles = dedupeTerms(queryPlan.alternateTitles, titles);
-    const adjacentTitles = dedupeTerms(queryPlan.adjacentTitles, [
-      ...titles,
-      ...alternateTitles,
-    ]);
-    const mustHave = dedupeTerms(queryPlan.mustHaveTerms);
+    const prepared = prepareQueries({
+      input: {
+        titles: queryPlan.titles,
+        alternateTitles: queryPlan.alternateTitles,
+        adjacentTitles: queryPlan.adjacentTitles,
+        mustHave: queryPlan.mustHaveTerms,
+        anyOf: queryPlan.anyOfTerms,
+        credentials: queryPlan.credentials,
+        locations: queryPlan.locations,
+        companies: [],
+        exclusions: queryPlan.exclusions,
+      },
+      channels,
+    });
     return {
       segmentLabel: queryPlan.segmentLabel,
       linkedRequirementIds: queryPlan.linkedRequirementIds,
       rationale: queryPlan.rationale,
-      queries: composeQueries({
-        titles,
-        alternateTitles,
-        adjacentTitles,
-        mustHave,
-        anyOf: dedupeTerms(queryPlan.anyOfTerms, mustHave),
-        credentials: dedupeTerms(queryPlan.credentials),
-        locations: dedupeTerms(queryPlan.locations),
-        companies: [],
-        exclusions: dedupeTerms(queryPlan.exclusions),
-      }),
+      queries: prepared.rows,
+      qa: {
+        pruned: prepared.pruned,
+        droppedDuplicates: prepared.droppedDuplicates,
+        inputNotes: prepared.inputNotes,
+      },
     };
   });
 }

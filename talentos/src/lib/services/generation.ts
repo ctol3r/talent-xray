@@ -6,7 +6,10 @@
 import { desc, eq } from "drizzle-orm";
 import type { QuerySuggestion } from "@/lib/core/payloads";
 import type { TraitScanHit } from "@/lib/domain/fair-hiring";
-import { composeQueries } from "@/lib/domain/search-strings";
+import {
+  normalizeQueryKey,
+  prepareQueries,
+} from "@/lib/domain/query-normalization";
 import type { Db } from "@/lib/db/client";
 import {
   candidateEvidence,
@@ -223,28 +226,52 @@ export async function generateSearchStrings(
     db,
     searchProjectId: projectId,
   });
-  const composed = composeQueries({
-    titles: output.titles,
-    alternateTitles: output.alternateTitles,
-    adjacentTitles: output.adjacentTitles,
-    mustHave: output.mustHave,
-    anyOf: output.anyOf,
-    credentials: output.credentials,
-    locations: output.locations,
-    companies: output.companies,
-    exclusions: output.exclusions,
-  });
+  const channels = await db
+    .select({
+      name: sourceChannels.name,
+      kind: sourceChannels.kind,
+      url: sourceChannels.url,
+      status: sourceChannels.status,
+    })
+    .from(sourceChannels)
+    .where(eq(sourceChannels.searchProjectId, projectId));
   const extras: QuerySuggestion[] = output.extraQueries;
-  const existing = new Set(
-    (
-      await db
-        .select({ query: searchQueries.query })
-        .from(searchQueries)
-        .where(eq(searchQueries.searchProjectId, projectId))
-    ).map((q) => q.query),
+  const prepared = prepareQueries({
+    input: {
+      titles: output.titles,
+      alternateTitles: output.alternateTitles,
+      adjacentTitles: output.adjacentTitles,
+      mustHave: output.mustHave,
+      anyOf: output.anyOf,
+      credentials: output.credentials,
+      locations: output.locations,
+      companies: output.companies,
+      exclusions: output.exclusions,
+    },
+    extras: extras.map((q) => ({
+      platform: q.platform,
+      query: q.query,
+      purpose: q.purpose,
+      breadth: q.breadth,
+      expectedPrecision: q.expectedPrecision ?? "medium",
+      targetPhenotype: q.targetPhenotype,
+    })),
+    channels,
+  });
+  const existingRows = await db
+    .select({ query: searchQueries.query, archived: searchQueries.archived })
+    .from(searchQueries)
+    .where(eq(searchQueries.searchProjectId, projectId));
+  const existing = new Set(existingRows.map((q) => q.query));
+  // Also skip anything already stored under a different casing/spacing,
+  // so a regenerate never re-adds the same string as a near-duplicate.
+  const existingKeys = new Set(
+    existingRows
+      .filter((q) => !q.archived)
+      .map((q) => normalizeQueryKey(q.query)),
   );
-  const rows = [
-    ...composed.map((q) => ({
+  const rows = prepared.rows
+    .map((q) => ({
       searchProjectId: projectId,
       platform: q.platform,
       query: q.query,
@@ -252,21 +279,29 @@ export async function generateSearchStrings(
       breadth: q.breadth,
       expectedPrecision: q.expectedPrecision,
       targetPhenotype: q.targetPhenotype,
-    })),
-    ...extras.map((q) => ({
-      searchProjectId: projectId,
-      platform: q.platform,
-      query: q.query,
-      purpose: q.purpose,
-      breadth: q.breadth,
-      expectedPrecision: q.expectedPrecision,
-      targetPhenotype: q.targetPhenotype,
-    })),
-  ].filter((row) => row.query.trim() !== "" && !existing.has(row.query));
+      qaMeta: {
+        ...q.qa,
+        notes: [...prepared.inputNotes, ...q.qa.notes],
+      },
+    }))
+    .filter(
+      (row) =>
+        row.query.trim() !== "" &&
+        !existing.has(row.query) &&
+        !existingKeys.has(normalizeQueryKey(row.query)),
+    );
   if (rows.length > 0) {
     await db.insert(searchQueries).values(rows);
   }
-  return { added: rows.length, warnings };
+  return {
+    added: rows.length,
+    warnings,
+    qa: {
+      pruned: prepared.pruned,
+      droppedDuplicates: prepared.droppedDuplicates.length,
+      split: prepared.rows.filter((q) => q.qa.part).length,
+    },
+  };
 }
 
 export async function generateEvidenceAlignment(
