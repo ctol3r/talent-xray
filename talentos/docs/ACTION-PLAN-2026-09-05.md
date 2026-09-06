@@ -49,15 +49,15 @@ Facts that shape sequencing:
 
 ## Wave order
 
-| Wave | Name                                                      | Attacks                                        | Migration                      |
-| ---- | --------------------------------------------------------- | ---------------------------------------------- | ------------------------------ |
-| A    | String Lab QA + yield ledger                              | hireEZ opaque match, own B grade               | 0006                           |
-| B    | Decision-to-query calibration loop                        | Metaview's moat                                | 0006 (shared)                  |
-| D    | Bring-your-own-data imports                               | turns hireEZ/Heartbeat/LinkedIn into suppliers | none                           |
-| E    | Registry-verified identity (NPPES)                        | Heartbeat/hireEZ on the verification axis      | 0007                           |
-| P    | Pilot corpus through TalentOS (3 searches × 5 candidates) | proves every claim above                       | none — creates the personal DB |
-| F    | Two-sided guidance v2                                     | uncontested by all three                       | none                           |
-| G    | Transparency: pricing model + "what we will not do"       | every competitor complaint page                | none                           |
+| Wave | Name                                                                                 | Attacks                                        | Migration                      |
+| ---- | ------------------------------------------------------------------------------------ | ---------------------------------------------- | ------------------------------ |
+| A    | String Lab QA + yield ledger                                                         | hireEZ opaque match, own B grade               | 0006                           |
+| B    | Decision-to-query calibration loop — **CLOSED 2026-09-05** (`docs/WAVE-B-REPORT.md`) | Metaview's moat                                | 0006 (shared)                  |
+| D    | Bring-your-own-data imports                                                          | turns hireEZ/Heartbeat/LinkedIn into suppliers | none                           |
+| E    | Registry-verified identity (NPPES)                                                   | Heartbeat/hireEZ on the verification axis      | 0007                           |
+| P    | Pilot corpus through TalentOS (3 searches × 5 candidates)                            | proves every claim above                       | none — creates the personal DB |
+| F    | Two-sided guidance v2                                                                | uncontested by all three                       | none                           |
+| G    | Transparency: pricing model + "what we will not do"                                  | every competitor complaint page                | none                           |
 
 Only two migrations exist in the program (0006 in Wave A, 0007 in Wave E) and both
 land **before** Wave P creates the personal DB, so the owner never runs a manual
