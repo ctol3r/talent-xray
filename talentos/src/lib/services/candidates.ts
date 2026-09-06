@@ -3,7 +3,10 @@ import { reviewWorkspace } from "./document-review";
 import { saveDocument, removeOriginal } from "./documents";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { emptyCandidateProfile } from "@/lib/core/payloads";
+import {
+  candidateProfilePayloadSchema,
+  emptyCandidateProfile,
+} from "@/lib/core/payloads";
 import type { Db } from "@/lib/db/client";
 import {
   documentVersions,
@@ -38,18 +41,27 @@ export const createCandidateInput = z.object({
   recruiterNotes: z.string().optional(),
   profileUrls: z.array(z.string()).default([]),
   stage: z.string().default("identified"),
+  /** How the profile URLs arrived: "manual" (default), "browser_capture", "import:<source>" (Wave D). */
+  addedVia: z.string().min(1).default("manual"),
+  /** Human label for the source of those URLs, e.g. "hireEZ export". */
+  sourceLabel: z.string().max(200).optional(),
+  /** Partial profile merged over the empty profile (imports supply lists only). */
+  profile: candidateProfilePayloadSchema.partial().optional(),
 });
 
 export async function createCandidate(
   db: Db,
-  input: z.infer<typeof createCandidateInput>,
+  input: z.input<typeof createCandidateInput>,
 ) {
-  const { profileUrls, resumeText, ...fields } =
+  const { profileUrls, resumeText, addedVia, sourceLabel, profile, ...fields } =
     createCandidateInput.parse(input);
   return db.transaction((tx) => {
     const candidate = tx
       .insert(candidates)
-      .values({ ...fields, profile: emptyCandidateProfile() })
+      .values({
+        ...fields,
+        profile: { ...emptyCandidateProfile(), ...(profile ?? {}) },
+      })
       .returning()
       .get();
     if (resumeText?.trim())
@@ -67,7 +79,8 @@ export async function createCandidate(
           urls.map((url) => ({
             candidateId: candidate.id,
             url,
-            addedVia: "manual",
+            addedVia,
+            label: sourceLabel,
           })),
         )
         .run();

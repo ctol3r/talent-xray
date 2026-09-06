@@ -41,6 +41,22 @@ Remaining follow-ups from that wave:
 - **Weight signals by pipeline stage or HM decision** (an accepted anchor
   on a hired candidate should count for more).
 
+## Imports — follow-ups from Wave D (2026-09-06)
+
+- **`import_batches` audit table + undo** (one row per commit, cascade
+  delete of what it created) — needs a migration.
+- **Saved mapping presets** per vendor after the recruiter overrides once.
+- **XLSX** exports (a dependency; decide with the audit table).
+- **Greenhouse / Lever / Bullhorn-specific mappers** once a real export of
+  each has been seen; the generic mapper plus overrides covers them today.
+- **Cross-project identity matching** — today only the target search's
+  candidates are compared.
+- **A merge UI** for identity-review tasks (spec §12 keeps merges human).
+- **Vendor-evidence decay reminders** — flag imported contact evidence
+  older than 90 days.
+- **Vendor "match scores"** are dropped by construction (D-010); revisit
+  only as an unverified, clearly labelled note.
+
 ## Other
 
 - **Session provider in the UI**: surface pending outbox requests as a

@@ -923,3 +923,43 @@ candidate (the same loop `review-shortlist.ts` already runs) — fine at desk
 scale. Corrections are inferred from the note convention
 `Corrected by connection <id>`; a first-class decision value is filed in
 the backlog.
+
+## D-031 — Vendor exports become ordinary candidates with a label; contact data is dropped unless kept, and then unverified
+
+**Decision.** (2026-09-06, Wave D.) A hireEZ, LinkedIn Recruiter, ATS or
+Heartbeat.ai export (CSV or JSON) is imported through a dry-run preview
+and an explicit commit (`src/lib/imports/*`, `services/imports.ts`). Rows
+become candidates through `createCandidate` with `candidate_sources.added_via
+= "import:<source>"` and a human label. Mappers are allow-lists of header
+aliases; headers matching `BLOCKED_FIELD_PATTERNS` or the new
+`BLOCKED_IMPORT_HEADER_PATTERNS` are dropped before mapping and reported by
+name; kept cells are scanned for protected-trait phrases as warnings. The
+canonical row has no CV field, so nothing from a file can become
+`resume_text` or a document version. Identity is resolved with the
+conservative matcher ported to `domain/identity.ts`: a shared profile URL
+defaults the row to skip, any other match creates a separate record plus
+an `identity_review` task, and nothing is ever merged. Vendor email and
+phone columns are dropped by default; on opt-in each value becomes one
+`candidate_source_evidence` row with `provenance = "imported"`,
+`verification_status = "unverified"` and the import date as
+`retrieved_at`, so the existing human-only verification flip and the
+"unverified" rendering apply. A Heartbeat NPI column becomes a link-out to
+the official registry page labelled unverified (Wave E's prefill bridge).
+
+**Alternatives.** (a) A CSV dependency — rejected: the format is small
+and the private-build check is sensitive to lockfile churn. (b) Store
+vendor contact data on the candidate — rejected: it is third-party data
+with a documented ~30 % bounce profile and no vendor guarantee; evidence
+rows carry provenance, a date and a verification state, candidate columns
+do not. (c) Auto-merge on a shared URL — rejected by spec §12; the matcher
+returns no merge instruction at all.
+
+**Reason.** The competitive brief's stack: keep the data vendor, put
+TalentOS on top. hireEZ's number-one complaint is contact accuracy; the
+import says where the data came from and when, and never calls it
+verified.
+
+**Tradeoffs.** Vendor header names are best-effort guesses, so the preview
+shows the detected mapping with per-header override and a generic mapper.
+The server re-validates rows and re-scans keys on commit; the client never
+decides safety. No import audit table or undo yet (backlog).

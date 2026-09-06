@@ -319,6 +319,13 @@ export default async function CandidatePage({
                     >
                       {source.url}
                     </a>
+                    {(source.label || source.addedVia) && (
+                      <span className="ml-2 text-[11px] text-ink-faint">
+                        {[source.label, source.addedVia]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -348,6 +355,12 @@ export default async function CandidatePage({
                         <span className="text-[11px] text-ink-faint">
                           {item.provider}
                           {item.providerRank ? ` · #${item.providerRank}` : ""}
+                        </span>
+                      )}
+                      {item.provenance === "imported" && (
+                        <span className="text-[11px] text-warn">
+                          vendor data from {item.retrievedAt.slice(0, 10)} —
+                          decays
                         </span>
                       )}
                     </div>

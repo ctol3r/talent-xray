@@ -47,6 +47,26 @@ export const BLOCKED_FIELD_PATTERNS: RegExp[] = [
   /\bpolitical/i,
 ];
 
+/**
+ * Import-header patterns dropped before a vendor CSV/JSON row is mapped
+ * (Wave D). These are the columns a sourcing export commonly carries that
+ * must never reach a candidate record, on top of BLOCKED_FIELD_PATTERNS.
+ * Kept in this file on purpose: it is the only module allowed to spell
+ * these words (tests/unit/fair-hiring.test.ts greps everything else).
+ */
+export const BLOCKED_IMPORT_HEADER_PATTERNS: RegExp[] = [
+  /\bage\b/i,
+  /\bsex\b/i,
+  /\bdob\b/i,
+  /\bnationality\b/i,
+  /\bcitizenship\b/i,
+  /\bphoto\b/i,
+  /\bpicture\b/i,
+  /\bavatar\b/i,
+  /\bbirth/i,
+  /\bethnic/i,
+];
+
 /** Phrases in generated text that trigger a mandatory-review warning. */
 const TEXT_SCAN_PATTERNS: { trait: string; pattern: RegExp }[] = [
   { trait: "race/ethnicity", pattern: /\brace\b|\bethnicit/i },

@@ -222,6 +222,8 @@ export const SOURCE_EVIDENCE_PROVENANCES = [
   "search_result",
   "recruiter_added",
   "candidate_provided",
+  /** Third-party vendor export (Wave D): decays, stays unverified until a human checks it. */
+  "imported",
 ] as const;
 export const sourceEvidenceProvenanceSchema = z.enum(
   SOURCE_EVIDENCE_PROVENANCES,

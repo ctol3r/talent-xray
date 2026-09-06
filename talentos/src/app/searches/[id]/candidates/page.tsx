@@ -69,12 +69,18 @@ export default async function CandidatesPage({
         description="Ordered as a review queue — candidates to review first based on currently available job-related evidence. Advisory only; you decide."
         actions={<AddCandidateForm searchProjectId={id} />}
       />
-      <p className="mb-4">
+      <p className="mb-4 flex gap-4">
         <Link
           className="underline text-teal-800"
           href={`/searches/${id}/review-shortlist`}
         >
           Prepare reviewed shortlist
+        </Link>
+        <Link
+          className="underline text-teal-800"
+          href={`/searches/${id}/candidates/import`}
+        >
+          Import candidates
         </Link>
       </p>
       <CandidateDeck searchProjectId={id} candidates={sorted} />

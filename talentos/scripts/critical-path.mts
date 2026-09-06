@@ -55,6 +55,11 @@ import {
   saveJobDescription,
 } from "../src/lib/services/search-projects";
 import { GOLDEN_FIXTURES } from "../src/lib/db/seed";
+import {
+  commitImport,
+  countDocumentVersions,
+  previewImport,
+} from "../src/lib/services/imports";
 
 if (process.env.TALENTOS_MODEL_PROVIDER !== "mock") {
   console.error("Refusing to run: set TALENTOS_MODEL_PROVIDER=mock");
@@ -131,6 +136,27 @@ assert(
 assert(
   queries.every((q) => q.qaMeta !== null),
   "every query carries qa metadata",
+);
+
+// Wave D: bring-your-own-data import (preview writes nothing; commit creates
+// candidates with a source label and never a CV version).
+const importPreview = await previewImport(db, {
+  searchProjectId: project.id,
+  filename: "smoke.csv",
+  text: "Name,Title,Company,Location,Profile\nImp One,Engineer,Smoke Co,Remote,https://example.org/imp-one\nImp Two,Engineer,Smoke Co,Remote,https://example.org/imp-two",
+  source: "generic_ats",
+});
+assert(importPreview.rows.length === 2, "import preview maps 2 rows");
+const importResult = await commitImport(db, {
+  searchProjectId: project.id,
+  source: "generic_ats",
+  filename: "smoke.csv",
+  rows: importPreview.rows.map((r) => r.row),
+});
+assert(importResult.created.length === 2, "import created 2 candidates");
+assert(
+  (await countDocumentVersions(db, project.id)) === 0,
+  "import never creates a document version",
 );
 
 // 11–12: candidate + evidence
@@ -217,7 +243,8 @@ await addLearning(db, {
 });
 await synthesizeLearnings(db, project.id);
 const snapshot = await buildProjectSnapshot(db, project.id);
-assert(snapshot.candidateCount === 1, "snapshot sees the candidate");
+// One candidate added by hand plus the two from the Wave D import step.
+assert(snapshot.candidateCount === 3, "snapshot sees every candidate");
 await getNextBestActions(db, project.id);
 const channels = await listChannels(db, project.id);
 assert(
