@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { TraitScanHit } from "@/lib/domain/fair-hiring";
+import type { TermDecision } from "@/lib/core/payloads";
 import { getDb } from "@/lib/db/client";
 import {
   generateChannels,
@@ -121,12 +122,32 @@ export async function generateChannelsAction(
   });
 }
 
+function calibrationNote(decisions: TermDecision[]): string {
+  const count = (action: TermDecision["action"]) =>
+    decisions.filter((d) => d.action === action).length;
+  const bits: string[] = [];
+  const promoted = count("promoted_to_must_have");
+  const added = count("added_any_of");
+  const demoted = count("demoted_to_any_of");
+  const removed = count("removed");
+  const excluded = count("added_exclusion");
+  const blocked = count("blocked");
+  if (promoted)
+    bits.push(`${promoted} term${promoted === 1 ? "" : "s"} promoted`);
+  if (added) bits.push(`${added} added from accepted evidence`);
+  if (demoted) bits.push(`${demoted} demoted`);
+  if (removed) bits.push(`${removed} removed`);
+  if (excluded) bits.push(`${excluded} excluded`);
+  if (blocked) bits.push(`${blocked} blocked by the fair-hiring scan`);
+  return bits.join(", ");
+}
+
 export async function generateSearchStringsAction(
   input: unknown,
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { added, warnings, qa } = await generateSearchStrings(
+    const { added, warnings, qa, calibration } = await generateSearchStrings(
       getDb(),
       searchProjectId,
     );
@@ -143,12 +164,37 @@ export async function generateSearchStringsAction(
       );
     }
     if (qa.split > 0) extras.push(`${qa.split} split to fit the word budget`);
+    const cal = calibrationNote(calibration.decisions);
+    if (cal) extras.push(cal);
     return {
       warnings,
       note: [`${added} quer${added === 1 ? "y" : "ies"} added`, ...extras].join(
         ", ",
       ),
     };
+  });
+}
+
+export async function composePlannedQueriesAction(
+  input: unknown,
+): Promise<ActionResult<GenerateSummary>> {
+  return act(async () => {
+    const { searchProjectId } = projectInput.parse(input);
+    const { generatePlannedQueries } =
+      await import("@/lib/services/intelligence");
+    const result = await generatePlannedQueries(getDb(), searchProjectId);
+    revalidateProject(searchProjectId);
+    const parts = [
+      `${result.added} quer${result.added === 1 ? "y" : "ies"} composed from ${result.segments} plan segment${result.segments === 1 ? "" : "s"}`,
+    ];
+    if (result.merged > 0) {
+      parts.push(
+        `${result.merged} existing row${result.merged === 1 ? "" : "s"} gained requirement links`,
+      );
+    }
+    const cal = calibrationNote(result.decisions);
+    if (cal) parts.push(cal);
+    return { warnings: [], note: parts.join(", ") };
   });
 }
 

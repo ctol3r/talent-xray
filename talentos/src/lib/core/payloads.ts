@@ -260,14 +260,51 @@ export const querySuggestionSchema = z.object({
 export type QuerySuggestion = z.infer<typeof querySuggestionSchema>;
 
 /**
- * Reserved for Wave B (decision-to-query calibration). Persisted on
- * `search_queries.calibration`; the column exists so the personal database
- * needs no second migration. Empty until Wave B lands.
+ * Decision-to-query calibration (Wave B, D-030). One decision per
+ * vocabulary term that recruiter review decisions moved, supported or
+ * blocked, with the reason rendered verbatim in the String Lab. Persisted
+ * per row on `search_queries.calibration`, filtered to the terms present in
+ * that row's text.
  */
+export const TERM_DECISION_ACTIONS = [
+  "promoted_to_must_have",
+  "supported",
+  "added_any_of",
+  "demoted_to_any_of",
+  "flagged",
+  "removed",
+  "added_exclusion",
+  "blocked",
+] as const;
+export const termDecisionActionSchema = z.enum(TERM_DECISION_ACTIONS);
+export type TermDecisionAction = z.infer<typeof termDecisionActionSchema>;
+
+export const termDecisionSchema = z.object({
+  term: z.string(),
+  action: termDecisionActionSchema,
+  /** Human-readable reason, e.g. "3 accepted anchors across 2 candidates, 0 dismissed (R: Publication record)". */
+  reason: z.string(),
+  requirementIds: z.array(z.string()),
+  accepted: z.number().int().min(0),
+  dismissed: z.number().int().min(0),
+  contradictory: z.number().int().min(0),
+  corrected: z.number().int().min(0),
+  candidates: z.number().int().min(0),
+  provenance: z.literal("recruiter"),
+});
+export type TermDecision = z.infer<typeof termDecisionSchema>;
+
 export const queryCalibrationSchema = z.object({
   generatedAt: z.string(),
+  /** Reviewed links across the search when this row was generated. */
   reviewedLinks: z.number().int().min(0),
-  decisions: z.array(z.unknown()),
+  /**
+   * Fingerprint of the review decisions this row was generated from, so a
+   * changed decision on the same link (accept → dismiss) reads as stale
+   * even though the count did not move.
+   */
+  signalsHash: z.string().optional(),
+  decisions: z.array(termDecisionSchema),
 });
 export type QueryCalibration = z.infer<typeof queryCalibrationSchema>;
 

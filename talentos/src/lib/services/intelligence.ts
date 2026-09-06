@@ -13,7 +13,11 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import type { GenerationMeta } from "@/lib/core/enums";
 import type { Db } from "@/lib/db/client";
-import { hiringIntelligence, sourceChannels } from "@/lib/db/schema";
+import {
+  hiringIntelligence,
+  searchQueries,
+  sourceChannels,
+} from "@/lib/db/schema";
 import {
   type AudiencePersonaIR,
   type CanonicalIntelligence,
@@ -22,10 +26,19 @@ import {
   type NextQuestion,
 } from "@/lib/core/ir";
 import {
+  decisionsForQuery,
+  deriveTermDecisions,
+  signalsFingerprint,
+  type CalibrationSignals,
+  type LinkOutcome,
+} from "@/lib/domain/calibration";
+import {
+  normalizeQueryKey,
   prepareQueries,
   type PreparedQuery,
   type PrepareResult,
 } from "@/lib/domain/query-normalization";
+import type { TermDecision } from "@/lib/core/payloads";
 import { loadProjectContext } from "@/lib/ai/context";
 import { runAiTask } from "@/lib/ai/run";
 import { hiringNeedTask } from "@/lib/ai/tasks/hiring-need";
@@ -234,6 +247,8 @@ export interface PlannedQueries {
   rationale: string;
   queries: PreparedQuery[];
   qa: Pick<PrepareResult, "pruned" | "droppedDuplicates" | "inputNotes">;
+  /** Wave B: calibration decisions applied to this segment's vocabulary. */
+  decisions: TermDecision[];
 }
 
 /**
@@ -245,6 +260,7 @@ export interface PlannedQueries {
 export async function composeDiscoveryQueries(
   db: Db,
   projectId: string,
+  calibration?: { signals: CalibrationSignals; outcomes: LinkOutcome[] },
 ): Promise<PlannedQueries[]> {
   const row = await requireIntent(db, projectId);
   const plan = row.payload.searchPlan;
@@ -261,20 +277,21 @@ export async function composeDiscoveryQueries(
     .from(sourceChannels)
     .where(eq(sourceChannels.searchProjectId, projectId));
   return plan.queryPlans.map((queryPlan) => {
-    const prepared = prepareQueries({
-      input: {
-        titles: queryPlan.titles,
-        alternateTitles: queryPlan.alternateTitles,
-        adjacentTitles: queryPlan.adjacentTitles,
-        mustHave: queryPlan.mustHaveTerms,
-        anyOf: queryPlan.anyOfTerms,
-        credentials: queryPlan.credentials,
-        locations: queryPlan.locations,
-        companies: [],
-        exclusions: queryPlan.exclusions,
-      },
-      channels,
-    });
+    const raw = {
+      titles: queryPlan.titles,
+      alternateTitles: queryPlan.alternateTitles,
+      adjacentTitles: queryPlan.adjacentTitles,
+      mustHave: queryPlan.mustHaveTerms,
+      anyOf: queryPlan.anyOfTerms,
+      credentials: queryPlan.credentials,
+      locations: queryPlan.locations,
+      companies: [],
+      exclusions: queryPlan.exclusions,
+    };
+    const { input, decisions } = calibration
+      ? deriveTermDecisions(raw, calibration.signals, calibration.outcomes)
+      : { input: raw, decisions: [] };
+    const prepared = prepareQueries({ input, channels });
     return {
       segmentLabel: queryPlan.segmentLabel,
       linkedRequirementIds: queryPlan.linkedRequirementIds,
@@ -285,8 +302,96 @@ export async function composeDiscoveryQueries(
         droppedDuplicates: prepared.droppedDuplicates,
         inputNotes: prepared.inputNotes,
       },
+      decisions,
     };
   });
+}
+
+/**
+ * Persist the plan-derived strings (Wave B): the deterministic IR path gets
+ * a real caller, so `linkedRequirementIds` land on rows. Rows are
+ * de-duplicated by normalized text against what is already stored; when a
+ * planned row collides with an existing one, the requirement linkage is
+ * merged onto the surviving row instead of being lost.
+ */
+export async function generatePlannedQueries(db: Db, projectId: string) {
+  const { loadCalibrationSignals } = await import("./calibration");
+  const calibration = await loadCalibrationSignals(db, projectId);
+  const planned = await composeDiscoveryQueries(db, projectId, calibration);
+  const generatedAt = new Date().toISOString();
+  const existing = await db
+    .select({
+      id: searchQueries.id,
+      query: searchQueries.query,
+      archived: searchQueries.archived,
+      linkedRequirementIds: searchQueries.linkedRequirementIds,
+    })
+    .from(searchQueries)
+    .where(eq(searchQueries.searchProjectId, projectId));
+  const byKey = new Map(
+    existing
+      .filter((q) => !q.archived)
+      .map((q) => [normalizeQueryKey(q.query), q]),
+  );
+  const seenKeys = new Set<string>();
+  const rows: (typeof searchQueries.$inferInsert)[] = [];
+  let merged = 0;
+  const decisions: TermDecision[] = [];
+  for (const segment of planned) {
+    decisions.push(...segment.decisions);
+    for (const q of segment.queries) {
+      const key = normalizeQueryKey(q.query);
+      const rowDecisions = decisionsForQuery(q.query, segment.decisions);
+      const linked = [
+        ...new Set([
+          ...segment.linkedRequirementIds,
+          ...rowDecisions.flatMap((d) => d.requirementIds),
+        ]),
+      ];
+      const collision = byKey.get(key);
+      if (collision) {
+        const union = [
+          ...new Set([...(collision.linkedRequirementIds ?? []), ...linked]),
+        ];
+        if (union.length !== (collision.linkedRequirementIds ?? []).length) {
+          await db
+            .update(searchQueries)
+            .set({ linkedRequirementIds: union })
+            .where(eq(searchQueries.id, collision.id));
+          merged += 1;
+        }
+        continue;
+      }
+      if (seenKeys.has(key) || q.query.trim() === "") continue;
+      seenKeys.add(key);
+      rows.push({
+        searchProjectId: projectId,
+        platform: q.platform,
+        query: q.query,
+        purpose: `${segment.segmentLabel} — ${q.purpose}`,
+        breadth: q.breadth,
+        expectedPrecision: q.expectedPrecision,
+        targetPhenotype: segment.segmentLabel,
+        provenance: "model_inference",
+        qaMeta: { ...q.qa, notes: [...segment.qa.inputNotes, ...q.qa.notes] },
+        calibration: {
+          generatedAt,
+          reviewedLinks: calibration.signals.reviewedLinks,
+          signalsHash: signalsFingerprint(calibration.outcomes),
+          decisions: rowDecisions,
+        },
+        linkedRequirementIds: linked,
+      });
+    }
+  }
+  if (rows.length > 0) await db.insert(searchQueries).values(rows);
+  return {
+    added: rows.length,
+    merged,
+    segments: planned.length,
+    decisions,
+    reviewedLinks: calibration.signals.reviewedLinks,
+  };
 }
 
 /**

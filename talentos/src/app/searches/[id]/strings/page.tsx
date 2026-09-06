@@ -11,7 +11,20 @@ import {
   qaQuery,
   termBudgetFor,
 } from "@/lib/domain/query-normalization";
-import { generateSearchStringsAction } from "@/lib/actions/generate";
+import {
+  composePlannedQueriesAction,
+  generateSearchStringsAction,
+} from "@/lib/actions/generate";
+import {
+  loadCalibrationSignals,
+  requirementLabels,
+} from "@/lib/services/calibration";
+import { getIntelligence } from "@/lib/services/intelligence";
+import { signalsFingerprint } from "@/lib/domain/calibration";
+import {
+  CalibrationPanel,
+  TermProvenance,
+} from "@/components/calibration-panel";
 import { GenerateButton } from "@/components/generate-button";
 import {
   CoveragePanel,
@@ -46,12 +59,24 @@ export default async function StringsPage({
 }) {
   const { id } = await params;
   const db = getDb();
-  const [queries, channels, yieldByProject, roleYield] = await Promise.all([
-    listQueries(db, id),
-    listChannels(db, id),
-    queryYieldForProject(db, id),
-    roleTitleYield(db, id),
-  ]);
+  const [queries, channels, yieldByProject, roleYield, calibration, ir] =
+    await Promise.all([
+      listQueries(db, id),
+      listChannels(db, id),
+      queryYieldForProject(db, id),
+      roleTitleYield(db, id),
+      loadCalibrationSignals(db, id),
+      getIntelligence(db, id),
+    ]);
+  const labels = requirementLabels(db, id);
+  const hasSearchPlan = Boolean(ir?.payload.searchPlan);
+  const newest = [...queries]
+    .filter((q) => q.calibration)
+    .sort((a, b) =>
+      a.calibration!.generatedAt < b.calibration!.generatedAt ? 1 : -1,
+    )[0];
+  const currentHash = signalsFingerprint(calibration.outcomes);
+  const rowDecisions = queries.flatMap((q) => q.calibration?.decisions ?? []);
   const byPlatform = new Map<string, typeof queries>();
   for (const query of queries) {
     const list = byPlatform.get(query.platform) ?? [];
@@ -69,14 +94,24 @@ export default async function StringsPage({
         title="Search String Lab"
         description="Boolean and x-ray queries across platforms, in narrow/balanced/broad/adjacent variants. The model expands vocabulary; a deterministic composer builds the strings. Every query is visible, editable, and yours."
         actions={
-          <GenerateButton
-            action={generateSearchStringsAction}
-            input={{ searchProjectId: id }}
-            label={
-              queries.length > 0 ? "Regenerate strings" : "Generate strings"
-            }
-            regenerate={queries.length > 0}
-          />
+          <div className="flex items-start gap-2">
+            {hasSearchPlan && (
+              <GenerateButton
+                action={composePlannedQueriesAction}
+                input={{ searchProjectId: id }}
+                label="Compose from search plan"
+                regenerate
+              />
+            )}
+            <GenerateButton
+              action={generateSearchStringsAction}
+              input={{ searchProjectId: id }}
+              label={
+                queries.length > 0 ? "Regenerate strings" : "Generate strings"
+              }
+              regenerate={queries.length > 0}
+            />
+          </div>
         }
       />
       {queries.length === 0 ? (
@@ -88,6 +123,12 @@ export default async function StringsPage({
         </EmptyState>
       ) : (
         <div className="space-y-4">
+          <CalibrationPanel
+            signals={calibration.signals}
+            decisions={rowDecisions}
+            generatedWith={newest?.calibration ?? null}
+            currentHash={currentHash}
+          />
           <CoveragePanel coverage={coverage} />
           <RoleYieldPanel yield={roleYield} />
           {queries.length > 0 && <PrunedPlatformsNote pruned={pruned} />}
@@ -139,6 +180,15 @@ export default async function StringsPage({
                         />
                       </div>
                       <NormalizationNotes qa={query.qaMeta ?? null} />
+                      <TermProvenance
+                        decisions={query.calibration?.decisions ?? []}
+                        requirementLabels={labels}
+                        stale={
+                          query.calibration !== null &&
+                          query.calibration !== undefined &&
+                          (query.calibration.signalsHash ?? "") !== currentHash
+                        }
+                      />
                     </li>
                   );
                 })}

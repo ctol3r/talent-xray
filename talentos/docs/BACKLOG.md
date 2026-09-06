@@ -26,6 +26,21 @@ Remaining follow-ups from that wave:
 - **Yield rollups by industry or geography** — only the normalized role
   title is rolled up today.
 
+## Calibration loop — follow-ups from Wave B (2026-09-05)
+
+- **Model-assisted term extraction** through the session provider: hook
+  point is before `deriveTermDecisions`, gated by
+  `TALENTOS_CALIBRATION_MODEL_TERMS=1`, grounded by requiring every
+  returned term to be a substring of a supplied accepted quote.
+- **Feed calibration signals into `renderProjectContext`** so the
+  expansion model sees them; needs a corpus run to score before it ships.
+- **First-class `corrected` decision value** in `document_reviews`; today
+  inferred from the `Corrected by connection <id>` note convention.
+- **Use `evidenceSpec` / `falseSignals`** from the IR as additional match
+  vocabulary once the W12 corpus can judge precision.
+- **Weight signals by pipeline stage or HM decision** (an accepted anchor
+  on a hired candidate should count for more).
+
 ## Other
 
 - **Session provider in the UI**: surface pending outbox requests as a

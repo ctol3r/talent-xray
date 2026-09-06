@@ -876,3 +876,50 @@ parity by a test. The mock discovery provider
 (`TALENTOS_DISCOVERY_PROVIDER=mock`) exists only so the ledger can be
 driven through the UI in e2e; it is watermarked and never configured by
 default.
+
+## D-030 — Review decisions calibrate the strings, deterministically, with a reason per term
+
+**Decision.** (2026-09-05, Wave B.) The recruiter's accept / dismiss /
+correct decisions on exact CV passages — across every candidate reviewed
+for a search — reshape the String Lab vocabulary before composition
+(`src/lib/domain/calibration.ts`, `deriveTermDecisions`), and every touched
+term carries a reason the String Lab renders verbatim ("2 accepted anchors
+across 2 candidates, 0 dismissed (R: Publication record)"). No model call.
+The composer is untouched; calibration runs ahead of the D-029
+normalization. Decisions are persisted per row on
+`search_queries.calibration`, filtered to the terms in that row, and the
+requirement ids they cite land on `search_queries.linked_requirement_ids`.
+`composeDiscoveryQueries` gains a persisting caller
+(`generatePlannedQueries`, "Compose from search plan") so the IR's own
+`linkedRequirementIds` reach rows too.
+
+**Thresholds** (named constants, tested): promote any-of → must-have on
+≥2 accepted anchors across ≥2 candidates with no dismissal or
+contradiction, only when a linked requirement is must-have and the ANDed
+list is under the expansion prompt's cap of 3; demote must-have → any-of
+on ≥2 dismissals with zero accepted; remove an any-of/credential only on
+≥2 accepted **contradictory** anchors; flag on ≥2 dismissals (visible
+only); add a term from an accepted quote only when the quote is ≤4 words,
+≥3 characters, on a must-have or preferred requirement, at most 6 per
+generation; add an exclusion only from an accepted `relevant` quote on a
+`disqualifier` requirement. Titles are never touched.
+
+**Alternatives.** (a) Feed decisions into the expansion prompt — deferred:
+prompt changes need a corpus run to score, and the visible-reasons
+differentiator comes from the deterministic path. (b) A side table for
+decisions — rejected: single-user, read-only for display, and the
+per-row JSON self-filters so a recruiter edit that removes a term removes
+its reason. (c) Let a dismissal remove a term — rejected: "this passage
+was not evidence" is not "this term is noise".
+
+**Fair hiring.** Every candidate term and every reason passes
+`scanTextForProtectedTraits` plus a contact/URL check; a hit is a visible
+`blocked` decision and the term is never added. A short accepted quote
+could still be a proper name; the ≤4-word rule and the visible, editable
+reason are the mitigations, and the panel copy says so.
+
+**Tradeoffs.** `loadCalibrationSignals` walks `reviewWorkspace` per
+candidate (the same loop `review-shortlist.ts` already runs) — fine at desk
+scale. Corrections are inferred from the note convention
+`Corrected by connection <id>`; a first-class decision value is filed in
+the backlog.

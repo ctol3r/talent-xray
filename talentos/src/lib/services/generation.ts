@@ -7,6 +7,11 @@ import { desc, eq } from "drizzle-orm";
 import type { QuerySuggestion } from "@/lib/core/payloads";
 import type { TraitScanHit } from "@/lib/domain/fair-hiring";
 import {
+  decisionsForQuery,
+  deriveTermDecisions,
+  signalsFingerprint,
+} from "@/lib/domain/calibration";
+import {
   normalizeQueryKey,
   prepareQueries,
 } from "@/lib/domain/query-normalization";
@@ -31,6 +36,7 @@ import {
   successProfiles,
 } from "@/lib/db/schema";
 import { loadProjectContext } from "@/lib/ai/context";
+import { loadCalibrationSignals } from "./calibration";
 import { listCandidateSourceEvidence } from "./discovery";
 import { derivePersonas, getIntelligence } from "./intelligence";
 import { listResearchFindings, ResearchRequiredError } from "./research";
@@ -236,8 +242,11 @@ export async function generateSearchStrings(
     .from(sourceChannels)
     .where(eq(sourceChannels.searchProjectId, projectId));
   const extras: QuerySuggestion[] = output.extraQueries;
-  const prepared = prepareQueries({
-    input: {
+  // Wave B: recruiter review decisions reshape the vocabulary before
+  // composition, deterministically, with a reason per touched term.
+  const calibration = await loadCalibrationSignals(db, projectId);
+  const { input: calibrated, decisions } = deriveTermDecisions(
+    {
       titles: output.titles,
       alternateTitles: output.alternateTitles,
       adjacentTitles: output.adjacentTitles,
@@ -248,6 +257,12 @@ export async function generateSearchStrings(
       companies: output.companies,
       exclusions: output.exclusions,
     },
+    calibration.signals,
+    calibration.outcomes,
+  );
+  const generatedAt = new Date().toISOString();
+  const prepared = prepareQueries({
+    input: calibrated,
     extras: extras.map((q) => ({
       platform: q.platform,
       query: q.query,
@@ -283,6 +298,19 @@ export async function generateSearchStrings(
         ...q.qa,
         notes: [...prepared.inputNotes, ...q.qa.notes],
       },
+      calibration: {
+        generatedAt,
+        reviewedLinks: calibration.signals.reviewedLinks,
+        signalsHash: signalsFingerprint(calibration.outcomes),
+        decisions: decisionsForQuery(q.query, decisions),
+      },
+      linkedRequirementIds: [
+        ...new Set(
+          decisionsForQuery(q.query, decisions).flatMap(
+            (d) => d.requirementIds,
+          ),
+        ),
+      ],
     }))
     .filter(
       (row) =>
@@ -300,6 +328,10 @@ export async function generateSearchStrings(
       pruned: prepared.pruned,
       droppedDuplicates: prepared.droppedDuplicates.length,
       split: prepared.rows.filter((q) => q.qa.part).length,
+    },
+    calibration: {
+      reviewedLinks: calibration.signals.reviewedLinks,
+      decisions,
     },
   };
 }
