@@ -13,6 +13,17 @@ import {
 import { listCandidateMessages } from "@/lib/services/workflow";
 import { listCandidateSourceEvidence } from "@/lib/services/discovery";
 import { listCandidatePackets } from "@/lib/services/guidance";
+import {
+  getRegistryMatch,
+  prefillFromCandidate,
+} from "@/lib/services/registries";
+import {
+  REGISTRY_LINK_OUTS,
+  REGISTRY_MATCH_EXPLAINER,
+  REGISTRY_MATCH_LABEL,
+  registryStatus,
+} from "@/lib/registries";
+import { RegistryMatchCard } from "@/components/registry-match";
 import { generateCandidatePacketAction } from "@/lib/actions/guidance";
 import { HmFeedbackForm } from "@/components/hm-feedback-form";
 import { PACKET_KINDS, PACKET_KIND_LABELS } from "@/lib/core/enums";
@@ -51,15 +62,23 @@ export default async function CandidatePage({
   const db = getDb();
   const candidate = await getCandidate(db, candidateId);
   if (!candidate || candidate.searchProjectId !== id) notFound();
-  const [stages, sources, sourceEvidence, evidence, messages, packets] =
-    await Promise.all([
-      getPipelineStages(db, id),
-      getCandidateSources(db, candidateId),
-      listCandidateSourceEvidence(db, candidateId),
-      getCandidateEvidence(db, candidateId),
-      listCandidateMessages(db, candidateId),
-      listCandidatePackets(db, candidateId),
-    ]);
+  const [
+    stages,
+    sources,
+    sourceEvidence,
+    evidence,
+    messages,
+    packets,
+    registryMatch,
+  ] = await Promise.all([
+    getPipelineStages(db, id),
+    getCandidateSources(db, candidateId),
+    listCandidateSourceEvidence(db, candidateId),
+    getCandidateEvidence(db, candidateId),
+    listCandidateMessages(db, candidateId),
+    listCandidatePackets(db, candidateId),
+    getRegistryMatch(db, candidateId),
+  ]);
   const [sequence] = await db
     .select()
     .from(outreachSequences)
@@ -295,6 +314,25 @@ export default async function CandidatePage({
         </div>
 
         <div className="space-y-4">
+          <RegistryMatchCard
+            candidateId={candidateId}
+            configured={registryStatus().nppes.configured}
+            mode={registryStatus().nppes.mode}
+            linkOut={REGISTRY_LINK_OUTS.nppes}
+            label={REGISTRY_MATCH_LABEL}
+            explainer={REGISTRY_MATCH_EXPLAINER}
+            prefill={prefillFromCandidate(candidate, sources)}
+            match={
+              registryMatch
+                ? {
+                    registryId: registryMatch.registryId,
+                    matchedAt: registryMatch.matchedAt,
+                    matchStrength: registryMatch.matchStrength,
+                    record: registryMatch.matchedFields,
+                  }
+                : null
+            }
+          />
           <Card title="Next action">
             <NextActionForm
               candidateId={candidateId}

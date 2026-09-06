@@ -308,6 +308,36 @@ export const queryCalibrationSchema = z.object({
 });
 export type QueryCalibration = z.infer<typeof queryCalibrationSchema>;
 
+/**
+ * Registry-matched identity (Wave E, D-032). The allow-listed snapshot of
+ * a public CMS NPPES record the recruiter confirmed by hand: who the person
+ * is and what they are enumerated as — never how to reach them privately.
+ * The adapter picks these fields explicitly and never copies the raw
+ * record, so nothing outside this shape can be persisted.
+ */
+export const nppesTaxonomySchema = z.object({
+  description: z.string(),
+  state: z.string().optional(),
+  license: z.string().optional(),
+  primary: z.boolean(),
+});
+export const nppesRecordSchema = z.object({
+  number: z.string().regex(/^\d{10}$/),
+  firstName: z.string(),
+  lastName: z.string(),
+  credential: z.string().optional(),
+  taxonomies: z.array(nppesTaxonomySchema),
+  /** The practice LOCATION address only — city, state and office telephone. */
+  practice: z
+    .object({
+      city: z.string().optional(),
+      state: z.string().optional(),
+      telephone: z.string().optional(),
+    })
+    .optional(),
+});
+export type NppesRecord = z.infer<typeof nppesRecordSchema>;
+
 export const querySuggestionsPayloadSchema = z.object({
   queries: z.array(querySuggestionSchema),
   synonymGroups: z.array(

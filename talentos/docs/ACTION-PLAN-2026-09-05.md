@@ -54,7 +54,7 @@ Facts that shape sequencing:
 | A    | String Lab QA + yield ledger                                                         | hireEZ opaque match, own B grade               | 0006                           |
 | B    | Decision-to-query calibration loop — **CLOSED 2026-09-05** (`docs/WAVE-B-REPORT.md`) | Metaview's moat                                | 0006 (shared)                  |
 | D    | Bring-your-own-data imports — **CLOSED 2026-09-06** (`docs/WAVE-D-REPORT.md`)        | turns hireEZ/Heartbeat/LinkedIn into suppliers | none                           |
-| E    | Registry-verified identity (NPPES)                                                   | Heartbeat/hireEZ on the verification axis      | 0007                           |
+| E    | Registry-verified identity (NPPES) — **CLOSED 2026-09-06** (`docs/WAVE-E-REPORT.md`) | Heartbeat/hireEZ on the verification axis      | 0007                           |
 | P    | Pilot corpus through TalentOS (3 searches × 5 candidates)                            | proves every claim above                       | none — creates the personal DB |
 | F    | Two-sided guidance v2                                                                | uncontested by all three                       | none                           |
 | G    | Transparency: pricing model + "what we will not do"                                  | every competitor complaint page                | none                           |

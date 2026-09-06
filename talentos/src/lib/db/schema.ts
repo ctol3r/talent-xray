@@ -4,7 +4,12 @@
  * Deliberately absent everywhere (enforced by tests/unit/fair-hiring.test.ts):
  * columns or JSON keys for protected characteristics.
  */
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 import type {
   Breadth,
   CrewJobStatus,
@@ -38,6 +43,7 @@ import type {
   IntakePayload,
   InterviewPlanPayload,
   MarketResearchPayload,
+  NppesRecord,
   OnboardingPlanPayload,
   OutreachSequencePayload,
   QueryCalibration,
@@ -377,6 +383,37 @@ export const candidateSourceEvidence = sqliteTable(
     queryId: text("query_id").references(() => searchQueries.id),
     createdAt: createdAt(),
   },
+);
+
+/**
+ * Registry-matched identity (Wave E, D-032): one confirmed public-registry
+ * record per candidate and registry. Written only by a human click; the
+ * snapshot is the allow-listed `NppesRecord`. Says who the person is and
+ * what they are enumerated as — not whether they are currently licensed in
+ * a given state, and never a private contact.
+ */
+export const candidateRegistryMatches = sqliteTable(
+  "candidate_registry_matches",
+  {
+    id: uuid(),
+    candidateId: text("candidate_id")
+      .notNull()
+      .references(() => candidates.id, { onDelete: "cascade" }),
+    registry: text("registry").notNull().$type<"nppes">(),
+    registryId: text("registry_id").notNull(),
+    matchedFields: text("matched_fields", { mode: "json" })
+      .notNull()
+      .$type<NppesRecord>(),
+    matchStrength: text("match_strength"),
+    matchedAt: text("matched_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+    matchedBy: text("matched_by").notNull().default("local-owner"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex("candidate_registry_unique").on(t.candidateId, t.registry),
+  ],
 );
 
 export const candidateEvidence = sqliteTable("candidate_evidence", {

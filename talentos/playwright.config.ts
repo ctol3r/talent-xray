@@ -27,6 +27,7 @@ export default defineConfig({
     env: {
       TALENTOS_MODEL_PROVIDER: "mock",
       TALENTOS_DISCOVERY_PROVIDER: "mock",
+      TALENTOS_REGISTRY_NPPES: "mock",
       TALENTOS_DATABASE_PATH: "./data/e2e.db",
       TALENTOS_DOCUMENT_DIR: "/tmp/talentos-e2e-documents",
     },

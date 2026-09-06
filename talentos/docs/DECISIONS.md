@@ -963,3 +963,46 @@ verified.
 shows the detected mapping with per-header override and a generic mapper.
 The server re-validates rows and re-scans keys on commit; the client never
 decides safety. No import audit table or undo yet (backlog).
+
+## D-032 — Registry-matched identity: a public record, picked by hand, labelled for what it is
+
+**Decision.** (2026-09-06, Wave E.) The candidate page can query the public
+CMS NPPES NPI Registry (`src/lib/registries/nppes.ts`) by name and state,
+or by an NPI the Wave D import already linked, and show the records in the
+registry's own order with the conservative identity matcher's strength
+attached. The recruiter picks one; `confirmRegistryMatch` upserts a single
+row per candidate and registry in `candidate_registry_matches` (migration 0007) holding an allow-listed snapshot — NPI, name, credential,
+taxonomies, and the practice LOCATION city, state and office telephone —
+plus a plain link-out to the official record. The surface label is
+"registry-matched · CMS NPPES" with the explainer: identity and licence
+taxonomy as recorded by CMS on the date shown; not how to reach them, not
+whether they are currently licensed in a given state, not whether they
+will respond; an NPI is not proof of licensure. The word "verified" is not
+used (it is Findem's and Glider's word for assessment-time identity
+checks, and the registry itself does not guarantee licensure).
+
+**Boundaries.** Opt-in only (`TALENTOS_REGISTRY_NPPES=1`; "mock" for
+tests); nothing calls out otherwise and the card links to the registry's
+own search page instead. The client mirrors the one outbound-HTTP
+precedent (D-010's discovery provider): injectable fetch, `configured`
+flag, no call when off. The mapper picks fields explicitly and never
+spreads the raw record, so mailing addresses, enumeration dates, other
+identifiers and any demographic field the API returns cannot be persisted;
+a fixture carrying all of them asserts none leak. A search never writes.
+The artifact-side `npiAdapter` stays `wired:false` (D-021) until a live
+request/response is observed and recorded.
+
+**Alternatives.** (a) Sync taxonomy into `profile.licenses` on confirm —
+deferred until profile strings carry provenance. (b) Auto-match on a name
+hit — rejected by spec §12. (c) State boards, GMC/NMC, ABMS — link-outs
+only: HTML forms, no public JSON, terms that restrict automation.
+
+**Reason.** Heartbeat and hireEZ sell reachability and admit it decays;
+nobody in the set sells verification of identity. A public registry record
+the recruiter chose, with its date, is the one claim TalentOS can make
+that they cannot.
+
+**Tradeoffs.** Name splitting is naive for compound surnames — every
+field is editable. NPPES sometimes answers HTTP 200 with an `Errors`
+array; both paths are handled. Rate limits are unknown; one request per
+click, limit ≤ 20.

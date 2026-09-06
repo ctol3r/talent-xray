@@ -57,6 +57,23 @@ Remaining follow-ups from that wave:
 - **Vendor "match scores"** are dropped by construction (D-010); revisit
   only as an unverified, clearly labelled note.
 
+## Registries — follow-ups from Wave E (2026-09-06)
+
+- **Observed live request/response.** Run one search with
+  `TALENTOS_REGISTRY_NPPES=1` against a known public NPI and paste the
+  response shape into `docs/`; until then the adapter is built against the
+  documented v2.1 shape only, and the artifact `npiAdapter` stays
+  `wired:false` (D-021).
+- **State medical / nursing boards (Nursys, FSMB, state sites), GMC / NMC,
+  ABMS** — HTML search forms or licensed APIs; link-out entries in
+  `source_recommendations` only.
+- **ORCID public API (JSON, no key) and Companies House (JSON, key)** —
+  candidates for a later registry wave; not clinicians.
+- **Sync taxonomy / licence into `profile.licenses` on confirm** once
+  profile strings carry a provenance marker.
+- **NPI-2 organisation records; periodic re-check of match freshness;
+  more than one registry per candidate.**
+
 ## Other
 
 - **Session provider in the UI**: surface pending outbox requests as a

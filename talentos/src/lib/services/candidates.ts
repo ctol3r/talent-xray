@@ -13,6 +13,7 @@ import {
   documentComparisons,
   candidatePackets,
   candidateSourceEvidence,
+  candidateRegistryMatches,
   searchLearnings,
   tasks,
   aiGenerations,
@@ -270,6 +271,7 @@ export async function deleteCandidate(db: Db, candidateId: string) {
       pipelineEvents,
       candidatePackets,
       candidateSourceEvidence,
+      candidateRegistryMatches,
       searchLearnings,
       tasks,
       aiGenerations,
@@ -331,7 +333,12 @@ export async function exportCandidate(db: Db, candidateId: string) {
       .from(pipelineEvents)
       .where(eq(pipelineEvents.candidateId, candidateId)),
   ]);
+  const registryMatches = await db
+    .select()
+    .from(candidateRegistryMatches)
+    .where(eq(candidateRegistryMatches.candidateId, candidateId));
   return {
+    registryMatches,
     documentReview: reviewWorkspace(db, candidate.searchProjectId, candidateId),
     exportedAt: new Date().toISOString(),
     candidate,

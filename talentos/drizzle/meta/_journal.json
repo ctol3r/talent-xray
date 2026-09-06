@@ -50,6 +50,13 @@
       "when": 1788661463662,
       "tag": "0006_yield_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1788710590695,
+      "tag": "0007_registry_matches",
+      "breakpoints": true
     }
   ]
 }
