@@ -23,6 +23,7 @@ const MODULES: { path: string; label: string; exact?: boolean }[] = [
   { path: "/pipeline", label: "Pipeline" },
   { path: "/close", label: "Close" },
   { path: "/analytics", label: "Analytics" },
+  { path: "/diagnosis", label: "Diagnosis" },
   { path: "/learnings", label: "Learnings" },
 ];
 

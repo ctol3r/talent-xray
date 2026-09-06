@@ -26,7 +26,11 @@
     "build:artifact:check": "tsx scripts/build-artifact.mts --check",
     "e2e:artifact": "playwright test -c playwright.artifact.config.ts",
     "test:documents:defects": "tsx scripts/check-document-defects.mts",
-    "check:private-build": "tsx scripts/check-private-build.mts"
+    "check:private-build": "tsx scripts/check-private-build.mts",
+    "test:integration": "vitest run --config vitest.integration.config.mts",
+    "seed:sp104": "tsx src/lib/hsal/seed-sp104-cli.ts",
+    "demo:sp104": "tsx scripts/demo-sp104.mts",
+    "hsal:vendor": "pnpm --dir ../../hsal sdk:vendor \"$(pwd)/vendor\" && pnpm install"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
@@ -37,7 +41,9 @@
     "pdfjs-dist": "^6.3.289",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "zod": "^4.5.4"
+    "zod": "^4.5.4",
+    "@talentos/hsal-adapter": "workspace:*",
+    "@hsal/sdk": "file:vendor/@hsal/sdk"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

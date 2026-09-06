@@ -11,6 +11,12 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.122.0
         version: 0.122.0(zod@4.5.4)
+      '@hsal/sdk':
+        specifier: file:vendor/@hsal/sdk
+        version: file:vendor/@hsal/sdk
+      '@talentos/hsal-adapter':
+        specifier: workspace:*
+        version: link:packages/hsal-adapter
       better-sqlite3:
         specifier: ^13.0.3
         version: 13.0.3
@@ -81,6 +87,15 @@ importers:
       vitest:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13))
+
+  packages/hsal-adapter:
+    dependencies:
+      '@hsal/sdk':
+        specifier: file:../../vendor/@hsal/sdk
+        version: file:vendor/@hsal/sdk
+      zod:
+        specifier: ^4.5.4
+        version: 4.5.4
 
 packages:
 
@@ -678,6 +693,12 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@hsal/protocol@file:vendor/@hsal/protocol':
+    resolution: {directory: vendor/@hsal/protocol, type: directory}
+
+  '@hsal/sdk@file:vendor/@hsal/sdk':
+    resolution: {directory: vendor/@hsal/sdk, type: directory}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -3578,6 +3599,14 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
+
+  '@hsal/protocol@file:vendor/@hsal/protocol':
+    dependencies:
+      zod: 4.5.4
+
+  '@hsal/sdk@file:vendor/@hsal/sdk':
+    dependencies:
+      '@hsal/protocol': file:vendor/@hsal/protocol
 
   '@humanfs/core@0.19.2':
     dependencies:

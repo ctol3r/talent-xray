@@ -1,0 +1,12 @@
+{
+  "id": "LEARN-SP104-001",
+  "sourceSearchProjectId": "SP104",
+  "title": "Avoid stack/title overconstraint in distributed-systems searches",
+  "statement": "For distributed-systems searches, exact programming language and current title may be weak proxies for Staff-level capability. Calibrate first on production scale, architecture ownership, technical influence, and demonstrated systems complexity.",
+  "category": "success_profile",
+  "confidence": 0.82,
+  "applicability": {
+    "roleFamilies": ["distributed systems", "infrastructure engineering"],
+    "seniority": ["senior", "staff", "principal"]
+  }
+}

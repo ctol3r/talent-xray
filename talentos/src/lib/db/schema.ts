@@ -6,6 +6,7 @@
  */
 import {
   integer,
+  real,
   sqliteTable,
   text,
   uniqueIndex,
@@ -827,5 +828,61 @@ export const documentReviews = sqliteTable("document_reviews", {
   actor: text("actor").notNull(),
   decision: text("decision").notNull().$type<"accepted" | "dismissed">(),
   note: text("note").notNull(),
+  createdAt: createdAt(),
+});
+
+// ---------------------------------------------------------------------------
+// HSAL integration (workstation-side references only; canonical epistemic state
+// lives in HSAL). See docs/TALENTOS_HSAL_EXECUTION_PLAN.md.
+// ---------------------------------------------------------------------------
+
+/** One active HSAL DecisionCase per search project. Stores the reference, never the contents. */
+export const hsalBindings = sqliteTable("hsal_bindings", {
+  searchProjectId: text("search_project_id")
+    .primaryKey()
+    .references(() => searchProjects.id),
+  hsalDecisionCaseId: text("hsal_decision_case_id").notNull(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/** Recruiting pipeline facts owned by the workstation (brief §6). Counts per stage for a period. */
+export const pipelineSnapshots = sqliteTable("pipeline_snapshots", {
+  id: text("id").primaryKey(),
+  searchProjectId: text("search_project_id")
+    .notNull()
+    .references(() => searchProjects.id),
+  periodStart: text("period_start").notNull(),
+  periodEnd: text("period_end").notNull(),
+  counts: text("counts", { mode: "json" })
+    .notNull()
+    .$type<Record<string, number>>(),
+  observedAt: text("observed_at").notNull(),
+  source: text("source").notNull(),
+  createdAt: createdAt(),
+});
+
+/** Domain-facing learnings distilled from an HSAL decision loop; references HSAL ids only. */
+export const hsalSearchLearnings = sqliteTable("hsal_search_learnings", {
+  id: text("id").primaryKey(),
+  sourceSearchProjectId: text("source_search_project_id")
+    .notNull()
+    .references(() => searchProjects.id),
+  title: text("title").notNull(),
+  statement: text("statement").notNull(),
+  category: text("category").notNull(),
+  evidenceIds: text("evidence_ids", { mode: "json" })
+    .notNull()
+    .$type<string[]>(),
+  originatingBeliefIds: text("originating_belief_ids", { mode: "json" })
+    .notNull()
+    .$type<string[]>(),
+  originatingModelIds: text("originating_model_ids", { mode: "json" })
+    .notNull()
+    .$type<string[]>(),
+  confidence: real("confidence").notNull(),
+  applicability: text("applicability", { mode: "json" })
+    .notNull()
+    .$type<Record<string, string[]>>(),
   createdAt: createdAt(),
 });

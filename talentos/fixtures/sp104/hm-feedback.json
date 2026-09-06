@@ -1,0 +1,70 @@
+[
+  {
+    "id": "HMF-SP104-C31",
+    "searchProjectId": "SP104",
+    "candidateId": "C31",
+    "feedback": "Strong systems background, but we really need someone who has been writing Go recently.",
+    "disposition": "reject",
+    "structuredReasons": [
+      {
+        "category": "skill",
+        "statement": "Needs recent Go.",
+        "criterionId": "CRIT-GO"
+      }
+    ],
+    "createdAt": "2026-08-12T16:00:00.000Z"
+  },
+  {
+    "id": "HMF-SP104-C44",
+    "searchProjectId": "SP104",
+    "candidateId": "C44",
+    "feedback": "Interesting background, but I don't see the Staff title we asked for.",
+    "disposition": "reject",
+    "structuredReasons": [
+      {
+        "category": "title",
+        "statement": "No Staff title.",
+        "criterionId": "CRIT-STAFF"
+      }
+    ],
+    "createdAt": "2026-08-14T16:00:00.000Z"
+  },
+  {
+    "id": "HMF-SP104-C52",
+    "searchProjectId": "SP104",
+    "candidateId": "C52",
+    "feedback": "Strong candidate, but I want someone who already operates formally at Staff.",
+    "disposition": "reject",
+    "structuredReasons": [
+      {
+        "category": "title",
+        "statement": "Wants formal Staff level.",
+        "criterionId": "CRIT-STAFF"
+      }
+    ],
+    "createdAt": "2026-08-18T16:00:00.000Z"
+  },
+  {
+    "id": "HMF-SP104-C61",
+    "searchProjectId": "SP104",
+    "candidateId": "C61",
+    "feedback": "This is much closer to what I'm looking for.",
+    "disposition": "advance",
+    "createdAt": "2026-08-22T16:00:00.000Z"
+  },
+  {
+    "id": "HMF-SP104-C73",
+    "searchProjectId": "SP104",
+    "candidateId": "C73",
+    "feedback": "I'd prefer someone who has already held Staff.",
+    "disposition": "reject",
+    "structuredReasons": [
+      {
+        "category": "title",
+        "statement": "Prefers prior Staff title.",
+        "criterionId": "CRIT-STAFF"
+      }
+    ],
+    "createdAt": "2026-08-25T16:00:00.000Z"
+  }
+]

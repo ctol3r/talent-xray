@@ -1,5 +1,7 @@
 # This file makes talentos/ its own pnpm workspace root, fully isolated from the
 # Talent X-Ray app at the repository root (own lockfile, own node_modules).
+packages:
+  - "packages/*"
 onlyBuiltDependencies:
   - better-sqlite3
   - esbuild
