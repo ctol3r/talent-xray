@@ -25,5 +25,6 @@ const project = await createSearchProject(db, {
 await saveJobDescription(db, {
   searchProjectId: project.id,
   rawText: fs.readFileSync(jdPath, "utf8"),
+  source: "pasted",
 });
 console.log(project.id);

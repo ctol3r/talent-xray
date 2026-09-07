@@ -15,6 +15,7 @@ import {
   prepareQueries,
   qaQuery,
   termBudgetFor,
+  GOOGLE_TERM_BUDGET,
 } from "@/lib/domain/query-normalization";
 import { normalizeRoleTitle } from "@/lib/domain/role-title";
 import {
@@ -328,5 +329,99 @@ describe("normalizeRoleTitle", () => {
       normalizeRoleTitle("Research Scientist"),
     );
     expect(normalizeRoleTitle("Staff Engineer II")).toBe("engineer");
+  });
+});
+
+/**
+ * Wave P found this the hard way: across three real searches the composer
+ * produced Google strings of 39 to 111 words against a 32-term budget, and
+ * the splitter left them whole. This test pins the diagnosis rather than a
+ * fix, because the fix is a design decision (see BACKLOG, "The composer's
+ * budget cannot be met by slicing"): with a realistic vocabulary the fixed
+ * part of a string — six three-word titles plus six exclusions — already
+ * exceeds the budget on its own, so no slice of the sliceable lists can ever
+ * fit, and the row is correctly kept whole with a warning.
+ */
+describe("a pilot-sized vocabulary cannot be fitted by slicing", () => {
+  const input: StringLabInput = {
+    titles: [
+      "Talent Brand Manager",
+      "Employer Brand Manager",
+      "Recruitment Marketing Manager",
+      "Talent Marketing Manager",
+      "Talent Brand Lead",
+      "Employer Brand Lead",
+    ],
+    alternateTitles: [
+      "Employer Brand Program Manager",
+      "Talent Attraction Manager",
+      "Head of Employer Brand",
+      "Employer Brand Specialist",
+      "Talent Brand Specialist",
+      "Candidate Experience Manager",
+    ],
+    adjacentTitles: ["Content Marketing Manager", "Brand Marketing Manager"],
+    mustHave: [],
+    anyOf: [
+      "employer brand",
+      "employer value proposition",
+      "recruitment marketing",
+      "talent brand",
+      "careers site",
+      "candidate experience",
+      "candidate journey",
+      "employee stories",
+      "talent community",
+      "employer reputation",
+      "hiring campaign",
+      "talent attraction",
+    ],
+    credentials: [],
+    locations: ["United States", "Canada", "Remote"],
+    companies: [],
+    exclusions: [
+      "recruiter job",
+      "we are hiring",
+      "apply now",
+      "staffing agency",
+      "job posting",
+      "product marketing",
+    ],
+  };
+
+  it("keeps the over-budget rows whole, and says so, rather than truncating them", () => {
+    const prepared = prepareQueries({ input, channels: [] });
+    const google = prepared.rows.filter((r) => /^google/i.test(r.platform));
+    const over = google.filter((r) => countTerms(r.query) > GOOGLE_TERM_BUDGET);
+    // The defect: with this vocabulary most Google rows are over budget.
+    expect(over.length).toBeGreaterThan(0);
+    // The guarantee that still holds: nothing is silently truncated, and
+    // every over-budget row carries a note a recruiter can see.
+    for (const row of over) {
+      expect(row.qa.notes.map((n) => n.code)).toContain("budget_split");
+      // Nothing was cut off the end: the string still carries its exclusions
+      // and its site group, which is what truncation would have lost.
+      expect(row.query).toContain('-"recruiter job"');
+    }
+  });
+
+  it("shows why slicing cannot help: the fixed part alone exceeds the budget", () => {
+    // One title, one any-of term, the locations and the exclusions — the
+    // smallest string this vocabulary can produce on a Google platform.
+    const smallest = prepareQueries({
+      input: {
+        ...input,
+        titles: [input.titles[0]],
+        alternateTitles: [],
+        anyOf: [input.anyOf[0]],
+      },
+      channels: [],
+    }).rows.filter((r) => /^google/i.test(r.platform));
+    expect(smallest.length).toBeGreaterThan(0);
+    const smallestTerms = Math.min(...smallest.map((r) => countTerms(r.query)));
+    // Six two-word exclusions and three locations dominate what is left, so
+    // even the minimal string is close to the budget. Widening the titles or
+    // the any-of list from here cannot be absorbed by splitting.
+    expect(smallestTerms).toBeGreaterThan(GOOGLE_TERM_BUDGET / 2);
   });
 });

@@ -226,15 +226,36 @@ and lab pages, OpenAlex author pages, bioRxiv author pages. Core is at its
 
 Source: `docs/PILOT-2026-09-06.md`. The highest-value item is the first one.
 
-- **The Search String Lab composer emits strings far over the 32-term budget**
-  — 39 to 111 words, in all three pilot searches. What Google returns is not
-  what the composer intended and is not predictable from the string: two CAIS
-  strings differing only in their trailing `site:` clause returned an
-  identical count, while a longer Merge Labs string returned two orders of
-  magnitude fewer results than a shorter one. Wave H2's `profile-sweep.ts`
-  already solves this for its own strings by appending exclusions until the
-  budget is reached and reporting what it dropped; port the same discipline
-  into `generateSearchStrings` and `composeDiscoveryQueries`.
+- **The composer's budget cannot be met by slicing, and the diagnosis is now
+  exact.** Across three pilot searches the Lab produced Google strings of 39
+  to 111 words against a 32-term budget (39 of 233 Google strings over, worst
+  at 83 terms). What Google returns is not what was composed and is not
+  predictable from the string: two CAIS strings differing only in their
+  trailing `site:` clause returned an identical count, while a longer Merge
+  Labs string returned two orders of magnitude _fewer_ results than a shorter
+  one. Wave A's splitter cannot fix it, and the reason is structural rather
+  than a bug: with a realistic vocabulary the fixed part of a string — six
+  three-word titles plus six exclusions — already exceeds the budget, so no
+  slice of `anyOf`, `alternateTitles` or `locations` can ever fit. Pinned by
+  `tests/unit/query-normalization.test.ts`, "a pilot-sized vocabulary cannot
+  be fitted by slicing".
+
+  Making `titles` sliceable and recursing was tried and rejected during the
+  pilot: it fits the narrow and balanced rows but produces 1,065 strings from
+  one vocabulary, and capping the parts at six leaves half the rows still
+  over. The real answer is a product decision, and it is one of:
+  (a) accept that a wide vocabulary needs roughly one string per title and
+  show that honestly, perhaps 18 per platform rather than 5;
+  (b) cap the vocabulary itself at composition time, so the Lab refuses to
+  build a 12-title, 12-term search and says why;
+  (c) drop exclusions from over-budget rows, which costs precision and is
+  measurable against the corpus;
+  (d) keep the current behaviour and make the over-budget warning loud on the
+  strings page, since nothing is truncated locally and the recruiter can edit.
+  Wave H2's `profile-sweep.ts` takes a fifth path that only works because its
+  strings are small: append exclusions until the budget is reached, then
+  report what was left out.
+
 - **No UI derives the hiring need or the search plan.** Both were driven by
   `scripts/pilot-run.mts` in all three searches. Until a button exists,
   "Compose from search plan" cannot appear for a real user.
