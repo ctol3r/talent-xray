@@ -1119,3 +1119,84 @@ on is described as retained.
 every public profile a person has) are designed separately and recorded
 as D-035 when the design is accepted. Wave G's cost model must be written
 against this decision, not Google's JSON API pricing.
+
+## D-035 — Profile connections are provenance-labelled addresses, kept one at a time, confirmed by the person or by a named platform, never merged
+
+**Decision.** (2026-09-07, Waves H and H2, after D-034.) A candidate's
+profile connections are rows in `candidate_sources`, each carrying a
+closed-enum `provenance` (`recruiter_added`, `imported`,
+`candidate_provided`, `platform_declared`, `platform_reciprocal`,
+`registry_match`), the party that asserted the address (`assertedBy`), the
+platform's own timestamp when it has one (`assertedAt`), the date any
+structured API was read (`retrievedAt`), the date and channel of the
+person's confirmation (`confirmedAt`, `confirmedVia`), the row it was read
+from (`originSourceId`), and the recruiter's own note on why they believe it
+is the same person (`whyNote`). One function, `profileLinkLabel`, renders
+every label. Every non-registry, non-confirmed badge begins with
+"unverified"; "confirmed by the person (recorded by you)" renders only with
+a date; the bare word "verified" appears only inside `registry-matched · CMS
+NPPES`, which names its registry (D-032, product rule 7).
+
+**Surfaces.** A URL's family is computed at read time against the two
+engines' own 102 patterns and never stored, so a corpus correction relabels
+every row at once. Professional, scholarly/registry, review and
+`unrecognised` are on; contact-aggregator, broadcast, personal-life and
+document are off per search until a written reason (20–400 characters,
+scanned for protected characteristics) is stored on the project.
+`unrecognised` — a host outside the corpus — is saveable but never an
+identity signal and never shown to a model, because a developer's own domain
+and a faculty page are the most valuable links a sourcer finds and refusing
+them would be absurd.
+
+**How addresses arrive.** Paste (many lines at once), browser-companion
+capture, Discover's `| +Name` attach, one of six per-candidate sweep
+searches opened on the hosted engine page, the person's own answer to a
+confirmation message, and — behind an opt-in flag, one person per click —
+the links a person listed on GitHub or ORCID, proved on Keybase, or that a
+volunteer recorded on Wikidata. Every one of those paths calls
+`enforcePolicyForSave` first.
+
+**Boundaries.** No page is fetched, crawled, scraped, unfurled or
+favicon-ed. No result list, page title, bio, image URL or follower count is
+stored; a schema test pins the column set. No profile URL is generated from
+a name or a LinkedIn slug. A denied address is deleted and suppressed, and
+the suppression outlives the record it was about. `findIdentityMatches` is
+unchanged; URLs are filtered by family before they reach it; a shared
+matchable address opens a review task and nothing merges — the answer to a
+duplicate is moving the row intact to the right record. Only professional
+and scholarly/registry addresses reach any model, as bare URLs. Nothing
+ranks, scores or counts links as a signal. The app sends nothing: the
+confirmation message is copied by hand and "sent" is a recruiter's
+statement, recorded with a date.
+
+**Alternatives.** A machine-merged unified profile, as every vendor in the
+research ships — rejected: the matcher suggests, a human decides. A separate
+`profile_links` table — rejected: it would split identity URLs, export,
+deletion and the companion's saved list. A stored surface-family column —
+rejected for the relabelling reason above. Treating unknown hosts as
+personal-life — rejected after the design review: it would have gated the
+best links behind a written reason. Refusing a cross-candidate duplicate —
+rejected: it makes the review task unreachable and inverts Wave D's rule.
+Handle-pivot URL guesses — designed, costed and left unbuilt as the owner's
+call, because the legal research argues against generating addresses.
+
+**Reason.** The owner asked for as many profile connections as possible. Of
+28 candidate sources checked against their own documentation, 16 survived
+verification and only four hand back several of a person's addresses in one
+call, each covering a different kind of person; the rest are closed by their
+own terms. So the count this product can reach honestly is lower than an
+aggregator's for clinical and sales roles and comparable for software and
+research. What none of the vendor documentation read in this research
+describes is source, date and confirmer per link, a refusal to merge without
+a human, and the person's own answer. Those are what this builds.
+
+**Tradeoffs.** Fewer links per person than an index where no API exists. The
+strongest tier depends on people replying, which nobody has measured. Yield
+and sweep counts are typed by the recruiter. A corpus correction can move an
+old row into an off family. LinkedIn User Agreement §8.2 and GitHub AUP §7
+remain open lawyer questions, recorded rather than assumed away; URL-only
+capture is the conservative reading, not a resolution. ORCID's Public API is
+non-commercial by its terms, so that adapter stays off until the owner
+answers the licence question. Whether recruiters prefer accountability to
+count is the trial that has not been run, and no comparative sentence is
+written anywhere until it is (rule 9).
