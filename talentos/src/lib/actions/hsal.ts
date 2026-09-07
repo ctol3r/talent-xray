@@ -114,9 +114,18 @@ export async function recordExperimentResultAction(
 ): Promise<ActionResult<{ evidenceIds: string[] }>> {
   return act(async () => {
     const parsed = experimentInput.parse(input);
-    const { adapter } = getAppAdapter(getDb());
+    const { adapter, client } = getAppAdapter(getDb());
     if (parsed.searchProjectId !== SP104_ID && !parsed.observations)
       throw new Error("Enter at least one observation.");
+    if (parsed.advanced !== undefined || parsed.total !== undefined) {
+      // An advanced/total pair resolves model predictions; that reading is
+      // only meaningful for a calibration test, whatever the client sent.
+      const intervention = await client.getIntervention(parsed.interventionId);
+      if (intervention.actionType !== "calibration_test")
+        throw new Error(
+          "Advanced/total applies to calibration tests only; record other results as observations.",
+        );
+    }
     const result =
       parsed.searchProjectId === SP104_ID && !parsed.observations
         ? { ...sp104.experimentResult, interventionId: parsed.interventionId }
@@ -374,8 +383,9 @@ export async function saveLearningAction(
         ([, v]) => Array.isArray(v) && v.length > 0,
       ),
     );
+    const id = parsed.id ?? nextLearningId(parsed.searchProjectId, existing);
     const learning = await adapter.createSearchLearning({
-      id: parsed.id ?? nextLearningId(parsed.searchProjectId, existing),
+      id,
       sourceSearchProjectId: parsed.searchProjectId,
       title: parsed.title,
       statement: parsed.statement,
@@ -387,6 +397,15 @@ export async function saveLearningAction(
       originatingModelIds: parsed.originatingModelIds,
       createdAt: new Date().toISOString(),
     });
+    // The store keeps the first writer; a concurrent submit that arrived second
+    // must not be told its text was saved.
+    if (
+      learning.title !== parsed.title ||
+      learning.statement !== parsed.statement
+    )
+      throw new Error(
+        `learning ${id} was saved by someone else moments ago; review it and submit again if yours is different`,
+      );
     revalidatePath(`/searches/${parsed.searchProjectId}`, "layout");
     return { learningId: learning.id };
   });
