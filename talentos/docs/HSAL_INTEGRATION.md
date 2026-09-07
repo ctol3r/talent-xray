@@ -50,6 +50,9 @@ Tests:
 ```bash
 pnpm test                      # includes tests/unit/hsal-adapter (metrics, mapping, rules, ranking, learnings, AI merge)
 pnpm test:integration          # Tests A–J against a real HSAL gateway with a temp database
+pnpm build && pnpm e2e:hsal    # browser e2e against a real gateway spawned from the sibling repo:
+                               #  - the whole loop on a search created in the UI (no fixtures)
+                               #  - the SP104 walkthrough through the same forms, pinning the fixture ids
 ```
 
 ## The loop in the UI
@@ -67,6 +70,16 @@ pnpm test:integration          # Tests A–J against a real HSAL gateway with a 
 | Act, then observe again           | Evidence (profile change, user-asserted) · State · Trajectory        | Apply profile change · Ingest W9 |
 | What did we learn?                | SearchLearning (TalentOS table, HSAL ids only)                       | Save learning                    |
 | Provenance                        | HSALEvent log                                                        | —                                |
+
+## Any search, not only SP104
+
+Every step of the loop works for a real search project: record the baseline pipeline
+(`PipelineCountsForm`, pre-filled from pipeline events when there are any), bind, capture the
+recruiter's belief, ingest HM decisions as evidence, diagnose, select the test, record the result
+(`ExperimentResultForm`: summary, one observation per line, advanced/total), apply the profile
+change (`ProfileChangeForm`), record the post-intervention pipeline (`PostInterventionForm`),
+revise the belief, save the learning (`LearningForm`). Pure helpers live in `src/lib/hsal/generic.ts`
+with unit tests in `tests/unit/hsal-generic.test.ts`.
 
 ## Invariants enforced
 
@@ -111,6 +124,18 @@ explanation → experiment → result → learning is explicit, attributable and
 - SP104's structured candidate observations come from fixtures; real projects derive
   observations from recorded HM decisions on candidates and their success profile from the
   traced `SuccessProfilePayload` (criterion ids `CRIT-<slug>`).
-- Pipeline snapshots are a new TalentOS table; event-derived funnels (D-022) can populate it later.
-- The profile-change / post-intervention / learning actions are wired for SP104's seeded data in
-  this slice; generic projects apply profile changes in the Profile module.
+- Pipeline snapshots are a new TalentOS table. Baseline and post-intervention counts are pre-filled
+  from the workstation's own pipeline events (`deriveCountsFromEvents`: population = candidates
+  with any pipeline event in the window, progress = furthest non-terminal stage up to the window
+  end). `positive_reply` has no workstation stage, so it is left blank for the recruiter, as is any
+  funnel stage a custom stage list cannot express; blank counts are rejected, never recorded as 0.
+  Edited numbers or dates are recorded with source `manual`. Re-recording a period with different
+  counts writes a new revision (`…-r2`); nothing is overwritten, matching HSAL's immutable States.
+  This differs deliberately from the Analytics funnel, which counts all-time exact stage entries.
+- Success Profile changes are applied by the human, on the Diagnosis page (one criterion per
+  line; labels that match existing criteria keep their ids, so moving "Go" to transferable is
+  recorded as a move of `CRIT-GO`) or in the Profile module. HSAL only records that a human did it.
+- Learnings are written by the recruiter in a form (title, statement, category, confidence,
+  applicability pre-filled from the project's role/seniority/industry/geography) and get ids
+  `LEARN-<project>-NNN`. SP104 keeps its seeded values as defaults, so `pnpm demo:sp104` and the
+  guided walkthrough are unchanged.

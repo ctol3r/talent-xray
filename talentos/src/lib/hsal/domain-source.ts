@@ -7,65 +7,34 @@
 import { desc, eq } from "drizzle-orm";
 import type {
   CandidateSearchEvidence,
-  CriterionCategory,
   DomainSource,
   HiringManagerFeedback,
   PipelineSnapshot,
   SearchProject,
-  SuccessCriterion,
-  SuccessProfile,
 } from "@talentos/hsal-adapter";
 import { pipelineSnapshotSchema } from "@talentos/hsal-adapter";
 import type { Db } from "@/lib/db/client";
 import {
   candidates,
+  pipelineEvents,
   pipelineSnapshots,
+  pipelineStages,
   searchProjects,
   successProfiles,
 } from "@/lib/db/schema";
-import type { SuccessProfilePayload, TracedItem } from "@/lib/core/payloads";
+import { DEFAULT_PIPELINE_STAGES } from "@/lib/domain/pipeline";
+import {
+  deriveCountsFromEvents,
+  payloadToSuccessProfile,
+  type DerivedCounts,
+} from "./generic";
 import { SP104_ID, sp104 } from "../../../fixtures/sp104";
 
-const slug = (s: string) =>
-  s
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 40);
-
-export function inferCriterionCategory(label: string): CriterionCategory {
-  const l = label.toLowerCase();
-  if (/\btitle\b|\bstaff\b|\bprincipal\b|\bsenior\b/.test(l)) return "title";
-  if (/\byears?\b|experience level|\bseniority\b/.test(l)) return "experience";
-  if (
-    /bay area|remote|on-?site|hybrid|located|relocat|\bnyc\b|\blondon\b/.test(l)
-  )
-    return "geography";
-  if (/degree|\bphd\b|\bmsc?\b|\bbsc?\b|university/.test(l)) return "education";
-  if (/industry|company experience|startup|enterprise|sector/.test(l))
-    return "industry";
-  return "skill";
-}
-
-export function tracedItemsToCriteria(items: TracedItem[]): SuccessCriterion[] {
-  return items.map((item) => ({
-    id: item.id ?? `CRIT-${slug(item.text)}`,
-    label: item.text,
-    category: inferCriterionCategory(item.text),
-    ...(item.note ? { rationale: item.note } : {}),
-  }));
-}
-
-export function payloadToSuccessProfile(
-  payload: SuccessProfilePayload | undefined,
-): SuccessProfile {
-  if (!payload) return { mustHave: [], preferred: [], transferable: [] };
-  return {
-    mustHave: tracedItemsToCriteria(payload.mustHave),
-    preferred: tracedItemsToCriteria(payload.preferred),
-    transferable: tracedItemsToCriteria(payload.trainable),
-  };
-}
+export {
+  inferCriterionCategory,
+  payloadToSuccessProfile,
+  tracedItemsToCriteria,
+} from "./generic";
 
 const STATUS_MAP: Record<string, SearchProject["status"]> = {
   open: "active",
@@ -126,6 +95,28 @@ export class AppDomainSource implements DomainSource {
       .limit(1);
     if (!row) return undefined;
     return pipelineSnapshotSchema.parse(row);
+  }
+
+  /**
+   * Derive funnel counts for a period from the workstation's own pipeline
+   * events (its ATS). Returns nothing when the project has no events, so the
+   * recruiter is asked to enter counts rather than shown zeros as facts.
+   */
+  async deriveCounts(
+    id: string,
+    period: { start: string; end: string },
+  ): Promise<DerivedCounts | undefined> {
+    const stageRows = await this.db
+      .select()
+      .from(pipelineStages)
+      .where(eq(pipelineStages.searchProjectId, id));
+    const stages = stageRows.length ? stageRows : DEFAULT_PIPELINE_STAGES;
+    const events = await this.db
+      .select()
+      .from(pipelineEvents)
+      .where(eq(pipelineEvents.searchProjectId, id));
+    if (events.length === 0) return undefined;
+    return deriveCountsFromEvents(stages, events, period);
   }
 
   async listSnapshots(id: string): Promise<PipelineSnapshot[]> {

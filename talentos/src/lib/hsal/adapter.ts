@@ -5,18 +5,22 @@ import { AppDomainSource } from "./domain-source";
 import { DrizzleBindingStore, DrizzleLearningStore } from "./stores";
 
 export interface AppAdapter {
+  learnings: DrizzleLearningStore;
+  bindings: DrizzleBindingStore;
   adapter: HSALAdapter;
   domain: AppDomainSource;
 }
 
 /** Composition root for the app → HSAL adapter. */
 export function getAppAdapter(db: Db): AppAdapter {
+  const learnings = new DrizzleLearningStore(db);
+  const bindings = new DrizzleBindingStore(db);
   const domain = new AppDomainSource(db);
   const adapter = createHSALAdapter({
     client: getHSALClient(),
     domain,
-    bindings: new DrizzleBindingStore(db),
-    learnings: new DrizzleLearningStore(db),
+    bindings,
+    learnings,
   });
-  return { adapter, domain };
+  return { adapter, domain, learnings, bindings };
 }

@@ -6,6 +6,7 @@ import {
   applyProfileChangeAction,
   captureBeliefAction,
   recordExperimentResultAction,
+  recordPipelineSnapshotAction,
   recordPostInterventionAction,
   reviseBeliefAction,
   runDiagnosisAction,
@@ -15,14 +16,28 @@ import {
 import {
   CaptureBeliefForm,
   DiagnosisAction,
+  ExperimentResultForm,
+  LearningForm,
+  PipelineCountsForm,
+  ProfileChangeForm,
   ReviseBeliefForm,
 } from "@/components/diagnosis-actions";
 import { Card, EmptyState, KeyValue, PageHeader, Tag } from "@/components/ui";
 import {
+  LEARNING_CATEGORIES,
   PIPELINE_STAGES,
   PIPELINE_STAGE_LABELS,
   formatPct,
 } from "@talentos/hsal-adapter";
+import { AppDomainSource } from "@/lib/hsal/domain-source";
+import type { DerivedCounts } from "@/lib/hsal/generic";
+import {
+  applicabilityFor,
+  criteriaToLines,
+  defaultPeriod,
+  listToText,
+  localDay,
+} from "@/lib/hsal/generic";
 import { SP104_ID, sp104 } from "../../../../../fixtures/sp104";
 import { PRODUCT_NAME } from "@/lib/product";
 
@@ -58,6 +73,113 @@ export default async function DiagnosisPage({
   );
   const profileBelief = v.beliefs.find((b) => b.id.endsWith("-PROFILE"));
   const strongest = v.models[0];
+
+  // Inputs for the generic act/observe/learn forms (SP104 keeps its seeded values).
+  const domain = new AppDomainSource(db);
+  const domainProject = await domain.getSearchProject(id);
+  const profileNow = domainProject?.successProfile ?? {
+    mustHave: [],
+    preferred: [],
+    transferable: [],
+  };
+  const knownCriteria = isDemo
+    ? [
+        ...sp104.successProfileAfter.mustHave,
+        ...sp104.successProfileAfter.preferred,
+        ...sp104.successProfileAfter.transferable,
+      ]
+    : [];
+  const profileInitial = isDemo
+    ? {
+        mustHave: criteriaToLines(sp104.successProfileAfter.mustHave),
+        preferred: criteriaToLines(sp104.successProfileAfter.preferred),
+        transferable: criteriaToLines(sp104.successProfileAfter.transferable),
+      }
+    : {
+        mustHave: criteriaToLines(profileNow.mustHave),
+        preferred: criteriaToLines(profileNow.preferred),
+        transferable: criteriaToLines(profileNow.transferable),
+      };
+  const { start: sixWeeksAgo, end: today } = defaultPeriod();
+  const periodStart = selected
+    ? localDay(new Date(selected.selectedAt ?? selected.createdAt))
+    : today;
+  const derived =
+    selected && v.trajectories.length === 0 && !isDemo
+      ? await domain.deriveCounts(id, { start: periodStart, end: today })
+      : undefined;
+  const stageFields = PIPELINE_STAGES.map((k) => ({
+    key: k,
+    label: PIPELINE_STAGE_LABELS[k],
+  }));
+  const baselineDerived =
+    !v.snapshot && !isDemo
+      ? await domain.deriveCounts(id, { start: sixWeeksAgo, end: today })
+      : undefined;
+  const baselineInitial = {
+    periodStart: sixWeeksAgo,
+    periodEnd: today,
+    counts: baselineDerived?.counts ?? {},
+    source: baselineDerived ? ("ats" as const) : ("manual" as const),
+  };
+  const derivedNote = (d: DerivedCounts, since: string) => {
+    const blanks = d.unmapped.map((k) =>
+      PIPELINE_STAGE_LABELS[k].toLowerCase(),
+    );
+    return `Pre-filled from ${d.candidates} candidates with pipeline activity ${since}. Positive replies are not tracked as a stage, so fill them in${blanks.length > 1 ? ` (also: ${blanks.filter((b) => b !== "positive replies").join(", ")})` : ""}. Edit anything your ATS reports differently; edited numbers are recorded as manual.`;
+  };
+  const baselineNote = baselineDerived
+    ? derivedNote(baselineDerived, "over the last six weeks")
+    : "No pipeline events recorded for this search yet. Enter the counts from your ATS for the period.";
+  const postInitial = isDemo
+    ? {
+        periodStart: sp104.pipelineW9.periodStart,
+        periodEnd: sp104.pipelineW9.periodEnd,
+        counts: sp104.pipelineW9.counts as Record<string, number>,
+        source: "seed" as const,
+        preset: {
+          id: sp104.pipelineW9.id,
+          observedAt: sp104.pipelineW9.observedAt,
+        },
+      }
+    : {
+        periodStart,
+        periodEnd: today,
+        counts: derived?.counts ?? {},
+        source: derived ? ("ats" as const) : ("manual" as const),
+      };
+  const postNote = isDemo
+    ? "Seeded post-intervention pipeline (W9). Edit if you want to try other numbers; edited numbers are recorded as manual."
+    : derived
+      ? derivedNote(derived, "since the test was selected")
+      : "No pipeline events recorded for this search yet. Enter the counts from your ATS.";
+  const learningInitial = isDemo
+    ? {
+        id: sp104.learning.id,
+        title: sp104.learning.title,
+        statement: sp104.learning.statement,
+        category: sp104.learning.category,
+        confidence: sp104.learning.confidence,
+        applicability: Object.fromEntries(
+          Object.entries(sp104.learning.applicability).map(([k, v]) => [
+            k,
+            listToText(v),
+          ]),
+        ),
+      }
+    : {
+        title: "",
+        statement: "",
+        category:
+          strongest?.kind === "success_profile" ? "success_profile" : "other",
+        confidence: 0.5,
+        applicability: Object.fromEntries(
+          Object.entries(applicabilityFor(project)).map(([k, v]) => [
+            k,
+            listToText(v),
+          ]),
+        ),
+      };
 
   return (
     <div>
@@ -99,10 +221,20 @@ export default async function DiagnosisPage({
         {/* ------------------------------------------------ WHAT'S HAPPENING */}
         <Card title="What's happening?">
           {!v.snapshot ? (
-            <EmptyState
-              title="No pipeline snapshot yet"
-              detail="Import or record a pipeline snapshot to start."
-            />
+            <div className="space-y-2">
+              <EmptyState
+                title="No pipeline snapshot yet"
+                detail="Record the pipeline for a period to start. Counts are what happened; HSAL infers the rates."
+              />
+              <PipelineCountsForm
+                action={recordPipelineSnapshotAction}
+                searchProjectId={id}
+                stages={stageFields}
+                initial={baselineInitial}
+                note={baselineNote}
+                submitLabel="Record pipeline"
+              />
+            </div>
           ) : (
             <div className="space-y-2">
               <ul className="grid grid-cols-3 gap-x-4 gap-y-1 text-sm">
@@ -332,22 +464,31 @@ export default async function DiagnosisPage({
                   />
                 )}
                 {v.recommended.status === "selected" &&
-                  experimentEvidence.length === 0 && (
+                  experimentEvidence.length === 0 &&
+                  isDemo && (
                     <DiagnosisAction
                       action={recordExperimentResultAction}
                       input={{
                         searchProjectId: id,
                         interventionId: v.recommended.id,
                       }}
-                      label={
-                        isDemo
-                          ? "Record result (seeded: 7/10 advanced)"
-                          : "Record result"
-                      }
+                      label="Record result (seeded: 7/10 advanced)"
                       tone="secondary"
                     />
                   )}
               </div>
+              {v.recommended.status === "selected" &&
+                experimentEvidence.length === 0 &&
+                !isDemo && (
+                  <ExperimentResultForm
+                    action={recordExperimentResultAction}
+                    searchProjectId={id}
+                    interventionId={v.recommended.id}
+                    showAdvance={
+                      v.recommended.actionType === "calibration_test"
+                    }
+                  />
+                )}
               {experimentEvidence.length > 0 && (
                 <div className="rounded border border-edge bg-panel2 p-2 text-xs">
                   <div className="font-semibold">Experiment result</div>
@@ -436,34 +577,45 @@ export default async function DiagnosisPage({
         {/* ------------------------------------------------ ACT + OBSERVE AGAIN */}
         {selected && experimentEvidence.length > 0 && (
           <Card title="Act, then observe again">
-            <div className="space-y-2 text-sm">
+            <div className="space-y-3 text-sm">
               {profileChanged ? (
                 <p>
                   Success Profile changed by you (recorded as user-asserted
                   evidence).
                 </p>
-              ) : isDemo ? (
-                <DiagnosisAction
-                  action={applyProfileChangeAction}
-                  input={{ searchProjectId: id, interventionId: selected.id }}
-                  label="Apply profile change (Go → transferable; title → Staff-equivalent scope)"
-                  tone="secondary"
-                  confirm={`This changes the SP104 Success Profile in ${PRODUCT_NAME}. HSAL will only record that you did it. Continue?`}
-                />
               ) : (
-                <p className="text-ink-muted">
-                  Apply the change in the Profile module.
-                </p>
+                <div className="space-y-1">
+                  <p className="text-xs text-ink-muted">
+                    Change the Success Profile here or in the Profile module.
+                    {PRODUCT_NAME} applies it; HSAL only records that you did.
+                  </p>
+                  <ProfileChangeForm
+                    action={applyProfileChangeAction}
+                    searchProjectId={id}
+                    interventionId={selected.id}
+                    initial={profileInitial}
+                    knownCriteria={knownCriteria}
+                    confirm={`This changes the Success Profile for this search in ${PRODUCT_NAME}. HSAL will only record that you did it. Continue?`}
+                  />
+                </div>
               )}
               {v.trajectories.length === 0 ? (
-                isDemo && profileChanged ? (
-                  <DiagnosisAction
+                <div className="border-t border-edge pt-2">
+                  <p className="mb-1 text-xs text-ink-muted">
+                    After the change has run for a while, record the pipeline
+                    again. HSAL compares it with the state the test started
+                    from.
+                  </p>
+                  <PipelineCountsForm
                     action={recordPostInterventionAction}
-                    input={{ searchProjectId: id, interventionId: selected.id }}
-                    label="Ingest post-intervention pipeline (seeded W9)"
-                    tone="secondary"
+                    searchProjectId={id}
+                    interventionId={selected.id}
+                    stages={stageFields}
+                    initial={postInitial}
+                    note={postNote}
+                    submitLabel="Record pipeline and compare"
                   />
-                ) : null
+                </div>
               ) : (
                 v.trajectories.map((t) => (
                   <div
@@ -499,16 +651,17 @@ export default async function DiagnosisPage({
                 </div>
               </div>
             ))
-          ) : v.trajectories.length > 0 && isDemo ? (
-            <DiagnosisAction
+          ) : v.trajectories.length > 0 ? (
+            <LearningForm
               action={saveLearningAction}
-              input={{
-                searchProjectId: id,
+              searchProjectId={id}
+              categories={LEARNING_CATEGORIES}
+              initial={learningInitial}
+              refs={{
                 evidenceIds: experimentEvidence.map((e) => e.id),
                 originatingBeliefIds: v.beliefs.map((b) => b.id),
                 originatingModelIds: strongest ? [strongest.id] : [],
               }}
-              label="Save learning"
             />
           ) : (
             <EmptyState
