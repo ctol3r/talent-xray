@@ -628,6 +628,30 @@ describe("persisted calibration", () => {
     }
   });
 
+  it("refreshes identical rows with current decisions on regenerate so staleness clears", async () => {
+    const first = await generateSearchStrings(db, project);
+    expect(first.added).toBeGreaterThan(0);
+    const before = await listQueries(db, project);
+    // A decision made after generation whose quote is a full sentence, so
+    // calibration changes the signals but not the vocabulary: strings come
+    // out identical and must be refreshed rather than skipped.
+    const c = startComparison(db, project, candidate);
+    const l = addConnection(db, c.id, {
+      ...link(),
+      cvAnchor: { start: 0, end: cv.length, quote: cv },
+    });
+    recordReview(db, { linkId: l.id, decision: "accepted", note: "ok" });
+    const second = await generateSearchStrings(db, project);
+    const after = await listQueries(db, project);
+    expect(second.refreshed).toBeGreaterThan(0);
+    expect(after.length).toBeGreaterThanOrEqual(before.length);
+    const untouched = after.filter((r) => before.some((b) => b.id === r.id));
+    for (const row of untouched) {
+      expect(row.calibration?.reviewedLinks).toBe(1);
+      expect(row.calibration?.signalsHash).toBeTruthy();
+    }
+  });
+
   it("composes and persists plan-derived strings with requirement links, merging on collision", async () => {
     await db
       .update(schema.hiringIntelligence)

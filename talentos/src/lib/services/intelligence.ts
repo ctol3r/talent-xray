@@ -350,16 +350,26 @@ export async function generatePlannedQueries(db: Db, projectId: string) {
       ];
       const collision = byKey.get(key);
       if (collision) {
+        // Identical string already stored: merge requirement linkage and
+        // refresh its calibration with the current decisions (Wave P
+        // finding — skipping left old rows stale forever).
         const union = [
           ...new Set([...(collision.linkedRequirementIds ?? []), ...linked]),
         ];
-        if (union.length !== (collision.linkedRequirementIds ?? []).length) {
-          await db
-            .update(searchQueries)
-            .set({ linkedRequirementIds: union })
-            .where(eq(searchQueries.id, collision.id));
-          merged += 1;
-        }
+        await db
+          .update(searchQueries)
+          .set({
+            linkedRequirementIds: union,
+            calibration: {
+              generatedAt,
+              reviewedLinks: calibration.signals.reviewedLinks,
+              signalsHash: signalsFingerprint(calibration.outcomes),
+              decisions: rowDecisions,
+            },
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(searchQueries.id, collision.id));
+        merged += 1;
         continue;
       }
       if (seenKeys.has(key) || q.query.trim() === "") continue;

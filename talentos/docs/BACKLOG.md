@@ -74,6 +74,40 @@ Remaining follow-ups from that wave:
 - **NPI-2 organisation records; periodic re-check of match freshness;
   more than one registry per candidate.**
 
+## Pilot findings — Wave P, Search 1 (2026-09-06)
+
+Source: `docs/PILOT-2026-09-06.md`. Measured on a real JD and a real CV
+through the UI with the session provider; discovery was blocked by the
+owner's Google key, so yield findings are still open.
+
+- **Derive hiring need / search plan from the UI.** `deriveHiringNeed` and
+  `deriveSearchPlan` have no button; "Compose from search plan" therefore
+  never appears without a script (`scripts/pilot-derive-plan.mts`). Add a
+  "Derive search plan" action on the Strategy or Strings page, session
+  provider included.
+- **Budget splitter: slice several lists jointly.** 16 of 122 strings
+  stayed over the 32-term Google budget ("kept whole") because exclusions
+  (6 negated terms), locations and title groups together exceed it before
+  any single OR list can fix it. Slice exclusions too, or slice two lists
+  at once, before giving up.
+- **Quote-to-term rule is too strict for real reviews.** Recruiters accept
+  sentence-length passages; the ≤4-word rule added nothing from 11 accepted
+  anchors. Extract noun phrases from accepted quotes, or offer a "use as
+  search term" pick at accept time.
+- **Seed only on request.** A fresh personal database was seeded with six
+  demo searches on first start. Gate the seed behind an explicit flag or a
+  Settings action.
+- **Outbox re-hash notice.** When project context changes between raising
+  and fulfilling a session request, the request is re-hashed and the old
+  response is orphaned (observed with the hiring-need request after
+  channels were added). Show pending requests in the UI with their hash
+  and a "context changed" marker (extends the "session provider in the
+  UI" item).
+- **Fixed during the pilot (record only):** regenerate with identical
+  strings now refreshes existing rows' calibration instead of skipping
+  them, so the "decisions changed" notice clears; plan-composed rows get
+  the same refresh on collision.
+
 ## Other
 
 - **Session provider in the UI**: surface pending outbox requests as a

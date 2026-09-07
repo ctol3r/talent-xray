@@ -274,17 +274,22 @@ export async function generateSearchStrings(
     channels,
   });
   const existingRows = await db
-    .select({ query: searchQueries.query, archived: searchQueries.archived })
+    .select({
+      id: searchQueries.id,
+      query: searchQueries.query,
+      archived: searchQueries.archived,
+    })
     .from(searchQueries)
     .where(eq(searchQueries.searchProjectId, projectId));
   const existing = new Set(existingRows.map((q) => q.query));
   // Also skip anything already stored under a different casing/spacing,
   // so a regenerate never re-adds the same string as a near-duplicate.
-  const existingKeys = new Set(
+  const existingByKey = new Map(
     existingRows
       .filter((q) => !q.archived)
-      .map((q) => normalizeQueryKey(q.query)),
+      .map((q) => [normalizeQueryKey(q.query), q.id]),
   );
+  const existingKeys = new Set(existingByKey.keys());
   const rows = prepared.rows
     .map((q) => ({
       searchProjectId: projectId,
@@ -321,8 +326,37 @@ export async function generateSearchStrings(
   if (rows.length > 0) {
     await db.insert(searchQueries).values(rows);
   }
+  // Wave P finding: when calibration changes decisions but not the strings,
+  // the regenerate used to add nothing and leave the old rows carrying stale
+  // calibration forever. Refresh the surviving rows in place instead.
+  let refreshed = 0;
+  for (const q of prepared.rows) {
+    const id = existingByKey.get(normalizeQueryKey(q.query));
+    if (!id) continue;
+    await db
+      .update(searchQueries)
+      .set({
+        calibration: {
+          generatedAt,
+          reviewedLinks: calibration.signals.reviewedLinks,
+          signalsHash: signalsFingerprint(calibration.outcomes),
+          decisions: decisionsForQuery(q.query, decisions),
+        },
+        linkedRequirementIds: [
+          ...new Set(
+            decisionsForQuery(q.query, decisions).flatMap(
+              (d) => d.requirementIds,
+            ),
+          ),
+        ],
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(searchQueries.id, id));
+    refreshed += 1;
+  }
   return {
     added: rows.length,
+    refreshed,
     warnings,
     qa: {
       pruned: prepared.pruned,

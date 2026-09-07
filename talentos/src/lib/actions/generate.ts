@@ -147,10 +147,8 @@ export async function generateSearchStringsAction(
 ): Promise<ActionResult<GenerateSummary>> {
   return act(async () => {
     const { searchProjectId } = projectInput.parse(input);
-    const { added, warnings, qa, calibration } = await generateSearchStrings(
-      getDb(),
-      searchProjectId,
-    );
+    const { added, refreshed, warnings, qa, calibration } =
+      await generateSearchStrings(getDb(), searchProjectId);
     revalidateProject(searchProjectId);
     const extras: string[] = [];
     if (qa.pruned.length > 0) {
@@ -166,6 +164,11 @@ export async function generateSearchStringsAction(
     if (qa.split > 0) extras.push(`${qa.split} split to fit the word budget`);
     const cal = calibrationNote(calibration.decisions);
     if (cal) extras.push(cal);
+    if (refreshed > 0) {
+      extras.push(
+        `${refreshed} existing quer${refreshed === 1 ? "y" : "ies"} refreshed with current review decisions`,
+      );
+    }
     return {
       warnings,
       note: [`${added} quer${added === 1 ? "y" : "ies"} added`, ...extras].join(
@@ -189,7 +192,7 @@ export async function composePlannedQueriesAction(
     ];
     if (result.merged > 0) {
       parts.push(
-        `${result.merged} existing row${result.merged === 1 ? "" : "s"} gained requirement links`,
+        `${result.merged} existing row${result.merged === 1 ? "" : "s"} refreshed with current review decisions`,
       );
     }
     const cal = calibrationNote(result.decisions);
