@@ -134,6 +134,75 @@ Search JSON API is closed to new customers and ends for everyone on
   probe result (HTTP code and Google's message) so a refused key is
   visible without reading logs.
 
+## Profile connections — from the Wave H design (2026-09-07)
+
+Source: `docs/WAVE-H-PROFILE-CONNECTIONS.md` (designed, not built) and the
+2026-09-07 source verification: 28 candidate sources checked against their own
+documentation, 16 confirmed, 12 refuted or materially corrected. Nothing below
+is built. **A source marked REFUTED must be re-verified before any adapter is
+written** — the original research claim about it did not survive checking.
+
+**Confirmed, worth an adapter on the D-032 pattern.**
+
+- **GitHub** REST `/users/{login}` + `/social_accounts` — website, X handle,
+  every social account the person listed. Keyless at 60/h, 5,000/h with a free
+  token. AUP bars bulk collection and unsolicited recruiter email; one person
+  per click is the conservative reading and is a lawyer question, not an
+  assertion in code. Wired in Wave H.
+- **Keybase** `user/lookup.json?fields=proofs_summary` — cryptographic proofs
+  to GitHub, X, Reddit, Hacker News and owned domains. Keyless. The only
+  source in the set that earns a reciprocal tier. Dormant since 2020, so the
+  label must say so. Wired in Wave H.
+- **Wikidata** SPARQL over ~30 identifier properties (P2002 X, P2037 GitHub,
+  P496 ORCID, P4033 Mastodon, P1153 Scopus …) — CC0, keyless, descriptive
+  User-Agent required. The one multi-link hub for notable people. Needs a new
+  tier value `community_entered`, labelled
+  `unverified · from Wikidata (community-entered)`. Wave H2.
+- **ORCID** public API `researcher-urls` / `external-identifiers` — **owner
+  decision first:** the Public API is non-commercial by its terms, so a
+  commercial launch needs membership (about USD 5,975/yr) or the annual CC0
+  data file. Never call `/educations`: the end-date year is an age proxy.
+  Wave H2.
+- **Identifier corroboration, not links** (feed the matcher, never new rows):
+  Semantic Scholar (confirm the licence first), Europe PMC, NIH RePORTER,
+  arXiv author identifiers, DBLP (CC0 but every host now serves a
+  proof-of-work challenge to server-side calls; dump or link-out only).
+
+**REFUTED 2026-09-07 — re-verify before any adapter.** GitLab, Bluesky,
+Mastodon, Dev.to, Stack Exchange, Hugging Face, Product Hunt, YouTube,
+Gravatar, OpenAlex, Crossref, and the LinkedIn entry's endpoint field. In most
+cases the endpoint exists but the auth or terms claim was wrong. Gravatar in
+particular: its lookup is keyed by an email hash, which makes it an
+email-existence oracle — write "never hash anything from the contact finder"
+beside any future adapter.
+
+**Closed by their own terms, link-out only.** LinkedIn (no API for other
+members; User Agreement §8.2 forbids storing their data), Meta's Threads,
+Instagram and Facebook (need the person's own token or a business account and
+App Review), X and Hashnode (paid), Dribbble (OAuth, terms aimed at hiring),
+Doximity, Zocdoc, Healthgrades, Muck Rack (no public API), Google Scholar,
+BrokerCheck and IAPD (automation forbidden), Crunchbase and OpenCorporates
+(paid, purpose-restricted, and they carry gender, birth date and nationality
+fields that an allow-list would have to drop).
+
+**Deferred from the Wave H design.** The `profile_confirmation_requests`
+snapshot table; a localhost confirmation sheet at `/confirm/[token]` (needs a
+security review before any tunnel); per-jurisdiction notice templates;
+retention default and review date per search; the merge UI (still none by
+design); handle-pivot URL guesses unless the owner takes option (B); a session
+timer so connections-per-recruiter-minute can be measured; the equivalent-brief
+trial against one incumbent that rule 9 requires before any comparative
+sentence is written anywhere.
+
+**Corpus checks in the control panel.** `www.martindale.com/*` is listed twice
+in the Reach engine; `www.apollo.io/companies/*` and
+`www.linkedin.com/company/*` are company patterns occupying people slots;
+`data.cms.gov/*` is a dataset, not a person surface. Platforms outside the
+corpus that recruiters actually use: LeetCode, HackerRank, Codeforces, Docker
+Hub, Codeberg, Linktree, personal domains, hospital physician finders, faculty
+and lab pages, OpenAlex author pages, bioRxiv author pages. Core is at its
+50-site cap, so any addition is a swap or a third engine.
+
 ## Other
 
 - **Session provider in the UI**: surface pending outbox requests as a
