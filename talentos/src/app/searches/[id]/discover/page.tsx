@@ -4,7 +4,7 @@ import { queryYieldForProject } from "@/lib/services/query-yield";
 import { listQueries } from "@/lib/services/workflow";
 import { DiscoveryPanel } from "@/components/discovery-panel";
 import { ProjectYieldCard } from "@/components/query-qa";
-import { Card, EmptyState, PageHeader } from "@/components/ui";
+import { Card, PageHeader } from "@/components/ui";
 
 export const metadata = { title: "Discover" };
 
@@ -26,28 +26,23 @@ export default async function DiscoverPage({
     <div>
       <PageHeader
         title="Discover"
-        description="Run your composed strings against the two live people-only search engines (profiles, portfolios, CVs, registries, rosters — no company marketing, no job ads). Result pages are never fetched or scraped; links open on the source site, and nothing persists unless you save a specific result."
+        description="Open your composed strings on the two live people-only search engines (profiles, portfolios, CVs, registries, rosters — no company marketing, no job ads). The engine's own results page opens in a new tab; you read the count and choose which profile URLs to keep. Result pages are never fetched or scraped, and nothing persists unless you record it."
       />
-      {!status.configured ? (
-        <EmptyState
-          title="Search engine not configured"
-          detail="Set TALENTOS_GOOGLE_CSE_KEY (your own Google Custom Search JSON API key) in .env, then restart. The engine IDs default to the live Talent X-Ray people-only engines; discovery is separate from general research (D-010)."
-        />
-      ) : (
-        <DiscoveryPanel
-          projectId={id}
-          queries={queries.map((q) => {
-            const y = yieldByProject.byQuery.get(q.id);
-            return {
-              id: q.id,
-              platform: q.platform,
-              breadth: q.breadth,
-              query: q.query,
-              yield: y ? { runs: y.runs, savedUrls: y.savedUrls } : undefined,
-            };
-          })}
-        />
-      )}
+      <DiscoveryPanel
+        projectId={id}
+        hosted={status.hosted}
+        apiConfigured={status.configured}
+        queries={queries.map((q) => {
+          const y = yieldByProject.byQuery.get(q.id);
+          return {
+            id: q.id,
+            platform: q.platform,
+            breadth: q.breadth,
+            query: q.query,
+            yield: y ? { runs: y.runs, savedUrls: y.savedUrls } : undefined,
+          };
+        })}
+      />
 
       {yieldByProject.totals.runs > 0 && (
         <div className="mt-6">

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db/client";
 import type { DiscoveryResult } from "@/lib/research/discovery-provider";
 import {
+  recordLinkOutRun,
+  recordLinkOutRunInput,
   runDiscovery,
   runDiscoveryInput,
   saveDiscoveryResult,
@@ -32,6 +34,20 @@ export async function runDiscoveryAction(
       resultCount: results.length,
     });
     return { results, runId: run.id };
+  });
+}
+
+/** Link-out run (D-034): the count the recruiter read and the URLs they kept. */
+export async function recordLinkOutRunAction(
+  input: unknown,
+): Promise<
+  ActionResult<{ runId: string; savedUrls: number; candidatesCreated: number }>
+> {
+  return act(async () => {
+    const parsed = recordLinkOutRunInput.parse(input);
+    const result = await recordLinkOutRun(getDb(), parsed);
+    revalidatePath(`/searches/${parsed.searchProjectId}`, "layout");
+    return result;
   });
 }
 

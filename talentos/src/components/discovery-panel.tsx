@@ -4,10 +4,15 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { DiscoveryResult } from "@/lib/research/discovery-provider";
 import {
+  recordLinkOutRunAction,
   runDiscoveryAction,
   saveDiscoveryResultAction,
 } from "@/lib/actions/discovery";
-import { candidateNameFromTitle } from "@/lib/domain/discovery";
+import {
+  buildHostedSearchUrl,
+  candidateNameFromTitle,
+  parseSaveLines,
+} from "@/lib/domain/discovery";
 
 interface QueryOption {
   id: string;
@@ -19,16 +24,25 @@ interface QueryOption {
 }
 
 /**
- * Live people-search against the Talent X-Ray engines. Results are
- * transient — nothing persists unless the recruiter saves a specific
- * result. Links open externally; result pages are never fetched.
+ * People-search on the Talent X-Ray engines. Two ways in (D-034): link-out
+ * to the engine's own hosted results page — always available, no key; the
+ * recruiter reads the count and pastes the URLs worth keeping — and, when
+ * a JSON API key is configured, an in-app run whose results are transient.
+ * Either way nothing persists unless the recruiter saves a specific URL,
+ * links open externally, and result pages are never fetched.
  */
 export function DiscoveryPanel({
   projectId,
   queries,
+  hosted,
+  apiConfigured,
 }: {
   projectId: string;
   queries: QueryOption[];
+  /** Engine ids for the hosted results page, per engine. */
+  hosted: { core: string; reach: string };
+  /** True only when a JSON API provider (or the mock) is configured. */
+  apiConfigured: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -40,6 +54,9 @@ export function DiscoveryPanel({
   const [results, setResults] = useState<DiscoveryResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedUrls, setSavedUrls] = useState<Record<string, string>>({});
+  const [countText, setCountText] = useState("");
+  const [linesText, setLinesText] = useState("");
+  const [recorded, setRecorded] = useState<string | null>(null);
 
   const selected = queries.find((q) => q.id === selectedId);
   // An edited string is still run, but the stored string is never credited
@@ -61,6 +78,49 @@ export function DiscoveryPanel({
       });
       if (r.ok) setResults(r.data.results);
       else setError(r.error);
+    });
+
+  const hostedUrl =
+    query.trim().length >= 2
+      ? buildHostedSearchUrl(hosted[engine], query)
+      : null;
+
+  const recordRun = () =>
+    startTransition(async () => {
+      setError(null);
+      setRecorded(null);
+      if (!/^\d+$/.test(countText.trim())) {
+        setError(
+          "Enter the result count shown at the top of the engine page (0 if it shows none).",
+        );
+        return;
+      }
+      const { saves, rejected } = parseSaveLines(linesText);
+      if (rejected.length > 0) {
+        setError(
+          `Not a complete http(s) URL — fix or remove: ${rejected.slice(0, 3).join(" · ")}${rejected.length > 3 ? " …" : ""}`,
+        );
+        return;
+      }
+      const r = await recordLinkOutRunAction({
+        searchProjectId: projectId,
+        queryId: selected?.id,
+        queryText: query,
+        edited,
+        engine,
+        resultCount: Number(countText.trim()),
+        saves,
+      });
+      if (r.ok) {
+        setRecorded(
+          `Run recorded · ${r.data.savedUrls} saved · ${r.data.candidatesCreated} candidate${r.data.candidatesCreated === 1 ? "" : "s"} created`,
+        );
+        setCountText("");
+        setLinesText("");
+        router.refresh();
+      } else {
+        setError(r.error);
+      }
     });
 
   const save = (result: DiscoveryResult, candidateName?: string) =>
@@ -131,7 +191,7 @@ export function DiscoveryPanel({
             className="mt-1 w-full rounded border border-edge bg-canvas px-2 py-1.5 font-mono text-[12px]"
           />
         </label>
-        <div className="mt-3 flex items-center gap-3">
+        <div className="mt-3 flex flex-wrap items-center gap-3">
           <select
             value={engine}
             onChange={(e) => setEngine(e.target.value as "core" | "reach")}
@@ -144,17 +204,84 @@ export function DiscoveryPanel({
               Verified &amp; Reach (registries, rosters, contact records)
             </option>
           </select>
-          <button
-            type="button"
-            onClick={run}
-            disabled={isPending || query.trim().length < 2}
-            className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
-          >
-            {isPending ? "Searching…" : "Run search"}
-          </button>
+          {hostedUrl ? (
+            <a
+              href={hostedUrl}
+              target="_blank"
+              rel="noopener"
+              className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas hover:opacity-90"
+            >
+              Open on engine ↗
+            </a>
+          ) : (
+            <span className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas opacity-50">
+              Open on engine ↗
+            </span>
+          )}
+          {apiConfigured && (
+            <button
+              type="button"
+              onClick={run}
+              disabled={isPending || query.trim().length < 2}
+              className="rounded border border-edge2 px-3 py-1.5 text-[13px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
+            >
+              {isPending ? "Searching…" : "Run search"}
+            </button>
+          )}
           <span className="text-[11.5px] text-ink-faint">
-            Results are transient — nothing is stored unless you save it.
+            The engine page opens in a new tab. Nothing is stored unless you
+            record it below.
           </span>
+        </div>
+        <div className="mt-4 rounded border border-edge bg-canvas p-3">
+          <p className="text-[12.5px] font-medium">
+            Record what you saw on the engine page
+          </p>
+          <p className="mt-0.5 text-[11.5px] text-ink-faint">
+            The count is a number, not a result. Only the URLs you paste are
+            kept, labelled unverified until you check the source.
+          </p>
+          <div className="mt-2 flex flex-wrap items-end gap-3">
+            <label className="block text-[12px] text-ink-muted">
+              Result count shown
+              <input
+                type="text"
+                inputMode="numeric"
+                value={countText}
+                onChange={(e) => setCountText(e.target.value)}
+                placeholder="e.g. 230"
+                className="mt-1 w-28 rounded border border-edge bg-panel px-2 py-1.5 text-[12.5px]"
+              />
+            </label>
+          </div>
+          <label className="mt-2 block text-[12px] text-ink-muted">
+            Profile URLs to keep — one per line; add “ | Name” to create a
+            candidate
+            <textarea
+              value={linesText}
+              onChange={(e) => setLinesText(e.target.value)}
+              rows={3}
+              placeholder={
+                "https://www.linkedin.com/in/example | Example Person"
+              }
+              className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[12px]"
+            />
+          </label>
+          <div className="mt-2 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={recordRun}
+              disabled={isPending || query.trim().length < 2}
+              className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
+            >
+              Record run
+            </button>
+            {recorded && (
+              <span className="rounded border border-ok/40 bg-ok-soft px-2 py-0.5 text-[11.5px] text-ok">
+                {recorded}
+              </span>
+            )}
+          </div>
         </div>
         {error && (
           <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[12px] text-bad">

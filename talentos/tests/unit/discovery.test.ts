@@ -12,12 +12,19 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Db } from "@/lib/db/client";
 import {
   buildCseUrl,
+  buildHostedEngineUrl,
   createTalentXRayDiscoveryProvider,
+  hostedEngineIds,
   mapCseItems,
 } from "@/lib/research/talent-xray";
 import { getCandidateDiscoveryProvider } from "@/lib/research/discovery-provider";
 import { getResearchProvider } from "@/lib/research/provider";
-import { candidateNameFromTitle } from "@/lib/domain/discovery";
+import {
+  buildHostedSearchUrl,
+  candidateNameFromTitle,
+  isHttpUrl,
+  parseSaveLines,
+} from "@/lib/domain/discovery";
 
 process.env.TALENTOS_MODEL_PROVIDER = "mock";
 
@@ -116,6 +123,60 @@ describe("talent-xray candidate-discovery provider", () => {
   });
 });
 
+describe("link-out discovery (D-034)", () => {
+  const query =
+    '("Founding Recruiter" OR "First Recruiter") recruiting -"recruiter job" (site:linkedin.com/in OR site:linkedin.com/pub)';
+
+  it("builds the hosted results page url per engine with the string verbatim", () => {
+    const core = new URL(buildHostedEngineUrl("core", query));
+    expect(core.origin + core.pathname).toBe("https://cse.google.com/cse");
+    expect(core.searchParams.get("cx")).toBe("a157d37906e1141cc");
+    expect(core.searchParams.get("q")).toBe(query);
+    const reach = new URL(buildHostedEngineUrl("reach", query));
+    expect(reach.searchParams.get("cx")).toBe("918bc00e18d0c46e5");
+    // No key, ever, on the link-out path.
+    expect(core.searchParams.has("key")).toBe(false);
+    expect(buildHostedSearchUrl("abc", "x y")).toBe(
+      "https://cse.google.com/cse?cx=abc&q=x+y",
+    );
+  });
+
+  it("honours the engine id overrides", () => {
+    process.env.TALENTOS_CSE_REACH_CX = "override-reach";
+    expect(hostedEngineIds().reach).toBe("override-reach");
+    expect(hostedEngineIds().core).toBe("a157d37906e1141cc");
+    delete process.env.TALENTOS_CSE_REACH_CX;
+  });
+
+  it("parses pasted save lines: names, blanks, duplicates, rejects", () => {
+    const { saves, rejected } = parseSaveLines(
+      [
+        "https://www.linkedin.com/in/jane-doe | Jane Doe",
+        "",
+        "https://github.com/janedoe",
+        "http://www.linkedin.com/in/jane-doe/",
+        "javascript:alert(1)",
+        "linkedin.com/in/no-scheme",
+        "https://x.com/janedoe | ",
+      ].join("\n"),
+    );
+    expect(saves).toEqual([
+      {
+        url: "https://www.linkedin.com/in/jane-doe",
+        candidateName: "Jane Doe",
+      },
+      { url: "https://github.com/janedoe" },
+      { url: "https://x.com/janedoe" },
+    ]);
+    expect(rejected).toEqual([
+      "javascript:alert(1)",
+      "linkedin.com/in/no-scheme",
+    ]);
+    expect(isHttpUrl("https://user:pw@example.com/")).toBe(false);
+    expect(isHttpUrl("https://example.com/a b")).toBe(false);
+  });
+});
+
 describe("explicit save flow", () => {
   let db: Db;
   let tmpDir: string;
@@ -191,6 +252,75 @@ describe("explicit save flow", () => {
       verificationStatus: "unverified",
       provenance: "search_result",
     });
+  });
+
+  it("records a link-out run: verbatim runs and saves are credited, edited runs are not", async () => {
+    const { recordLinkOutRun } = await import("@/lib/services/discovery");
+    const { upsertQuery } = await import("@/lib/services/workflow");
+    const { queryYieldForProject } = await import("@/lib/services/query-yield");
+    const stored = await upsertQuery(db, {
+      searchProjectId: projectId,
+      platform: "Google (LinkedIn x-ray)",
+      query: '"Founding Recruiter" site:linkedin.com/in',
+      breadth: "narrow",
+    });
+    const verbatim = await recordLinkOutRun(db, {
+      searchProjectId: projectId,
+      queryId: stored.id,
+      queryText: stored.query,
+      engine: "core",
+      resultCount: 230,
+      saves: [
+        {
+          url: "https://www.linkedin.com/in/linkout-one",
+          candidateName: "Linkout One",
+        },
+        { url: "https://github.com/linkout-two" },
+      ],
+    });
+    expect(verbatim).toMatchObject({ savedUrls: 2, candidatesCreated: 1 });
+
+    const edited = await recordLinkOutRun(db, {
+      searchProjectId: projectId,
+      queryId: stored.id,
+      queryText: `${stored.query} extra`,
+      edited: true,
+      engine: "reach",
+      resultCount: 0,
+      saves: [{ url: "https://x.com/linkout-three" }],
+    });
+    expect(edited.savedUrls).toBe(1);
+
+    const y = await queryYieldForProject(db, projectId);
+    const credited = y.byQuery.get(stored.id);
+    expect(credited).toMatchObject({
+      runs: 1,
+      lastResultCount: 230,
+      savedUrls: 2,
+      candidates: 1,
+    });
+    expect(y.totals.runs).toBe(2);
+    // Saves are labelled by provider and engine, so the ledger counts them
+    // exactly as an API save.
+    const { listSavedSources } = await import("@/lib/services/discovery");
+    const sources = await listSavedSources(db, projectId);
+    expect(sources.map((s) => s.source).sort()).toEqual(
+      [
+        "talent-xray:core",
+        "talent-xray:core",
+        "talent-xray:core",
+        "talent-xray:reach",
+      ].sort(),
+    );
+    await expect(
+      recordLinkOutRun(db, {
+        searchProjectId: projectId,
+        queryText: stored.query,
+        engine: "core",
+        resultCount: 1,
+        saves: [{ url: "not a url" }],
+      }),
+    ).rejects.toThrow(/complete http/);
   });
 
   it("verification is a recruiter act, recorded explicitly", async () => {

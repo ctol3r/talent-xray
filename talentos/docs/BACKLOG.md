@@ -121,17 +121,18 @@ Search JSON API is closed to new customers and ends for everyone on
   boolean output unchanged; per-query pricing available to an individual
   recruiter (BYOK); the 100-domain people-only corpus expressible as a
   filter; no result-page fetching. Output: a one-page matrix and a D-034.
-- **Link-out-only fallback in the app.** A discovery mode that opens the
-  composed string on a public engine in the recruiter's own browser and
-  records only the string and explicit saves. Satisfies every hard rule
-  today; loses automatic yield counts. Cheapest way to keep the pilot's
-  discovery steps runnable.
+- **Link-out-only fallback in the app — DONE 2026-09-07 (D-034).** Opens
+  the string on the engines' own hosted results page (corpus kept, not a
+  public engine); the recruiter records the count and pastes the URLs
+  kept; same ledger rows as the API path. Remaining loss: counts are
+  self-reported, saves carry no snippet or rank.
 - **Runbook and plan corrections.** `docs/PILOT-RUNBOOK.md` Part A1 and
   the Wave G cost figures assume Google pricing and a ten-minute key; both
   are wrong now. Fix when the replacement is chosen, not before.
-- **Settings page honesty.** The discovery status card should show the
-  provider's last probe result (HTTP code and Google's message) instead of
-  "configured", so a refused key is visible without reading logs.
+- **Settings page honesty.** Copy now says link-out needs no key and the
+  API is optional (2026-09-07). Still open: show the API provider's last
+  probe result (HTTP code and Google's message) so a refused key is
+  visible without reading logs.
 
 ## Other
 

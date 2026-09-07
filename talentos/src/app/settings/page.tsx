@@ -53,9 +53,13 @@ export default function SettingsPage() {
           </div>
           <p className="text-[13px] text-ink-muted">
             People search only — profiles, portfolios, publications, registries,
-            rosters. Backed by the two live people-only engines (set
-            TALENTOS_GOOGLE_CSE_KEY to enable). Result pages are never fetched;
-            saved snippets stay labeled unverified until you check the source.
+            rosters, on the two live people-only engines. Discover opens each
+            string on the engine&apos;s own results page (link-out, no key
+            needed); you record the count and the URLs you keep. The JSON API
+            provider above is optional and, since Google closed that API to new
+            customers, most installs will show it as not configured. Result
+            pages are never fetched; saved snippets stay labeled unverified
+            until you check the source.
           </p>
         </Card>
         <Card title="Research provider (general)">

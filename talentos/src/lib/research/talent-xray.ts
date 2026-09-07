@@ -1,3 +1,4 @@
+import { buildHostedSearchUrl } from "@/lib/domain/discovery";
 import type {
   CandidateDiscoveryProvider,
   DiscoveryResult,
@@ -47,19 +48,36 @@ export type FetchLike = (url: string) => Promise<{
   json(): Promise<unknown>;
 }>;
 
+/** The engine id in use, honouring the env overrides. */
+export function engineCx(engine: CseEngine): string {
+  return engine === "reach"
+    ? (process.env.TALENTOS_CSE_REACH_CX ?? CSE_ENGINES.reach)
+    : (process.env.TALENTOS_CSE_CORE_CX ?? CSE_ENGINES.core);
+}
+
+/** Both engine ids, for a server page to hand to the link-out UI. */
+export function hostedEngineIds(): Record<CseEngine, string> {
+  return { core: engineCx("core"), reach: engineCx("reach") };
+}
+
+/**
+ * Link-out discovery (D-034): the engine's own hosted results page. Needs
+ * no key; the app never reads the page. Kept next to the JSON API builder
+ * so the two ways of reaching the same engines stay in one file.
+ */
+export function buildHostedEngineUrl(engine: CseEngine, query: string): string {
+  return buildHostedSearchUrl(engineCx(engine), query);
+}
+
 export function buildCseUrl(
   key: string,
   engine: CseEngine,
   query: string,
   limit: number,
 ): string {
-  const cx =
-    engine === "reach"
-      ? (process.env.TALENTOS_CSE_REACH_CX ?? CSE_ENGINES.reach)
-      : (process.env.TALENTOS_CSE_CORE_CX ?? CSE_ENGINES.core);
   const params = new URLSearchParams({
     key,
-    cx,
+    cx: engineCx(engine),
     q: query,
     num: String(Math.min(Math.max(limit, 1), 10)),
   });

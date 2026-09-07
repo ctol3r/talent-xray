@@ -16,15 +16,31 @@ import { z } from "zod";
 import { verificationStatusSchema } from "@/lib/core/enums";
 import type { Db } from "@/lib/db/client";
 import { candidateSourceEvidence, researchSources } from "@/lib/db/schema";
+import { isHttpUrl } from "@/lib/domain/discovery";
 import {
   getCandidateDiscoveryProvider,
   type DiscoveryResult,
 } from "@/lib/research/discovery-provider";
+import {
+  hostedEngineIds,
+  TALENT_XRAY_PROVIDER_NAME,
+} from "@/lib/research/talent-xray";
 import { createCandidate, createCandidateInput } from "./candidates";
+import { recordQueryRun } from "./query-yield";
 
+/**
+ * Two ways to reach the engines. Link-out (D-034) is always available and
+ * needs no key: the recruiter opens the engine's hosted results page. The
+ * JSON API provider is optional (Google closed it to new customers, D-033)
+ * and reports `configured` only when a key is present.
+ */
 export function discoveryStatus() {
   const provider = getCandidateDiscoveryProvider();
-  return { provider: provider.name, configured: provider.configured };
+  return {
+    provider: provider.name,
+    configured: provider.configured,
+    hosted: hostedEngineIds(),
+  };
 }
 
 export const runDiscoveryInput = z.object({
@@ -121,6 +137,67 @@ export async function saveDiscoveryResult(
     });
   }
   return { saved, candidateId };
+}
+
+const linkOutSaveSchema = z.object({
+  url: z
+    .string()
+    .max(2048)
+    .refine(isHttpUrl, "Each line must be a complete http(s) URL."),
+  title: z.string().max(500).optional(),
+  candidateName: z.string().min(1).max(200).optional(),
+});
+
+export const recordLinkOutRunInput = z.object({
+  searchProjectId: z.string(),
+  /** The stored string this run came from, when run verbatim. */
+  queryId: z.string().optional(),
+  queryText: z.string().min(2),
+  edited: z.boolean().default(false),
+  engine: z.enum(["core", "reach"]),
+  /** The count the recruiter read off the hosted page — a number, not a result. */
+  resultCount: z.number().int().min(0),
+  /** URLs the recruiter chose to keep after opening them. */
+  saves: z.array(linkOutSaveSchema).max(50).default([]),
+});
+
+/**
+ * Link-out run (D-034). The recruiter opened the hosted engine page in a
+ * new tab, read the result count, and pasted the profile URLs worth
+ * keeping. Only that count and those explicit saves are stored — the same
+ * ledger rows the JSON API path wrote, so yield rolls up identically. An
+ * edited string is recorded but never credited (Wave A rule).
+ */
+export async function recordLinkOutRun(
+  db: Db,
+  raw: z.input<typeof recordLinkOutRunInput>,
+) {
+  const input = recordLinkOutRunInput.parse(raw);
+  const run = await recordQueryRun(db, {
+    searchProjectId: input.searchProjectId,
+    queryId: input.queryId,
+    queryText: input.queryText,
+    edited: input.edited,
+    engine: input.engine,
+    resultCount: input.resultCount,
+  });
+  const creditedQueryId = input.edited ? undefined : input.queryId;
+  let candidatesCreated = 0;
+  for (const save of input.saves) {
+    const { candidateId } = await saveDiscoveryResult(db, {
+      searchProjectId: input.searchProjectId,
+      url: save.url,
+      title: save.title,
+      provider: TALENT_XRAY_PROVIDER_NAME,
+      engine: input.engine,
+      query: input.queryText,
+      retrievedAt: run.ranAt,
+      candidateName: save.candidateName,
+      queryId: creditedQueryId,
+    });
+    if (candidateId) candidatesCreated += 1;
+  }
+  return { runId: run.id, savedUrls: input.saves.length, candidatesCreated };
 }
 
 export async function listSavedSources(db: Db, projectId: string) {

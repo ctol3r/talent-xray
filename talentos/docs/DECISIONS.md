@@ -1055,3 +1055,67 @@ it needs a numbered record the next wave prompt can cite.
 **Tradeoffs.** Nothing is built on the finding yet. The date is what makes
 it urgent: any pilot recruiter who already has access loses it in sixteen
 weeks.
+
+## D-034 — Discovery is link-out to the engines' own hosted results page; the app records a count and explicit saves
+
+**Decision.** (2026-09-07, after D-033.) Candidate discovery opens the
+composed string on the Programmable Search Engine's hosted results page,
+`https://cse.google.com/cse?cx=<engine>&q=<string>`, in a new tab
+(`buildHostedEngineUrl`, `src/lib/research/talent-xray.ts`). The app never
+reads that page. The recruiter records what they saw — the result count
+shown at the top of the page, and the profile URLs they chose to keep, one
+per line with an optional `| Name` to create a candidate — and
+`recordLinkOutRun` (`src/lib/services/discovery.ts`) writes exactly the
+rows the JSON API path wrote: one `search_query_runs` row with the count,
+one `research_sources` row per kept URL labelled `talent-xray:<engine>`,
+and `candidate_source_evidence` (unverified, provenance `search_result`)
+when a candidate is created. Yield (D-029) rolls up identically; an edited
+string is recorded and never credited (Wave A). No key, no cost, no new
+terms. Tested live in the owner's browser on both engines on 2026-09-07
+(`docs/DISCOVERY-PROVIDERS-2026-09-07.md`).
+
+**Why this page.** Google's 2026-01-20 announcement keeps the Search
+Element free for engines that use "Sites to search" with 50 or fewer
+domains; both Talent X-Ray engines are such engines with "Search the
+entire web" off. Only the JSON API and "entire web" end on 2027-01-01.
+The composer's string goes through verbatim — quotes, `OR` groups,
+`-` exclusions, `site:` with a path — and the 102-pattern corpus stays,
+because the engine applies it, not the query.
+
+**Boundaries.** The JSON API provider stays in the code for grandfathered
+customers and for the mock in tests; the Discover page shows "Run search"
+only when one is configured and never gates the page on it. A result
+count is a number, not a result (D-029). A pasted URL is an explicit save
+(product rule 2). The hosted page is ad-supported on the free tier;
+LEGAL.md Q3 already tracks that nothing may suppress or restyle those
+ads, and nothing here touches the page.
+
+**Alternatives.** Vertex AI Search — blocked by Google Cloud Service
+Specific Terms §21 ("web domains that it owns or is authorized to
+utilize") and it drops exclusions and `site:` paths. SerpAPI — takes the
+string verbatim by scraping Google result pages, which the product rules
+forbid the app to do and which paying a third party does not change.
+Brave — the only first-party index with boolean operators and a domain
+allow-list ("goggles"); needs a compile step for parentheses and `site:`
+paths and a recall test; kept as the API candidate for when automatic
+yield counts are worth $5 per thousand queries. Bing — no longer a search
+API. Public engines by link-out — lose the corpus. Details and sources in
+`docs/DISCOVERY-PROVIDERS-2026-09-07.md`.
+
+**Reason.** It is the only option that satisfies all five criteria today
+(composer unchanged, corpus kept, link-out only, free to an individual,
+no forbidding clause), and it needs a link and a form rather than a
+provider.
+
+**Tradeoffs.** The app cannot count results or dedupe across strings by
+itself; the recruiter types the count and pastes the URLs, so yield
+numbers are self-reported. Saves lose the engine's snippet and rank
+(no `providerRank`, no snippet), which is a loss of evidence context, not
+of evidence: the recruiter opened the page. The hosted page's own future
+past 2027 is not named in Google's announcement; the Element it is built
+on is described as retained.
+
+**Follow-ups.** Profile connections (the owner's ask of 2026-09-07 for
+every public profile a person has) are designed separately and recorded
+as D-035 when the design is accepted. Wave G's cost model must be written
+against this decision, not Google's JSON API pricing.
