@@ -222,6 +222,36 @@ Hub, Codeberg, Linktree, personal domains, hospital physician finders, faculty
 and lab pages, OpenAlex author pages, bioRxiv author pages. Core is at its
 50-site cap, so any addition is a swap or a third engine.
 
+## Pilot findings — Wave P, all three searches (2026-09-07)
+
+Source: `docs/PILOT-2026-09-06.md`. The highest-value item is the first one.
+
+- **The Search String Lab composer emits strings far over the 32-term budget**
+  — 39 to 111 words, in all three pilot searches. What Google returns is not
+  what the composer intended and is not predictable from the string: two CAIS
+  strings differing only in their trailing `site:` clause returned an
+  identical count, while a longer Merge Labs string returned two orders of
+  magnitude fewer results than a shorter one. Wave H2's `profile-sweep.ts`
+  already solves this for its own strings by appending exclusions until the
+  budget is reached and reporting what it dropped; port the same discipline
+  into `generateSearchStrings` and `composeDiscoveryQueries`.
+- **No UI derives the hiring need or the search plan.** Both were driven by
+  `scripts/pilot-run.mts` in all three searches. Until a button exists,
+  "Compose from search plan" cannot appear for a real user.
+- **Corpus housekeeping in the control panel.** `www.martindale.com/*` is
+  listed twice in the second engine, and `www.apollo.io/companies/*` and
+  `www.linkedin.com/company/*` are company patterns occupying people slots in
+  a 50-slot engine. Three slots recoverable.
+- **Rapid link-out searching triggers Google's robot check** after roughly
+  nine queries in a few minutes. Not a code defect; a constraint on measuring
+  many strings quickly, and one more reason the app never reads these pages
+  itself. Worth one line in the Discover page copy.
+- **Re-running a generation after its context grows produces a new request
+  under a new hash.** Any pipeline driver must check for existing output
+  rather than re-running; `scripts/pilot-run.mts` shows the pattern.
+- **A fresh personal database seeds six demo searches** on first start, which
+  a real user has to clear before their own list is legible.
+
 ## Other
 
 - **Session provider in the UI**: surface pending outbox requests as a
