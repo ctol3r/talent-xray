@@ -480,7 +480,8 @@ a line on a competitor's complaint page.
 **Deliverables.** `src/app/about/page.tsx` (local app; also mirrored as a section in the
 TalentOS-Lite artifact "About" panel if that surface exists) rendering, from a single
 `src/lib/product-principles.ts` constant: cost model (local-first; model work runs in the
-owner's Claude session; discovery is BYOK Google at Google's published rate; no seats, no
+owner's Claude session; discovery is link-out to the engines' own hosted results page at no
+cost — D-034, after Google closed the JSON API to new customers, D-033; no seats, no
 credits, no renewal escalation); the six refusals (no scraping; no auto-send; no interview
 recording; no personal contact enrichment; no protected-characteristic fields; no fabricated
 evidence — every suggestion carries an exact quote or a live link); the two honest gaps (no
