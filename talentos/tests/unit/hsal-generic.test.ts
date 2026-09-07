@@ -199,6 +199,50 @@ describe("success profile criteria editing", () => {
     ).toThrow(/more than one list/);
   });
 
+  it("keeps a criterion's identity but takes the recruiter's spelling, and treats a spelling fix as a change", () => {
+    const stored = [
+      {
+        id: "CRIT-K8S",
+        label: "kubernetes experience",
+        category: "skill" as const,
+        rationale: "platform team",
+      },
+    ];
+    const edited = criteriaFromLines("Kubernetes Experience", stored);
+    expect(edited[0]).toEqual({
+      id: "CRIT-K8S",
+      label: "Kubernetes Experience",
+      category: "skill",
+      rationale: "platform team",
+    });
+    const before = { mustHave: stored, preferred: [], transferable: [] };
+    expect(
+      sameProfile(before, {
+        mustHave: edited,
+        preferred: [],
+        transferable: [],
+      }),
+    ).toBe(false);
+    expect(
+      sameProfile(before, {
+        mustHave: criteriaFromLines("kubernetes experience", stored),
+        preferred: [],
+        transferable: [],
+      }),
+    ).toBe(true);
+    // two known criteria that share an id can never both be selected
+    const clashing = [
+      { id: "CRIT-X", label: "Alpha", category: "skill" as const },
+      { id: "CRIT-X", label: "Beta", category: "skill" as const },
+    ];
+    expect(() =>
+      parseProfileLists(
+        { mustHave: "Alpha", preferred: "Beta", transferable: "" },
+        clashing,
+      ),
+    ).toThrow(/already used in another list/);
+  });
+
   it("does not read 'Staff-equivalent scope' as a title proxy", () => {
     expect(inferCriterionCategory("Evidence of Staff-equivalent scope")).toBe(
       "experience",

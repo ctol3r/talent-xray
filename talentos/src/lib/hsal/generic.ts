@@ -101,7 +101,12 @@ export function criteriaFromLines(
     seen.add(key);
     const match = byLabel.get(key);
     if (match) {
-      out.push(match);
+      if (taken.has(match.id) || out.some((c) => c.id === match.id))
+        throw new Error(
+          `"${label}" resolves to criterion ${match.id}, which is already used in another list.`,
+        );
+      // Keep identity (id, category, rationale) but take the recruiter's spelling.
+      out.push({ ...match, label });
       taken.add(match.id);
       continue;
     }
@@ -158,12 +163,14 @@ export function parseProfileLists(
   };
 }
 
+/** Same criteria in the same lists with the same wording (identity and spelling both count). */
 export function sameProfile(a: SuccessProfile, b: SuccessProfile): boolean {
-  const ids = (cs: SuccessCriterion[]) => cs.map((c) => c.id).join("|");
+  const sig = (cs: SuccessCriterion[]) =>
+    cs.map((c) => `${c.id}=${c.label}`).join("|");
   return (
-    ids(a.mustHave) === ids(b.mustHave) &&
-    ids(a.preferred) === ids(b.preferred) &&
-    ids(a.transferable) === ids(b.transferable)
+    sig(a.mustHave) === sig(b.mustHave) &&
+    sig(a.preferred) === sig(b.preferred) &&
+    sig(a.transferable) === sig(b.transferable)
   );
 }
 
