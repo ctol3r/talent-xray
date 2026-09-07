@@ -108,6 +108,29 @@ owner's Google key, so yield findings are still open.
   them, so the "decisions changed" notice clears; plan-composed rows get
   the same refresh on collision.
 
+## Discovery provider — Google closure (2026-09-07)
+
+Source: D-033; `docs/PILOT-2026-09-06.md` "Discovery finding". The Custom
+Search JSON API is closed to new customers and ends for everyone on
+2027-01-01. Not built; recorded per the anti-drift rule.
+
+- **Provider assessment wave.** Evaluate Vertex AI Search, a domain-filtered
+  general web-search API, and link-out-only against: the composer's
+  boolean output unchanged; per-query pricing available to an individual
+  recruiter (BYOK); the 100-domain people-only corpus expressible as a
+  filter; no result-page fetching. Output: a one-page matrix and a D-034.
+- **Link-out-only fallback in the app.** A discovery mode that opens the
+  composed string on a public engine in the recruiter's own browser and
+  records only the string and explicit saves. Satisfies every hard rule
+  today; loses automatic yield counts. Cheapest way to keep the pilot's
+  discovery steps runnable.
+- **Runbook and plan corrections.** `docs/PILOT-RUNBOOK.md` Part A1 and
+  the Wave G cost figures assume Google pricing and a ten-minute key; both
+  are wrong now. Fix when the replacement is chosen, not before.
+- **Settings page honesty.** The discovery status card should show the
+  provider's last probe result (HTTP code and Google's message) instead of
+  "configured", so a refused key is visible without reading logs.
+
 ## Other
 
 - **Session provider in the UI**: surface pending outbox requests as a

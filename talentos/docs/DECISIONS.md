@@ -1006,3 +1006,52 @@ that they cannot.
 field is editable. NPPES sometimes answers HTTP 200 with an `Errors`
 array; both paths are handled. Rate limits are unknown; one request per
 click, limit ≤ 20.
+
+## D-033 — Google has closed the Custom Search JSON API; discovery needs a new provider before Wave G
+
+**Decision.** (2026-09-07, Wave P.) Recorded as a fact, not yet as a
+choice of replacement. Google's Custom Search JSON API overview states the
+API "is closed to new customers" and that existing customers "have until
+January 1, 2027 to transition". The owner's account has no grandfathered
+project: a 2026 project with the API enabled and a correctly restricted key,
+and a 2024 project with the API enabled and an unrestricted key, both
+answer `403 This project does not have the access to Custom Search JSON
+API` on both engines (`a157d37906e1141cc`, `918bc00e18d0c46e5`). Verified
+in the owner's Console on 2026-09-07 (`docs/PILOT-2026-09-06.md`,
+"Discovery finding").
+
+**What stands.** The composer (`composeQueries`), Wave A normalization,
+the yield ledger, and the link-out boundary (D-010, D-026) are provider-
+independent: they produce strings and record what a run returned. The
+`talent-xray` discovery provider (`TALENTOS_DISCOVERY_PROVIDER`) is the
+only piece that speaks to Google. BYOK as an economic model survives only
+if the replacement provider also sells per-query keys to individuals.
+
+**What is now false in the record.** The action plan's assumption that a
+pilot recruiter can obtain a key in ten minutes (`docs/PILOT-RUNBOOK.md`,
+Part A1) and the BYOK cost figures quoted from Google's price list. Wave G
+("cost model and what we will not do") cannot be written against Google
+pricing.
+
+**Candidates for the replacement, unassessed.** (a) Vertex AI Search —
+Google's named successor; 50-domain cap per data store matches the
+two-engine split, but query syntax, `site:` semantics and per-query
+pricing for individuals are unverified. (b) A general web-search API with
+domain filtering (Brave, Bing successor, SerpAPI-style resellers) — the
+composer's boolean output would need a compatibility check per provider.
+(c) Link-out only: compose the string, open it in the recruiter's own
+browser on a public search engine, record nothing but the string and the
+owner's explicit saves. (c) already satisfies every hard product rule and
+needs no key; it loses the yield ledger's automatic counts.
+
+**Alternatives rejected today.** Mocking discovery for the pilot (the
+runbook forbids it; a pilot on fixtures is not a pilot). Scraping any
+search results page (D-010; the product rules).
+
+**Reason.** The finding was made by probing, not by reading a changelog;
+it changes the pilot's close condition and the shape of Waves F and G, so
+it needs a numbered record the next wave prompt can cite.
+
+**Tradeoffs.** Nothing is built on the finding yet. The date is what makes
+it urgent: any pilot recruiter who already has access loses it in sixteen
+weeks.
