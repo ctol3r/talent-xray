@@ -24,19 +24,16 @@
  * question for a lawyer, recorded in docs/WAVE-H-PROFILE-CONNECTIONS.md. A
  * "read every candidate" button must never be added.
  */
-import { PRODUCT_NAME } from "@/lib/product";
 import {
   declaredLinkSchema,
   httpOnly,
   resolveDeclaredMode,
+  USER_AGENT,
   type DeclaredClient,
   type DeclaredFetch,
   type DeclaredLink,
   type DeclaredMode,
 } from "./declared";
-
-/** Identifies this local install to the platform, as its docs ask. */
-const USER_AGENT = `${PRODUCT_NAME}-local`;
 
 export const GITHUB_API = "https://api.github.com";
 

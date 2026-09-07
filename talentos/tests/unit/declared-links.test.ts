@@ -34,6 +34,17 @@ import {
   mapKeybaseProofs,
 } from "@/lib/profiles/keybase";
 import {
+  createOrcidClient,
+  mapOrcidLinks,
+  orcidIdFromUrl,
+} from "@/lib/profiles/orcid";
+import {
+  createWikidataClient,
+  isHuman,
+  mapWikidataLinks,
+  wikidataIdFromUrl,
+} from "@/lib/profiles/wikidata";
+import {
   acceptDeclaredLink,
   declaredAccounts,
   readDeclaredLinks,
@@ -385,5 +396,141 @@ describe("suggestions, against a database", () => {
         },
       }),
     ).toThrow(/only be added by hand/);
+  });
+});
+
+// ── Wave H2: the two research-and-notable sources ─────────────────────────
+
+/** An ORCID researcher-urls payload, in the shape the API really returns. */
+const ORCID_URLS = {
+  "last-modified-date": { value: 1700000000000 },
+  "researcher-url": [
+    {
+      "created-date": { value: 1600000000000 },
+      "url-name": "Personal site",
+      url: { value: "https://jrivera.dev" },
+      visibility: "public",
+      "put-code": 1,
+      source: { "source-name": { value: "Jordan Rivera" } },
+    },
+    {
+      "url-name": "GitHub",
+      url: { value: "https://github.com/jrivera-dev" },
+    },
+    { "url-name": "Broken", url: { value: "not-a-url" } },
+  ],
+  path: "/0000-0002-1825-0097/researcher-urls",
+};
+
+const ORCID_IDS = {
+  "external-identifier": [
+    {
+      "external-id-type": "Scopus Author ID",
+      "external-id-value": "7005000000",
+      "external-id-url": { value: "https://www.scopus.com/authid/7005000000" },
+    },
+  ],
+};
+
+describe("orcid", () => {
+  it("keeps the links the researcher published and drops the rest", () => {
+    const links = mapOrcidLinks(ORCID_URLS, ORCID_IDS, "0000-0002-1825-0097");
+    expect(links.map((l) => l.url)).toEqual([
+      "https://jrivera.dev/",
+      "https://github.com/jrivera-dev",
+      "https://www.scopus.com/authid/7005000000",
+    ]);
+    expect(links[0].label).toBe("Personal site");
+    expect(
+      links.every((l) => l.assertedBy === "orcid:0000-0002-1825-0097"),
+    ).toBe(true);
+    // Not reciprocal: ORCID stores what the researcher typed, it does not
+    // check that the target links back.
+    expect(links.every((l) => l.reciprocal === false)).toBe(true);
+    // No date from the record survives; a career start year is an age proxy.
+    expect(JSON.stringify(links)).not.toContain("1600000000000");
+  });
+
+  it("reads an iD only from a real ORCID address, and is off by default", async () => {
+    expect(orcidIdFromUrl("https://orcid.org/0000-0002-1825-0097")).toBe(
+      "0000-0002-1825-0097",
+    );
+    expect(orcidIdFromUrl("https://orcid.org/about")).toBeNull();
+    expect(
+      orcidIdFromUrl("https://example.com/0000-0002-1825-0097"),
+    ).toBeNull();
+    const calls: string[] = [];
+    const client = createOrcidClient(fetchStub({}, calls));
+    expect(client.configured).toBe(false);
+    await expect(client.read("0000-0002-1825-0097")).rejects.toThrow(
+      /non-commercial/,
+    );
+    expect(calls).toEqual([]);
+  });
+});
+
+/** A Wikidata entity, trimmed to the claims that matter plus ones that must not leak. */
+const WIKIDATA_PERSON = {
+  entities: {
+    Q42: {
+      claims: {
+        P31: [{ mainsnak: { datavalue: { value: { id: "Q5" } } } }],
+        P2002: [{ mainsnak: { datavalue: { value: "jrivera" } } }],
+        P2037: [{ mainsnak: { datavalue: { value: "jrivera-dev" } } }],
+        P496: [{ mainsnak: { datavalue: { value: "0000-0002-1825-0097" } } }],
+        P856: [{ mainsnak: { datavalue: { value: "https://jrivera.dev" } } }],
+        // Properties a hiring record must never weigh. They are in the
+        // fixture precisely so the assertion below can prove they do not
+        // survive the mapper's allow-list.
+        P569: [{ mainsnak: { datavalue: { value: { time: "+1952-03-11" } } } }],
+        P21: [{ mainsnak: { datavalue: { value: { id: "Q6581097" } } } }],
+        P27: [{ mainsnak: { datavalue: { value: { id: "Q145" } } } }],
+      },
+    },
+  },
+};
+
+describe("wikidata", () => {
+  it("builds an address per identifier and touches nothing that describes the person", () => {
+    const links = mapWikidataLinks(WIKIDATA_PERSON, "Q42");
+    expect(links.map((l) => l.url)).toEqual([
+      "https://x.com/jrivera",
+      "https://github.com/jrivera-dev",
+      "https://orcid.org/0000-0002-1825-0097",
+      "https://jrivera.dev/",
+    ]);
+    const serialised = JSON.stringify(links);
+    for (const forbidden of ["1952", "Q6581097", "Q145", "P569", "P21"]) {
+      expect(`${forbidden} → ${serialised.includes(forbidden)}`).toBe(
+        `${forbidden} → false`,
+      );
+    }
+  });
+
+  it("refuses an entity that is not a human", () => {
+    const company = {
+      entities: {
+        Q95: {
+          claims: {
+            P31: [{ mainsnak: { datavalue: { value: { id: "Q4830453" } } } }],
+            P2037: [{ mainsnak: { datavalue: { value: "google" } } }],
+          },
+        },
+      },
+    };
+    expect(mapWikidataLinks(company, "Q95")).toEqual([]);
+    expect(isHuman(WIKIDATA_PERSON.entities.Q42.claims)).toBe(true);
+  });
+
+  it("reads an item id only from a Wikidata address, and is off by default", async () => {
+    expect(wikidataIdFromUrl("https://www.wikidata.org/wiki/Q42")).toBe("Q42");
+    expect(
+      wikidataIdFromUrl("https://www.wikidata.org/wiki/Property:P31"),
+    ).toBeNull();
+    const calls: string[] = [];
+    const client = createWikidataClient(fetchStub({}, calls));
+    expect(client.configured).toBe(false);
+    await expect(client.read("Q42")).rejects.toThrow(/is off/);
+    expect(calls).toEqual([]);
   });
 });

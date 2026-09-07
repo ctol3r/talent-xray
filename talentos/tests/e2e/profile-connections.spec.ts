@@ -212,3 +212,125 @@ test("addresses carry their provenance, private surfaces are refused, duplicates
     page.getByText("This is a company page, not a person."),
   ).toBeVisible();
 });
+
+test("a sweep, a notice and an answer: the whole loop for one person", async ({
+  page,
+}) => {
+  await page.goto("/searches/new");
+  await page.fill('input[name="name"]', "E2E — sweep and consent");
+  await page.fill('input[name="roleTitle"]', "Research Engineer");
+  await page.click('button:has-text("Create search")');
+  // Wait for the redirect: reading the URL too early yields "new".
+  await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
+  const project = page.url().match(/searches\/([^/]+)/)![1];
+
+  await page.goto(`/searches/${project}/candidates`);
+  await page
+    .getByRole("button", { name: "Add candidate", exact: true })
+    .click();
+  await page.fill('input[name="candidateName"]', "Robin Vale");
+  await page.getByLabel("Current company").fill("Acme Robotics");
+  await page.getByLabel("Geography").fill("Austin, TX");
+  await page
+    .locator("form")
+    .getByRole("button", { name: "Add candidate", exact: true })
+    .click();
+  await page.getByRole("link", { name: "Robin Vale", exact: true }).click();
+
+  // 1. The sweep is composed from what is already known, and every string
+  //    opens on the right engine with the string verbatim.
+  await expect(page.getByText("Search for more profiles")).toBeVisible();
+  const t1 = page.locator("li", { hasText: "T1 · Every people surface" });
+  await expect(t1).toBeVisible();
+  const t1Text = await t1.locator("textarea").inputValue();
+  expect(t1Text).toContain('"Robin Vale"');
+  expect(t1Text).toContain('("Acme Robotics" OR Acme)');
+  expect(t1Text).toContain("-site:facebook.com");
+  const t1Link = t1.getByRole("link", { name: "Open on engine ↗" });
+  const href = new URL((await t1Link.getAttribute("href")) ?? "");
+  expect(href.origin + href.pathname).toBe("https://cse.google.com/cse");
+  expect(href.searchParams.get("cx")).toBe("a157d37906e1141cc");
+  expect(href.searchParams.get("q")).toBe(t1Text);
+  await expect(t1Link).toHaveAttribute("rel", /noopener/);
+
+  // The registry template goes to the second engine.
+  const t3 = page.locator("li", { hasText: "T3 · Registries and author" });
+  const t3Href = new URL(
+    (await t3
+      .getByRole("link", { name: "Open on engine ↗" })
+      .getAttribute("href")) ?? "",
+  );
+  expect(t3Href.searchParams.get("cx")).toBe("918bc00e18d0c46e5");
+
+  // 2. Recording a sweep run keeps the addresses on this person and lands in
+  //    the ledger under its template.
+  await page.getByPlaceholder("e.g. 12").fill("7");
+  await page
+    .getByLabel(/Addresses to keep on Robin Vale/)
+    .fill(
+      "https://orcid.org/0000-0002-1825-0097\nhttps://github.com/robin-vale",
+    );
+  await page.getByRole("button", { name: "Record run" }).click();
+  await expect(page.getByText(/2 addresses kept on Robin Vale/)).toBeVisible();
+
+  await page.reload();
+  await expect(
+    page.getByText("Profile connections — 2 addresses"),
+  ).toBeVisible();
+  await expect(page.getByText(/via sweep T1/).first()).toBeVisible();
+
+  // 3. The notice is due, and the message that discharges it lists what is
+  //    held and the right to object.
+  await expect(page.getByText(/due \d{4}-\d{2}-\d{2}/)).toBeVisible();
+  await page.getByRole("link", { name: /Ask Robin Vale/ }).click();
+  await expect(page.getByText("Nothing is sent from here")).toBeVisible();
+  const body = await page.locator("textarea").first().inputValue();
+  expect(body).toContain("1. https://orcid.org/0000-0002-1825-0097");
+  expect(body).toContain("Your right to object.");
+  expect(body).toContain("legitimate interest");
+  expect(body).toContain("[Your name]");
+
+  await page.getByRole("button", { name: "Record as sent" }).click();
+  await expect(page.getByText(/Recorded as sent on/)).toBeVisible();
+
+  // 4. Their answer: one confirmed, one denied and blocked.
+  const orcidRow = page.locator("li", { hasText: "orcid.org" });
+  await orcidRow.getByLabel("Theirs", { exact: true }).check();
+  const githubRow = page.locator("li", { hasText: "github.com/robin-vale" });
+  await githubRow.getByLabel("Not theirs", { exact: true }).check();
+  await page.getByRole("button", { name: "Record answer" }).click();
+  await expect(
+    page.getByText(/1 confirmed · 1 removed and blocked/),
+  ).toBeVisible();
+
+  await page.goto(`/searches/${project}/candidates`);
+  await page.getByRole("link", { name: "Robin Vale", exact: true }).click();
+  await expect(
+    page.getByText(/confirmed by the person \(recorded by you\)/),
+  ).toBeVisible();
+  await expect(page.getByText("notice:")).toBeVisible();
+  await expect(page.getByText(/sent \d{4}-\d{2}-\d{2}/)).toBeVisible();
+
+  // 5. The denied address cannot come back.
+  await page
+    .locator("section", { hasText: "Profile connections" })
+    .locator("textarea")
+    .first()
+    .fill("https://github.com/robin-vale");
+  await page
+    .locator("section", { hasText: "Profile connections" })
+    .getByRole("button", { name: "Add", exact: true })
+    .click();
+  await expect(page.getByText(/asked not to be recorded/)).toBeVisible();
+
+  // 6. And Settings can find who is held at an address.
+  await page.goto("/settings");
+  await expect(page.getByText("Data requests")).toBeVisible();
+  await page
+    .getByPlaceholder("https://www.linkedin.com/in/example")
+    .fill("https://orcid.org/0000-0002-1825-0097");
+  await page.getByRole("button", { name: "Find", exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: "Robin Vale", exact: true }),
+  ).toBeVisible();
+});

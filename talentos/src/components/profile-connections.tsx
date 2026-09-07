@@ -485,6 +485,15 @@ export function ProfileConnections({
         </p>
       )}
 
+      <p className="mt-4 text-[12px]">
+        <a
+          href={`/searches/${searchProjectId}/candidates/${candidateId}/confirm`}
+          className="text-accent hover:underline"
+        >
+          Ask {candidateName} which of these are theirs →
+        </a>
+      </p>
+
       <p className="mt-4 text-[11px] text-ink-faint">{PROFILE_CARD_FOOTER}</p>
     </Card>
   );

@@ -122,7 +122,9 @@ describe("labels", () => {
     expect(withDates.badge).toBe(
       "unverified · reciprocal · Keybase reports a proven back-link",
     );
-    expect(withDates.provenanceLine).toContain("Keybase checked on 2026-01-02");
+    expect(withDates.provenanceLine).toContain(
+      "Keybase reported on 2026-01-02",
+    );
 
     // No date, no claim: the badge falls back rather than asserting a check
     // that has no time attached to it.

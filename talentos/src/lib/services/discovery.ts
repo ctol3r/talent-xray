@@ -26,6 +26,7 @@ import {
   TALENT_XRAY_PROVIDER_NAME,
 } from "@/lib/research/talent-xray";
 import { createCandidate, createCandidateInput } from "./candidates";
+import { addProfileLink } from "./profile-links";
 import { recordQueryRun } from "./query-yield";
 
 /**
@@ -162,6 +163,11 @@ export const recordLinkOutRunInput = z.object({
   resultCount: z.number().int().min(0),
   /** URLs the recruiter chose to keep after opening them. */
   saves: z.array(linkOutSaveSchema).max(50).default([]),
+  /** Wave H2: the person a profile sweep was composed for. */
+  candidateId: z.string().optional(),
+  sweepTemplate: z.string().max(8).optional(),
+  /** Wave H2: attach every kept address to this existing candidate. */
+  attachToCandidateId: z.string().optional(),
 });
 
 /**
@@ -183,9 +189,43 @@ export async function recordLinkOutRun(
     edited: input.edited,
     engine: input.engine,
     resultCount: input.resultCount,
+    candidateId: input.candidateId,
+    sweepTemplate: input.sweepTemplate,
   });
   const creditedQueryId = input.edited ? undefined : input.queryId;
   let candidatesCreated = 0;
+
+  // A sweep is composed for one person, so its saves attach to that person
+  // rather than creating new records. The guard runs exactly as it does on
+  // the candidate card.
+  if (input.attachToCandidateId) {
+    for (const save of input.saves) {
+      addProfileLink(db, {
+        candidateId: input.attachToCandidateId,
+        url: save.url,
+        ...(save.title ? { label: save.title } : {}),
+        addedVia: input.sweepTemplate
+          ? `sweep:${input.sweepTemplate}`
+          : `discover:${input.engine}`,
+        provenance: "recruiter_added",
+      });
+      await db.insert(researchSources).values({
+        searchProjectId: input.searchProjectId,
+        url: save.url,
+        title: save.title,
+        source: `${TALENT_XRAY_PROVIDER_NAME}:${input.engine}`,
+        query: input.queryText,
+        queryId: creditedQueryId,
+        retrievedAt: run.ranAt,
+      });
+    }
+    return {
+      runId: run.id,
+      savedUrls: input.saves.length,
+      candidatesCreated: 0,
+    };
+  }
+
   for (const save of input.saves) {
     const { candidateId } = await saveDiscoveryResult(db, {
       searchProjectId: input.searchProjectId,

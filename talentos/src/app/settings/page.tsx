@@ -3,6 +3,7 @@ import { PRODUCT_NAME } from "@/lib/product";
 import { getProviderStatus } from "@/lib/ai/provider";
 import { getResearchProvider } from "@/lib/research/provider";
 import { getCandidateDiscoveryProvider } from "@/lib/research/discovery-provider";
+import { DataRequestCard } from "@/components/data-request-card";
 import { resolveGithubMode } from "@/lib/profiles/github";
 import { resolveKeybaseMode } from "@/lib/profiles/keybase";
 import { Card, KeyValue, PageHeader, Tag } from "@/components/ui";
@@ -66,6 +67,7 @@ export default function SettingsPage() {
             until you check the source.
           </p>
         </Card>
+        <DataRequestCard />
         <Card title="Declared profile links">
           <div className="mb-2 flex flex-wrap gap-2">
             <Tag tone={githubMode === "off" ? "neutral" : "ok"}>

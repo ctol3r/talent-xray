@@ -13,8 +13,17 @@
  * specific row (D-032's pattern).
  */
 import { z } from "zod";
+import { PRODUCT_NAME } from "@/lib/product";
 
-export const DECLARED_PLATFORMS = ["github", "keybase"] as const;
+/** Identifies this local install to a platform, as their docs ask. */
+export const USER_AGENT = `${PRODUCT_NAME}-local`;
+
+export const DECLARED_PLATFORMS = [
+  "github",
+  "keybase",
+  "orcid",
+  "wikidata",
+] as const;
 export type DeclaredPlatform = (typeof DECLARED_PLATFORMS)[number];
 
 export const declaredLinkSchema = z
@@ -27,8 +36,9 @@ export const declaredLinkSchema = z
     assertedAt: z.string().nullable(),
     /**
      * True only when the platform itself checked that the target proves
-     * ownership — a cryptographic proof or a verified back-link. A field
-     * someone typed is declared, not reciprocal.
+     * ownership — a cryptographic proof or a checked back-link. A field
+     * someone typed is declared, not reciprocal, and a value a third party
+     * entered about someone else is neither.
      */
     reciprocal: z.boolean(),
     /** The platform's own name for the field ("website", "twitter"). */

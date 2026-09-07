@@ -44,6 +44,16 @@ import {
   keybaseUsernameFromUrl,
   resolveKeybaseMode,
 } from "@/lib/profiles/keybase";
+import {
+  createOrcidClient,
+  orcidIdFromUrl,
+  resolveOrcidMode,
+} from "@/lib/profiles/orcid";
+import {
+  createWikidataClient,
+  resolveWikidataMode,
+  wikidataIdFromUrl,
+} from "@/lib/profiles/wikidata";
 import { addProfileLink } from "./profile-links";
 import { searchProjects } from "@/lib/db/schema";
 
@@ -82,35 +92,39 @@ export function declaredAccounts(
     .from(candidateSources)
     .where(eq(candidateSources.candidateId, candidateId))
     .all();
-  const githubMode = resolveGithubMode();
-  const keybaseMode = resolveKeybaseMode();
+  const modes: Record<DeclaredPlatform, string> = {
+    github: resolveGithubMode(),
+    keybase: resolveKeybaseMode(),
+    orcid: resolveOrcidMode(),
+    wikidata: resolveWikidataMode(),
+  };
+  const readers: {
+    platform: DeclaredPlatform;
+    accountFromUrl: (url: string) => string | null;
+  }[] = [
+    { platform: "github", accountFromUrl: githubLoginFromUrl },
+    { platform: "keybase", accountFromUrl: keybaseUsernameFromUrl },
+    { platform: "orcid", accountFromUrl: orcidIdFromUrl },
+    { platform: "wikidata", accountFromUrl: wikidataIdFromUrl },
+  ];
   const out: DeclaredAccount[] = [];
   const seen = new Set<string>();
   for (const row of rows) {
-    const login = githubLoginFromUrl(row.url);
-    if (login && !seen.has(`github:${login}`)) {
-      seen.add(`github:${login}`);
+    for (const reader of readers) {
+      const account = reader.accountFromUrl(row.url);
+      if (!account) continue;
+      const key = `${reader.platform}:${account}`;
+      if (seen.has(key)) break;
+      seen.add(key);
       out.push({
         sourceId: row.id,
-        platform: "github",
-        account: login,
+        platform: reader.platform,
+        account,
         url: row.url,
-        configured: githubMode !== "off",
-        mode: githubMode,
+        configured: modes[reader.platform] !== "off",
+        mode: modes[reader.platform],
       });
-      continue;
-    }
-    const username = keybaseUsernameFromUrl(row.url);
-    if (username && !seen.has(`keybase:${username}`)) {
-      seen.add(`keybase:${username}`);
-      out.push({
-        sourceId: row.id,
-        platform: "keybase",
-        account: username,
-        url: row.url,
-        configured: keybaseMode !== "off",
-        mode: keybaseMode,
-      });
+      break;
     }
   }
   return out;
@@ -159,11 +173,13 @@ export async function readDeclaredLinks(
       "That address is not a platform account this app can read links from.",
     );
   }
-  const client =
-    clients?.[account.platform] ??
-    (account.platform === "github"
-      ? createGithubClient()
-      : createKeybaseClient());
+  const factories: Record<DeclaredPlatform, () => DeclaredClient> = {
+    github: createGithubClient,
+    keybase: createKeybaseClient,
+    orcid: createOrcidClient,
+    wikidata: createWikidataClient,
+  };
+  const client = clients?.[account.platform] ?? factories[account.platform]();
   const links = await client.read(account.account);
   const retrievedAt = now();
 

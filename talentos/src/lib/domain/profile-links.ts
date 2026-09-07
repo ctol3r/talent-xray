@@ -172,6 +172,16 @@ export function profileLinkLabel(
     case "platform_declared": {
       const platform = platformName(row.assertedBy);
       const account = platformAccount(row.assertedBy);
+      // Wikidata is edited by volunteers, not by the person and not checked
+      // by the platform it names, so it can never say "declared".
+      if (platform === "Wikidata") {
+        badge = "unverified · from Wikidata (community-entered)";
+        provenanceLine = `entered by a Wikidata editor on the item ${account ?? ""} · read on ${day(row.retrievedAt)} · kept by you on ${day(row.createdAt)}`;
+        subLines.push(
+          "A volunteer wrote this down, not the person. Open it and judge it.",
+        );
+        break;
+      }
       badge = `unverified · declared on ${platform}`;
       provenanceLine = `listed by the holder of ${account ?? platform} · read from the ${platform} API on ${day(row.retrievedAt)} · kept by you on ${day(row.createdAt)}`;
       subLines.push(DECLARED_SUBLINE);
@@ -186,7 +196,10 @@ export function profileLinkLabel(
       }
       const platform = platformName(row.assertedBy);
       badge = `unverified · reciprocal · ${platform} reports a proven back-link`;
-      provenanceLine = `${platform} checked on ${day(row.assertedAt)} that this address proves ownership · read on ${day(row.retrievedAt)} · kept by you on ${day(row.createdAt)}`;
+      // The date is when the platform reported the proof to us, not when the
+      // proof was originally made — a live observation showed the API answers
+      // with its current verdict and no original timestamp.
+      provenanceLine = `${platform} reported on ${day(row.assertedAt)} that this address proves ownership · read on ${day(row.retrievedAt)} · kept by you on ${day(row.createdAt)}`;
       subLines.push(DECLARED_SUBLINE);
       break;
     }

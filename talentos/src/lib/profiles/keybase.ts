@@ -15,19 +15,16 @@
  * One request, one person, per click. No key. Nothing is stored until the
  * recruiter keeps a specific row.
  */
-import { PRODUCT_NAME } from "@/lib/product";
 import {
   declaredLinkSchema,
   httpOnly,
   resolveDeclaredMode,
+  USER_AGENT,
   type DeclaredClient,
   type DeclaredFetch,
   type DeclaredLink,
   type DeclaredMode,
 } from "./declared";
-
-/** Identifies this local install to the platform, as its docs ask. */
-const USER_AGENT = `${PRODUCT_NAME}-local`;
 
 export const KEYBASE_API = "https://keybase.io/_/api/1.0/user/lookup.json";
 

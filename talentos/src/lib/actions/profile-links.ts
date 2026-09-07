@@ -15,6 +15,7 @@ import {
   addProfileLink,
   addProfileLinkInput,
   clearSurfaceOptIn,
+  findCandidatesByUrl,
   moveProfileLink,
   removeProfileLink,
   setJurisdiction,
@@ -186,12 +187,29 @@ export async function suppressUrlAction(
   input: unknown,
 ): Promise<ActionResult<undefined>> {
   return act(async () => {
+    // A data request arrives from outside any one search, so the project is
+    // optional here; the suppression applies everywhere either way.
     const parsed = suppressUrlInput
-      .extend({ searchProjectId: z.string().min(1) })
+      .extend({ searchProjectId: z.string().min(1).optional() })
       .parse(input);
     suppressUrl(getDb(), parsed);
-    revalidatePath(`/searches/${parsed.searchProjectId}`, "layout");
+    if (parsed.searchProjectId) {
+      revalidatePath(`/searches/${parsed.searchProjectId}`, "layout");
+    }
+    revalidatePath("/settings");
     return undefined;
+  });
+}
+
+/** Who is held at this address, across every search. For a data request. */
+export async function findCandidatesByUrlAction(input: unknown): Promise<
+  ActionResult<{
+    hits: { candidateId: string; name: string; searchProjectId: string }[];
+  }>
+> {
+  return act(async () => {
+    const parsed = z.object({ url: z.string().min(8).max(2048) }).parse(input);
+    return { hits: findCandidatesByUrl(getDb(), parsed.url) };
   });
 }
 

@@ -25,6 +25,9 @@ import {
 } from "@/lib/registries";
 import { RegistryMatchCard } from "@/components/registry-match";
 import { ProfileConnections } from "@/components/profile-connections";
+import { ProfileSweepPanel } from "@/components/profile-sweep-panel";
+import { buildProfileSweep } from "@/lib/domain/profile-sweep";
+import { hostedEngineIds } from "@/lib/research/talent-xray";
 import { listProfileLinks } from "@/lib/services/profile-links";
 import { declaredAccounts } from "@/lib/services/declared-links";
 import { noticeStatus } from "@/lib/domain/profile-links";
@@ -100,6 +103,15 @@ export default async function CandidatePage({
     project?.jurisdiction ?? null,
     new Date(),
   );
+  // Wave H2: the searches that find this person's OTHER profiles. Composed
+  // from what is already known about them; opened by the recruiter.
+  const sweep = buildProfileSweep({
+    name: candidate.name,
+    employer: candidate.currentCompany,
+    geography: candidate.geography,
+    links: profileLinks.map((l) => ({ url: l.url })),
+    optIns: (project?.surfaceOptIns ?? null) as never,
+  });
   const [sequence] = await db
     .select()
     .from(outreachSequences)
@@ -377,6 +389,13 @@ export default async function CandidatePage({
               mode: a.mode,
             }))}
             notice={notice}
+          />
+          <ProfileSweepPanel
+            searchProjectId={id}
+            candidateId={candidateId}
+            candidateName={candidate.name}
+            queries={sweep}
+            hosted={hostedEngineIds()}
           />
           {sourceEvidence.length > 0 && (
             <Card title="Source evidence">

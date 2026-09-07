@@ -193,12 +193,16 @@ paste and a per-row "why", move-to-another-candidate, the GitHub and Keybase
 declared-link adapters, the matcher and model filters, and the Article 14
 clock as a displayed tag.
 
-**Wave H2, open.** Per-candidate profile sweep strings and their ledger rows
-(run three real names on the hosted page before closing, as D-034 was
-validated); the confirmation draft, "I sent this" and the answer form;
-Wikidata and ORCID adapters; the Settings data-subject-request card;
-`sweepYieldForProject`; a live read from GitHub and Keybase pasted into
-`docs/` so both adapters stop being "built, not observed" (D-021).
+**Wave H2 — BUILT 2026-09-07** (`docs/WAVE-H2-REPORT.md`): six per-candidate
+sweep templates with their ledger rows and rollup, the Article 14
+confirmation message with "I sent this" and the answer form, Wikidata and
+ORCID adapters, the Settings data-subject-request card, and a live read from
+all four adapters recorded in `docs/PROFILE-ADAPTERS-OBSERVED.md`.
+
+Left from that scope: the sweep templates have been validated for grammar,
+budget and engine routing, and one has been run through the UI end to end,
+but they have not been run on three real names on the hosted page the way
+D-034 was validated. Do that with a real candidate in the pilot.
 
 **Deferred from the Wave H design.** The `profile_confirmation_requests`
 snapshot table; a localhost confirmation sheet at `/confirm/[token]` (needs a
