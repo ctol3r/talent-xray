@@ -114,7 +114,9 @@ Source: D-033; `docs/PILOT-2026-09-06.md` "Discovery finding". The Custom
 Search JSON API is closed to new customers and ends for everyone on
 2027-01-01. Not built; recorded per the anti-drift rule.
 
-- **Provider assessment wave.** Evaluate Vertex AI Search, a domain-filtered
+- **Provider assessment — DONE 2026-09-07** (`docs/DISCOVERY-PROVIDERS-2026-09-07.md`).
+  Recommends link-out to the engines' own hosted page now, Brave as the API
+  candidate later. Original scope: evaluate Vertex AI Search, a domain-filtered
   general web-search API, and link-out-only against: the composer's
   boolean output unchanged; per-query pricing available to an individual
   recruiter (BYOK); the 100-domain people-only corpus expressible as a
