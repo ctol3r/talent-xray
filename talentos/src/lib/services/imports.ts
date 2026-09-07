@@ -33,7 +33,12 @@ import {
   MAX_IMPORT_CELL_CHARS,
   MAX_IMPORT_COLUMNS,
 } from "@/lib/imports/contracts";
-import { createCandidate, listCandidates } from "./candidates";
+import { matchableProfileUrls } from "@/lib/domain/surface-families";
+import {
+  createCandidate,
+  listCandidates,
+  type DroppedProfileUrl,
+} from "./candidates";
 import { createTask } from "./workflow";
 
 async function existingIdentities(
@@ -114,6 +119,8 @@ export interface CommitResult {
   created: { id: string; name: string }[];
   flagged: { candidateId: string; taskId: string; reason: string }[];
   contactEvidenceCount: number;
+  /** Addresses the surface-family policy refused, named rather than dropped silently. */
+  droppedUrls: { url: string; message: string; name: string }[];
 }
 
 export async function commitImport(
@@ -141,6 +148,7 @@ export async function commitImport(
   const existing = await existingIdentities(db, input.searchProjectId);
   const created: CommitResult["created"] = [];
   const flagged: CommitResult["flagged"] = [];
+  const droppedUrls: { url: string; message: string; name: string }[] = [];
   let contactEvidenceCount = 0;
 
   for (const row of input.rows) {
@@ -150,27 +158,36 @@ export async function commitImport(
       currentCompany: row.currentCompany,
       currentTitle: row.currentTitle,
       geography: row.geography,
-      profileUrls: row.profileUrls,
+      // Wave H: a shared Facebook or contact-vendor address must never bind
+      // two candidate records together, so the matcher sees only the
+      // families that can carry identity.
+      profileUrls: matchableProfileUrls(row.profileUrls),
     };
     const matches = findIdentityMatches(me, existing);
-    const candidate = await createCandidate(db, {
-      searchProjectId: input.searchProjectId,
-      name: row.name,
-      currentTitle: row.currentTitle,
-      currentCompany: row.currentCompany,
-      geography: row.geography,
-      profileUrls: row.profileUrls,
-      addedVia: `import:${input.source}`,
-      sourceLabel: label,
-      profile: {
-        licenses: row.licenses,
-        certifications: row.certifications,
-        skills: row.skills,
+    const dropped: DroppedProfileUrl[] = [];
+    const candidate = await createCandidate(
+      db,
+      {
+        searchProjectId: input.searchProjectId,
+        name: row.name,
+        currentTitle: row.currentTitle,
+        currentCompany: row.currentCompany,
+        geography: row.geography,
+        profileUrls: row.profileUrls,
+        addedVia: `import:${input.source}`,
+        sourceLabel: label,
+        profile: {
+          licenses: row.licenses,
+          certifications: row.certifications,
+          skills: row.skills,
+        },
+        recruiterNotes: `Imported from ${mapper.label} file ${input.filename} on ${importedAt.slice(0, 10)}.`,
+        stage: "identified",
       },
-      recruiterNotes: `Imported from ${mapper.label} file ${input.filename} on ${importedAt.slice(0, 10)}.`,
-      stage: "identified",
-    });
+      dropped,
+    );
     created.push({ id: candidate.id, name: candidate.name });
+    droppedUrls.push(...dropped.map((d) => ({ ...d, name: row.name })));
     existing.push({ ...me, id: candidate.id });
 
     if (row.registryUrl) {
@@ -216,7 +233,7 @@ export async function commitImport(
       });
     }
   }
-  return { created, flagged, contactEvidenceCount };
+  return { created, flagged, contactEvidenceCount, droppedUrls };
 }
 
 /** For tests and the smoke script: how many CV versions exist for a search. */

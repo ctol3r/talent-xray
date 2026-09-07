@@ -153,6 +153,11 @@ export async function confirmRegistryMatch(
       sourceType: "registry",
       label: "NPI record (registry-matched)",
       addedVia: "registry_match",
+      // Wave H: the registry itself is the asserting party, and the match
+      // date is when its record was read.
+      provenance: "registry_match",
+      assertedBy: "cms-nppes",
+      retrievedAt: new Date().toISOString(),
     });
   }
   return row;

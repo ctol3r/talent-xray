@@ -13,6 +13,7 @@ import {
 } from "drizzle-orm/sqlite-core";
 import type {
   Breadth,
+  ConfirmationChannel,
   CrewJobStatus,
   PacketKind,
   Certainty,
@@ -21,14 +22,18 @@ import type {
   ChannelStatus,
   Disposition,
   GenerationMeta,
+  Jurisdiction,
   LearningKind,
+  NoticeResolution,
   OfferStatus,
   OutreachStatus,
   OutreachStepKind,
+  ProfileLinkProvenance,
   ProvenanceSource,
   RubricLevel,
   SearchStatus,
   SourceEvidenceProvenance,
+  SuppressionReason,
   VerificationStatus,
 } from "@/lib/core/enums";
 import type { CanonicalIntelligence } from "@/lib/core/ir";
@@ -103,6 +108,12 @@ export const searchProjects = sqliteTable("search_projects", {
   businessObjective: text("business_objective"),
   status: text("status").notNull().$type<SearchStatus>().default("open"),
   recruiterNotes: text("recruiter_notes"),
+  /** Off-by-default surface families this search has turned on, with the reason. */
+  surfaceOptIns: text("surface_opt_ins", { mode: "json" }).$type<Partial<
+    Record<string, { reason: string; at: string }>
+  > | null>(),
+  /** Which regime this search runs under. Null means the strictest (EU/UK). */
+  jurisdiction: text("jurisdiction").$type<Jurisdiction>(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -297,6 +308,9 @@ export const searchQueryRuns = sqliteTable("search_query_runs", {
   edited: integer("edited", { mode: "boolean" }).notNull().default(false),
   engine: text("engine").notNull(),
   resultCount: integer("result_count").notNull(),
+  /** Set when the run came from a per-candidate profile sweep (Wave H2). */
+  candidateId: text("candidate_id"),
+  sweepTemplate: text("sweep_template"),
   ranAt: text("ran_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
@@ -331,10 +345,20 @@ export const candidates = sqliteTable("candidates", {
   profile: text("profile", { mode: "json" })
     .notNull()
     .$type<CandidateProfilePayload>(),
+  /** How the Article 14 duty to inform was discharged, as the recruiter states it. */
+  noticeResolution: text("notice_resolution").$type<NoticeResolution>(),
+  noticeResolvedAt: text("notice_resolved_at"),
+  noticeNote: text("notice_note"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
 
+/**
+ * A public profile address held for a candidate (Wave H). The row records
+ * where the address came from, who asserted it belongs to this person, when
+ * a structured API was read, when a human kept it, and the human's own note
+ * on why they think it is the same person. It never holds page content.
+ */
 export const candidateSources = sqliteTable("candidate_sources", {
   id: uuid(),
   candidateId: text("candidate_id")
@@ -344,6 +368,40 @@ export const candidateSources = sqliteTable("candidate_sources", {
   sourceType: text("source_type"),
   label: text("label"),
   addedVia: text("added_via"),
+  /** Null on a row written before Wave H; `linkTier` derives it. */
+  provenance: text("provenance").$type<ProfileLinkProvenance>(),
+  /** "github:octocat" | "cms-nppes" | "<vendor label>" | "the person". */
+  assertedBy: text("asserted_by"),
+  /** The platform's own timestamp for its assertion, when it has one. */
+  assertedAt: text("asserted_at"),
+  /** When a structured public API was read. Null for a human-opened row. */
+  retrievedAt: text("retrieved_at"),
+  /** Set only when the person themselves confirmed the address. */
+  confirmedAt: text("confirmed_at"),
+  confirmedVia: text("confirmed_via").$type<ConfirmationChannel>(),
+  /** The row this address was read from, for a declared or copied link. */
+  originSourceId: text("origin_source_id"),
+  /** The recruiter's own reason for believing this is the same person. */
+  whyNote: text("why_note"),
+  createdAt: createdAt(),
+});
+
+/**
+ * Addresses that must never be saved again: the person denied them, objected,
+ * or asked for deletion. Checked on every candidate-bound write path. The row
+ * outlives the candidate record it was about, so `candidate_id` is nulled
+ * rather than cascaded.
+ */
+export const profileSuppressions = sqliteTable("profile_suppressions", {
+  id: uuid(),
+  kind: text("kind").notNull().$type<"url" | "email">().default("url"),
+  normalizedValue: text("normalized_value").notNull().unique(),
+  candidateId: text("candidate_id"),
+  reason: text("reason").notNull().$type<SuppressionReason>(),
+  recordedAt: text("recorded_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  note: text("note"),
   createdAt: createdAt(),
 });
 

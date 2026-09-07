@@ -6,7 +6,11 @@ import {
   researchSources,
   searchProjects,
 } from "@/lib/db/schema";
-import { captureInputSchema } from "@/lib/core/browser-companion";
+import {
+  captureInputSchema,
+  labelForCapture,
+} from "@/lib/core/browser-companion";
+import { enforcePolicyForSave } from "./profile-links";
 
 export function captureWorkspace(db: Db) {
   return {
@@ -82,6 +86,14 @@ export function saveCapturedSource(db: Db, input: unknown) {
         throw new Error(
           "The candidate does not belong to the selected search.",
         );
+      // Wave H: a captured address attached to a person goes through the one
+      // guard, so a suppressed address or an off-family surface is refused
+      // here exactly as it is on the candidate card.
+      enforcePolicyForSave(tx as unknown as Db, {
+        searchProjectId: project.id,
+        url: parsed.url,
+        provenance: "recruiter_added",
+      });
       const existing = tx
         .select()
         .from(candidateSources)
@@ -99,8 +111,9 @@ export function saveCapturedSource(db: Db, input: unknown) {
           .values({
             candidateId: candidate.id,
             url: parsed.url,
-            label: parsed.title || null,
+            label: labelForCapture(parsed.url, parsed.title),
             addedVia: "browser_capture",
+            provenance: "recruiter_added",
           })
           .returning()
           .get();

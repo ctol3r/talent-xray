@@ -24,6 +24,12 @@ import {
   registryStatus,
 } from "@/lib/registries";
 import { RegistryMatchCard } from "@/components/registry-match";
+import { ProfileConnections } from "@/components/profile-connections";
+import { listProfileLinks } from "@/lib/services/profile-links";
+import { declaredAccounts } from "@/lib/services/declared-links";
+import { noticeStatus } from "@/lib/domain/profile-links";
+import { listCandidates } from "@/lib/services/candidates";
+import { getSearchProject } from "@/lib/services/search-projects";
 import { generateCandidatePacketAction } from "@/lib/actions/guidance";
 import { HmFeedbackForm } from "@/components/hm-feedback-form";
 import { PACKET_KINDS, PACKET_KIND_LABELS } from "@/lib/core/enums";
@@ -70,6 +76,8 @@ export default async function CandidatePage({
     messages,
     packets,
     registryMatch,
+    project,
+    siblings,
   ] = await Promise.all([
     getPipelineStages(db, id),
     getCandidateSources(db, candidateId),
@@ -78,7 +86,20 @@ export default async function CandidatePage({
     listCandidateMessages(db, candidateId),
     listCandidatePackets(db, candidateId),
     getRegistryMatch(db, candidateId),
+    getSearchProject(db, id),
+    listCandidates(db, id),
   ]);
+  // Wave H: every address held for this person, labelled with where it came
+  // from. A registry row whose match was cleared is demoted rather than
+  // keeping a badge that names a registry we no longer hold a record from.
+  const profileLinks = listProfileLinks(db, candidateId, {
+    hasRegistryMatch: Boolean(registryMatch),
+  });
+  const notice = noticeStatus(
+    candidate,
+    project?.jurisdiction ?? null,
+    new Date(),
+  );
   const [sequence] = await db
     .select()
     .from(outreachSequences)
@@ -340,38 +361,23 @@ export default async function CandidatePage({
               nextActionDue={candidate.nextActionDue}
             />
           </Card>
-          <Card title="Sources">
-            {sources.length === 0 ? (
-              <p className="text-[13px] text-ink-muted">
-                No profile URLs saved.
-              </p>
-            ) : (
-              <ul className="space-y-1">
-                {sources.map((source) => (
-                  <li key={source.id}>
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[12.5px] break-all text-accent hover:underline"
-                    >
-                      {source.url}
-                    </a>
-                    {(source.label || source.addedVia) && (
-                      <span className="ml-2 text-[11px] text-ink-faint">
-                        {[source.label, source.addedVia]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <p className="mt-2 text-[11.5px] text-ink-faint">
-              Links open at the source. Pages are never fetched or stored.
-            </p>
-          </Card>
+          <ProfileConnections
+            searchProjectId={id}
+            candidateId={candidateId}
+            candidateName={candidate.name}
+            links={profileLinks}
+            otherCandidates={siblings
+              .filter((c) => c.id !== candidateId)
+              .map((c) => ({ id: c.id, name: c.name }))}
+            declaredAccounts={declaredAccounts(db, candidateId).map((a) => ({
+              sourceId: a.sourceId,
+              platform: a.platform,
+              account: a.account,
+              configured: a.configured,
+              mode: a.mode,
+            }))}
+            notice={notice}
+          />
           {sourceEvidence.length > 0 && (
             <Card title="Source evidence">
               <ul className="space-y-3">

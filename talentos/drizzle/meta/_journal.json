@@ -64,6 +64,13 @@
       "when": 1788713881337,
       "tag": "0008_hsal_integration",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1788801412617,
+      "tag": "0009_profile_connections",
+      "breakpoints": true
     }
   ]
 }

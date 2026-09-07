@@ -3,6 +3,8 @@ import { PRODUCT_NAME } from "@/lib/product";
 import { getProviderStatus } from "@/lib/ai/provider";
 import { getResearchProvider } from "@/lib/research/provider";
 import { getCandidateDiscoveryProvider } from "@/lib/research/discovery-provider";
+import { resolveGithubMode } from "@/lib/profiles/github";
+import { resolveKeybaseMode } from "@/lib/profiles/keybase";
 import { Card, KeyValue, PageHeader, Tag } from "@/components/ui";
 
 export const metadata = { title: "Settings" };
@@ -11,6 +13,8 @@ export default function SettingsPage() {
   const provider = getProviderStatus();
   const research = getResearchProvider();
   const discovery = getCandidateDiscoveryProvider();
+  const githubMode = resolveGithubMode();
+  const keybaseMode = resolveKeybaseMode();
   // A runtime data location for display, not a bundled asset.
   const dbPath = path.resolve(
     /* turbopackIgnore: true */
@@ -60,6 +64,24 @@ export default function SettingsPage() {
             customers, most installs will show it as not configured. Result
             pages are never fetched; saved snippets stay labeled unverified
             until you check the source.
+          </p>
+        </Card>
+        <Card title="Declared profile links">
+          <div className="mb-2 flex flex-wrap gap-2">
+            <Tag tone={githubMode === "off" ? "neutral" : "ok"}>
+              GitHub: {githubMode === "off" ? "not enabled" : githubMode}
+            </Tag>
+            <Tag tone={keybaseMode === "off" ? "neutral" : "ok"}>
+              Keybase: {keybaseMode === "off" ? "not enabled" : keybaseMode}
+            </Tag>
+          </div>
+          <p className="text-[13px] text-ink-muted">
+            Reads the addresses a person listed on a profile they control,
+            through that platform&apos;s own public JSON API — one person, one
+            click, never in bulk, never for outreach. Set
+            TALENTOS_PROFILES_GITHUB=1 or TALENTOS_PROFILES_KEYBASE=1 to enable;
+            nothing calls out otherwise. A page is never fetched or read, and
+            nothing is stored until you keep a specific address.
           </p>
         </Card>
         <Card title="Research provider (general)">

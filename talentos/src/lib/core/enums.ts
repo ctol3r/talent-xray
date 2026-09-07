@@ -231,3 +231,95 @@ export const sourceEvidenceProvenanceSchema = z.enum(
 export type SourceEvidenceProvenance = z.infer<
   typeof sourceEvidenceProvenanceSchema
 >;
+
+// ── Wave H: profile connections ─────────────────────────────────────────────
+
+/**
+ * Where a profile address came from, and therefore what may be claimed about
+ * it. A closed enum so `profileLinkLabel` can be exhaustive; null on a row
+ * written before Wave H, where `linkTier` derives the value from `addedVia`.
+ */
+export const PROFILE_LINK_PROVENANCES = [
+  /** A human typed, pasted, captured or kept it. */
+  "recruiter_added",
+  /** A third-party export (Wave D). Decays; open it before relying on it. */
+  "imported",
+  /** The person themselves told the recruiter it is theirs. */
+  "candidate_provided",
+  /** The person listed it on a profile they control, read through that platform's public API. */
+  "platform_declared",
+  /** The platform itself checked a back-link or a cryptographic proof. */
+  "platform_reciprocal",
+  /** A public registry record the recruiter picked (Wave E, D-032). */
+  "registry_match",
+] as const;
+export const profileLinkProvenanceSchema = z.enum(PROFILE_LINK_PROVENANCES);
+export type ProfileLinkProvenance = z.infer<typeof profileLinkProvenanceSchema>;
+
+/**
+ * What kind of surface an address points at. A pure function of the URL
+ * (`classifySurface`), never stored, so a corpus correction relabels every
+ * row at once.
+ */
+export const SURFACE_FAMILIES = [
+  /** Profiles people publish for work: LinkedIn /in, GitHub, portfolios. */
+  "professional",
+  /** Author and credential registries: ORCID, PubMed, NPPES, bar and licence lookups. */
+  "scholarly_registry",
+  /** Directory pages carrying third-party opinion: Zocdoc, Healthgrades, Avvo. */
+  "review_site",
+  /** Third-party contact-data vendors: ZoomInfo, RocketReach, Apollo. */
+  "contact_aggregator",
+  /** Timelines that are part work, part life: X, Bluesky, Mastodon, YouTube, Medium. */
+  "mixed_broadcast",
+  /** Where people talk to friends and family: Facebook, Instagram, TikTok, Reddit. */
+  "personal_life",
+  /** A shared file, which may be anything at all: Drive, Docs, Scribd, SlideShare. */
+  "document",
+  /** A company page, not a person. Refused as a profile link. */
+  "not_a_person",
+  /** Not in the corpus. Saveable, never matched, never shown to a model. */
+  "unrecognised",
+] as const;
+export const surfaceFamilySchema = z.enum(SURFACE_FAMILIES);
+export type SurfaceFamily = z.infer<typeof surfaceFamilySchema>;
+
+/** How the person answered a confirmation request the recruiter sent by hand. */
+export const CONFIRMATION_CHANNELS = [
+  "email",
+  "linkedin_message",
+  "sheet",
+  "call",
+  "other",
+] as const;
+export const confirmationChannelSchema = z.enum(CONFIRMATION_CHANNELS);
+export type ConfirmationChannel = z.infer<typeof confirmationChannelSchema>;
+
+/** How the GDPR Article 14 duty to inform was discharged, as the recruiter states it. */
+export const NOTICE_RESOLUTIONS = [
+  "sent",
+  "at_first_contact",
+  "exempt",
+] as const;
+export const noticeResolutionSchema = z.enum(NOTICE_RESOLUTIONS);
+export type NoticeResolution = z.infer<typeof noticeResolutionSchema>;
+
+/** Which regime a search runs under. Null means the strictest (EU/UK) behaviour. */
+export const JURISDICTIONS = [
+  "eu_uk",
+  "california",
+  "nyc",
+  "illinois",
+  "other",
+] as const;
+export const jurisdictionSchema = z.enum(JURISDICTIONS);
+export type Jurisdiction = z.infer<typeof jurisdictionSchema>;
+
+/** Why an address may never be saved again. */
+export const SUPPRESSION_REASONS = [
+  "denied_by_person",
+  "objection",
+  "deletion_request",
+] as const;
+export const suppressionReasonSchema = z.enum(SUPPRESSION_REASONS);
+export type SuppressionReason = z.infer<typeof suppressionReasonSchema>;

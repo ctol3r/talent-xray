@@ -28,9 +28,12 @@ import {
   outreachSequences,
   pipelineEvents,
   pipelineStages,
+  profileSuppressions,
   scorecards,
   searchProjects,
+  searchQueryRuns,
 } from "@/lib/db/schema";
+import { addProfileLink, enforcePolicyForSave } from "./profile-links";
 
 export const createCandidateInput = z.object({
   searchProjectId: z.string(),
@@ -50,9 +53,16 @@ export const createCandidateInput = z.object({
   profile: candidateProfilePayloadSchema.partial().optional(),
 });
 
+/** Addresses a create refused, so the caller can say so rather than drop them silently. */
+export interface DroppedProfileUrl {
+  url: string;
+  message: string;
+}
+
 export async function createCandidate(
   db: Db,
   input: z.input<typeof createCandidateInput>,
+  droppedProfileUrls: DroppedProfileUrl[] = [],
 ) {
   const { profileUrls, resumeText, addedVia, sourceLabel, profile, ...fields } =
     createCandidateInput.parse(input);
@@ -73,15 +83,46 @@ export async function createCandidate(
         text: resumeText,
         confirmed: true,
       });
+    // Wave H: a URL attached to a person goes through the one guard, so a
+    // suppressed address, a company page or an off-family surface cannot
+    // enter here either. A refused URL is dropped and named on the result;
+    // creating the candidate still succeeds, because the person is not the
+    // problem — one of their addresses is.
     const urls = profileUrls.map((url) => url.trim()).filter(Boolean);
-    if (urls.length)
+    const kept: string[] = [];
+    for (const url of urls) {
+      try {
+        enforcePolicyForSave(tx as unknown as Db, {
+          searchProjectId: fields.searchProjectId,
+          url,
+          provenance: "recruiter_added",
+        });
+        kept.push(url);
+      } catch (error) {
+        droppedProfileUrls.push({
+          url,
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+    // A vendor export is "imported", which decays and must be checked; a URL
+    // a human typed or captured is "recruiter-added". The tier follows how
+    // the address arrived, not who called this function.
+    const provenance = addedVia.startsWith("import:")
+      ? ("imported" as const)
+      : ("recruiter_added" as const);
+    if (kept.length)
       tx.insert(candidateSources)
         .values(
-          urls.map((url) => ({
+          kept.map((url) => ({
             candidateId: candidate.id,
             url,
             addedVia,
             label: sourceLabel,
+            provenance,
+            ...(provenance === "imported" && sourceLabel
+              ? { assertedBy: sourceLabel }
+              : {}),
           })),
         )
         .run();
@@ -218,15 +259,27 @@ export const addCandidateSourceInput = z.object({
   label: z.string().optional(),
 });
 
+/**
+ * Wave H: one address, one person, through the one guard. Kept as a thin
+ * wrapper so existing callers do not change shape.
+ */
 export async function addCandidateSource(
   db: Db,
   input: z.infer<typeof addCandidateSourceInput>,
 ) {
-  const [source] = await db
-    .insert(candidateSources)
-    .values({ ...input, addedVia: "manual" })
-    .returning();
-  return source;
+  const { sourceId } = addProfileLink(db, {
+    candidateId: input.candidateId,
+    url: input.url,
+    ...(input.label ? { label: input.label } : {}),
+    ...(input.sourceType ? { sourceType: input.sourceType } : {}),
+    addedVia: "manual",
+    provenance: "recruiter_added",
+  });
+  return db
+    .select()
+    .from(candidateSources)
+    .where(eq(candidateSources.id, sourceId))
+    .get();
 }
 
 export async function getPipelineStages(db: Db, projectId: string) {
@@ -258,6 +311,15 @@ export async function deleteCandidate(db: Db, candidateId: string) {
       .run();
     tx.delete(documentVersions)
       .where(eq(documentVersions.candidateId, candidateId))
+      .run();
+    // Wave H: the candidate's own sweep runs go with them (the ledger row is
+    // about this person), and their objections outlive the record.
+    tx.update(profileSuppressions)
+      .set({ candidateId: null })
+      .where(eq(profileSuppressions.candidateId, candidateId))
+      .run();
+    tx.delete(searchQueryRuns)
+      .where(eq(searchQueryRuns.candidateId, candidateId))
       .run();
     for (const table of [
       scorecards,

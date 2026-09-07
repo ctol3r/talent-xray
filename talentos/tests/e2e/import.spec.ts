@@ -60,7 +60,15 @@ test("import a vendor export with preview, dropped column and identity review", 
     page.getByRole("link", { name: "Ben Sample", exact: true }),
   ).toHaveCount(2);
   await page.getByRole("link", { name: "Ada Example", exact: true }).click();
-  await expect(page.getByText("hireEZ export · import:hireez")).toBeVisible();
+  // Wave H: the profile-connections card replaced the plain Sources list. An
+  // imported address now says it is third-party and decays.
+  const imported = page
+    .locator("li")
+    .filter({ hasText: "linkedin.com/in/ada-example" });
+  await expect(imported.getByText("unverified · imported")).toBeVisible();
+  await expect(
+    imported.getByText(/from hireEZ export on .* third-party data/),
+  ).toBeVisible();
 
   await page.goto("/tasks");
   await expect(

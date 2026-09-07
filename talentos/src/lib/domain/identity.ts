@@ -45,7 +45,12 @@ const normOrg = (s: string | undefined): string =>
     .replace(/\s+/g, " ")
     .trim();
 
-const normUrl = (u: string): string =>
+/**
+ * The identity key for an address: scheme, "www." and trailing slashes are
+ * noise, a query string is not. Exported for the profile-link suppression
+ * list (Wave H), which must recognise the same address the matcher does.
+ */
+export const normUrl = (u: string): string =>
   u
     .toLowerCase()
     .replace(/^https?:\/\//, "")

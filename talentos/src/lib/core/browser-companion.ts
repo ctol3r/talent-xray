@@ -71,6 +71,30 @@ export function assertLocalCompanionRequest(
     );
 }
 
+/**
+ * A LinkedIn tab title reads "Name - Headline - Company | LinkedIn", which is
+ * profile content the app has no business storing (rule 1). For those hosts
+ * the label is the profile slug, which is part of the address itself; the
+ * recruiter can type a better one. Everywhere else the page title is a fair
+ * label for a link the recruiter chose to keep.
+ */
+export function labelForCapture(
+  url: string,
+  title: string | null | undefined,
+): string | null {
+  try {
+    const parsed = new URL(url);
+    if (/(^|\.)linkedin\.com$/.test(parsed.hostname.toLowerCase())) {
+      const segments = parsed.pathname.split("/").filter(Boolean);
+      const slug = segments[1] ?? segments[0] ?? null;
+      return slug ? slug.slice(0, 120) : null;
+    }
+  } catch {
+    return (title ?? "").trim().slice(0, 120) || null;
+  }
+  return (title ?? "").trim().slice(0, 120) || null;
+}
+
 export function readCaptureFragment(fragment: string) {
   if (fragment.length > 30_000)
     throw new Error(

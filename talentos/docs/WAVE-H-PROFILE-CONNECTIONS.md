@@ -1,7 +1,10 @@
 # Wave H — Profile connections (design, 2026-09-07)
 
-Status: **DESIGNED, NOT BUILT.** One decision is the owner's and is stated in
-the box below. Executor: Claude. Predecessors: Wave A (yield ledger, D-029),
+Status: **Wave H (the first half) is BUILT and gated — see
+`docs/WAVE-H-REPORT.md`. Wave H2 is OPEN.** The build took option (A) below,
+which is the default reading of the owner's ask; option (B) is still the
+owner's to take and is a small addition on top. D-035 is drafted at the
+bottom of this document and is written into `DECISIONS.md` on acceptance. Executor: Claude. Predecessors: Wave A (yield ledger, D-029),
 Wave D (imports, `identity.ts`, D-031), Wave E (NPPES, D-032), D-034
 (link-out discovery). Becomes **D-035** in `DECISIONS.md` when the owner
 accepts and the first half closes.

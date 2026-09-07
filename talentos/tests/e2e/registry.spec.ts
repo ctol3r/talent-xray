@@ -36,7 +36,12 @@ test("match a clinician to a public registry record by hand", async ({
   await expect(page.getByText("same name same location")).toBeVisible();
   await page.getByRole("button", { name: "This is them" }).first().click();
 
-  await expect(page.getByText("registry-matched · CMS NPPES")).toBeVisible();
+  // The badge appears on the registry card and, from Wave H, on the address
+  // itself in the profile-connections card. Both are correct; assert each.
+  await expect(
+    page.getByText("registry-matched · CMS NPPES").first(),
+  ).toBeVisible();
+  await expect(page.getByText("registry-matched · CMS NPPES")).toHaveCount(2);
   const link = page.getByRole("link", { name: "Open NPI record" });
   await expect(link).toHaveAttribute(
     "href",
@@ -47,8 +52,12 @@ test("match a clinician to a public registry record by hand", async ({
   ).toBeVisible();
 
   await page.reload();
-  await expect(page.getByText("registry-matched · CMS NPPES")).toBeVisible();
+  await expect(
+    page.getByText("registry-matched · CMS NPPES").first(),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Clear match" }).click();
+  // Clearing the match demotes the saved address too: a badge that names a
+  // registry must not outlive the record it came from (Wave H).
   await expect(page.getByText("registry-matched · CMS NPPES")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Search NPPES" }),

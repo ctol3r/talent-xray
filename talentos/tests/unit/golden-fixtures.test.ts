@@ -46,6 +46,8 @@ function contextFor(fixtureIndex: number): ProjectContext {
       businessObjective: fixture.businessObjective,
       status: "open",
       recruiterNotes: null,
+      surfaceOptIns: null,
+      jurisdiction: null,
       createdAt: now,
       updatedAt: now,
     },

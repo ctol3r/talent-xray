@@ -114,6 +114,9 @@ export async function saveDiscoveryResult(
         searchProjectId: input.searchProjectId,
         name: input.candidateName,
         profileUrls: [input.url],
+        // Wave H: the engine the address came from travels into the
+        // provenance line, and createCandidate runs the family guard.
+        addedVia: input.engine ? `discover:${input.engine}` : "manual",
         recruiterNotes: `Saved from discovery — query: ${input.query}`,
         // resumeText is candidate/recruiter material only; the snippet
         // becomes explicit, unverified source evidence below (D-010).

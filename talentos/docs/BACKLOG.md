@@ -185,6 +185,21 @@ BrokerCheck and IAPD (automation forbidden), Crunchbase and OpenCorporates
 (paid, purpose-restricted, and they carry gender, birth date and nationality
 fields that an allow-list would have to drop).
 
+**Wave H first half — BUILT 2026-09-07** (`docs/WAVE-H-REPORT.md`):
+migration 0009, surface families and their warnings, the tier vocabulary and
+its one label producer, `enforcePolicyForSave` on every candidate-bound write
+path, the suppression list, the profile-connections card with multi-line
+paste and a per-row "why", move-to-another-candidate, the GitHub and Keybase
+declared-link adapters, the matcher and model filters, and the Article 14
+clock as a displayed tag.
+
+**Wave H2, open.** Per-candidate profile sweep strings and their ledger rows
+(run three real names on the hosted page before closing, as D-034 was
+validated); the confirmation draft, "I sent this" and the answer form;
+Wikidata and ORCID adapters; the Settings data-subject-request card;
+`sweepYieldForProject`; a live read from GitHub and Keybase pasted into
+`docs/` so both adapters stop being "built, not observed" (D-021).
+
 **Deferred from the Wave H design.** The `profile_confirmation_requests`
 snapshot table; a localhost confirmation sheet at `/confirm/[token]` (needs a
 security review before any tunnel); per-jurisdiction notice templates;

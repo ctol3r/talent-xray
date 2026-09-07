@@ -15,6 +15,7 @@ import {
   normalizeQueryKey,
   prepareQueries,
 } from "@/lib/domain/query-normalization";
+import { modelVisibleUrls } from "@/lib/domain/surface-families";
 import type { Db } from "@/lib/db/client";
 import {
   candidateEvidence,
@@ -391,7 +392,10 @@ export async function generateEvidenceAlignment(
     {
       project,
       candidate,
-      sourceUrls: sources.map((s) => s.url),
+      // Wave H: only professional and scholarly/registry addresses reach a
+      // model, as bare URLs. A personal-life, document, contact-vendor or
+      // unrecognised address is never named in a prompt.
+      sourceUrls: modelVisibleUrls(sources.map((s) => s.url)),
       sourceEvidence: sourceEvidence.map((item) => ({
         sourceUrl: item.sourceUrl,
         title: item.title,
