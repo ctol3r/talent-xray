@@ -1,4 +1,6 @@
 import { getDb } from "@/lib/db/client";
+import { loadProjectContext } from "@/lib/ai/context";
+import { SearchPlanPanel } from "@/components/search-plan-panel";
 import { listChannels, listQueries } from "@/lib/services/workflow";
 import {
   queryYieldForProject,
@@ -59,15 +61,23 @@ export default async function StringsPage({
 }) {
   const { id } = await params;
   const db = getDb();
-  const [queries, channels, yieldByProject, roleYield, calibration, ir] =
-    await Promise.all([
-      listQueries(db, id),
-      listChannels(db, id),
-      queryYieldForProject(db, id),
-      roleTitleYield(db, id),
-      loadCalibrationSignals(db, id),
-      getIntelligence(db, id),
-    ]);
+  const [
+    queries,
+    channels,
+    yieldByProject,
+    roleYield,
+    calibration,
+    ir,
+    context,
+  ] = await Promise.all([
+    listQueries(db, id),
+    listChannels(db, id),
+    queryYieldForProject(db, id),
+    roleTitleYield(db, id),
+    loadCalibrationSignals(db, id),
+    getIntelligence(db, id),
+    loadProjectContext(db, id),
+  ]);
   const labels = requirementLabels(db, id);
   const hasSearchPlan = Boolean(ir?.payload.searchPlan);
   const newest = [...queries]
@@ -113,6 +123,12 @@ export default async function StringsPage({
             />
           </div>
         }
+      />
+      <SearchPlanPanel
+        searchProjectId={id}
+        intelligence={ir?.payload ?? null}
+        meta={ir?.meta ?? null}
+        hasJobDescription={Boolean(context.jdText?.trim())}
       />
       {queries.length === 0 ? (
         <EmptyState
