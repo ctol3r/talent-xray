@@ -1,4 +1,20 @@
 import { defineConfig } from "@playwright/test";
+import path from "node:path";
+
+const port = Number(process.env.TALENTOS_E2E_PORT);
+const runDir = process.env.TALENTOS_E2E_DIR;
+if (
+  !Number.isInteger(port) ||
+  port < 1024 ||
+  port > 65535 ||
+  !runDir ||
+  !path.isAbsolute(runDir)
+) {
+  throw new Error(
+    "Run pnpm e2e so each browser run gets its own port and disposable data.",
+  );
+}
+const baseURL = `http://127.0.0.1:${port}`;
 
 /**
  * E2E runs against a production server (`pnpm build` first) with the mock
@@ -9,27 +25,13 @@ import { defineConfig } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests/e2e",
-  outputDir: "./test-results/standalone",
+  outputDir: `./test-results/standalone/${path.basename(runDir)}`,
   timeout: 180_000,
   workers: 1,
   use: {
-    baseURL: "http://localhost:3999",
+    baseURL,
     launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXE
       ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXE }
       : {},
-  },
-  globalSetup: "./tests/e2e/global-setup.ts",
-  webServer: {
-    command: "pnpm start --port 3999",
-    port: 3999,
-    reuseExistingServer: false,
-    timeout: 60_000,
-    env: {
-      TALENTOS_MODEL_PROVIDER: "mock",
-      TALENTOS_DISCOVERY_PROVIDER: "mock",
-      TALENTOS_REGISTRY_NPPES: "mock",
-      TALENTOS_DATABASE_PATH: "./data/e2e.db",
-      TALENTOS_DOCUMENT_DIR: "/tmp/talentos-e2e-documents",
-    },
   },
 });

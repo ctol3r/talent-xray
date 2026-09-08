@@ -68,6 +68,14 @@ pnpm e2e      # the same critical path driven through the real UI (Playwright)
 `pnpm e2e` needs a prior `pnpm build`; point `PLAYWRIGHT_CHROMIUM_EXE` at a
 system Chromium if Playwright's own download isn't available.
 
+Use `pnpm e2e` (with optional Playwright arguments, for example
+`pnpm e2e tests/e2e/search-planning.spec.ts`) so the runner allocates an unused
+loopback port and a separate temporary database, document folder and session
+outbox. Runs also have separate result folders. The runner removes only its
+own temporary data; it never frees a port by killing its existing listener.
+This replaces fixed-port cleanup scripts in local drafts. The artifact suite
+starts no web server and continues to use `pnpm e2e:artifact` directly.
+
 ## Load-bearing properties
 
 - **Deterministic core, generative edges.** Pipeline state, analytics,
