@@ -80,11 +80,14 @@ Source: `docs/PILOT-2026-09-06.md`. Measured on a real JD and a real CV
 through the UI with the session provider; discovery was blocked by the
 owner's Google key, so yield findings are still open.
 
-- **Derive hiring need / search plan from the UI.** `deriveHiringNeed` and
-  `deriveSearchPlan` have no button; "Compose from search plan" therefore
-  never appears without a script (`scripts/pilot-derive-plan.mts`). Add a
-  "Derive search plan" action on the Strategy or Strings page, session
-  provider included.
+- **Derive hiring need / search plan from the UI — implemented on the
+  search-planning branch (2026-09-07).** Search String Lab now exposes the
+  existing services in order, shows requirements and plan vocabulary, and
+  handles the keyless session request/response without claiming a pending
+  request is a saved draft. The original pilot required
+  `scripts/pilot-derive-plan.mts`; the new browser regression covers the same
+  entry point through the UI. See `docs/SEARCH-PLANNING.md` for validation and
+  release limits; CI and use against the personal installation remain open.
 - **Budget splitter: slice several lists jointly.** 16 of 122 strings
   stayed over the 32-term Google budget ("kept whole") because exclusions
   (6 negated terms), locations and title groups together exceed it before
