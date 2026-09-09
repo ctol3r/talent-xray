@@ -25,6 +25,8 @@ import {
   type KnowledgeGraph,
 } from "@/lib/core/knowledge-graph";
 import { currentRequirements, reviewWorkspace } from "./document-review";
+import { tagsIn, tagHref } from "@/lib/core/tags";
+import { listTags } from "./tags";
 import { validateAnchor } from "@/lib/documents/contracts";
 
 function savedLinks(db: Db, searchProjectId: string) {
@@ -331,6 +333,81 @@ export function knowledgeGraph(
       `candidate-source:${source.id}`,
     );
   }
+  // ── Tags (D-039) ──────────────────────────────────────────────────────────
+  // A tag is a word somebody wrote, not a record, and it is the only thing in
+  // this graph that reaches outside the search: the same word on this job and
+  // on a person in another one is a real connection. Reading the text here
+  // rather than a table keeps the graph a projection — delete the word and
+  // the node disappears with it.
+  //
+  // Every edge is written from the record to the tag. Direction is kept for
+  // reading ("mentions") and ignored for traversal (`graphNeighbours`), which
+  // is what makes a tag a two-way link rather than a label hanging off a row.
+  const tagNodes = new Map<string, GraphNode>();
+  const mentionTag = (
+    fromNodeId: string,
+    text: string | null,
+    where: string,
+  ) => {
+    if (!text) return;
+    for (const tag of tagsIn(text)) {
+      const id = graphNodeId("tag", tag.slug);
+      if (!tagNodes.has(id)) {
+        tagNodes.set(id, {
+          id,
+          kind: "tag",
+          label: tag.display,
+          detail: `Tag. Every search, person and note carrying this word is on its page.`,
+          href: tagHref(tag.slug),
+        });
+      }
+      addEdge(
+        fromNodeId,
+        id,
+        "mentions",
+        `tag:${fromNodeId}:${tag.slug}`,
+        where,
+      );
+    }
+  };
+
+  mentionTag(rootId, project.recruiterNotes, "search notes");
+  mentionTag(rootId, project.businessObjective, "business objective");
+  for (const person of people) {
+    mentionTag(
+      graphNodeId("candidate", person.id),
+      person.recruiterNotes,
+      "candidate notes",
+    );
+  }
+  for (const channel of channels) {
+    const id = graphNodeId("channel", channel.id);
+    mentionTag(id, channel.whyRelevant, "why relevant");
+    mentionTag(id, channel.note, "channel note");
+  }
+  // A tag is the only node here that means something outside this search, so
+  // it carries the whole-workspace count and links to its own page. That is
+  // the cross-search edge: the graph shows it exists, the tag page walks it.
+  if (tagNodes.size > 0) {
+    const totals = new Map(listTags(db).map((tag) => [tag.slug, tag]));
+    for (const tagNode of tagNodes.values()) {
+      const slug = tagNode.id.slice("tag:".length);
+      const total = totals.get(slug);
+      if (!total) continue;
+      const elsewhere = total.count;
+      tagNode.status =
+        elsewhere > 1
+          ? `${elsewhere} mentions across the workspace`
+          : "1 mention";
+      tagNode.detail = `Tag. Written on ${total.searchCount} search${
+        total.searchCount === 1 ? "" : "es"
+      } and ${total.candidateCount} ${
+        total.candidateCount === 1 ? "person" : "people"
+      } in total. Open its page for every mention, including other searches.`;
+    }
+  }
+  nodes.push(...tagNodes.values());
+
   const nodeIds = new Set(nodes.map((node) => node.id));
   const manual = savedLinks(db, searchProjectId);
   const unavailableLinks = manual.filter(

@@ -84,11 +84,13 @@ describe("normalizeStringLabInput", () => {
 describe("countTerms / budgets / keys", () => {
   it("counts terms the way the artifact compiler does", () => {
     const fixtures: Array<[string, number]> = [
-      // Whitespace tokens: a quoted phrase counts per word, as Google does.
-      ['("Research Scientist" OR "Research Engineer") alignment', 5],
-      ["a OR b OR c", 3],
-      ['(site:linkedin.com/in OR site:linkedin.com/pub) "ml"', 3],
-      ["( a ) AND ( b )", 2],
+      // A quoted phrase counts per word, as Google does — and the operators
+      // count too. See the note on `countTerms`.
+      ['("Research Scientist" OR "Research Engineer") alignment', 6],
+      ["a OR b OR c", 5],
+      ["(a|b|c)", 5],
+      ['(site:linkedin.com/in OR site:linkedin.com/pub) "ml"', 4],
+      ["( a ) AND ( b )", 3],
       ["single", 1],
     ];
     for (const [query, expected] of fixtures) {

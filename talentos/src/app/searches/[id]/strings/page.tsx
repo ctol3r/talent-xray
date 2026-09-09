@@ -38,6 +38,7 @@ import {
 } from "@/components/query-qa";
 import { AddQueryForm, QueryEditor } from "@/components/query-tools";
 import { Card, EmptyState, PageHeader, Tag } from "@/components/ui";
+import { QueryEconomy } from "@/components/query-economy";
 
 export const metadata = { title: "Search String Lab" };
 
@@ -91,7 +92,7 @@ export default async function StringsPage({
   return (
     <div>
       <PageHeader
-        title="Search String Lab"
+        title="🔤 Search String Lab"
         description="Boolean and x-ray queries across platforms, in narrow/balanced/broad/adjacent variants. The model expands vocabulary; a deterministic composer builds the strings. Every query is visible, editable, and yours."
         actions={
           <div className="flex items-start gap-2">
@@ -116,7 +117,7 @@ export default async function StringsPage({
       />
       {queries.length === 0 ? (
         <EmptyState
-          title="No search strings yet"
+          title="No strings yet"
           detail="Generate the variant matrix from the sourcing strategy — or add queries manually."
         >
           <AddQueryForm searchProjectId={id} />
@@ -153,12 +154,12 @@ export default async function StringsPage({
                         <PartTag part={query.qaMeta?.part} />
                         <QaBadges warnings={warnings} />
                         {query.expectedPrecision && (
-                          <span className="text-[11.5px] text-ink-faint">
+                          <span className="text-[12.5px] text-ink-faint">
                             precision: {query.expectedPrecision}
                           </span>
                         )}
                         {query.purpose && (
-                          <span className="text-[11.5px] text-ink-faint">
+                          <span className="text-[12.5px] text-ink-faint">
                             {query.purpose}
                           </span>
                         )}
@@ -167,9 +168,21 @@ export default async function StringsPage({
                         />
                       </div>
                       <div className="flex items-start justify-between gap-3">
-                        <code className="min-w-0 flex-1 font-mono text-[12.5px] leading-5 break-words text-ink">
-                          {query.query}
-                        </code>
+                        <div className="min-w-0 flex-1">
+                          <code className="block font-mono text-[13.5px] leading-5 break-words text-ink">
+                            {query.query}
+                          </code>
+                          {/* What this string is spending, and what it could
+                              stop spending. Shown, never applied on its own. */}
+                          <QueryEconomy
+                            queryId={query.id}
+                            searchProjectId={id}
+                            platform={query.platform}
+                            breadth={query.breadth}
+                            purpose={query.purpose}
+                            query={query.query}
+                          />
+                        </div>
                         <QueryEditor
                           queryId={query.id}
                           searchProjectId={id}

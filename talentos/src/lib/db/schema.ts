@@ -33,9 +33,11 @@ import type {
   RubricLevel,
   SearchStatus,
   SourceEvidenceProvenance,
+  StartDateAgreement,
   SuppressionReason,
   VerificationStatus,
 } from "@/lib/core/enums";
+import type { MilestoneKind } from "../../../artifact-src/core/milestones";
 import type { CanonicalIntelligence } from "@/lib/core/ir";
 import type { QueryQaMeta } from "@/lib/domain/query-normalization";
 import type {
@@ -105,6 +107,28 @@ export const searchProjects = sqliteTable("search_projects", {
   industry: text("industry"),
   seniority: text("seniority"),
   compensationNote: text("compensation_note"),
+  /**
+   * The offer, in parts rather than in a sentence, so two jobs can be
+   * compared and a part-time role is a number instead of a note somebody has
+   * to read. Every one of these describes the work or the employer's offer —
+   * none describes a person.
+   */
+  fte: text("fte"),
+  salaryMin: integer("salary_min"),
+  salaryMax: integer("salary_max"),
+  salaryCurrency: text("salary_currency"),
+  salaryPeriod: text("salary_period"),
+  openings: integer("openings"),
+  priority: text("priority"),
+  /** Whether the employer sponsors a work permit. Changes which markets can be sourced at all. */
+  sponsorship: text("sponsorship"),
+  targetStartDate: text("target_start_date"),
+  /**
+   * Whether a start date was actually agreed, asked at intake as its own
+   * answer. Null on jobs created before the question existed — which is not
+   * the same as "not agreed", and the pages that assume a fortnight say so.
+   */
+  startDateAgreement: text("start_date_agreement").$type<StartDateAgreement>(),
   businessObjective: text("business_objective"),
   status: text("status").notNull().$type<SearchStatus>().default("open"),
   recruiterNotes: text("recruiter_notes"),
@@ -617,6 +641,44 @@ export const pipelineEvents = sqliteTable("pipeline_events", {
   note: text("note"),
 });
 
+/**
+ * The four moments a job's elapsed-time measures are built from.
+ *
+ * Separate from `pipeline_events` on purpose. Those are one candidate moving
+ * one stage, and there are hundreds of them; these are four things that happen
+ * to the job itself, at most once each, and three of the four are a person
+ * stating that something has been agreed. Storing a claim about an agreement
+ * in a table of stage moves would make it look like an inference.
+ *
+ * `occurredAt` is when the thing happened, which is not always when the row
+ * was written — `createdAt` keeps the difference visible.
+ */
+export const searchMilestones = sqliteTable(
+  "search_milestones",
+  {
+    id: uuid(),
+    searchProjectId: text("search_project_id")
+      .notNull()
+      .references(() => searchProjects.id),
+    kind: text("kind").notNull().$type<MilestoneKind>(),
+    occurredAt: text("occurred_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+    /** The person the moment was about, where there was one. */
+    candidateId: text("candidate_id").references(() => candidates.id),
+    note: text("note"),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    // One per job per kind. These are firsts by definition — a first reply is
+    // only first once — so the second write is dropped rather than counted.
+    uniqueIndex("search_milestones_job_kind").on(
+      table.searchProjectId,
+      table.kind,
+    ),
+  ],
+);
+
 export const offers = sqliteTable("offers", {
   id: uuid(),
   searchProjectId: text("search_project_id")
@@ -696,6 +758,12 @@ export const tasks = sqliteTable("tasks", {
   title: text("title").notNull(),
   kind: text("kind"),
   dueAt: text("due_at"),
+  /**
+   * Manual order, set by dragging. Null means "not placed by hand", and
+   * those sort after the placed ones by date — so adding this changed
+   * nothing for tasks that already existed.
+   */
+  sortOrder: integer("sort_order"),
   status: text("status").notNull().$type<"open" | "done">().default("open"),
   createdAt: createdAt(),
   completedAt: text("completed_at"),

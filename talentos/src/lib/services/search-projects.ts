@@ -2,12 +2,23 @@ import { saveDocument } from "./documents";
 import { and, desc, eq, inArray, lte } from "drizzle-orm";
 import { z } from "zod";
 import { computeOutreachStats } from "@/lib/domain/analytics";
+import { startDateAgreementSchema } from "@/lib/core/enums";
 import {
   computeNextBestActions,
   type NextBestAction,
   type ProjectSnapshot,
 } from "@/lib/domain/next-best-action";
 import { DEFAULT_PIPELINE_STAGES } from "@/lib/domain/pipeline";
+import { duplicateJobTitleMessage, sameJobTitle } from "@/lib/domain/job-label";
+import {
+  CURRENCIES,
+  FTE_OPTIONS,
+  JOB_PRIORITIES,
+  SALARY_PERIODS,
+  SPONSORSHIP_OPTIONS,
+  isValidChoice,
+  type Choice,
+} from "@/lib/domain/job-fields";
 import type { Db } from "@/lib/db/client";
 import {
   candidatePackets,
@@ -31,6 +42,18 @@ import {
   tasks,
 } from "@/lib/db/schema";
 
+/**
+ * A value from a fixed list, or empty. Empty is always allowed: a form that
+ * forces a choice before the recruiter knows one collects guesses.
+ */
+const choice = (choices: Choice[]) =>
+  z
+    .string()
+    .refine((value) => isValidChoice(choices, value), {
+      message: "Not one of the available options.",
+    })
+    .optional();
+
 export const createSearchProjectInput = z.object({
   name: z.string().min(1),
   companyName: z.string().optional(),
@@ -43,15 +66,89 @@ export const createSearchProjectInput = z.object({
   employmentType: z.string().optional(),
   workArrangement: z.string().optional(),
   compensationNote: z.string().optional(),
+  // The offer, in parts. Each is validated against its own list so a stored
+  // value is always one the product knows how to render.
+  fte: choice(FTE_OPTIONS),
+  salaryMin: z.coerce.number().int().min(0).max(100_000_000).optional(),
+  salaryMax: z.coerce.number().int().min(0).max(100_000_000).optional(),
+  salaryCurrency: choice(CURRENCIES),
+  salaryPeriod: choice(SALARY_PERIODS),
+  openings: z.coerce.number().int().min(1).max(999).optional(),
+  priority: choice(JOB_PRIORITIES),
+  sponsorship: choice(SPONSORSHIP_OPTIONS),
+  targetStartDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .or(z.literal("")),
+  /**
+   * Whether a start date was agreed. Optional here so seeds, imports and
+   * fixtures can still make a job in one line; required at intake, which is
+   * where a person is actually in a position to answer it.
+   */
+  startDateAgreement: startDateAgreementSchema.optional(),
   businessObjective: z.string().optional(),
   recruiterNotes: z.string().optional(),
 });
 export type CreateSearchProjectInput = z.infer<typeof createSearchProjectInput>;
 
+/**
+ * What intake must answer, which is more than what the database will hold.
+ *
+ * The start date is the only expectation this product captures, and every
+ * "recent", "stalled" and "quiet" reading in it is measured against that
+ * window. When it is missing the reading falls back to a fortnight nobody
+ * agreed to — so the question is asked at intake rather than left to a blank
+ * field that could equally mean "not agreed" or "not typed".
+ *
+ * "Not agreed yet" is a legitimate answer and always will be: a manager who
+ * has not committed to a date has not committed to one, and a form that makes
+ * people invent one would be trading a visible assumption for an invisible
+ * lie. What is refused is silence — and answering "agreed" without a date,
+ * which is a claim with nothing behind it.
+ */
+export const intakeSearchProjectInput = createSearchProjectInput
+  .extend({ startDateAgreement: startDateAgreementSchema })
+  .superRefine((value, ctx) => {
+    if (value.startDateAgreement === "agreed" && !value.targetStartDate)
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["targetStartDate"],
+        message: "A start date was agreed, so give the date.",
+      });
+    if (value.startDateAgreement === "not_agreed" && value.targetStartDate)
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["targetStartDate"],
+        message:
+          "No start date was agreed, so remove the date or change the answer.",
+      });
+  });
+
+/**
+ * Refuse a title another job already uses.
+ *
+ * Titles are how a job is named in a list, in the recall menu and inside
+ * `[[a title]]` in a note, so two identical ones make all three ambiguous.
+ * The check is case- and punctuation-insensitive, because "CAIS Founding
+ * Recruiter" and "CAIS — founding recruiter" are the same title to a reader.
+ */
+async function assertJobTitleFree(
+  db: Db,
+  title: string,
+  exceptId?: string,
+): Promise<void> {
+  const taken = (await db.select().from(searchProjects)).find(
+    (row) => row.id !== exceptId && sameJobTitle(row.name, title),
+  );
+  if (taken) throw new Error(duplicateJobTitleMessage(taken.name));
+}
+
 export async function createSearchProject(
   db: Db,
   input: CreateSearchProjectInput,
 ) {
+  await assertJobTitleFree(db, input.name);
   let companyId: string | undefined;
   if (input.companyName) {
     const existing = await db
@@ -92,6 +189,7 @@ export async function updateSearchProject(
   input: z.infer<typeof updateSearchProjectInput>,
 ) {
   const { id, ...fields } = input;
+  if (fields.name) await assertJobTitleFree(db, fields.name, id);
   const [project] = await db
     .update(searchProjects)
     .set({ ...fields, updatedAt: new Date().toISOString() })
@@ -352,6 +450,23 @@ export interface DashboardData {
     projectName: string;
     actions: NextBestAction[];
   }[];
+  /**
+   * Jobs that exist but are on hold or closed.
+   *
+   * Only a count, and only so the dashboard can tell an empty desk from a
+   * finished one. They are two different situations and one of them should
+   * not be greeted with "create your first search".
+   */
+  closedSearches: number;
+  /**
+   * Every job in the workspace, as ids.
+   *
+   * The scope the elapsed-day medians are computed over, passed explicitly so
+   * the number and the caption beside it cannot drift apart. The dashboard has
+   * no filter today, so the scope is everything; when it grows one, this is the
+   * single place the narrowed set arrives from.
+   */
+  allJobIds: string[];
 }
 
 export async function getDashboardData(db: Db): Promise<DashboardData> {
@@ -393,9 +508,12 @@ export async function getDashboardData(db: Db): Promise<DashboardData> {
     .from(tasks)
     .where(eq(tasks.status, "open"))
     .orderBy(tasks.dueAt);
+  const all = await db.select({ id: searchProjects.id }).from(searchProjects);
   return {
     activeSearches: active,
     today: { followUpsDue, candidatesNeedingReview, openTasks },
     actionsByProject,
+    closedSearches: all.length - active.length,
+    allJobIds: all.map((job) => job.id),
   };
 }

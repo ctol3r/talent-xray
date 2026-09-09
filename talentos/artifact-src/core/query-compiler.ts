@@ -207,15 +207,35 @@ export interface CompiledQuery {
   violations: string[];
 }
 
-/** Count the way Google does: whitespace tokens, excluding the OR keyword. */
+/**
+ * Term count as the engines see it.
+ *
+ * It used to subtract the operators — `OR`, `AND`, `NOT` — on the assumption
+ * that Google counts only the words between them. Google's own documentation
+ * says the opposite: the 32-word limit applies to search terms **and
+ * operators**, and only stop words are free. So a six-way OR group was being
+ * counted five terms lighter than Google counts it, and a query this product
+ * called runnable could lose its tail without anybody being told. That is not
+ * hypothetical — the pilot recorded two strings differing only in their tail
+ * coming back with identical result counts, which is what silent truncation
+ * looks like from outside.
+ *
+ * `|` is counted as well, and that is a deliberate over-estimate: whether
+ * Google charges for it is not documented anywhere I could verify, and a
+ * counter that guesses low is the failure mode this exists to prevent.
+ * `pnpm probe:search` settles it, and needs a key nobody has yet.
+ */
 export function countTerms(query: string): number {
-  return query
-    .split(/\s+/)
-    .map((t) => t.trim())
-    .filter(
-      (t) =>
-        t && t !== "OR" && t !== "AND" && t !== "NOT" && t !== "(" && t !== ")",
-    ).length;
+  return (
+    query
+      .replace(/[()]/g, " ")
+      // `|` is a token of its own, not a separator to be thrown away: it is
+      // an operator, and operators are charged.
+      .replace(/\|/g, " | ")
+      .split(/\s+/)
+      .map((token) => token.trim())
+      .filter(Boolean).length
+  );
 }
 
 function violationsFor(query: string, p: PlatformConstraints): string[] {

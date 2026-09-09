@@ -16,7 +16,15 @@ import path from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
 import * as schema from "@/lib/db/schema";
 import type { Db } from "@/lib/db/client";
 import type { DeclaredFetch } from "@/lib/profiles/declared";
@@ -24,8 +32,11 @@ import {
   buildGithubSocialAccountsUrl,
   buildGithubUserUrl,
   createGithubClient,
+  githubBudget,
+  GITHUB_MIN_INTERVAL_MS,
   githubLoginFromUrl,
   mapGithubLinks,
+  resetGithubLimiter,
 } from "@/lib/profiles/github";
 import {
   buildKeybaseLookupUrl,
@@ -158,10 +169,29 @@ describe("github: what may leave the module", () => {
 });
 
 describe("github: the client", () => {
+  beforeEach(() => resetGithubLimiter());
   afterEach(() => {
     delete process.env.TALENTOS_PROFILES_GITHUB;
     delete process.env.TALENTOS_GITHUB_TOKEN;
+    resetGithubLimiter();
   });
+
+  /** A clock the test moves, so pacing is asserted rather than waited out. */
+  function clock(startAt = 1_788_930_000_000) {
+    let at = startAt;
+    const slept: number[] = [];
+    return {
+      slept,
+      at: () => at,
+      options: {
+        now: () => at,
+        sleep: async (ms: number) => {
+          slept.push(ms);
+          at += ms;
+        },
+      },
+    };
+  }
 
   it("is off by default and makes no request", async () => {
     const calls: string[] = [];
@@ -226,6 +256,136 @@ describe("github: the client", () => {
         }),
       ).read("busy"),
     ).rejects.toThrow(/rate limit reached; try after/);
+  });
+
+  it("reads a secondary limit off retry-after, which the counter cannot say", async () => {
+    // GitHub answers a caller going too fast with 403 and `retry-after`, and
+    // the counter is still positive. Reading only the counter reports this as
+    // an unexplained 403 and throws away the only useful fact in it.
+    process.env.TALENTOS_PROFILES_GITHUB = "1";
+    const c = clock();
+    await expect(
+      createGithubClient(
+        fetchStub({
+          [buildGithubUserUrl("fast")]: {
+            status: 403,
+            body: {},
+            headers: {
+              "x-ratelimit-remaining": "41",
+              "x-ratelimit-limit": "60",
+              "retry-after": "60",
+            },
+          },
+        }),
+        c.options,
+      ).read("fast"),
+    ).rejects.toThrow(/asked us to slow down until .*nothing was retried/s);
+  });
+
+  it("names the token when GitHub rejects it, rather than the status", async () => {
+    process.env.TALENTOS_PROFILES_GITHUB = "1";
+    process.env.TALENTOS_GITHUB_TOKEN = "ghp_stale";
+    await expect(
+      createGithubClient(
+        fetchStub({
+          [buildGithubUserUrl("anyone")]: { status: 401, body: {} },
+        }),
+        clock().options,
+      ).read("anyone"),
+    ).rejects.toThrow(/TALENTOS_GITHUB_TOKEN/);
+  });
+
+  it("does not spend a request to be told the same limit twice", async () => {
+    process.env.TALENTOS_PROFILES_GITHUB = "1";
+    const c = clock();
+    const calls: string[] = [];
+    const routes = {
+      [buildGithubUserUrl("busy")]: {
+        status: 429,
+        body: {},
+        headers: {
+          "x-ratelimit-remaining": "0",
+          "x-ratelimit-limit": "60",
+          "x-ratelimit-reset": String(Math.floor(c.at() / 1000) + 900),
+        },
+      },
+    };
+    await expect(
+      createGithubClient(fetchStub(routes, calls), c.options).read("busy"),
+    ).rejects.toThrow(/rate limit reached/);
+    expect(calls).toHaveLength(1);
+
+    // The next click is the one that must not ask again.
+    await expect(
+      createGithubClient(fetchStub(routes, calls), c.options).read("someone"),
+    ).rejects.toThrow(/Nothing was sent/);
+    expect(calls).toHaveLength(1);
+    expect(githubBudget().remaining).toBe(0);
+  });
+
+  it("keeps a second between requests, so a person costs two paced ones", async () => {
+    process.env.TALENTOS_PROFILES_GITHUB = "1";
+    const c = clock();
+    const calls: string[] = [];
+    await createGithubClient(
+      fetchStub(
+        {
+          [buildGithubUserUrl("jrivera-dev")]: {
+            status: 200,
+            body: GITHUB_USER,
+            headers: {
+              "x-ratelimit-remaining": "59",
+              "x-ratelimit-limit": "60",
+            },
+          },
+          [buildGithubSocialAccountsUrl("jrivera-dev")]: {
+            status: 200,
+            body: GITHUB_SOCIAL,
+            headers: {
+              "x-ratelimit-remaining": "58",
+              "x-ratelimit-limit": "60",
+            },
+          },
+        },
+        calls,
+      ),
+      c.options,
+    ).read("jrivera-dev");
+    expect(calls).toHaveLength(2);
+    expect(c.slept).toEqual([GITHUB_MIN_INTERVAL_MS]);
+    expect(githubBudget().remaining).toBe(58);
+  });
+
+  it("refuses to call a refused second request an empty answer", async () => {
+    // The website off the profile with every social account silently dropped
+    // is a wrong answer that looks like a complete one — and it is the exact
+    // shape a limit reached half-way through a person produces.
+    process.env.TALENTOS_PROFILES_GITHUB = "1";
+    const c = clock();
+    await expect(
+      createGithubClient(
+        fetchStub({
+          [buildGithubUserUrl("jrivera-dev")]: {
+            status: 200,
+            body: GITHUB_USER,
+            headers: {
+              "x-ratelimit-remaining": "1",
+              "x-ratelimit-limit": "60",
+            },
+          },
+          [buildGithubSocialAccountsUrl("jrivera-dev")]: {
+            status: 403,
+            body: {},
+            headers: {
+              "x-ratelimit-remaining": "0",
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-reset": String(Math.floor(c.at() / 1000) + 900),
+            },
+          },
+        }),
+        c.options,
+      ).read("jrivera-dev"),
+    ).rejects.toThrow(/rate limit reached/);
   });
 });
 

@@ -1,53 +1,36 @@
 import { getDb } from "@/lib/db/client";
-import { listOpenTasks } from "@/lib/services/workflow";
-import { CompleteTaskButton, TaskForm } from "@/components/task-controls";
+import { listTasks } from "@/lib/services/workflow";
+import { TaskForm } from "@/components/task-controls";
+import { TaskList } from "@/components/task-list";
+import { OpenAsPane } from "@/components/open-as-pane";
 import { Card, PageHeader } from "@/components/ui";
 
 export const metadata = { title: "Tasks" };
 
 export default async function TasksPage() {
-  const tasks = await listOpenTasks(getDb());
+  const tasks = await listTasks(getDb());
   return (
     <div className="max-w-3xl">
       <PageHeader
-        title="Tasks"
-        description="Free-standing to-dos alongside the per-search next-best-action queue."
+        title="✅ Tasks"
+        description="Free-standing to-dos, in the order you want to do them. Drag one, or use the arrows. Tick one and it stays where it is, struck through, so you can see what you got through — and untick it if you were wrong."
+        actions={<OpenAsPane target="tasks" />}
       />
       <div className="space-y-4">
         <Card>
           <TaskForm />
         </Card>
-        <Card title={`Open (${tasks.length})`}>
-          {tasks.length === 0 ? (
-            <p className="text-[13px] text-ink-muted">Nothing open.</p>
-          ) : (
-            <ul className="divide-y divide-edge">
-              {tasks.map((task) => (
-                <li
-                  key={task.id}
-                  className="flex items-center justify-between gap-3 py-2"
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate text-[13px]">
-                      {task.title}
-                    </span>
-                    {task.dueAt && (
-                      <span
-                        className={`text-[11.5px] ${
-                          task.dueAt <= new Date().toISOString()
-                            ? "text-bad"
-                            : "text-ink-faint"
-                        }`}
-                      >
-                        due {new Date(task.dueAt).toLocaleDateString()}
-                      </span>
-                    )}
-                  </span>
-                  <CompleteTaskButton taskId={task.id} />
-                </li>
-              ))}
-            </ul>
-          )}
+        <Card title={`✅ ${tasks.open} open · ${tasks.done} done`}>
+          <TaskList
+            olderDone={tasks.olderDone}
+            tasks={tasks.rows.map((task) => ({
+              id: task.id,
+              title: task.title,
+              dueAt: task.dueAt,
+              searchProjectId: task.searchProjectId,
+              done: task.status === "done",
+            }))}
+          />
         </Card>
       </div>
     </div>

@@ -37,18 +37,18 @@ function CandidateCard({
     <div className="rounded border border-edge bg-panel p-2.5">
       <Link
         href={`/searches/${projectId}/candidates/${candidate.id}`}
-        className="block text-[13px] font-medium text-ink hover:text-accent"
+        className="block text-[14px] font-medium text-ink hover:text-accent"
       >
         {candidate.name}
       </Link>
-      <p className="mt-0.5 truncate text-[11.5px] text-ink-muted">
+      <p className="mt-0.5 truncate text-[12.5px] text-ink-muted">
         {[candidate.currentTitle, candidate.currentCompany]
           .filter(Boolean)
           .join(" · ") || "—"}
       </p>
       {candidate.nextAction && (
         <p
-          className={`mt-1 text-[11.5px] ${due ? "text-bad" : "text-ink-faint"}`}
+          className={`mt-1 text-[12.5px] ${due ? "text-bad" : "text-ink-faint"}`}
         >
           → {candidate.nextAction}
           {candidate.nextActionDue &&
@@ -66,7 +66,7 @@ function CandidateCard({
             }),
           )
         }
-        className="mt-2 w-full rounded border border-edge bg-panel2 px-1.5 py-1 text-[11.5px] text-ink-muted outline-none"
+        className="mt-2 w-full rounded border border-edge bg-panel2 px-1.5 py-1 text-[12.5px] text-ink-muted"
         title="Move stage"
       >
         {stages.map((stage) => (
@@ -100,16 +100,16 @@ export function PipelineBoard({
         return (
           <div key={stage.key} className="w-60 shrink-0">
             <div className="mb-2 flex items-center justify-between px-1">
-              <span className="text-[12px] font-semibold text-ink-muted">
+              <span className="text-[13px] font-semibold text-ink-muted">
                 {stage.label}
               </span>
-              <span className="text-[11.5px] text-ink-faint">
+              <span className="text-[12.5px] text-ink-faint">
                 {inStage.length}
               </span>
             </div>
             <div className="space-y-2 rounded-lg border border-edge bg-panel2/30 p-2">
               {inStage.length === 0 ? (
-                <p className="px-1 py-3 text-center text-[11.5px] text-ink-faint">
+                <p className="px-1 py-3 text-center text-[12.5px] text-ink-faint">
                   Empty
                 </p>
               ) : (

@@ -29,12 +29,18 @@ describe("the nav", () => {
     for (const key of MODULE_KEYS) {
       expect(keys, `${key} is missing from the nav`).toContain(key);
     }
+    // Screens with no generated record behind them: they read what other
+    // modules produced, or they are a tool rather than an artifact. `expert`
+    // is the third kind — a conversation, which is neither: its transcript is
+    // this sitting's, not a versioned draft of anything.
     const extras = keys.filter((k) => !MODULE_KEYS.includes(k as never));
     expect(extras.sort()).toEqual([
       "actions",
+      "expert",
       "overview",
       "pipeline",
       "research",
+      "sourcing",
     ]);
     for (const entry of NAV) {
       expect(PHASE_KEYS).toContain(entry.phase);

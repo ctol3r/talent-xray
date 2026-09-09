@@ -1,6 +1,24 @@
 import type { Certainty, ProvenanceSource } from "@/lib/core/enums";
 import { PROVENANCE_LABELS } from "@/lib/core/enums";
 
+/**
+ * The bar at the top of a page, which stays there.
+ *
+ * Only the title and the actions stick. The description scrolls away under
+ * them on purpose: it is the sentence that tells you what a page is for, which
+ * you need once, and the title is what tells you where you are, which you need
+ * whenever you have scrolled far enough to have forgotten. A sticky block
+ * carrying both would take three lines of every screen for the life of the
+ * page.
+ *
+ * The negative margin lets the bar reach the edges of the card it sits in, so
+ * rows pass behind it rather than beside it.
+ *
+ * Returned as a fragment rather than wrapped in a div, and that is the whole
+ * trick: a sticky element only sticks inside its own parent's box, so a header
+ * wrapped in a short div scrolls away the moment that div does. The parent has
+ * to be the page.
+ */
 export function PageHeader({
   title,
   description,
@@ -11,19 +29,23 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 flex items-start justify-between gap-4">
-      <div>
-        <h1 className="text-lg font-semibold">{title}</h1>
-        {description && (
-          <p className="mt-1 max-w-2xl text-[13px] text-ink-muted">
-            {description}
-          </p>
+    <>
+      <div className="sticky top-0 z-20 -mx-3 -mt-4 mb-4 flex flex-wrap items-start justify-between gap-x-4 gap-y-1 border-b border-edge bg-panel/95 px-3 py-2.5 backdrop-blur-sm sm:-mx-6 sm:-mt-5 sm:px-6">
+        <h1 className="min-w-0 text-[16px] font-semibold sm:text-lg">
+          {title}
+        </h1>
+        {actions && (
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+            {actions}
+          </div>
         )}
       </div>
-      {actions && (
-        <div className="flex shrink-0 items-center gap-2">{actions}</div>
+      {description && (
+        <p className="mb-5 max-w-2xl text-[14px] text-ink-muted">
+          {description}
+        </p>
       )}
-    </div>
+    </>
   );
 }
 
@@ -41,7 +63,7 @@ export function Card({
       className={`rounded-lg border border-edge bg-panel p-4 ${className}`}
     >
       {title && (
-        <h2 className="mb-3 text-[13px] font-semibold text-ink">{title}</h2>
+        <h2 className="mb-3 text-[14px] font-semibold text-ink">{title}</h2>
       )}
       {children}
     </section>
@@ -61,7 +83,7 @@ export function EmptyState({
     <div className="rounded-lg border border-dashed border-edge2 bg-panel/50 px-6 py-10 text-center">
       <p className="text-sm font-medium text-ink">{title}</p>
       {detail && (
-        <p className="mx-auto mt-1 max-w-md text-[13px] text-ink-muted">
+        <p className="mx-auto mt-1 max-w-md text-[14px] text-ink-muted">
           {detail}
         </p>
       )}
@@ -73,7 +95,7 @@ export function EmptyState({
 }
 
 const BADGE_BASE =
-  "inline-flex items-center rounded px-1.5 py-px text-[10.5px] font-medium tracking-wide";
+  "inline-flex items-center rounded px-1.5 py-px text-[11.5px] font-medium tracking-wide";
 
 export function ProvenanceBadge({ source }: { source: ProvenanceSource }) {
   const styles: Record<ProvenanceSource, string> = {
@@ -142,7 +164,7 @@ export function KeyValue({
 }) {
   if (value === undefined || value === null || value === "") return null;
   return (
-    <div className="flex gap-2 text-[13px]">
+    <div className="flex gap-2 text-[14px]">
       <span className="w-40 shrink-0 text-ink-faint">{label}</span>
       <span className="min-w-0 text-ink">{value}</span>
     </div>

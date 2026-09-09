@@ -99,15 +99,15 @@ export function RegistryMatchCard({
       match.record.taxonomies.find((t) => t.primary) ??
       match.record.taxonomies[0];
     return (
-      <Card title="Registry identity">
+      <Card title="🪪 Registry identity">
         <div className="flex flex-wrap items-center gap-2">
           <Tag tone="ok">{label}</Tag>
           {mode === "mock" && <Tag tone="warn">MOCK</Tag>}
-          <span className="text-[11.5px] text-ink-faint">
+          <span className="text-[12.5px] text-ink-faint">
             matched {match.matchedAt.slice(0, 10)}
           </span>
         </div>
-        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[12.5px]">
+        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[13.5px]">
           <dt className="text-ink-faint">NPI</dt>
           <dd className="font-mono text-ink">{match.registryId}</dd>
           <dt className="text-ink-faint">Name</dt>
@@ -139,13 +139,13 @@ export function RegistryMatchCard({
             </>
           )}
         </dl>
-        <p className="mt-2 text-[11.5px] text-ink-faint">{explainer}</p>
+        <p className="mt-2 text-[12.5px] text-ink-faint">{explainer}</p>
         <div className="mt-2 flex items-center gap-2">
           <a
             href={`https://npiregistry.cms.hhs.gov/provider-view/${match.registryId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[12.5px] text-accent hover:underline"
+            className="text-[13.5px] text-accent hover:underline"
           >
             Open NPI record
           </a>
@@ -158,15 +158,15 @@ export function RegistryMatchCard({
             Clear match
           </button>
         </div>
-        {error && <p className="mt-2 text-[12px] text-bad">{error}</p>}
+        {error && <p className="mt-2 text-[13px] text-bad">{error}</p>}
       </Card>
     );
   }
 
   if (!configured) {
     return (
-      <Card title="Registry identity">
-        <p className="text-[12.5px] text-ink-muted">
+      <Card title="🪪 Registry identity">
+        <p className="text-[13.5px] text-ink-muted">
           Registry lookup is off. Set{" "}
           <code className="font-mono">TALENTOS_REGISTRY_NPPES=1</code> to match
           clinicians against the public CMS NPI Registry from here; until then,
@@ -176,7 +176,7 @@ export function RegistryMatchCard({
           href={linkOut.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-block text-[12.5px] text-accent hover:underline"
+          className="mt-2 inline-block text-[13.5px] text-accent hover:underline"
         >
           {linkOut.label} ↗
         </a>
@@ -185,14 +185,14 @@ export function RegistryMatchCard({
   }
 
   return (
-    <Card title="Registry identity">
-      <p className="text-[12px] text-ink-muted">
+    <Card title="🪪 Registry identity">
+      <p className="text-[13px] text-ink-muted">
         Search the public CMS NPI Registry. Results come back in the
         registry&apos;s order; you pick the record. Nothing is stored until you
         do.
       </p>
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <label className="text-[12px] text-ink-muted">
+        <label className="text-[13px] text-ink-muted">
           First name
           <input
             value={form.firstName}
@@ -200,7 +200,7 @@ export function RegistryMatchCard({
             className={`${inputClass} mt-1`}
           />
         </label>
-        <label className="text-[12px] text-ink-muted">
+        <label className="text-[13px] text-ink-muted">
           Last name
           <input
             value={form.lastName}
@@ -208,7 +208,7 @@ export function RegistryMatchCard({
             className={`${inputClass} mt-1`}
           />
         </label>
-        <label className="text-[12px] text-ink-muted">
+        <label className="text-[13px] text-ink-muted">
           State
           <input
             value={form.state}
@@ -219,7 +219,7 @@ export function RegistryMatchCard({
             className={`${inputClass} mt-1`}
           />
         </label>
-        <label className="text-[12px] text-ink-muted">
+        <label className="text-[13px] text-ink-muted">
           NPI (if known)
           <input
             value={form.npi}
@@ -239,11 +239,11 @@ export function RegistryMatchCard({
         </button>
         {mode === "mock" && <Tag tone="warn">MOCK</Tag>}
       </div>
-      {error && <p className="mt-2 text-[12px] text-bad">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-bad">{error}</p>}
       {hits && (
         <ul className="mt-3 space-y-2">
           {hits.length === 0 && (
-            <li className="text-[12.5px] text-ink-muted">No records.</li>
+            <li className="text-[13.5px] text-ink-muted">No records.</li>
           )}
           {hits.map((hit) => {
             const primary =
@@ -252,14 +252,14 @@ export function RegistryMatchCard({
             return (
               <li
                 key={hit.record.number}
-                className="rounded border border-edge bg-panel2/50 px-3 py-2 text-[12.5px]"
+                className="rounded border border-edge bg-panel2/50 px-3 py-2 text-[13.5px]"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-ink">
                     {hit.record.firstName} {hit.record.lastName}
                     {hit.record.credential ? `, ${hit.record.credential}` : ""}
                   </span>
-                  <span className="font-mono text-[11.5px] text-ink-faint">
+                  <span className="font-mono text-[12.5px] text-ink-faint">
                     {hit.record.number}
                   </span>
                   <Tag

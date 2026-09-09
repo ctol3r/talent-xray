@@ -54,7 +54,7 @@ export default async function ClosePage({
   return (
     <div>
       <PageHeader
-        title="Close · Offer · Onboarding"
+        title="🤝 Close · Offer · Onboarding"
         description="Close plans built on captured motivations and honest objection handling — no manipulation, no deceptive pressure. Accepted offers flow into onboarding."
       />
       {closable.length === 0 ? (
@@ -101,7 +101,7 @@ export default async function ClosePage({
 
                 <div className="border-t border-edge pt-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <h3 className="text-[13px] font-semibold">Close plan</h3>
+                    <h3 className="text-[14px] font-semibold">Close plan</h3>
                     <GenerateButton
                       action={generateClosePlanAction}
                       input={{ candidateId: candidate.id }}
@@ -110,7 +110,7 @@ export default async function ClosePage({
                     />
                   </div>
                   {!closePlan ? (
-                    <p className="text-[13px] text-ink-muted">
+                    <p className="text-[14px] text-ink-muted">
                       No close plan yet — build one from captured motivations,
                       concerns, and compensation notes.
                     </p>
@@ -147,11 +147,11 @@ export default async function ClosePage({
                         </div>
                         <div className="space-y-3">
                           <div className="rounded border border-warn/30 bg-warn-soft/40 px-3 py-2">
-                            <p className="text-[12.5px] font-medium text-warn">
+                            <p className="text-[13.5px] font-medium text-warn">
                               Risk of decline:{" "}
                               {closePlan.payload.riskOfDecline.level}
                             </p>
-                            <p className="text-[12.5px] text-ink-muted">
+                            <p className="text-[13.5px] text-ink-muted">
                               {closePlan.payload.riskOfDecline.rationale}
                             </p>
                           </div>
@@ -175,7 +175,7 @@ export default async function ClosePage({
                       </div>
                       {closePlan.payload.likelyObjections.length > 0 && (
                         <div>
-                          <h4 className="mb-1.5 text-[11.5px] font-semibold tracking-wider text-ink-faint uppercase">
+                          <h4 className="mb-1.5 text-[12.5px] font-semibold tracking-wider text-ink-faint uppercase">
                             Likely objections
                           </h4>
                           <ul className="space-y-1.5">
@@ -183,12 +183,12 @@ export default async function ClosePage({
                               (objection, i) => (
                                 <li
                                   key={i}
-                                  className="rounded border border-edge bg-panel2/50 px-3 py-2 text-[13px]"
+                                  className="rounded border border-edge bg-panel2/50 px-3 py-2 text-[14px]"
                                 >
                                   <span className="font-medium">
                                     {objection.objection}
                                   </span>
-                                  <span className="block text-[12.5px] text-ink-muted">
+                                  <span className="block text-[13.5px] text-ink-muted">
                                     {objection.suggestedResponse}
                                   </span>
                                 </li>
@@ -204,7 +204,7 @@ export default async function ClosePage({
                 {offer?.status === "accepted" && (
                   <div className="border-t border-edge pt-3">
                     <div className="mb-2 flex items-center justify-between">
-                      <h3 className="text-[13px] font-semibold">Onboarding</h3>
+                      <h3 className="text-[14px] font-semibold">Onboarding</h3>
                       <GenerateButton
                         action={generateOnboardingPlanAction}
                         input={{ candidateId: candidate.id }}
@@ -217,7 +217,7 @@ export default async function ClosePage({
                       />
                     </div>
                     {!onboarding ? (
-                      <p className="text-[13px] text-ink-muted">
+                      <p className="text-[14px] text-ink-muted">
                         Offer accepted — generate the onboarding plan to protect
                         the start.
                       </p>
@@ -251,10 +251,10 @@ export default async function ClosePage({
                         {onboarding.payload.communicationSchedule.length >
                           0 && (
                           <div>
-                            <h4 className="mb-1.5 text-[11.5px] font-semibold tracking-wider text-ink-faint uppercase">
+                            <h4 className="mb-1.5 text-[12.5px] font-semibold tracking-wider text-ink-faint uppercase">
                               Candidate communication schedule
                             </h4>
-                            <ul className="space-y-1 text-[13px]">
+                            <ul className="space-y-1 text-[14px]">
                               {onboarding.payload.communicationSchedule.map(
                                 (touch, i) => (
                                   <li key={i}>

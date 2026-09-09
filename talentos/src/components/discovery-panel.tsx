@@ -4,10 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { DiscoveryResult } from "@/lib/research/discovery-provider";
 import {
+  readDiscoveredPagesAction,
   recordLinkOutRunAction,
   runDiscoveryAction,
   saveDiscoveryResultAction,
 } from "@/lib/actions/discovery";
+import type { PageReadingRun } from "@/lib/services/page-reading";
 import {
   buildHostedSearchUrl,
   candidateNameFromTitle,
@@ -28,8 +30,10 @@ interface QueryOption {
  * to the engine's own hosted results page — always available, no key; the
  * recruiter reads the count and pastes the URLs worth keeping — and, when
  * a JSON API key is configured, an in-app run whose results are transient.
- * Either way nothing persists unless the recruiter saves a specific URL,
- * links open externally, and result pages are never fetched.
+ * Either way nothing persists unless the recruiter saves a specific URL, and
+ * links open externally. A found page can also be opened and read for the
+ * people on it (D-082) — behind the policy gate, off unless the owner turned
+ * it on, and the reading is dropped unless somebody is saved from it.
  */
 export function DiscoveryPanel({
   projectId,
@@ -57,6 +61,7 @@ export function DiscoveryPanel({
   const [countText, setCountText] = useState("");
   const [linesText, setLinesText] = useState("");
   const [recorded, setRecorded] = useState<string | null>(null);
+  const [reading, setReading] = useState<PageReadingRun | null>(null);
 
   const selected = queries.find((q) => q.id === selectedId);
   // An edited string is still run, but the stored string is never credited
@@ -149,14 +154,28 @@ export function DiscoveryPanel({
       }
     });
 
+  function readPages() {
+    setError(null);
+    startTransition(async () => {
+      const outcome = await readDiscoveredPagesAction({
+        urls: (results ?? []).map((r) => r.url).slice(0, 25),
+      });
+      if (!outcome.ok) {
+        setError(outcome.error);
+        return;
+      }
+      setReading(outcome.data);
+    });
+  }
+
   return (
     <div className="space-y-4">
       <div className="rounded border border-edge bg-panel p-4">
         {queries.length > 0 && (
-          <label className="mb-2 block text-[12px] text-ink-muted">
+          <label className="mb-2 block text-[13px] text-ink-muted">
             Composed strings from the Search String Lab
             <select
-              className="mt-1 w-full rounded border border-edge bg-canvas px-2 py-1.5 text-[12.5px]"
+              className="mt-1 w-full rounded border border-edge bg-canvas px-2 py-1.5 text-[13.5px]"
               onChange={(e) => {
                 const chosen = queries.find((q) => q.id === e.target.value);
                 if (chosen) {
@@ -177,25 +196,25 @@ export function DiscoveryPanel({
           </label>
         )}
         {edited && (
-          <p className="mb-2 text-[11.5px] text-ink-faint">
+          <p className="mb-2 text-[12.5px] text-ink-faint">
             Edited from the stored string — this run is recorded, but saves will
             not be credited to the stored string.
           </p>
         )}
-        <label className="block text-[12px] text-ink-muted">
+        <label className="block text-[13px] text-ink-muted">
           Query (editable — what you search is always visible)
           <textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             rows={3}
-            className="mt-1 w-full rounded border border-edge bg-canvas px-2 py-1.5 font-mono text-[12px]"
+            className="mt-1 w-full rounded border border-edge bg-canvas px-2 py-1.5 font-mono text-[13px]"
           />
         </label>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <select
             value={engine}
             onChange={(e) => setEngine(e.target.value as "core" | "reach")}
-            className="rounded border border-edge bg-canvas px-2 py-1.5 text-[12.5px]"
+            className="rounded border border-edge bg-canvas px-2 py-1.5 text-[13.5px]"
           >
             <option value="core">
               Core engine (profiles, portfolios, CVs)
@@ -209,12 +228,12 @@ export function DiscoveryPanel({
               href={hostedUrl}
               target="_blank"
               rel="noopener"
-              className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas hover:opacity-90"
+              className="rounded bg-accent px-3 py-1.5 text-[14px] font-medium text-canvas hover:opacity-90"
             >
               Open on engine ↗
             </a>
           ) : (
-            <span className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas opacity-50">
+            <span className="rounded bg-accent px-3 py-1.5 text-[14px] font-medium text-canvas opacity-50">
               Open on engine ↗
             </span>
           )}
@@ -223,26 +242,26 @@ export function DiscoveryPanel({
               type="button"
               onClick={run}
               disabled={isPending || query.trim().length < 2}
-              className="rounded border border-edge2 px-3 py-1.5 text-[13px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
+              className="rounded border border-edge2 px-3 py-1.5 text-[14px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
             >
               {isPending ? "Searching…" : "Run search"}
             </button>
           )}
-          <span className="text-[11.5px] text-ink-faint">
+          <span className="text-[12.5px] text-ink-faint">
             The engine page opens in a new tab. Nothing is stored unless you
             record it below.
           </span>
         </div>
         <div className="mt-4 rounded border border-edge bg-canvas p-3">
-          <p className="text-[12.5px] font-medium">
+          <p className="text-[13.5px] font-medium">
             Record what you saw on the engine page
           </p>
-          <p className="mt-0.5 text-[11.5px] text-ink-faint">
+          <p className="mt-0.5 text-[12.5px] text-ink-faint">
             The count is a number, not a result. Only the URLs you paste are
             kept, labelled unverified until you check the source.
           </p>
           <div className="mt-2 flex flex-wrap items-end gap-3">
-            <label className="block text-[12px] text-ink-muted">
+            <label className="block text-[13px] text-ink-muted">
               Result count shown
               <input
                 type="text"
@@ -250,11 +269,11 @@ export function DiscoveryPanel({
                 value={countText}
                 onChange={(e) => setCountText(e.target.value)}
                 placeholder="e.g. 230"
-                className="mt-1 w-28 rounded border border-edge bg-panel px-2 py-1.5 text-[12.5px]"
+                className="mt-1 w-28 rounded border border-edge bg-panel px-2 py-1.5 text-[13.5px]"
               />
             </label>
           </div>
-          <label className="mt-2 block text-[12px] text-ink-muted">
+          <label className="mt-2 block text-[13px] text-ink-muted">
             Profile URLs to keep — one per line; add “ | Name” to create a
             candidate
             <textarea
@@ -264,7 +283,7 @@ export function DiscoveryPanel({
               placeholder={
                 "https://www.linkedin.com/in/example | Example Person"
               }
-              className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[12px]"
+              className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[13px]"
             />
           </label>
           <div className="mt-2 flex items-center gap-3">
@@ -272,19 +291,19 @@ export function DiscoveryPanel({
               type="button"
               onClick={recordRun}
               disabled={isPending || query.trim().length < 2}
-              className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
+              className="rounded bg-accent px-3 py-1.5 text-[14px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
             >
               Record run
             </button>
             {recorded && (
-              <span className="rounded border border-ok/40 bg-ok-soft px-2 py-0.5 text-[11.5px] text-ok">
+              <span className="rounded border border-ok/40 bg-ok-soft px-2 py-0.5 text-[12.5px] text-ok">
                 {recorded}
               </span>
             )}
           </div>
         </div>
         {error && (
-          <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[12px] text-bad">
+          <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[13px] text-bad">
             {error}
           </p>
         )}
@@ -292,10 +311,23 @@ export function DiscoveryPanel({
 
       {results && (
         <div className="space-y-2">
-          <p className="text-[12px] text-ink-muted">
-            {results.length} result{results.length === 1 ? "" : "s"} · engine:{" "}
-            {engine}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[13px] text-ink-muted">
+              {results.length} result{results.length === 1 ? "" : "s"} · engine:{" "}
+              {engine}
+            </p>
+            {results.length > 0 && (
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={readPages}
+                className="rounded border border-edge px-2 py-1 text-[12.5px] text-ink-muted hover:border-edge2 disabled:opacity-50"
+              >
+                Read these pages
+              </button>
+            )}
+          </div>
+          {reading && <ReadingSummary run={reading} />}
           {results.map((result) => (
             <ResultRow
               key={result.url}
@@ -306,13 +338,52 @@ export function DiscoveryPanel({
             />
           ))}
           {results.length === 0 && (
-            <p className="text-[13px] text-ink-muted">
+            <p className="text-[14px] text-ink-muted">
               No results — try the balanced or broad variant, or the other
               engine.
             </p>
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * What the run did, said plainly. A refusal is shown with its reason rather
+ * than dropped: "we did not read that, and here is the sentence why" is the
+ * only version of this a recruiter can argue with.
+ */
+function ReadingSummary({ run }: { run: PageReadingRun }) {
+  const read = run.reads.filter((r) => r.ok);
+  const people = read.reduce((n, r) => n + (r.reading?.people.length ?? 0), 0);
+  return (
+    <div className="rounded border border-edge bg-panel px-4 py-3">
+      <p className="text-[13px] text-ink-muted">
+        {run.disabled
+          ? run.disabled
+          : `Read ${read.length} of ${run.reads.length} · ${people} ${
+              people === 1 ? "person" : "people"
+            } named · ${run.requests} request${run.requests === 1 ? "" : "s"}`}
+      </p>
+      <ul className="mt-2 space-y-1.5">
+        {run.reads.map((r) => (
+          <li key={r.url} className="text-[13px]">
+            <span className="break-all font-mono text-[12px] text-ink-faint">
+              {r.finalUrl}
+            </span>
+            {r.ok ? (
+              <span className="ml-1.5 text-ink-muted">
+                —{" "}
+                {r.reading?.people.map((p) => p.name).join(", ") ||
+                  "no person named on it"}
+              </span>
+            ) : (
+              <span className="ml-1.5 text-warn">— {r.reason}</span>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -339,16 +410,16 @@ function ResultRow({
             href={result.url}
             target="_blank"
             rel="noopener"
-            className="text-[13.5px] font-medium text-accent hover:underline"
+            className="text-[14.5px] font-medium text-accent hover:underline"
           >
             {result.title ?? result.url}
           </a>
-          <p className="mt-0.5 break-all font-mono text-[11px] text-ink-faint">
+          <p className="mt-0.5 break-all font-mono text-[12px] text-ink-faint">
             {result.url}
           </p>
           {result.snippet && (
-            <p className="mt-1 text-[12.5px] text-ink-muted">
-              <span className="mr-1.5 rounded border border-edge2 px-1 py-0.5 text-[10px] uppercase tracking-wide text-ink-faint">
+            <p className="mt-1 text-[13.5px] text-ink-muted">
+              <span className="mr-1.5 rounded border border-edge2 px-1 py-0.5 text-[11px] uppercase tracking-wide text-ink-faint">
                 unverified snippet · #{result.providerRank}
               </span>
               {result.snippet}
@@ -357,7 +428,7 @@ function ResultRow({
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
           {savedState ? (
-            <span className="rounded border border-ok/40 bg-ok-soft px-2 py-0.5 text-[11px] text-ok">
+            <span className="rounded border border-ok/40 bg-ok-soft px-2 py-0.5 text-[12px] text-ok">
               {savedState}
             </span>
           ) : (
@@ -366,14 +437,14 @@ function ResultRow({
                 type="button"
                 onClick={() => onSave(result)}
                 disabled={disabled}
-                className="rounded border border-edge2 px-2.5 py-1 text-[12px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
+                className="rounded border border-edge2 px-2.5 py-1 text-[13px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
               >
                 Save URL
               </button>
               <button
                 type="button"
                 onClick={() => setAsCandidate((v) => !v)}
-                className="rounded border border-edge2 px-2.5 py-1 text-[12px] text-ink-muted hover:bg-panel2"
+                className="rounded border border-edge2 px-2.5 py-1 text-[13px] text-ink-muted hover:bg-panel2"
               >
                 Save as candidate…
               </button>
@@ -388,13 +459,13 @@ function ResultRow({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Candidate name"
-            className="w-64 rounded border border-edge bg-canvas px-2 py-1 text-[12.5px]"
+            className="w-64 rounded border border-edge bg-canvas px-2 py-1 text-[13.5px]"
           />
           <button
             type="button"
             onClick={() => name.trim() && onSave(result, name.trim())}
             disabled={disabled || !name.trim()}
-            className="rounded bg-accent px-2.5 py-1 text-[12px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
+            className="rounded bg-accent px-2.5 py-1 text-[13px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
           >
             Create candidate
           </button>

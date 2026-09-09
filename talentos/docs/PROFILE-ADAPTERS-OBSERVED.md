@@ -47,3 +47,37 @@ A GitHub account with `social_accounts` populated, and a Wikidata person with
 modern social identifiers. Both are covered by fixtures in
 `tests/unit/declared-links.test.ts`; neither has been seen live. Worth one
 more read when a real candidate has them.
+
+## GitHub's limits, measured (2026-09-08)
+
+The lane is on (`TALENTOS_PROFILES_GITHUB=1`) and the numbers behind it were
+taken from the API rather than from its documentation:
+
+| Request                              | Answer | Left of 60 |
+| ------------------------------------ | ------ | ---------- |
+| `GET /rate_limit`                    | 200    | 60         |
+| `GET /users/octocat`                 | 200    | 59         |
+| `GET /users/octocat/social_accounts` | 200    | 58         |
+
+Three facts follow, and only one of them is the headline number.
+
+- **A person costs two requests**, so the keyless limit is **thirty people an
+  hour per IP**, not sixty. A token raises 60 to 5,000, which is 2,500 people.
+- **Asking what is left is free.** `/rate_limit` read 60 of 60 before and after
+  itself, so the budget can be checked without spending it.
+- **`x-ratelimit-reset` is a UTC epoch second.** It is said back to the reader
+  in their own time.
+
+Re-observed through the adapter itself on 2026-09-08: `octocat` still yields
+one address (the blog), the two requests were spaced 1,108 ms apart by the new
+pacing, and the budget seen afterwards was `limit 60, remaining 55`. Unchanged
+from 2026-09-07 except for the pacing.
+
+The two limits that share a status code are in `src/lib/profiles/github.ts`
+and in D-111: the counter (`x-ratelimit-remaining: 0`) and GitHub's own
+"slow down" (`retry-after`, counter still positive). Neither was reproduced
+deliberately — exceeding a limit to watch it happen is the one experiment not
+worth running — so both are covered by fixtures in
+`tests/unit/declared-links.test.ts` against the documented shapes, and a bad
+token was confirmed live to answer 401 `Bad credentials` with no rate-limit
+headers at all.

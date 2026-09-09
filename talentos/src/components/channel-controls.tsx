@@ -4,7 +4,7 @@ import { updateChannelAction } from "@/lib/actions/workflow";
 import { useAction } from "./forms";
 
 const selectClass =
-  "rounded border border-edge bg-panel px-1.5 py-0.5 text-[12px] text-ink outline-none";
+  "rounded border border-edge bg-panel px-1.5 py-0.5 text-[13px] text-ink";
 
 export function ChannelControls({
   channelId,

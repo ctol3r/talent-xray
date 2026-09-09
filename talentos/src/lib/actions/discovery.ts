@@ -14,6 +14,12 @@ import {
   setEvidenceVerificationInput,
 } from "@/lib/services/discovery";
 import { recordQueryRun } from "@/lib/services/query-yield";
+import { runOpenIndex, runOpenIndexInput } from "@/lib/services/open-index";
+import {
+  readPages,
+  readPagesInput,
+  type PageReadingRun,
+} from "@/lib/services/page-reading";
 import { act, type ActionResult } from "./helpers";
 
 export async function runDiscoveryAction(
@@ -72,4 +78,43 @@ export async function setEvidenceVerificationAction(
     revalidatePath(`/searches/${row.searchProjectId}`, "layout");
     return { verificationStatus: row.verificationStatus };
   });
+}
+
+/**
+ * Run the open index (public, licensed people APIs) for a search.
+ *
+ * Returns rows and stores nothing. Keeping one is the existing explicit act
+ * — `saveDiscoveryResultAction` — so an open-index save lands in the same
+ * ledger, labelled unverified, as any other.
+ */
+export async function runOpenIndexAction(input: unknown): Promise<
+  ActionResult<{
+    results: DiscoveryResult[];
+    reports: { source: string; label: string; count: number; error?: string }[];
+    requests: { source: string; url: string; purpose: string }[];
+  }>
+> {
+  return act(async () => {
+    const parsed = runOpenIndexInput.parse(input);
+    const run = await runOpenIndex(parsed);
+    return {
+      results: run.results,
+      reports: run.reports,
+      requests: run.requests,
+    };
+  });
+}
+
+/**
+ * Open the pages a run returned and read the people off them (D-082).
+ *
+ * Nothing is persisted: a reading is handed to the panel and dropped, and a
+ * person becomes a record through the same explicit save a link-out result
+ * already uses. Off unless the owner has turned reading on, in which case
+ * every row comes back with the sentence saying so.
+ */
+export async function readDiscoveredPagesAction(
+  input: unknown,
+): Promise<ActionResult<PageReadingRun>> {
+  return act(async () => readPages(readPagesInput.parse(input)));
 }

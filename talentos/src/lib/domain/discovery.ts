@@ -22,6 +22,37 @@ export function buildHostedSearchUrl(cx: string, query: string): string {
   return `${HOSTED_SEARCH_PAGE}?${params.toString()}`;
 }
 
+/**
+ * A composed boolean query, opened in ordinary Google.
+ *
+ * The hosted engines are people-only by construction, which is the product —
+ * but the angle library was written for the open web, and its negatives
+ * (`-"job description"`, `-site:indeed.com` and the rest) are what make a plain
+ * web search behave. So every angle can be opened here too, by hand, with no
+ * key and no connector. The app never reads the result page: it hands over a
+ * URL and the recruiter opens it (product rule 1).
+ *
+ * Three parameters, each of which a sourcer would set by hand:
+ *  - `nfpr=1` stops Google "correcting" the query and searching for something
+ *    else, which is fatal to a hand-built boolean string.
+ *  - `filter=0` stops it collapsing near-duplicates, which on a site-restricted
+ *    search silently hides most of the people you were looking for.
+ *  - `udm=14` asks for plain web results rather than the assembled page. It is
+ *    undocumented and widely used; if Google drops it the link still works,
+ *    because an unknown parameter is ignored.
+ */
+export const WEB_SEARCH_PAGE = "https://www.google.com/search";
+
+export function buildWebSearchUrl(query: string): string {
+  const params = new URLSearchParams({
+    q: query,
+    nfpr: "1",
+    filter: "0",
+    udm: "14",
+  });
+  return `${WEB_SEARCH_PAGE}?${params.toString()}`;
+}
+
 /** An absolute http(s) URL with no embedded credentials, whitespace or control characters. */
 export function isHttpUrl(value: string): boolean {
   try {

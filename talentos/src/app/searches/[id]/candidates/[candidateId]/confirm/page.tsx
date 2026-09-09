@@ -33,10 +33,10 @@ export default async function ConfirmPage({
   return (
     <div>
       <PageHeader
-        title={`Ask ${workspace.candidate.name}`}
+        title={`❓ Ask ${workspace.candidate.name}`}
         description="One message that tells this person what you hold, asks which addresses are theirs, and carries the notice the law requires. You send it yourself; the app records what you say happened."
       />
-      <p className="mb-4 text-[12.5px]">
+      <p className="mb-4 text-[13.5px]">
         <Link
           href={`/searches/${id}/candidates/${candidateId}`}
           className="text-accent hover:underline"

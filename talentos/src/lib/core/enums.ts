@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MILESTONE_KINDS } from "../../../artifact-src/core/milestones";
 
 /** Where a stored claim/criterion came from. Rendered as a badge everywhere. */
 export const PROVENANCE_SOURCES = [
@@ -139,15 +140,39 @@ export const SEARCH_STATUSES = ["open", "on_hold", "closed"] as const;
 export const searchStatusSchema = z.enum(SEARCH_STATUSES);
 export type SearchStatus = z.infer<typeof searchStatusSchema>;
 
+/**
+ * Offer statuses, and `signed` is deliberately its own step after `accepted`.
+ *
+ * A verbal yes and a returned contract are different events with different
+ * dates, and the gap between them is where offers are lost. Collapsing them
+ * would also make the brief-to-signature measure a measure of something else,
+ * quietly and with no way for the reader to tell.
+ */
 export const OFFER_STATUSES = [
   "preparing",
   "extended",
   "accepted",
+  "signed",
   "declined",
   "withdrawn",
 ] as const;
 export const offerStatusSchema = z.enum(OFFER_STATUSES);
 export type OfferStatus = z.infer<typeof offerStatusSchema>;
+
+/**
+ * Whether a start date was agreed at intake, as an answer rather than a blank.
+ *
+ * The distinction is the whole point. An empty date field means either "the
+ * manager and I agreed nothing" or "I did not get round to typing it", and
+ * every measure built on the date has been treating the two as the same thing.
+ * Asking for the answer makes the absence deliberate and, more usefully,
+ * dateable — so a page can say the fortnight is an assumption and be believed.
+ */
+export const START_DATE_AGREEMENTS = ["agreed", "not_agreed"] as const;
+export const startDateAgreementSchema = z.enum(START_DATE_AGREEMENTS);
+export type StartDateAgreement = z.infer<typeof startDateAgreementSchema>;
+
+export const milestoneKindSchema = z.enum(MILESTONE_KINDS);
 
 export const DISPOSITIONS = [
   "active",

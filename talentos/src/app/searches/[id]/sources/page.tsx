@@ -41,11 +41,11 @@ export default async function SourcesPage({
   return (
     <div>
       <PageHeader
-        title="Source Channels"
+        title="📡 Source Channels"
         description="Review candidate-sourcing and opportunity-exposure venues for this search. Rankings explain role, audience, and geographic fit; check suggested venues before using them."
       />
       <SourceRecommendationsWorkbench searchProjectId={id} />
-      <details className="mb-5 text-[12px] text-ink-muted">
+      <details className="mb-5 text-[13px] text-ink-muted">
         <summary className="cursor-pointer">Existing channel generator</summary>
         <p className="my-2">
           Uses the configured generation provider and existing channel workflow.
@@ -76,7 +76,7 @@ export default async function SourcesPage({
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[13.5px] font-medium">
+                      <span className="text-[14.5px] font-medium">
                         {channel.name}
                       </span>
                       <Tag>{channel.kind.replace("_", " ")}</Tag>
@@ -98,11 +98,11 @@ export default async function SourcesPage({
                         {channel.costModel}
                       </Tag>
                     </div>
-                    <p className="mt-1 text-[13px] text-ink-muted">
+                    <p className="mt-1 text-[14px] text-ink-muted">
                       {channel.whyRelevant}
                     </p>
                     {(channel.audience || channel.geography) && (
-                      <p className="mt-1 text-[12px] text-ink-muted">
+                      <p className="mt-1 text-[13px] text-ink-muted">
                         Audience: {channel.audience ?? "unknown"} · Geography:{" "}
                         {channel.geography ?? "unknown"}
                       </p>
@@ -114,7 +114,7 @@ export default async function SourcesPage({
                       />
                     )}
                     {channel.note && !recommendation && (
-                      <p className="mt-0.5 text-[12px] text-ink-faint">
+                      <p className="mt-0.5 text-[13px] text-ink-faint">
                         {channel.note}
                       </p>
                     )}
@@ -123,7 +123,7 @@ export default async function SourcesPage({
                         href={channel.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-0.5 inline-block text-[12.5px] text-accent hover:underline"
+                        className="mt-0.5 inline-block text-[13.5px] text-accent hover:underline"
                       >
                         {channel.url}
                       </a>

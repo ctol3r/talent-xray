@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { moduleNav } from "./helpers/nav";
 
 /**
  * Wave H through the real UI, with mock adapters and no network.
@@ -9,10 +10,6 @@ import { expect, test, type Page } from "@playwright/test";
  * rather than merging them, and the app never shows an address it would not
  * let you keep. Every link is asserted, never followed.
  */
-function moduleNav(page: Page, label: string) {
-  return page.getByTestId("workspace-nav").getByRole("link", { name: label });
-}
-
 async function addCandidate(page: Page, project: string, name: string) {
   await page.goto(`/searches/${project}/candidates`);
   await page
@@ -32,7 +29,7 @@ test("addresses carry their provenance, private surfaces are refused, duplicates
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "E2E — profile connections");
   await page.fill('input[name="roleTitle"]', "Staff Engineer");
-  await page.click('button:has-text("Create search")');
+  await page.click('button:has-text("Create job")');
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
   const project = page.url().match(/searches\/([^/]+)/)![1];
 
@@ -64,7 +61,12 @@ test("addresses carry their provenance, private surfaces are refused, duplicates
   await expect(
     page.getByText("Profile connections — 2 addresses"),
   ).toBeVisible();
-  const githubRow = page.locator("li", { hasText: "github.com/jrivera-dev" });
+  // Inside the card: the connected-here panel at the foot lists the same
+  // addresses (D-100), and every one of these is about how the card shows it.
+  const githubRow = page
+    .locator("li")
+    .filter({ hasText: "github.com/jrivera-dev" })
+    .filter({ hasText: "unverified" });
   await expect(
     githubRow.getByText("unverified · recruiter-added"),
   ).toBeVisible();
@@ -179,12 +181,15 @@ test("addresses carry their provenance, private surfaces are refused, duplicates
     .click();
   await expect(page.getByText(/also on Jordan Rivera/)).toBeVisible();
 
-  await moduleNav(page, "Candidates").click();
+  await moduleNav(page, "Candidates");
+  // The list, not the connected-here panel at the foot, which names the same
+  // people (D-100).
+  const people = page.getByRole("table");
   await expect(
-    page.getByRole("link", { name: "Jordan Rivera", exact: true }),
+    people.getByRole("link", { name: "Jordan Rivera", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "J. Rivera", exact: true }),
+    people.getByRole("link", { name: "J. Rivera", exact: true }),
   ).toBeVisible();
 
   await page.goto("/tasks");
@@ -198,7 +203,10 @@ test("addresses carry their provenance, private surfaces are refused, duplicates
 
   // 6. A company page is not a person, whatever the recruiter pastes.
   await page.goto(`/searches/${project}/candidates`);
-  await page.getByRole("link", { name: "J. Rivera", exact: true }).click();
+  await page
+    .getByRole("table")
+    .getByRole("link", { name: "J. Rivera", exact: true })
+    .click();
   await page
     .locator("section", { hasText: "Profile connections" })
     .locator("textarea")
@@ -219,7 +227,7 @@ test("a sweep, a notice and an answer: the whole loop for one person", async ({
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "E2E — sweep and consent");
   await page.fill('input[name="roleTitle"]', "Research Engineer");
-  await page.click('button:has-text("Create search")');
+  await page.click('button:has-text("Create job")');
   // Wait for the redirect: reading the URL too early yields "new".
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
   const project = page.url().match(/searches\/([^/]+)/)![1];

@@ -12,7 +12,7 @@ test("match a clinician to a public registry record by hand", async ({
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "E2E — registry");
   await page.fill('input[name="roleTitle"]', "Physician");
-  await page.click('button:has-text("Create search")');
+  await page.click('button:has-text("Create job")');
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
   const project = page.url().match(/searches\/([^/]+)/)![1];
 

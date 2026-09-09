@@ -6,7 +6,9 @@
  * engine can never be handed a market-research question by construction.
  *
  * Rules every implementation must honor:
- * - Never fetch, crawl, or scrape a result page. Link out only.
+ * - A provider returns rows from a search API. It never fetches a result
+ *   PAGE: opening one is `src/lib/fetch/read-page.ts`, behind the policy
+ *   gate, and only for an address that got through it (D-082).
  * - Results are transient; persisting anything is a separate, per-result,
  *   user-explicit act (services/discovery.ts).
  * - Result order is reported as providerRank (1-based). No implementation
@@ -14,6 +16,7 @@
  */
 import { createMockDiscoveryProvider } from "./mock-discovery";
 import { createTalentXRayDiscoveryProvider } from "./talent-xray";
+import { createBraveDiscoveryProvider } from "./web-search/brave";
 
 export interface DiscoveryResult {
   url: string;
@@ -58,5 +61,8 @@ export function getCandidateDiscoveryProvider(): CandidateDiscoveryProvider {
   const configured = process.env.TALENTOS_DISCOVERY_PROVIDER?.toLowerCase();
   if (configured === "none") return noneDiscoveryProvider;
   if (configured === "mock") return createMockDiscoveryProvider();
+  // Open-web search: the whole index, addressed with operators, rather than
+  // the hundred people-only domains. Reports configured=false without a key.
+  if (configured === "brave") return createBraveDiscoveryProvider();
   return createTalentXRayDiscoveryProvider();
 }

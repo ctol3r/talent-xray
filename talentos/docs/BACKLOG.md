@@ -612,3 +612,118 @@ appended per the anti-drift rule.
   capture only on explicit recruiter save, per-site opt-in, and a plain
   warning that LinkedIn suspends accounts for extension-driven sourcing
   (Juicebox is the documented case).
+
+## From the 2026-09-07 platform review
+
+Raised by the owner, assessed in `docs/PLATFORM-REVIEW-2026-09-07.md`. The
+tag system (D-039), the open index (D-040) and the phase nav (D-041) were
+built the same day; what is left is below.
+
+- **Per-record backlinks.** Standing on a person, see the string that found
+  them, the document they came from, and the requirement they answer. The
+  edges already exist in `graphBacklinks`; this is wiring, not new data.
+- **Colour the graph by tag.** Now that tags exist (D-039), the knowledge
+  graph can colour a node by the tags its record carries, which is the last
+  piece of the Obsidian reference the owner attached.
+- **A tag on more than notes.** The index reads six free-text columns. Intake
+  answers, scorecard comments and outreach drafts are candidates, each a
+  deliberate addition rather than a sweep.
+- **Stack Exchange as a fifth open-index source.** Verified usable: keyless,
+  CORS-clean, no commercial restriction, and there are working allowlist
+  filters that return no protected-characteristic proxies. The catch is that
+  `/tags/{tag}/top-answerers` is hard-capped at 20 per tag per period — an
+  undocumented cap, measured — so it is a leaderboard, not a search. Worth
+  building as a supplement, not as an engine.
+- **GitHub's Acceptable Use Policy §7.** The adapter is written and off. The
+  owner decides whether reading a public profile and linking to it falls
+  inside the restriction on using GitHub information to contact people for
+  recruiting. Open since Wave H.
+- **Move the open index into the artifact.** All four sources were verified
+  to send CORS headers, so the browser can call them directly; Wikidata needs
+  `origin=*` as a query parameter and Crossref's wildcard is observed rather
+  than documented. The adapters already sit behind a fetch interface, so this
+  is a port of `open-index/`, not a rewrite.
+- **Rediscovery over saved people.** Every person ever saved, across every
+  search, searchable by requirement match rather than keyword. An aggregator
+  is bad at this because its index is not your history.
+- **AI query iteration against the yield ledger.** The strings carry
+  provenance and the ledger records which string produced which saved
+  profile. Iterating strings against that feedback needs nothing new.
+- **Split the two largest components.** `document-review.tsx` (1,062 lines)
+  and `diagnosis-actions.tsx` (666) are each doing several jobs.
+- **The eleven azlen.me references.** Blocked: they are `video/mp4` and
+  cannot be watched. Concept search and data transformations look substantial
+  rather than decorative and are worth scoping first. One line each from the
+  owner on what the interaction does unblocks all of them.
+
+## Reading pages — what was left out (2026-09-08, from D-082/D-083)
+
+- **Only one button.** "Read these pages" on the Discover results list is the
+  single surface. The sourcing console composes twenty angles and has none, and
+  a saved candidate's profile links cannot be read from their own page.
+- **PDFs are refused by content type.** A CV on a personal site is a PDF more
+  often than not, and the allowlist is HTML and plain text. The document
+  pipeline already extracts text from an uploaded PDF; joining the two would
+  make the CV and portfolio angles worth running. It also needs its own size
+  and time caps, because a PDF is bigger than a page.
+- **A page that builds itself in the browser reads as empty.** No script is
+  executed, deliberately. A large share of modern people-pages return 200 with
+  an allowlisted content type and almost no text. Worth counting rather than
+  guessing at: record how often a permitted 200 yields zero people.
+- **The unlisted-host cap is per run, not per day.** A host nobody has read the
+  terms of is asked at most eight times in a run, and a new run starts the
+  count again. Making it survive the process needs somewhere to put it, and
+  that is a schema change.
+- **Nobody has read any host's terms.** Every registry row says `assumed`. The
+  ones worth reading first are the hosts that actually appear in the corpus,
+  which the reader could count if it were reachable (see the first item).
+- **No conditional GET, on purpose.** Recorded in D-082: with no stored
+  extraction a 304 means "nothing changed" against nothing, so the run skips
+  the page and loses the result. Revisit only if extractions are ever stored.
+
+## Left open by D-111 (2026-09-08)
+
+- **The contact URL is the owner's to supply.** `TALENTOS_FETCH_CONTACT` is
+  documented and blank. It has to be a page that exists and that the owner has
+  read — a URL a site owner can open to find out who is asking and how to stop
+  it. Until there is one, reading pages cannot be enabled, and nothing else
+  about the reader is blocking.
+- **The operator probe still has not run.** It needs
+  `TALENTOS_BRAVE_SEARCH_KEY` and refuses to run on fixtures, so all eight rows
+  in `OPERATOR_SUPPORT` say `unverified` and the settings page says eight. One
+  key and one `pnpm probe:search` settles it; nothing else can, because the
+  claim is about how that index behaves.
+- **A GitHub account with `social_accounts` populated is still unobserved
+  live.** `octocat` has none. Covered by a fixture; worth one read when a real
+  candidate has them.
+- **A token would raise the GitHub lane from thirty people an hour to 2,500.**
+  `TALENTOS_GITHUB_TOKEN` is blank and needs no scopes for public profile data.
+  Only worth creating if thirty an hour ever binds.
+- **Nobody has read any host's terms** — unchanged, and now pinned. Every row
+  in the source registry is held at its current posture and basis by
+  `tests/unit/fetch-registry.test.ts`, so reading a host's terms is the only
+  thing that can move one, and doing so means editing the pin on purpose.
+
+## Left open by D-112 (2026-09-08)
+
+- **Only the home conversation is collected from `/outbox`.** A job-bound
+  generation is written to its response file and then picked up by the button
+  that asked for it — one press, not a terminal round trip, and the row says
+  so. Collecting it from the queue itself needs the job's id, which a request
+  file does not carry: it carries the job's *title*, in the prompt. Either the
+  request gains an id (a schema change, and D-008's hash covers the prompts,
+  so it would invalidate every request now waiting) or the page keeps
+  inferring the job from a unique title, which is enough to link to but not
+  enough to act on.
+- **The chat handoff still cannot be collected out of order.** A question's
+  request is keyed on a hash of the prompt, and the prompt carries the
+  conversation before it — so asking a second question before the first is
+  answered means the first can no longer reproduce its own hash, and answering
+  it writes a new request instead of collecting the old one. `/outbox` detects
+  this and says so rather than reporting a success that did not happen, but it
+  cannot fix it. This predates the page; it is only visible now because the
+  page made it visible.
+- **The outbox has no artifact path, by construction.** The browser-only build
+  has no filesystem and no session outbox. This is one of the places local and
+  artifact genuinely diverge — worth stating rather than leaving as an
+  apparent gap in the standing "must also run as an artifact" constraint.

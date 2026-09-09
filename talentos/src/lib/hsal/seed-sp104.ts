@@ -60,6 +60,22 @@ export function successProfileToPayload(
   });
 }
 
+/**
+ * The six people in the SP104 demo.
+ *
+ * Invented, like Axiom Compute and their six employers, and like Dana
+ * Whitfield who rejects most of them. They were called "Candidate C31"
+ * through "Candidate C73" until the demo was looked at with fresh eyes: a
+ * shortlist of placeholders reads as a product that could not find anybody,
+ * which is the opposite of what a demo is for, and it made every screen that
+ * renders a name — the deck, the ribbons, the scorecard — impossible to
+ * judge.
+ *
+ * The ids stay C31…C73. They are load-bearing: HSAL evidence ids are built
+ * from them (`E-SP104-C31-1`), fixtures/sp104 keys on them, and the adapter
+ * tests assert them. So the id remains the tell that this is a fixture, and
+ * the name is only what a name is for.
+ */
 const SEED_CANDIDATES: {
   id: string;
   name: string;
@@ -74,7 +90,7 @@ const SEED_CANDIDATES: {
 }[] = [
   {
     id: "C31",
-    name: "Candidate C31",
+    name: "Priya Raghunathan",
     title: "Senior Software Engineer",
     company: "Meridian Cloud",
     skills: ["Rust", "distributed systems", "large-scale infrastructure"],
@@ -87,7 +103,7 @@ const SEED_CANDIDATES: {
   },
   {
     id: "C44",
-    name: "Candidate C44",
+    name: "Tomas Lindqvist",
     title: "Principal Engineer",
     company: "Latticework",
     skills: ["C++", "architecture ownership", "infrastructure"],
@@ -100,7 +116,7 @@ const SEED_CANDIDATES: {
   },
   {
     id: "C52",
-    name: "Candidate C52",
+    name: "Grace Abara",
     title: "Senior Engineer",
     company: "Northwind Data",
     skills: ["Java", "distributed storage"],
@@ -113,14 +129,14 @@ const SEED_CANDIDATES: {
   },
   {
     id: "C54",
-    name: "Candidate C54",
+    name: "Mei-Lin Chen",
     title: "Staff Engineer",
     company: "Orbital Systems",
     skills: ["Go", "Kubernetes"],
   },
   {
     id: "C61",
-    name: "Candidate C61",
+    name: "Daniel Okonkwo",
     title: "Staff Engineer",
     company: "Helix Compute",
     skills: ["Go", "distributed systems"],
@@ -132,7 +148,7 @@ const SEED_CANDIDATES: {
   },
   {
     id: "C73",
-    name: "Candidate C73",
+    name: "Ruth Kowalczyk",
     title: "Senior Engineer",
     company: "Quanta Infra",
     skills: ["Rust", "distributed systems"],

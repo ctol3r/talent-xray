@@ -99,7 +99,7 @@ export function BrowserCompanion({
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(280px,2fr)]">
       <div className="space-y-5">
-        <Card title="Review and save a link">
+        <Card title="🔖 Review and save a link">
           <p className="mb-4 text-sm text-ink-muted">
             Only this URL and title will be saved. Edit or remove private query
             parameters before saving. The page itself is never fetched.
@@ -225,7 +225,7 @@ export function BrowserCompanion({
           )}
         </Card>
         {projectId && (
-          <Card title="Saved browser links for this search">
+          <Card title="🔖 Saved browser links for this search">
             {!saved.length ? (
               <p className="text-sm text-ink-muted">
                 No browser links have been saved to this search.
@@ -257,7 +257,7 @@ export function BrowserCompanion({
           </Card>
         )}
       </div>
-      <Card title={`Take ${PRODUCT_NAME} with you`}>
+      <Card title={`🧳 Take ${PRODUCT_NAME} with you`}>
         <div className="space-y-4 text-sm text-ink-muted">
           <p>
             Keep {PRODUCT_NAME} running at{" "}

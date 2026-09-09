@@ -6,9 +6,7 @@ test("keyless salary findings require review, persist and invalidate on editing"
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "Compensation fixture");
   await page.fill('input[name="roleTitle"]', "Engineer");
-  await page
-    .getByRole("button", { name: "Create search", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Create job", exact: true }).click();
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
   const project = page.url().match(/searches\/([^/]+)/)![1];
   await page.goto(`/searches/${project}/market`);

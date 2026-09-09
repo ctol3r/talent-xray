@@ -23,6 +23,8 @@ import {
 import type { Db } from "@/lib/db/client";
 import { candidateSources, candidates, searchProjects } from "@/lib/db/schema";
 import { scanTextForProtectedTraits } from "@/lib/domain/fair-hiring";
+import { summariseHeld } from "@/lib/domain/held-data";
+import type { CandidateProfilePayload } from "@/lib/core/payloads";
 import { SURFACE_FAMILY_LABELS } from "@/lib/domain/surface-families";
 import { addProfileLink, listProfileLinks, suppressUrl } from "./profile-links";
 
@@ -53,6 +55,17 @@ export function buildConfirmationDraft(
   candidate: { name: string },
   project: { name: string; roleTitle: string },
   links: { id: string; url: string; family: string }[],
+  /**
+   * What else the record holds. Left out, the notice says only addresses are
+   * held — which was a hardcoded promise, and the moment the product could
+   * store a contact detail it became a claim the code might break silently.
+   * Passing the record makes the sentence derived instead (`held-data.ts`).
+   */
+  held?: {
+    profile: CandidateProfilePayload | null;
+    hasResumeText: boolean;
+    hasNotes: boolean;
+  },
 ): ConfirmationDraft {
   const listed = links.map((link) => ({
     sourceId: link.id,
@@ -76,7 +89,14 @@ export function buildConfirmationDraft(
     "",
     "Why you are hearing from me. I found these pages on the public web while looking for people who might suit the role. I have not been given your details by anyone, and I hold them because I have a legitimate interest in contacting suitable candidates. You can object to that at any time, and I have set out how below.",
     "",
-    "What I hold. Web addresses only — the pages themselves were never copied, and I hold no email address or phone number for you unless you send me one:",
+    `What I hold. ${
+      summariseHeld({
+        profile: held?.profile ?? null,
+        addressCount: listed.length,
+        hasResumeText: held?.hasResumeText ?? false,
+        hasNotes: held?.hasNotes ?? false,
+      }).sentence
+    } The addresses are:`,
     "",
     numbered || "(no addresses)",
     "",
@@ -113,6 +133,11 @@ export function confirmationWorkspace(db: Db, candidateId: string) {
     candidate,
     { name: project.name, roleTitle: project.roleTitle },
     links.map((l) => ({ id: l.id, url: l.url, family: l.family })),
+    {
+      profile: candidate.profile ?? null,
+      hasResumeText: Boolean(candidate.resumeText?.trim()),
+      hasNotes: Boolean(candidate.recruiterNotes?.trim()),
+    },
   );
   return { candidate, project, links, draft };
 }

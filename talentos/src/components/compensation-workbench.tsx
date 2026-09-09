@@ -78,7 +78,7 @@ export function CompensationWorkbench({
     2,
   );
   return (
-    <Card title="Compensation recommendation">
+    <Card title="💰 Compensation recommendation">
       <p className="mb-3 text-sm text-ink-muted">
         Build a provisional base-pay band from sources you review. No AI API key
         is needed. Bonus, equity and benefits remain separate; this does not

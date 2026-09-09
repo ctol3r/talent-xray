@@ -116,6 +116,7 @@
   color: #54706c;
 }
 .review-workspace {
+  position: relative;
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr) 260px;
   gap: 14px;
@@ -271,7 +272,7 @@
     grid-template-columns: 145px minmax(0, 1fr);
   }
 }
-@media (max-width: 899px) {
+@media (max-width: 759px) {
   .review-workspace,
   .review-workspace.context-hidden {
     display: block;

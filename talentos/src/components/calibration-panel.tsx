@@ -58,8 +58,8 @@ export function CalibrationPanel({
 }) {
   if (signals.reviewedLinks === 0) {
     return (
-      <Card title="Calibration">
-        <p className="text-[12.5px] text-ink-muted">
+      <Card title="⚖️ Calibration">
+        <p className="text-[13.5px] text-ink-muted">
           No review decisions yet; strings are model vocabulary only. Accept or
           dismiss CV ↔ JD connections and regenerate to calibrate.
         </p>
@@ -77,20 +77,20 @@ export function CalibrationPanel({
     grouped.set(d.action, list);
   }
   return (
-    <Card title="Calibration">
-      <p className="text-[12.5px] text-ink-muted">
+    <Card title="⚖️ Calibration">
+      <p className="text-[13.5px] text-ink-muted">
         Calibration from {signals.reviewedLinks} reviewed connection
         {signals.reviewedLinks === 1 ? "" : "s"} across {signals.candidates}{" "}
         candidate{signals.candidates === 1 ? "" : "s"}. Dismissals never negate
         a term; only accepted contradictory evidence removes one.
       </p>
       {stale && (
-        <p className="mt-2 rounded border border-warn/40 bg-warn-soft px-3 py-2 text-[12px] text-warn">
+        <p className="mt-2 rounded border border-warn/40 bg-warn-soft px-3 py-2 text-[13px] text-warn">
           Review decisions changed since these strings were generated;
           regenerate to apply.
         </p>
       )}
-      <ul className="mt-3 space-y-1 text-[12px] text-ink-muted">
+      <ul className="mt-3 space-y-1 text-[13px] text-ink-muted">
         {signals.requirements
           .filter((r) => acceptedTotal(r) + r.dismissed + r.corrected > 0)
           .map((r) => (
@@ -108,10 +108,10 @@ export function CalibrationPanel({
               <div className="mb-1 flex items-center gap-2">
                 <Tag tone={ACTION_TONE[action]}>{ACTION_LABELS[action]}</Tag>
               </div>
-              <ul className="space-y-0.5 text-[12px] text-ink-muted">
+              <ul className="space-y-0.5 text-[13px] text-ink-muted">
                 {list.map((d) => (
                   <li key={`${action}-${d.term}`}>
-                    <code className="font-mono text-[12px] text-ink">
+                    <code className="font-mono text-[13px] text-ink">
                       {d.term}
                     </code>{" "}
                     · {PROVENANCE_LABELS[d.provenance]} · {d.reason}
@@ -153,7 +153,7 @@ export function TermProvenance({
       {decisions.map((d) => (
         <p
           key={`${d.action}-${d.term}`}
-          className="text-[11px] text-ink-faint"
+          className="text-[12px] text-ink-faint"
           data-testid={stale ? "term-provenance-stale" : "term-provenance"}
         >
           <code className="font-mono text-ink-muted">{d.term}</code> ·{" "}

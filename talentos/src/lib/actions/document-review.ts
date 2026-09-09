@@ -140,3 +140,13 @@ export async function exportShortlistDraftAction(raw: unknown) {
     return exportShortlistDraft(getDb(), z.string().min(1).parse(raw));
   });
 }
+
+export async function agreeShortlistAction(raw: unknown) {
+  return act(async () => {
+    const { recordShortlistAgreed } =
+      await import("@/lib/services/review-shortlist");
+    const r = await recordShortlistAgreed(getDb(), raw);
+    refresh();
+    return r;
+  });
+}

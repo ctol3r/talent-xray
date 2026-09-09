@@ -4,6 +4,7 @@ import type { Db } from "@/lib/db/client";
 import { candidates, settings } from "@/lib/db/schema";
 import { reviewWorkspace } from "./document-review";
 import { validateAnchor } from "@/lib/documents/contracts";
+import { recordMilestone } from "./milestones";
 const selection = z.object({ comparisonIds: z.array(z.string()).max(100) });
 /** A draft output selection, not a pipeline stage or a submitted hiring decision. */
 export function shortlistWorkspace(db: Db, searchProjectId: string) {
@@ -114,4 +115,32 @@ export function exportShortlistDraft(db: Db, searchProjectId: string) {
       "Recruiter-selected draft only. No contact, submission or stage change is implied. Relationship acceptance is not independent verification.",
     reviews,
   };
+}
+
+/**
+ * Record that the hiring manager agreed this shortlist.
+ *
+ * Kept apart from saving and exporting, which are the recruiter arranging
+ * their own draft and say so. This one is a claim about a conversation that
+ * happened outside the software, so it is a separate deliberate act with its
+ * own button, and it still moves nobody and contacts nobody — it writes a
+ * date.
+ *
+ * A saved selection is required first. Agreement about an empty shortlist is
+ * not a thing that can have happened, and allowing it would put a timestamp in
+ * the middle of the elapsed-day measures with nothing behind it.
+ */
+export async function recordShortlistAgreed(db: Db, raw: unknown) {
+  const searchProjectId = z.string().min(1).parse(raw);
+  const w = shortlistWorkspace(db, searchProjectId);
+  if (w.comparisonIds.length === 0)
+    throw new Error(
+      "Save a draft selection before recording that it was agreed.",
+    );
+  await recordMilestone(db, {
+    searchProjectId,
+    kind: "shortlist_agreed",
+    note: `${w.comparisonIds.length} reviewed candidates in the agreed shortlist`,
+  });
+  return { agreed: w.comparisonIds.length };
 }

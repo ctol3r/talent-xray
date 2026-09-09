@@ -139,3 +139,27 @@ SerpAPI pricing and legal pages; Exa, Tavily and Jina API references;
 Google "Refine web searches" and site: operator pages; Bing advanced
 search options. URLs are in the three research transcripts of 2026-09-07
 and will be pinned in D-034 when the decision is taken.
+
+## Open-web search, added 2026-09-08
+
+`TALENTOS_DISCOVERY_PROVIDER=brave` with `TALENTOS_BRAVE_SEARCH_KEY` runs the
+composed angles against the whole open web instead of the hundred people-only
+domains. Chosen over a Google-SERP reseller because it is its own index rather
+than somebody else's results resold against their terms, and because its
+operator support is a documented feature rather than an accident.
+
+Two costs, both real:
+
+- **A smaller index than Google**, which hurts exactly the long-tail orphan
+  pages sourcing depends on — the personal site, the lab roster, the tender
+  annex.
+- **The operators are unverified here.** Nobody has run a key against it, so
+  `OPERATOR_SUPPORT` says `unverified` on every row and the settings page
+  counts them. `pnpm probe:search` settles it; it needs the key and makes eight
+  real requests.
+
+Rule 3 of this document — link out only, never a page — is superseded by
+`docs/DECISIONS.md` D-082. A result row is still only a URL, a title and the
+engine's own snippet. Opening one of those addresses is a separate act, behind
+the policy gate in `src/lib/fetch/`, off unless `TALENTOS_FETCH=on` and a
+contact URL are both set.

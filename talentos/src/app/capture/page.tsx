@@ -27,7 +27,7 @@ export default async function CapturePage({
   return (
     <div>
       <PageHeader
-        title="Browser companion"
+        title="🧭 Browser companion"
         description="Bring a link from any browser into your local recruiting workspace. Review the URL and title, then explicitly save it to a search or candidate."
       />
       <BrowserCompanion

@@ -6,13 +6,10 @@
  * outreach → pipeline → screen → interview evidence → close plan →
  * offer accepted → onboarding → analytics + learnings.
  */
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { moduleNav } from "./helpers/nav";
 
 const CAIS_JD = `The Center for AI Safety (CAIS) is hiring a Research Scientist or Research Engineer to advance empirical machine learning safety research in San Francisco. Strong empirical research record (first-author publications at NeurIPS, ICML, ICLR or equivalent open-source impact), excellent engineering in Python and PyTorch or JAX, experience with distributed training. Research taste matters more than citation counts. On-site in San Francisco.`;
-
-function moduleNav(page: Page, label: string) {
-  return page.getByTestId("workspace-nav").getByRole("link", { name: label });
-}
 
 test("critical path: intake to onboarding on one search", async ({ page }) => {
   // 1. Create the SearchProject.
@@ -24,8 +21,10 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   );
   await page.fill('input[name="companyName"]', "Center for AI Safety");
   await page.fill('input[name="geography"]', "San Francisco, CA");
-  await page.fill('input[name="industry"]', "AI safety research");
-  await page.click('button:has-text("Create search")');
+  // Industry is a dropdown now (D-050): a job typed "AI safety research"
+  // and another typed "AI safety" cannot be compared.
+  await page.selectOption('select[name="industry"]', "ai_research");
+  await page.click('button:has-text("Create job")');
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
 
   // 2. Paste the JD.
@@ -55,7 +54,7 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   });
 
   // 5. Generate the tailored intake; it must show domain depth.
-  await moduleNav(page, "Intake").click();
+  await moduleNav(page, "Intake");
   await page.click('button:has-text("Generate intake")');
   await expect(page.getByText("Why the role exists")).toBeVisible({
     timeout: 30_000,
@@ -77,31 +76,34 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   });
 
   // 7. Success profile.
-  await moduleNav(page, "Profile").click();
+  await moduleNav(page, "Profile");
   await page.click('button:has-text("Compile success profile")');
-  await expect(page.getByText("Mission", { exact: true })).toBeVisible({
+  await expect(page.getByRole("heading", { name: /Mission/ })).toBeVisible({
     timeout: 30_000,
   });
 
   // 8. Sourcing strategy.
-  await moduleNav(page, "Strategy").click();
+  await moduleNav(page, "Strategy");
   await page.click('button:has-text("Generate strategy")');
   await expect(page.getByText("Primary target profile")).toBeVisible({
     timeout: 30_000,
   });
 
   // 9. Channels — model suggestions land as 'inferred', never invented facts.
-  await moduleNav(page, "Sources").click();
+  await moduleNav(page, "Sources");
   // The generator now sits under a collapsed "Existing channel generator" section.
   await page.getByText("Existing channel generator", { exact: true }).click();
   await page.click('button:has-text("Run existing channel generator")');
-  await expect(page.getByText("Google Scholar")).toBeVisible({
+  // .first() because the connected strip at the foot of every module (D-037)
+  // lists the search's own records, so a channel name appears twice: once in
+  // the channel card, once as a link into the graph. The card comes first.
+  await expect(page.getByText("Google Scholar").first()).toBeVisible({
     timeout: 30_000,
   });
   await expect(page.getByText("inferred").first()).toBeVisible();
 
   // 10. Boolean/x-ray strings.
-  await moduleNav(page, "Strings").click();
+  await moduleNav(page, "Strings");
   await page.click('button:has-text("Generate strings")');
   await expect(page.getByText("site:linkedin.com/in").first()).toBeVisible({
     timeout: 30_000,
@@ -112,7 +114,7 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   await expect(page.getByText("Channel coverage")).toBeVisible();
 
   // 11. Add a candidate.
-  await moduleNav(page, "Candidates").click();
+  await moduleNav(page, "Candidates");
   await page.click('button:has-text("Add candidate")');
   await page.fill('input[name="candidateName"]', "Evelyn Example");
   await page
@@ -154,7 +156,7 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   );
 
   // 15. Recruiter screen guide.
-  await moduleNav(page, "Screen").click();
+  await moduleNav(page, "Screen");
   await page.click('button:has-text("Generate screen guide")');
   await expect(
     page.getByText("Strong evidence sounds like").first(),
@@ -163,7 +165,7 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   });
 
   // 16. Interview plan + structured scorecard (rating requires evidence).
-  await moduleNav(page, "Interviews").click();
+  await moduleNav(page, "Interviews");
   await page.click('button:has-text("Design interview plan")');
   await expect(page.getByText("1. Recruiter Screen")).toBeVisible({
     timeout: 30_000,
@@ -196,7 +198,7 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   });
 
   // 17–18. Offer: extended → accepted (drives pipeline stages).
-  await moduleNav(page, "Close").click();
+  await moduleNav(page, "Close");
   await page.getByLabel("Offer status").selectOption("extended");
   await expect(page.getByText("offer extended", { exact: true })).toBeVisible({
     timeout: 15_000,
@@ -222,13 +224,13 @@ test("critical path: intake to onboarding on one search", async ({ page }) => {
   await expect(firstCheckbox).toBeChecked({ timeout: 15_000 });
 
   // 20. Analytics show the accepted offer; learnings capture + synthesis.
-  await moduleNav(page, "Analytics").click();
+  await moduleNav(page, "Analytics");
   await expect(
     page.getByText("Funnel — candidates who ever reached each stage"),
   ).toBeVisible();
   await expect(page.getByText("Offer Accepted").first()).toBeVisible();
 
-  await moduleNav(page, "Learnings").click();
+  await moduleNav(page, "Learnings");
   await page
     .getByLabel("What happened, and what it teaches")
     .fill("Mission alignment plus a fast process won the accept.");

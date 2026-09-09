@@ -25,7 +25,7 @@ export function DiagnosisAction({
   const router = useRouter();
   const cls =
     tone === "primary"
-      ? "rounded bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white disabled:opacity-50"
+      ? "rounded bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-canvas disabled:opacity-50"
       : "rounded border border-edge2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-ink disabled:opacity-50";
   return (
     <span className="inline-flex flex-col items-start gap-1">
@@ -119,7 +119,7 @@ export function ReviseBeliefForm({
         <button
           type="submit"
           disabled={pending || !reason}
-          className="rounded bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white disabled:opacity-50"
+          className="rounded bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-canvas disabled:opacity-50"
         >
           {pending ? "Saving…" : "Revise my confidence"}
         </button>
@@ -191,7 +191,7 @@ export function CaptureBeliefForm({
         <button
           type="submit"
           disabled={pending || !statement}
-          className="rounded bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white disabled:opacity-50"
+          className="rounded bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-canvas disabled:opacity-50"
         >
           {pending ? "Saving…" : "Record what I think"}
         </button>
@@ -203,7 +203,7 @@ export function CaptureBeliefForm({
 
 const inputCls = "rounded border border-edge2 bg-panel p-2 text-xs";
 const submitCls =
-  "rounded bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white disabled:opacity-50";
+  "rounded bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-canvas disabled:opacity-50";
 
 /** Record what an experiment showed, for any search: a summary, distinct observations, and an advance count. */
 export function ExperimentResultForm({

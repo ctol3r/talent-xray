@@ -65,9 +65,10 @@ describe("engineRunnable", () => {
 
 describe("checkEngineQuery", () => {
   it("re-checks an edited query against Google's 32-word limit", () => {
-    const ok = checkEngineQuery('("ICU Nurse" OR "Critical Care Nurse") CCRN');
+    const ok = checkEngineQuery('("ICU Nurse"|"Critical Care Nurse") CCRN');
     expect(ok.runnable).toBe(true);
-    expect(ok.termCount).toBe(6);
+    // Two words, the operator, three words, one word.
+    expect(ok.termCount).toBe(7);
     const long = checkEngineQuery(
       Array.from({ length: 40 }, (_, i) => `term${i}`).join(" "),
     );

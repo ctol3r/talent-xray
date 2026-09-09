@@ -6,6 +6,7 @@ import type { shortlistWorkspace } from "@/lib/services/review-shortlist";
 import {
   saveShortlistDraftAction,
   exportShortlistDraftAction,
+  agreeShortlistAction,
 } from "@/lib/actions/document-review";
 import "./document-review.css";
 export function ReviewShortlist({
@@ -133,6 +134,28 @@ export function ReviewShortlist({
           }
         >
           Export saved draft shortlist
+        </button>
+        {/*
+          Separate from saving and exporting, because it is a different kind of
+          claim: those two are about this draft, and this one is about a
+          conversation with the hiring manager. It records a date and nothing
+          else — nobody is moved, contacted or submitted by it.
+        */}
+        <button
+          disabled={busy || w.comparisonIds.length === 0}
+          onClick={() =>
+            run(async () => {
+              const r = await agreeShortlistAction(searchProjectId);
+              setMessage(
+                r.ok
+                  ? "Shortlist agreed, dated today. No candidate was moved or contacted."
+                  : r.error,
+              );
+              if (r.ok) router.refresh();
+            })
+          }
+        >
+          Hiring manager agreed this shortlist
         </button>
       </div>
       <p role="status">{message}</p>

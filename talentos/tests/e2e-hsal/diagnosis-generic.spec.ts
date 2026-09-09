@@ -63,9 +63,7 @@ test("generic search runs the whole diagnosis loop; confidence only moves on exp
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "HSAL generic loop");
   await page.fill('input[name="roleTitle"]', "Staff Platform Engineer");
-  await page
-    .getByRole("button", { name: "Create search", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Create job", exact: true }).click();
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
   const id = page.url().match(/searches\/([^/]+)/)![1];
   await page.goto(`/searches/${id}/diagnosis`);

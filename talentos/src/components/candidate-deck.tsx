@@ -60,6 +60,12 @@ export function CandidateDeck({
                     borderTop: "5px solid #33867d",
                     borderRadius: 12,
                     background: "#f5faf7",
+                    // Said, not inherited. This card is deliberately paper in
+                    // a dark room, and without an explicit ink the theme's
+                    // near-white text lands on near-white card — the plain
+                    // white-on-white failure. 13.19:1 here, and everything in
+                    // the card — the links included — inherits it.
+                    color: "#14312e",
                     padding: 16,
                     transform: `translate(${p.x}px,${p.y}px) scale(${p.scale})`,
                     transformOrigin: "top left",
@@ -75,7 +81,7 @@ export function CandidateDeck({
                   <p>{c.currentTitle}</p>
                   <p>{c.stage}</p>
                   <ReviewResumeLink
-                    className="underline text-teal-800"
+                    className="underline"
                     href={`/searches/${searchProjectId}/candidates/${c.id}/review`}
                   >
                     Open CV–JD comparison
@@ -90,7 +96,7 @@ export function CandidateDeck({
           {candidates.map((c) => (
             <li key={c.id}>
               <ReviewResumeLink
-                className="underline text-teal-800"
+                className="underline"
                 href={`/searches/${searchProjectId}/candidates/${c.id}/review`}
               >
                 Review {c.name} · CV ↔ JD

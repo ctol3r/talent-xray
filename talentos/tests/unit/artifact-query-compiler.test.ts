@@ -32,9 +32,17 @@ const wide: StringLabInput = {
 };
 
 describe("term counting", () => {
-  it("counts the way Google does — boolean keywords and brackets are free", () => {
-    expect(countTerms('"critical care" OR "intensive care"')).toBe(4);
-    expect(countTerms("(a OR b) AND NOT c")).toBe(3);
+  it("counts the way Google does — brackets are free, operators are not", () => {
+    // Operators count. Google's documentation says the 32-word limit applies
+    // to search terms *and operators*, and that only stop words are free —
+    // so subtracting OR/AND/NOT, as this used to, counted a six-way group
+    // five terms lighter than Google counts it and let a query lose its tail
+    // in silence.
+    expect(countTerms('"critical care" OR "intensive care"')).toBe(5);
+    expect(countTerms("(a OR b) AND NOT c")).toBe(6);
+    // `|` is charged too: whether Google does is undocumented, and a counter
+    // that guesses low is the failure this exists to prevent.
+    expect(countTerms("(a|b) c")).toBe(4);
     expect(countTerms("   ")).toBe(0);
   });
 });

@@ -6,9 +6,11 @@
  *
  * Agents draft. Humans decide. Nothing sends automatically.
  */
+import "./ui/expert";
 import "./ui/overview";
 import "./ui/intake-loop";
 import "./ui/candidates";
+import "./ui/sourcing";
 import "./ui/golden";
 import "./ui/actions";
 import "./ui/pipeline";

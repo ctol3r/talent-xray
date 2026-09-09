@@ -28,15 +28,18 @@ export async function selectPassage(
 
 export async function openReviewFixture(
   page: Page,
+  /**
+   * Job titles are unique across the workspace (D-049), so two specs cannot
+   * both create "Connected review fixture". Each caller names its own.
+   */
+  title = "Connected review fixture",
 ): Promise<{ project: string }> {
   page.setDefaultTimeout(10000);
   await page.setViewportSize({ width: 1800, height: 1100 });
   await page.goto("/searches/new");
-  await page.fill('input[name="name"]', "Connected review fixture");
+  await page.fill('input[name="name"]', title);
   await page.fill('input[name="roleTitle"]', "Engineer");
-  await page
-    .getByRole("button", { name: "Create search", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Create job", exact: true }).click();
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
   const project = page.url().match(/searches\/([^/]+)/)![1];
   await page.goto(`/searches/${project}/candidates`);

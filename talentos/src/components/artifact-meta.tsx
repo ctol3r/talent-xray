@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { GenerationMeta } from "@/lib/core/enums";
+import type { TraitScanHit } from "@/lib/domain/fair-hiring";
 import { saveArtifactJsonAction } from "@/lib/actions/workflow";
 import { MockBadge } from "./ui";
 
@@ -38,11 +39,15 @@ export function ArtifactMeta({
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Set after a save that went through and tripped the fair-hiring scan. It
+  // is not an error — the edit is saved — so it renders in amber next to a
+  // button that says so, rather than in red next to one that says retry.
+  const [flagged, setFlagged] = useState<TraitScanHit[]>([]);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
   return (
-    <div className="mb-3 flex flex-wrap items-center gap-2 text-[11.5px] text-ink-faint">
+    <div className="mb-3 flex flex-wrap items-center gap-2 text-[12.5px] text-ink-faint">
       {meta ? (
         <>
           {meta.provider === "mock" && <MockBadge />}
@@ -57,10 +62,11 @@ export function ArtifactMeta({
       )}
       <button
         type="button"
-        className="rounded border border-edge2 px-2 py-0.5 text-[11px] text-ink-muted hover:bg-panel2"
+        className="rounded border border-edge2 px-2 py-0.5 text-[12px] text-ink-muted hover:bg-panel2"
         onClick={() => {
           setText(JSON.stringify(payload, null, 2));
           setError(null);
+          setFlagged([]);
           setEditing(true);
         }}
       >
@@ -76,12 +82,12 @@ export function ArtifactMeta({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-[13px] font-medium text-ink">
+              <span className="text-[14px] font-medium text-ink">
                 Edit artifact ({kind}) — validated against its schema on save
               </span>
               <button
                 type="button"
-                className="text-[12px] text-ink-faint hover:text-ink"
+                className="text-[13px] text-ink-faint hover:text-ink"
                 onClick={() => setEditing(false)}
               >
                 Close
@@ -91,12 +97,35 @@ export function ArtifactMeta({
               value={text}
               onChange={(e) => setText(e.target.value)}
               spellCheck={false}
-              className="min-h-0 flex-1 resize-none rounded border border-edge bg-canvas p-3 font-mono text-[12px] text-ink outline-none"
+              className="min-h-0 flex-1 resize-none rounded border border-edge bg-canvas p-3 font-mono text-[13px] text-ink"
             />
             {error && (
-              <p className="mt-2 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[12px] text-bad">
+              <p className="mt-2 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[13px] text-bad">
                 {error}
               </p>
+            )}
+            {flagged.length > 0 && (
+              <div className="mt-2 rounded border border-warn/40 bg-warn-soft px-3 py-2 text-[13px] text-warn">
+                <p className="font-medium">
+                  Saved. This mentions{" "}
+                  {flagged.map((hit) => hit.trait).join(", ")}.
+                </p>
+                <p className="mt-1 text-ink-muted">
+                  Worth a look — some mentions belong (a benefits line about
+                  parental leave), and some are a decision nobody is allowed to
+                  make. Nothing was blocked or changed.
+                </p>
+                <ul className="mt-1.5 space-y-1">
+                  {flagged.map((hit) => (
+                    <li
+                      key={`${hit.trait}:${hit.excerpt}`}
+                      className="font-mono text-[12px] text-ink-muted"
+                    >
+                      …{hit.excerpt}…
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
             <div className="mt-3 flex justify-end gap-2">
               <button
@@ -110,16 +139,25 @@ export function ArtifactMeta({
                       json: text,
                     });
                     if (result.ok) {
-                      setEditing(false);
+                      setError(null);
+                      setFlagged(result.data.warnings);
                       router.refresh();
+                      // A clean save closes; a flagged one stays open so the
+                      // warning is read rather than dismissed by the dialog
+                      // disappearing out from under it.
+                      if (result.data.warnings.length === 0) setEditing(false);
                     } else {
                       setError(result.error);
                     }
                   })
                 }
-                className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas disabled:opacity-50"
+                className="rounded bg-accent px-3 py-1.5 text-[14px] font-medium text-canvas disabled:opacity-50"
               >
-                {pending ? "Saving…" : "Save"}
+                {pending
+                  ? "Saving…"
+                  : flagged.length > 0
+                    ? "Save again"
+                    : "Save"}
               </button>
             </div>
           </div>

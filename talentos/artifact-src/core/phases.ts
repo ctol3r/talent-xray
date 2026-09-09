@@ -98,6 +98,14 @@ const mod = (
 
 export const NAV: NavEntry[] = [
   {
+    key: "expert",
+    label: "Ask",
+    phase: "define",
+    audience: "core",
+    required: false,
+    hint: "One conversation with a small team of specialists. It answers here — the artifact borrows the viewer's own Claude, so there is no key and no file.",
+  },
+  {
     key: "overview",
     label: "Brief",
     phase: "define",
@@ -146,6 +154,14 @@ export const NAV: NavEntry[] = [
     "plan",
     "Queries compiled against each platform's real limits.",
   ),
+  {
+    key: "sourcing",
+    label: "Sourcing",
+    phase: "plan",
+    audience: "core",
+    required: false,
+    hint: "One brief, fanned across twenty angles. Nothing here fetches anything.",
+  },
   mod(
     "candidates",
     "execute",

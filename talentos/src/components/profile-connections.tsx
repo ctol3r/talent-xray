@@ -205,9 +205,9 @@ export function ProfileConnections({
 
   return (
     <Card
-      title={`Profile connections — ${links.length} address${links.length === 1 ? "" : "es"}`}
+      title={`🔗 Profile connections — ${links.length} address${links.length === 1 ? "" : "es"}`}
     >
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-[12px] text-ink-muted">
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-[13px] text-ink-muted">
         <span>{confirmedCount} confirmed by the person</span>
         <span aria-hidden>·</span>
         <span>notice:</span>
@@ -217,7 +217,7 @@ export function ProfileConnections({
       </div>
 
       {grouped.length === 0 && (
-        <p className="text-[13px] text-ink-muted">
+        <p className="text-[14px] text-ink-muted">
           No addresses yet. Paste the profiles you have found below, one per
           line.
         </p>
@@ -225,11 +225,11 @@ export function ProfileConnections({
 
       {grouped.map(({ family, rows }) => (
         <div key={family} className="mb-4">
-          <h4 className="text-[11px] font-semibold tracking-wider text-ink-faint uppercase">
+          <h4 className="text-[12px] font-semibold tracking-wider text-ink-faint uppercase">
             {SURFACE_FAMILY_LABELS[family]} ({rows.length})
           </h4>
           {FAMILY_NOTES[family] && (
-            <p className="mt-0.5 text-[11px] text-ink-faint">
+            <p className="mt-0.5 text-[12px] text-ink-faint">
               {FAMILY_NOTES[family]}
             </p>
           )}
@@ -248,33 +248,33 @@ export function ProfileConnections({
                       href={row.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[12.5px] break-all text-accent hover:underline"
+                      className="text-[13.5px] break-all text-accent hover:underline"
                     >
                       {row.url}
                     </a>
                     {row.label && (
-                      <span className="ml-2 text-[11px] text-ink-faint">
+                      <span className="ml-2 text-[12px] text-ink-faint">
                         listed as “{row.label}”
                       </span>
                     )}
-                    <p className="mt-0.5 text-[11px] text-ink-faint">
+                    <p className="mt-0.5 text-[12px] text-ink-faint">
                       <span className="mr-1.5 rounded border border-edge2 px-1 py-0.5 uppercase tracking-wide">
                         {row.badge}
                       </span>
                       {row.provenanceLine}
                     </p>
                     {row.subLines.map((line) => (
-                      <p key={line} className="text-[11px] text-ink-faint">
+                      <p key={line} className="text-[12px] text-ink-faint">
                         {line}
                       </p>
                     ))}
                     {row.originUrl && (
-                      <p className="text-[11px] text-ink-faint">
+                      <p className="text-[12px] text-ink-faint">
                         found on: {row.originUrl}
                       </p>
                     )}
                     {row.whyNote && (
-                      <p className="mt-0.5 text-[11.5px] text-ink-muted">
+                      <p className="mt-0.5 text-[12.5px] text-ink-muted">
                         Why you kept it: {row.whyNote}
                       </p>
                     )}
@@ -284,7 +284,7 @@ export function ProfileConnections({
                       type="button"
                       onClick={() => remove(row.id)}
                       disabled={pending}
-                      className="text-[11.5px] text-ink-faint hover:text-bad disabled:opacity-50"
+                      className="text-[12.5px] text-ink-faint hover:text-bad disabled:opacity-50"
                     >
                       Remove
                     </button>
@@ -294,7 +294,7 @@ export function ProfileConnections({
                         onChange={(e) =>
                           e.target.value && move(row.id, e.target.value)
                         }
-                        className="rounded border border-edge bg-canvas px-1.5 py-0.5 text-[11px] text-ink-muted"
+                        className="rounded border border-edge bg-canvas px-1.5 py-0.5 text-[12px] text-ink-muted"
                       >
                         <option value="">Move to…</option>
                         {otherCandidates.map((c) => (
@@ -313,8 +313,8 @@ export function ProfileConnections({
       ))}
 
       <div className="mt-4 rounded border border-edge bg-canvas p-3">
-        <p className="text-[12.5px] font-medium">Add addresses</p>
-        <p className="mt-0.5 text-[11.5px] text-ink-faint">
+        <p className="text-[13.5px] font-medium">Add addresses</p>
+        <p className="mt-0.5 text-[12.5px] text-ink-faint">
           One per line. Open each one and judge it yourself first — this app
           never opens or reads these pages.
         </p>
@@ -325,7 +325,7 @@ export function ProfileConnections({
           placeholder={
             "https://github.com/example\nhttps://orcid.org/0000-0002-1825-0097"
           }
-          className="mt-2 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[12px]"
+          className="mt-2 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[13px]"
         />
         <input
           type="text"
@@ -334,7 +334,7 @@ export function ProfileConnections({
           placeholder="Why you think these are the same person (your own note)"
           className={`mt-2 ${inputClass}`}
         />
-        <label className="mt-2 flex items-center gap-2 text-[12px] text-ink-muted">
+        <label className="mt-2 flex items-center gap-2 text-[13px] text-ink-muted">
           <input
             type="checkbox"
             checked={fromPerson}
@@ -351,13 +351,13 @@ export function ProfileConnections({
           >
             Add
           </button>
-          {status && <span className="text-[11.5px] text-ok">{status}</span>}
+          {status && <span className="text-[12.5px] text-ok">{status}</span>}
         </div>
 
         {refused.length > 0 && (
           <div className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2">
             {refused.map((r) => (
-              <p key={r.url} className="text-[11.5px] text-bad">
+              <p key={r.url} className="text-[12.5px] text-bad">
                 {r.url} — {firstSentence(r.message)}
               </p>
             ))}
@@ -366,7 +366,7 @@ export function ProfileConnections({
 
         {pendingFamily && FAMILY_WARNINGS[pendingFamily] && (
           <div className="mt-3 rounded border border-warn/40 bg-warn-soft px-3 py-2">
-            <p className="text-[12px] text-ink-muted">
+            <p className="text-[13px] text-ink-muted">
               {FAMILY_WARNINGS[pendingFamily]}
             </p>
             <input
@@ -390,10 +390,10 @@ export function ProfileConnections({
 
       {declaredAccounts.length > 0 && (
         <div className="mt-4 rounded border border-edge bg-canvas p-3">
-          <p className="text-[12.5px] font-medium">
+          <p className="text-[13.5px] font-medium">
             Addresses this person listed themselves
           </p>
-          <p className="mt-0.5 text-[11.5px] text-ink-faint">
+          <p className="mt-0.5 text-[12.5px] text-ink-faint">
             Reads the links {candidateName} published on a profile they control,
             through that platform&apos;s own public API. One person, one click.
             Nothing is kept until you keep it.
@@ -422,7 +422,7 @@ export function ProfileConnections({
           {read && (
             <div className="mt-3">
               {read.suggestions.length === 0 && (
-                <p className="text-[12px] text-ink-muted">
+                <p className="text-[13px] text-ink-muted">
                   No addresses to show from {read.platform}.
                 </p>
               )}
@@ -437,11 +437,11 @@ export function ProfileConnections({
                         href={suggestion.link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[12.5px] break-all text-accent hover:underline"
+                        className="text-[13.5px] break-all text-accent hover:underline"
                       >
                         {suggestion.link.url}
                       </a>
-                      <p className="text-[11px] text-ink-faint">
+                      <p className="text-[12px] text-ink-faint">
                         <span className="mr-1.5 rounded border border-edge2 px-1 py-0.5 uppercase tracking-wide">
                           suggested · not yet opened
                         </span>
@@ -450,7 +450,7 @@ export function ProfileConnections({
                         it is the same person before keeping it
                       </p>
                       {suggestion.alreadySavedOn && (
-                        <p className="text-[11px] text-warn">
+                        <p className="text-[12px] text-warn">
                           already saved on {suggestion.alreadySavedOn}
                         </p>
                       )}
@@ -459,7 +459,7 @@ export function ProfileConnections({
                       type="button"
                       onClick={() => keep(suggestion)}
                       disabled={pending}
-                      className="shrink-0 rounded border border-edge2 px-2 py-1 text-[11.5px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
+                      className="shrink-0 rounded border border-edge2 px-2 py-1 text-[12.5px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
                     >
                       This is them — keep
                     </button>
@@ -467,7 +467,7 @@ export function ProfileConnections({
                 ))}
               </ul>
               {read.hiddenCount > 0 && (
-                <p className="mt-2 text-[11.5px] text-ink-faint">
+                <p className="mt-2 text-[12.5px] text-ink-faint">
                   {read.hiddenCount} address
                   {read.hiddenCount === 1 ? "" : "es"} on surfaces that are off
                   for this search were not shown. Paste one by hand if you
@@ -480,12 +480,12 @@ export function ProfileConnections({
       )}
 
       {error && (
-        <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[12px] text-bad">
+        <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[13px] text-bad">
           {error}
         </p>
       )}
 
-      <p className="mt-4 text-[12px]">
+      <p className="mt-4 text-[13px]">
         <a
           href={`/searches/${searchProjectId}/candidates/${candidateId}/confirm`}
           className="text-accent hover:underline"
@@ -494,7 +494,7 @@ export function ProfileConnections({
         </a>
       </p>
 
-      <p className="mt-4 text-[11px] text-ink-faint">{PROFILE_CARD_FOOTER}</p>
+      <p className="mt-4 text-[12px] text-ink-faint">{PROFILE_CARD_FOOTER}</p>
     </Card>
   );
 }

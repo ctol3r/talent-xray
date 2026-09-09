@@ -56,7 +56,7 @@ export function NormalizationNotes({ qa }: { qa: QueryQaMeta | null }) {
   );
   if (!notes || notes.length === 0) return null;
   return (
-    <p className="mt-1 text-[11px] text-ink-faint">
+    <p className="mt-1 text-[12px] text-ink-faint">
       {notes.map((n) => n.message).join(" · ")}
     </p>
   );
@@ -64,11 +64,11 @@ export function NormalizationNotes({ qa }: { qa: QueryQaMeta | null }) {
 
 export function YieldLine({ yield: y }: { yield?: QueryYield }) {
   if (!y || y.runs === 0) {
-    return <span className="text-[11.5px] text-ink-faint">never run</span>;
+    return <span className="text-[12.5px] text-ink-faint">never run</span>;
   }
   return (
     <span
-      className="text-[11.5px] text-ink-faint"
+      className="text-[12.5px] text-ink-faint"
       title="Yield ledger: runs, explicitly saved URLs, candidates created from them"
     >
       ran {y.runs}× · {y.savedUrls} saved · {y.candidates}{" "}
@@ -82,8 +82,8 @@ export function CoveragePanel({ coverage }: { coverage: ChannelCoverage[] }) {
   const covered = coverage.filter((c) => c.covered);
   const missing = coverage.filter((c) => !c.covered);
   return (
-    <Card title="Channel coverage">
-      <p className="text-[12.5px] text-ink-muted">
+    <Card title="📡 Channel coverage">
+      <p className="text-[13.5px] text-ink-muted">
         {covered.length} of {coverage.length} channel
         {coverage.length === 1 ? "" : "s"} named by the strategy{" "}
         {covered.length === 1 ? "has" : "have"} a string.
@@ -107,7 +107,7 @@ export function PrunedPlatformsNote({
 }) {
   if (pruned.length === 0) return null;
   return (
-    <p className="text-[12px] text-ink-faint">
+    <p className="text-[13px] text-ink-faint">
       Surfaces skipped for this profession:{" "}
       {pruned.map((p) => `${p.platform} (${p.reason})`).join("; ")}.
     </p>
@@ -118,14 +118,14 @@ export function RoleYieldPanel({ yield: y }: { yield: RoleTitleYield | null }) {
   if (!y) return null;
   return (
     <Card
-      title={`Same role in ${y.searches} other search${y.searches === 1 ? "" : "es"}`}
+      title={`🔁 Same role in ${y.searches} other search${y.searches === 1 ? "" : "es"}`}
     >
       {y.rows.length === 0 ? (
-        <p className="text-[12.5px] text-ink-muted">
+        <p className="text-[13.5px] text-ink-muted">
           No strings were run for this role elsewhere yet.
         </p>
       ) : (
-        <ul className="space-y-1 text-[12.5px] text-ink-muted">
+        <ul className="space-y-1 text-[13.5px] text-ink-muted">
           {y.rows.slice(0, 8).map((row) => (
             <li key={`${row.platform}-${row.breadth}`}>
               <span className="text-ink">{row.platform}</span> · {row.breadth}:
@@ -137,7 +137,7 @@ export function RoleYieldPanel({ yield: y }: { yield: RoleTitleYield | null }) {
           ))}
         </ul>
       )}
-      <p className="mt-2 text-[11px] text-ink-faint">
+      <p className="mt-2 text-[12px] text-ink-faint">
         Rolled up by normalized role title ({y.normalizedTitle}); explicit saves
         only, never result counts.
       </p>
@@ -153,8 +153,8 @@ export function ProjectYieldCard({
   zeroYieldCount: number;
 }) {
   return (
-    <Card title="Yield for this search">
-      <p className="text-[12.5px] text-ink-muted">
+    <Card title="🎣 Yield for this search">
+      <p className="text-[13.5px] text-ink-muted">
         {totals.runs} run{totals.runs === 1 ? "" : "s"} · {totals.savedUrls}{" "}
         saved · {totals.candidates} candidate
         {totals.candidates === 1 ? "" : "s"} created from saves.

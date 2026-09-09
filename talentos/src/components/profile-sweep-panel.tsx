@@ -81,8 +81,8 @@ export function ProfileSweepPanel({
 
   return (
     <div className="mt-4 rounded border border-edge bg-canvas p-3">
-      <p className="text-[12.5px] font-medium">Search for more profiles</p>
-      <p className="mt-0.5 text-[11.5px] text-ink-faint">
+      <p className="text-[13.5px] font-medium">Search for more profiles</p>
+      <p className="mt-0.5 text-[12.5px] text-ink-faint">
         Each of these opens on the engine&apos;s own results page in a new tab.
         Open the addresses you find, judge them yourself, then paste the ones
         worth keeping below. Nothing is read or stored for you.
@@ -96,7 +96,7 @@ export function ProfileSweepPanel({
             <li key={q.key} className="rounded border border-edge px-3 py-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[12px] font-medium">
+                  <p className="text-[13px] font-medium">
                     {q.key} · {q.purpose}
                   </p>
                   <textarea
@@ -108,9 +108,9 @@ export function ProfileSweepPanel({
                       }))
                     }
                     rows={2}
-                    className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1 font-mono text-[11.5px]"
+                    className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1 font-mono text-[12.5px]"
                   />
-                  <p className="mt-0.5 text-[11px] text-ink-faint">
+                  <p className="mt-0.5 text-[12px] text-ink-faint">
                     {q.terms}/32 terms ·{" "}
                     {q.engine === "reach" ? "Reach engine" : "Core engine"}
                     {q.omittedExclusions.length > 0 && (
@@ -129,7 +129,7 @@ export function ProfileSweepPanel({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setRanTemplate(q.key)}
-                  className="shrink-0 rounded bg-accent px-2.5 py-1 text-[12px] font-medium text-canvas hover:opacity-90"
+                  className="shrink-0 rounded bg-accent px-2.5 py-1 text-[13px] font-medium text-canvas hover:opacity-90"
                 >
                   Open on engine ↗
                 </a>
@@ -140,14 +140,14 @@ export function ProfileSweepPanel({
       </ul>
 
       <div className="mt-3 rounded border border-edge2 px-3 py-2">
-        <p className="text-[12px] font-medium">Record what you saw</p>
+        <p className="text-[13px] font-medium">Record what you saw</p>
         <div className="mt-1.5 flex flex-wrap items-end gap-3">
-          <label className="block text-[11.5px] text-ink-muted">
+          <label className="block text-[12.5px] text-ink-muted">
             Which search
             <select
               value={ranTemplate}
               onChange={(e) => setRanTemplate(e.target.value)}
-              className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[12px]"
+              className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[13px]"
             >
               {queries.map((q) => (
                 <option key={q.key} value={q.key}>
@@ -156,7 +156,7 @@ export function ProfileSweepPanel({
               ))}
             </select>
           </label>
-          <label className="block text-[11.5px] text-ink-muted">
+          <label className="block text-[12.5px] text-ink-muted">
             Result count shown
             <input
               type="text"
@@ -164,17 +164,17 @@ export function ProfileSweepPanel({
               value={count}
               onChange={(e) => setCount(e.target.value)}
               placeholder="e.g. 12"
-              className="mt-1 block w-24 rounded border border-edge bg-panel px-2 py-1 text-[12px]"
+              className="mt-1 block w-24 rounded border border-edge bg-panel px-2 py-1 text-[13px]"
             />
           </label>
         </div>
-        <label className="mt-2 block text-[11.5px] text-ink-muted">
+        <label className="mt-2 block text-[12.5px] text-ink-muted">
           Addresses to keep on {candidateName} — one per line
           <textarea
             value={lines}
             onChange={(e) => setLines(e.target.value)}
             rows={2}
-            className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1 font-mono text-[11.5px]"
+            className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1 font-mono text-[12.5px]"
           />
         </label>
         <div className="mt-2 flex items-center gap-3">
@@ -182,14 +182,14 @@ export function ProfileSweepPanel({
             type="button"
             onClick={record}
             disabled={pending}
-            className="rounded border border-edge2 px-2.5 py-1 text-[12px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
+            className="rounded border border-edge2 px-2.5 py-1 text-[13px] text-ink-muted hover:bg-panel2 disabled:opacity-50"
           >
             Record run
           </button>
-          {status && <span className="text-[11.5px] text-ok">{status}</span>}
+          {status && <span className="text-[12.5px] text-ok">{status}</span>}
         </div>
         {error && (
-          <p className="mt-2 rounded border border-bad/40 bg-bad-soft px-2 py-1 text-[11.5px] text-bad">
+          <p className="mt-2 rounded border border-bad/40 bg-bad-soft px-2 py-1 text-[12.5px] text-bad">
             {error}
           </p>
         )}

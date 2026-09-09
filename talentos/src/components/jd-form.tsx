@@ -25,7 +25,7 @@ export function JdForm({
     return (
       <button
         type="button"
-        className="text-[12.5px] text-accent hover:underline"
+        className="text-[13.5px] text-accent hover:underline"
         onClick={() => setOpen(true)}
       >
         Replace job description…
@@ -61,7 +61,7 @@ export function JdForm({
         rows={10}
         required
         placeholder="Paste the JD text here…"
-        className={`${inputClass} resize-y font-mono text-[12.5px]`}
+        className={`${inputClass} resize-y font-mono text-[13.5px]`}
         name="jd"
       />
       <ErrorNote error={error} />

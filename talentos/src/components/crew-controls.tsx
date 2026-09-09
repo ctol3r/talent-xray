@@ -62,7 +62,7 @@ export function CrewControls({
           type="button"
           onClick={kickoff}
           disabled={isPending}
-          className="rounded border border-edge2 px-3 py-1.5 text-[13px] font-medium text-ink-muted hover:bg-panel2 disabled:opacity-50"
+          className="rounded border border-edge2 px-3 py-1.5 text-[14px] font-medium text-ink-muted hover:bg-panel2 disabled:opacity-50"
         >
           {hasActiveJobs ? "Restart crew" : "Kick off crew"}
         </button>
@@ -70,13 +70,13 @@ export function CrewControls({
           type="button"
           onClick={advance}
           disabled={isPending || !hasActiveJobs}
-          className="rounded bg-accent px-3 py-1.5 text-[13px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
+          className="rounded bg-accent px-3 py-1.5 text-[14px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
         >
           {isPending ? "Working…" : "Advance crew"}
         </button>
       </div>
       {note ? (
-        <p className="max-w-md text-right text-[12px] text-ink-muted">{note}</p>
+        <p className="max-w-md text-right text-[13px] text-ink-muted">{note}</p>
       ) : null}
     </div>
   );

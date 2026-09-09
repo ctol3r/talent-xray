@@ -20,7 +20,7 @@ export function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1200);
       }}
-      className="shrink-0 rounded border border-edge2 px-2 py-0.5 text-[11.5px] text-ink-muted hover:bg-panel2"
+      className="shrink-0 rounded border border-edge2 px-2 py-0.5 text-[12.5px] text-ink-muted hover:bg-panel2"
     >
       {copied ? "Copied" : "Copy"}
     </button>
@@ -53,7 +53,7 @@ export function QueryEditor({
         <CopyButton text={query} />
         <button
           type="button"
-          className="rounded border border-edge2 px-2 py-0.5 text-[11.5px] text-ink-muted hover:bg-panel2"
+          className="rounded border border-edge2 px-2 py-0.5 text-[12.5px] text-ink-muted hover:bg-panel2"
           onClick={() => setEditing(true)}
         >
           Edit
@@ -61,7 +61,7 @@ export function QueryEditor({
         <button
           type="button"
           disabled={pending}
-          className="rounded border border-edge2 px-2 py-0.5 text-[11.5px] text-ink-faint hover:bg-panel2"
+          className="rounded border border-edge2 px-2 py-0.5 text-[12.5px] text-ink-faint hover:bg-panel2"
           onClick={() =>
             submit(() => archiveQueryAction({ queryId, searchProjectId }))
           }
@@ -95,7 +95,7 @@ export function QueryEditor({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         rows={3}
-        className={`${inputClass} resize-y font-mono text-[12px]`}
+        className={`${inputClass} resize-y font-mono text-[13px]`}
       />
       <ErrorNote error={error} />
       <div className="flex gap-2">
@@ -168,7 +168,7 @@ export function AddQueryForm({ searchProjectId }: { searchProjectId: string }) {
         placeholder="The query"
         rows={2}
         required
-        className={`${inputClass} resize-y font-mono text-[12px]`}
+        className={`${inputClass} resize-y font-mono text-[13px]`}
       />
       <ErrorNote error={error} />
       <div className="flex gap-2">

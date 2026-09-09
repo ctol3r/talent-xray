@@ -17,6 +17,9 @@ import {
   subtleButtonClass,
   useAction,
 } from "./forms";
+import { TagTextarea, type TagOption } from "./tag-textarea";
+import { TagRow } from "./tag-text";
+import { tagsIn } from "@/lib/core/tags";
 
 export function AddCandidateForm({
   searchProjectId,
@@ -178,12 +181,66 @@ export function StageSelect({
             moveCandidateStageAction({ candidateId, toStage: e.target.value }),
           )
         }
-        className="rounded border border-edge bg-panel px-2 py-1 text-[12.5px] text-ink outline-none"
+        className="rounded border border-edge bg-panel px-2 py-1 text-[13.5px] text-ink"
         title="Move stage — every move is logged as a pipeline event"
       >
         {stages.map((stage) => (
           <option key={stage.key} value={stage.key}>
             {stage.label}
+          </option>
+        ))}
+      </select>
+      <ErrorNote error={error} />
+    </div>
+  );
+}
+
+/**
+ * Where a person stands, as distinct from where they are.
+ *
+ * Stage says how far somebody got; disposition says whether they are still
+ * in it. Keeping them apart is what lets a job hold four people who reached
+ * hiring-manager review and were turned down there — which is the fact the
+ * hill reads when it asks whether the profile is right. Recording one moves
+ * nobody's stage: a person is turned down at the stage they reached, and
+ * overwriting that would lose the only thing the count is about.
+ */
+export function DispositionSelect({
+  candidateId,
+  disposition,
+}: {
+  candidateId: string;
+  disposition: string;
+}) {
+  const { pending, error, submit } = useAction();
+  return (
+    <div>
+      <select
+        defaultValue={disposition}
+        disabled={pending}
+        onChange={(e) =>
+          submit(() =>
+            updateCandidateAction({
+              id: candidateId,
+              disposition: e.target.value,
+            }),
+          )
+        }
+        className="rounded border border-edge bg-panel px-2 py-1 text-[13.5px] text-ink"
+        title="Where this person stands — separate from the stage they reached"
+        aria-label="Disposition"
+      >
+        {(
+          [
+            ["active", "Active"],
+            ["on_hold", "On hold"],
+            ["not_selected", "Not selected"],
+            ["withdrawn", "Withdrew"],
+            ["hired", "Hired"],
+          ] as const
+        ).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
           </option>
         ))}
       </select>
@@ -244,15 +301,25 @@ export function NextActionForm({
   );
 }
 
+/**
+ * A person's notes, and the place their tags live.
+ *
+ * Tags are written here rather than kept in a field of their own, so a tag
+ * always has the sentence that justifies it beside it, and removing the word
+ * removes the tag. Typing @, # or [[ recalls the tags that already exist.
+ */
 export function NotesForm({
   candidateId,
   notes,
+  tags = [],
 }: {
   candidateId: string;
   notes: string | null;
+  tags?: TagOption[];
 }) {
   const [value, setValue] = useState(notes ?? "");
   const { pending, error, submit } = useAction();
+  const written = tagsIn(value);
   return (
     <form
       className="space-y-1.5"
@@ -263,13 +330,15 @@ export function NotesForm({
         );
       }}
     >
-      <textarea
+      <TagTextarea
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={setValue}
+        options={tags}
         rows={3}
-        placeholder="Recruiter notes — motivations, concerns, context. Job-related only."
+        placeholder="Recruiter notes — motivations, concerns, context. Job-related only. [[ or # makes a page, @ finds a person, jj finds a job."
         className={`${inputClass} resize-y`}
       />
+      {written.length > 0 && <TagRow tags={written} className="pt-0.5" />}
       <ErrorNote error={error} />
       <button type="submit" disabled={pending} className={buttonClass}>
         {pending ? "Saving…" : "Save notes"}
@@ -314,7 +383,7 @@ export function CandidateDataControls({
         {!confirming ? (
           <button
             type="button"
-            className="rounded border border-bad/40 px-3 py-1.5 text-[13px] text-bad hover:bg-bad-soft"
+            className="rounded border border-bad/40 px-3 py-1.5 text-[14px] text-bad hover:bg-bad-soft"
             onClick={() => setConfirming(true)}
           >
             Delete candidate…
@@ -323,7 +392,7 @@ export function CandidateDataControls({
           <button
             type="button"
             disabled={pending}
-            className="rounded bg-bad px-3 py-1.5 text-[13px] font-medium text-canvas"
+            className="rounded bg-bad px-3 py-1.5 text-[14px] font-medium text-canvas"
             onClick={() =>
               submit(
                 () => deleteCandidateAction({ candidateId }),

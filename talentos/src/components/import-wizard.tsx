@@ -99,8 +99,8 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
 
   if (result) {
     return (
-      <Card title="Import complete">
-        <p className="text-[13px] text-ink">
+      <Card title="✅ Import complete">
+        <p className="text-[14px] text-ink">
           {result.created.length} candidate
           {result.created.length === 1 ? "" : "s"} created ·{" "}
           {result.flagged.length} flagged for identity review
@@ -108,7 +108,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
             ` · ${result.contactEvidenceCount} vendor contact field${result.contactEvidenceCount === 1 ? "" : "s"} kept as unverified evidence`}
           .
         </p>
-        <ul className="mt-2 space-y-1 text-[12.5px]">
+        <ul className="mt-2 space-y-1 text-[13.5px]">
           {result.created.map((c) => (
             <li key={c.id}>
               <Link
@@ -123,7 +123,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-[12px] text-ink-muted">
+        <p className="mt-3 text-[13px] text-ink-muted">
           Flagged rows were created as separate records — nothing was merged.
           Review them on the{" "}
           <Link href="/tasks" className="text-accent hover:underline">
@@ -138,7 +138,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
   return (
     <div className="space-y-4">
       {!preview && (
-        <Card title="1 · Choose an export">
+        <Card title="📥 1 · Choose an export">
           <form
             className="space-y-3"
             onSubmit={(e) => {
@@ -148,7 +148,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
               runPreview(form);
             }}
           >
-            <label className="block text-[12.5px] text-ink-muted">
+            <label className="block text-[13.5px] text-ink-muted">
               File (.csv or .json, up to 5 MiB)
               <input
                 name="file"
@@ -158,7 +158,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
                 className={`${inputClass} mt-1`}
               />
             </label>
-            <label className="block text-[12.5px] text-ink-muted">
+            <label className="block text-[13.5px] text-ink-muted">
               Source
               <select
                 name="source"
@@ -174,13 +174,13 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
                 ))}
               </select>
             </label>
-            <p className="text-[11.5px] text-ink-faint">
+            <p className="text-[12.5px] text-ink-faint">
               Nothing is written until you commit. Columns that carry protected
               characteristics are dropped before mapping. Vendor contact data is
               dropped unless you keep it, and is never marked verified.
             </p>
             {error && (
-              <p className="rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[12px] text-bad">
+              <p className="rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[13px] text-bad">
                 {error}
               </p>
             )}
@@ -194,16 +194,16 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
       {preview && (
         <>
           <Card
-            title={`2 · Preview — ${preview.sourceLabel} · ${preview.filename}`}
+            title={`👁️ 2 · Preview — ${preview.sourceLabel} · ${preview.filename}`}
           >
-            <p className="text-[12.5px] text-ink-muted">
+            <p className="text-[13.5px] text-ink-muted">
               {preview.counts.total} row{preview.counts.total === 1 ? "" : "s"}{" "}
               · {preview.counts.create} to create · {preview.counts.flagged}{" "}
               flagged for identity review · {preview.counts.skip} skipped (same
               profile URL already saved).
             </p>
             {preview.droppedColumns.length > 0 && (
-              <p className="mt-2 rounded border border-warn/40 bg-warn-soft px-3 py-2 text-[12px] text-warn">
+              <p className="mt-2 rounded border border-warn/40 bg-warn-soft px-3 py-2 text-[13px] text-warn">
                 {preview.droppedColumns.length} column
                 {preview.droppedColumns.length === 1 ? "" : "s"} dropped before
                 mapping:{" "}
@@ -211,14 +211,14 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
               </p>
             )}
             {preview.parseWarnings.length > 0 && (
-              <ul className="mt-2 list-disc pl-5 text-[12px] text-ink-muted">
+              <ul className="mt-2 list-disc pl-5 text-[13px] text-ink-muted">
                 {preview.parseWarnings.slice(0, 8).map((w) => (
                   <li key={w}>{w}</li>
                 ))}
               </ul>
             )}
             <div className="mt-3">
-              <p className="mb-1 text-[12px] text-ink-muted">Source</p>
+              <p className="mb-1 text-[13px] text-ink-muted">Source</p>
               <select
                 value={source}
                 onChange={(e) => {
@@ -237,11 +237,11 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
             </div>
             <div className="mt-3 overflow-x-auto">
               <table
-                className="w-full text-left text-[12px]"
+                className="w-full text-left text-[13px]"
                 data-testid="mapping-table"
               >
                 <thead>
-                  <tr className="border-b border-edge text-[11px] tracking-wider text-ink-faint uppercase">
+                  <tr className="border-b border-edge text-[12px] tracking-wider text-ink-faint uppercase">
                     <th className="pb-1 pr-3 font-medium">Header</th>
                     <th className="pb-1 font-medium">Maps to</th>
                   </tr>
@@ -271,7 +271,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
                                 setOverrides(next);
                                 rePreview(next);
                               }}
-                              className="rounded border border-edge bg-canvas px-1.5 py-0.5 text-[12px]"
+                              className="rounded border border-edge bg-canvas px-1.5 py-0.5 text-[13px]"
                             >
                               <option value="drop">ignore</option>
                               {CANONICAL_FIELDS.map((f) => (
@@ -290,12 +290,12 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
             </div>
           </Card>
 
-          <Card title="3 · Rows">
+          <Card title="📋 3 · Rows">
             <ul className="space-y-1.5">
               {preview.rows.map((r) => (
                 <li
                   key={r.index}
-                  className="flex items-start gap-2 text-[12.5px]"
+                  className="flex items-start gap-2 text-[13.5px]"
                 >
                   <input
                     type="checkbox"
@@ -328,7 +328,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
                     {[...r.matches, ...r.inFileMatches].slice(0, 2).map((m) => (
                       <span
                         key={`${m.otherId}-${m.strength}`}
-                        className="block text-[11.5px] text-ink-faint"
+                        className="block text-[12.5px] text-ink-faint"
                       >
                         {m.reason}
                       </span>
@@ -339,7 +339,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
                       .map((w) => (
                         <span
                           key={`${w.field}-${w.trait}`}
-                          className="block text-[11.5px] text-warn"
+                          className="block text-[12.5px] text-warn"
                         >
                           Review: {w.field} mentions {w.trait}
                         </span>
@@ -349,7 +349,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
               ))}
             </ul>
             {preview.contactColumnsPresent && (
-              <label className="mt-3 flex items-start gap-2 text-[12.5px] text-ink-muted">
+              <label className="mt-3 flex items-start gap-2 text-[13.5px] text-ink-muted">
                 <input
                   type="checkbox"
                   checked={keepContact}
@@ -363,7 +363,7 @@ export function ImportWizard({ searchProjectId }: { searchProjectId: string }) {
               </label>
             )}
             {error && (
-              <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[12px] text-bad">
+              <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[13px] text-bad">
                 {error}
               </p>
             )}

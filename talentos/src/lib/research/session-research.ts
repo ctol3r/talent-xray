@@ -16,13 +16,25 @@ import type { ResearchFinding, ResearchProvider } from "./provider";
  * only — never a specific person's profile page.
  */
 export class ResearchPendingError extends Error {
+  /**
+   * `alsoPending` names the other requests written in the same pass. An
+   * audience research run has several queries; before it was collected here,
+   * the first pending query threw and the rest were never written, so the
+   * owner answered one file, re-ran, and met the next one. Every query the
+   * run still needs is now written before this is thrown.
+   */
   constructor(
     readonly requestPath: string,
     readonly responsePath: string,
+    readonly alsoPending: string[] = [],
   ) {
+    const total = alsoPending.length + 1;
     super(
-      `Research pending: request written to ${requestPath}. ` +
-        `A Claude session performs the web search and writes the findings JSON to ${responsePath}; then re-run.`,
+      total === 1
+        ? `Research pending: request written to ${requestPath}. ` +
+            `A Claude session performs the web search and writes the findings JSON to ${responsePath}; then re-run.`
+        : `Research pending: ${total} requests written to the session outbox, starting with ${requestPath}. ` +
+            `A Claude session performs each web search and writes the findings JSON to the path in each request's respondTo field; then re-run. Run \`pnpm outbox\` to list them.`,
     );
     this.name = "ResearchPendingError";
   }

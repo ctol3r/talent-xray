@@ -2,6 +2,8 @@ import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { jobDescriptions } from "@/lib/db/schema";
 import { getRoleIntelligence } from "@/lib/services/artifacts";
+import { proposeJobTags } from "@/lib/services/tags";
+import { RequirementTags } from "@/components/requirement-tags";
 import { generateRoleIntelligenceAction } from "@/lib/actions/generate";
 import { ArtifactMeta } from "@/components/artifact-meta";
 import { GenerateButton } from "@/components/generate-button";
@@ -26,11 +28,14 @@ export default async function RolePage({
     .limit(1);
   const intel = await getRoleIntelligence(db, id);
   const payload = intel?.payload;
+  // Offered on the job, from the same vocabulary a person is offered, so the
+  // two ends of a link finally have a word in common to meet on.
+  const tagProposals = proposeJobTags(db, id);
 
   return (
     <div>
       <PageHeader
-        title="Role Intelligence"
+        title="📄 Role Intelligence"
         description="The JD becomes structured, editable understanding: requirements separated from preferences, signals, assumptions, and open questions — nothing vague silently promoted to a hard requirement."
         actions={
           jd && (
@@ -44,13 +49,13 @@ export default async function RolePage({
         }
       />
       <div className="space-y-4">
-        <Card title="Job description">
+        <Card title="📄 Job description">
           {jd && (
             <details className="mb-3">
-              <summary className="cursor-pointer text-[12.5px] text-ink-muted">
+              <summary className="cursor-pointer text-[13.5px] text-ink-muted">
                 Saved {new Date(jd.createdAt).toLocaleString()} · view text
               </summary>
-              <pre className="mt-2 max-h-72 overflow-y-auto rounded border border-edge bg-canvas p-3 font-mono text-[12px] whitespace-pre-wrap text-ink-muted">
+              <pre className="mt-2 max-h-72 overflow-y-auto rounded border border-edge bg-canvas p-3 font-mono text-[13px] whitespace-pre-wrap text-ink-muted">
                 {jd.rawText}
               </pre>
             </details>
@@ -69,19 +74,19 @@ export default async function RolePage({
           />
         ) : (
           <>
-            <Card title="Role hypothesis">
+            <Card title="💡 Role hypothesis">
               <ArtifactMeta
                 meta={intel?.meta ?? null}
                 kind="role_intelligence"
                 ownerId={id}
                 payload={payload}
               />
-              <p className="text-[13.5px] leading-6">
+              <p className="text-[14.5px] leading-6">
                 {payload.roleHypothesis}
               </p>
             </Card>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <Card title="Requirements">
+              <Card title="✅ Requirements">
                 <div className="space-y-4">
                   <TracedList
                     title="Hard requirements"
@@ -91,7 +96,7 @@ export default async function RolePage({
                   <TracedList title="Signals" items={payload.signals} />
                 </div>
               </Card>
-              <Card title="What still needs the hiring manager">
+              <Card title="❓ What still needs the hiring manager">
                 <div className="space-y-4">
                   <TracedList
                     title="Assumptions (unconfirmed)"
@@ -106,7 +111,10 @@ export default async function RolePage({
                 </div>
               </Card>
             </div>
-            <Card title="Role profile">
+            <Card title="🏷️ Tags from these requirements">
+              <RequirementTags searchProjectId={id} proposals={tagProposals} />
+            </Card>
+            <Card title="🎯 Role profile">
               <div className="mb-3 space-y-1.5">
                 <KeyValue
                   label="Canonical title"

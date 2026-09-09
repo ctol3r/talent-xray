@@ -4,10 +4,35 @@
  * using the mock provider. The Playwright e2e covers the same flow through
  * the UI; this catches service-layer regressions in seconds.
  *
- * Usage: TALENTOS_MODEL_PROVIDER=mock TALENTOS_DATABASE_PATH=./data/smoke.db pnpm smoke
+ * `pnpm smoke` sets the database path itself. It used to rely on the caller
+ * remembering, which put five runs of fixture data into real work (D-046).
+ *
+ * The throwaway database is deleted first. A check that accumulates state
+ * across runs is not a check of a clean path, and job titles are unique
+ * (D-049), so the second run would collide with the first run's fixture.
  */
 import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 import { getDb } from "../src/lib/db/client";
+
+const dbPath = process.env.TALENTOS_DATABASE_PATH;
+if (!dbPath) {
+  console.error(
+    "Refusing to run: set TALENTOS_DATABASE_PATH to a throwaway file. `pnpm smoke` does this for you.",
+  );
+  process.exit(1);
+}
+if (path.resolve(dbPath) === path.resolve("./data/talentos.db")) {
+  console.error(
+    "Refusing to run against ./data/talentos.db — this check writes fixture data. Use `pnpm smoke`.",
+  );
+  process.exit(1);
+}
+for (const suffix of ["", "-wal", "-shm"]) {
+  const file = path.resolve(`${dbPath}${suffix}`);
+  if (fs.existsSync(file)) fs.rmSync(file);
+}
 import { computeFunnel } from "../src/lib/domain/analytics";
 import { normalizeQueryKey } from "../src/lib/domain/query-normalization";
 import {

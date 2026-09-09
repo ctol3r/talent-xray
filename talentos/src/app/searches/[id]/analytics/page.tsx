@@ -64,7 +64,7 @@ export default async function AnalyticsPage({
   if (events.length === 0) {
     return (
       <div>
-        <PageHeader title="Analytics" />
+        <PageHeader title="📈 Analytics" />
         <EmptyState
           title="No pipeline activity yet"
           detail="Analytics are computed deterministically from pipeline events. Add candidates and move them through stages."
@@ -76,11 +76,11 @@ export default async function AnalyticsPage({
   return (
     <div>
       <PageHeader
-        title="Analytics"
+        title="📈 Analytics"
         description="Computed deterministically from pipeline events and outreach tracking — no model involvement in these numbers."
       />
       <div className="space-y-4">
-        <Card title="Funnel — candidates who ever reached each stage">
+        <Card title="🪜 Funnel — candidates who ever reached each stage">
           <div className="space-y-1.5">
             {funnel
               .filter(
@@ -88,7 +88,7 @@ export default async function AnalyticsPage({
               )
               .map((stage) => (
                 <div key={stage.key} className="flex items-center gap-3">
-                  <span className="w-44 shrink-0 text-[12.5px] text-ink-muted">
+                  <span className="w-44 shrink-0 text-[13.5px] text-ink-muted">
                     {stage.label}
                   </span>
                   <div className="h-4 flex-1 rounded-sm bg-panel2">
@@ -99,10 +99,10 @@ export default async function AnalyticsPage({
                       }}
                     />
                   </div>
-                  <span className="w-8 shrink-0 text-right text-[13px] font-medium">
+                  <span className="w-8 shrink-0 text-right text-[14px] font-medium">
                     {stage.reached}
                   </span>
-                  <span className="w-14 shrink-0 text-right text-[12px] text-ink-faint">
+                  <span className="w-14 shrink-0 text-right text-[13px] text-ink-faint">
                     {stage.conversionFromPrevious !== null
                       ? `${Math.round(stage.conversionFromPrevious * 100)}%`
                       : ""}
@@ -112,8 +112,8 @@ export default async function AnalyticsPage({
           </div>
         </Card>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Card title="Outreach">
-            <div className="space-y-2 text-[13px]">
+          <Card title="✉️ Outreach">
+            <div className="space-y-2 text-[14px]">
               <div className="flex justify-between">
                 <span className="text-ink-muted">Drafted</span>
                 <span>{outreach.drafted}</span>
@@ -136,13 +136,13 @@ export default async function AnalyticsPage({
               </div>
             </div>
           </Card>
-          <Card title="Average time in stage (completed visits)">
+          <Card title="🪜 Average time in stage (completed visits)">
             {Object.keys(timeInStage).length === 0 ? (
-              <p className="text-[13px] text-ink-muted">
+              <p className="text-[14px] text-ink-muted">
                 Not enough movement yet.
               </p>
             ) : (
-              <div className="space-y-1.5 text-[13px]">
+              <div className="space-y-1.5 text-[14px]">
                 {stages
                   .filter((s) => timeInStage[s.key] !== undefined)
                   .map((stage) => (
@@ -155,9 +155,9 @@ export default async function AnalyticsPage({
             )}
           </Card>
         </div>
-        <Card title="Pipeline diagnosis">
+        <Card title="🩺 Pipeline diagnosis">
           {diagnosis.findings.length === 0 ? (
-            <p className="text-[13px] text-ink-muted">
+            <p className="text-[14px] text-ink-muted">
               No failure patterns detected at current sample sizes.
             </p>
           ) : (
@@ -167,25 +167,25 @@ export default async function AnalyticsPage({
                   key={finding.id}
                   className="rounded border border-warn/30 bg-warn-soft/30 p-3"
                 >
-                  <p className="text-[13.5px] font-medium text-warn">
+                  <p className="text-[14.5px] font-medium text-warn">
                     {finding.symptom}
                   </p>
                   <div className="mt-2 grid grid-cols-1 gap-3 lg:grid-cols-2">
                     <div>
-                      <h4 className="text-[11px] font-semibold tracking-wider text-ink-faint uppercase">
+                      <h4 className="text-[12px] font-semibold tracking-wider text-ink-faint uppercase">
                         Possible causes
                       </h4>
-                      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[12.5px]">
+                      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[13.5px]">
                         {finding.possibleCauses.map((cause, i) => (
                           <li key={i}>{cause}</li>
                         ))}
                       </ul>
                     </div>
                     <div>
-                      <h4 className="text-[11px] font-semibold tracking-wider text-ink-faint uppercase">
+                      <h4 className="text-[12px] font-semibold tracking-wider text-ink-faint uppercase">
                         Experiments to run
                       </h4>
-                      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[12.5px]">
+                      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[13.5px]">
                         {finding.experiments.map((experiment, i) => (
                           <li key={i}>{experiment}</li>
                         ))}
@@ -198,7 +198,7 @@ export default async function AnalyticsPage({
           )}
           {diagnosis.insufficientData.length > 0 && (
             <div className="mt-3 border-t border-edge pt-2">
-              <p className="text-[12px] text-ink-faint">
+              <p className="text-[13px] text-ink-faint">
                 Withheld for small samples:{" "}
                 {diagnosis.insufficientData.join(" ")}
               </p>

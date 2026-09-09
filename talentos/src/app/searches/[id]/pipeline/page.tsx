@@ -20,7 +20,7 @@ export default async function PipelinePage({
   return (
     <div>
       <PageHeader
-        title="Pipeline"
+        title="🪜 Pipeline"
         description="Every stage move is logged as an event — the substrate for funnel analytics and diagnosis. Later columns appear once they hold candidates."
       />
       {candidates.length === 0 ? (

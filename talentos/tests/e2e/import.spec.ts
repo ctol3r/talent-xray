@@ -12,7 +12,7 @@ test("import a vendor export with preview, dropped column and identity review", 
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "E2E — import");
   await page.fill('input[name="roleTitle"]', "Engineer");
-  await page.click('button:has-text("Create search")');
+  await page.click('button:has-text("Create job")');
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
   const project = page.url().match(/searches\/([^/]+)/)![1];
 
@@ -53,13 +53,16 @@ test("import a vendor export with preview, dropped column and identity review", 
   ).toBeVisible();
 
   await page.goto(`/searches/${project}/candidates`);
+  // Scoped to the table: the connected-here panel at the foot lists the same
+  // people by name (D-100), and this is an assertion about the list.
+  const list = page.getByRole("table");
   await expect(
-    page.getByRole("link", { name: "Ada Example", exact: true }),
+    list.getByRole("link", { name: "Ada Example", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Ben Sample", exact: true }),
+    list.getByRole("link", { name: "Ben Sample", exact: true }),
   ).toHaveCount(2);
-  await page.getByRole("link", { name: "Ada Example", exact: true }).click();
+  await list.getByRole("link", { name: "Ada Example", exact: true }).click();
   // Wave H: the profile-connections card replaced the plain Sources list. An
   // imported address now says it is third-party and decays.
   const imported = page

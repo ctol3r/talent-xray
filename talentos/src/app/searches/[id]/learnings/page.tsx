@@ -18,7 +18,7 @@ export default async function LearningsPage({
   return (
     <div>
       <PageHeader
-        title="Search Learnings"
+        title="📚 Learnings"
         description="Capture why candidates responded, declined, failed, or accepted — then synthesize. Small samples are flagged, never generalized silently."
         actions={
           <GenerateButton
@@ -31,9 +31,9 @@ export default async function LearningsPage({
       />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <Card title="Recorded learnings">
+          <Card title="📚 Recorded learnings">
             {learnings.length === 0 ? (
-              <p className="text-[13px] text-ink-muted">
+              <p className="text-[14px] text-ink-muted">
                 Nothing recorded yet. Every candidate outcome is a data point —
                 capture it while it&apos;s fresh.
               </p>
@@ -48,7 +48,7 @@ export default async function LearningsPage({
                       <Tag>{learning.kind.replaceAll("_", " ")}</Tag>
                       <ProvenanceBadge source={learning.provenance} />
                       {learning.sampleSize !== null && (
-                        <span className="text-[11.5px] text-ink-faint">
+                        <span className="text-[12.5px] text-ink-faint">
                           n={learning.sampleSize}
                         </span>
                       )}
@@ -56,14 +56,14 @@ export default async function LearningsPage({
                         <Tag tone="warn">small sample</Tag>
                       )}
                     </div>
-                    <p className="mt-1 text-[13px]">{learning.text}</p>
+                    <p className="mt-1 text-[14px]">{learning.text}</p>
                   </li>
                 ))}
               </ul>
             )}
           </Card>
         </div>
-        <Card title="Record an outcome">
+        <Card title="📝 Record an outcome">
           <LearningForm searchProjectId={id} />
         </Card>
       </div>

@@ -1,9 +1,27 @@
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  GRAPH_VIEW_HEIGHT as VIEW_H,
+  GRAPH_VIEW_WIDTH as VIEW_W,
+  advanceSimulation,
+  createSimulation,
+  GRAPH_ITERATIONS,
+  reheat,
+  settleGraph as settle,
+  simulationSettled,
+  snapshotSimulation,
+  type GraphSimulation,
+  type GraphPoint as Point,
+} from "@/lib/core/graph-layout";
+import {
+  DEFAULT_VIEW,
+  type GraphViewSettings,
+} from "@/lib/core/graph-view-settings";
 import {
   graphBacklinks,
+  graphWithin,
   graphKinds,
   graphNodeHref,
   type GraphEdge,
@@ -16,6 +34,9 @@ import {
   removeGraphLinkAction,
 } from "@/lib/actions/knowledge-graph";
 import { Card, PageHeader } from "@/components/ui";
+import { GraphControls, useGraphView } from "./graph-controls";
+import { applyGraphFilters } from "@/lib/core/graph-view-settings";
+import { EMPTY_STATES } from "@/lib/domain/voice";
 
 const colors: Record<GraphKind, string> = {
   search: "#a5b4fc",
@@ -25,110 +46,445 @@ const colors: Record<GraphKind, string> = {
   comparison: "#c4b5fd",
   channel: "#fdba74",
   source: "#f9a8d4",
+  tag: "#f0abfc",
 };
 const inputClass =
   "w-full rounded border border-edge2 bg-panel2 p-2 text-sm text-ink";
 const buttonClass =
   "rounded border border-edge2 px-3 py-1.5 text-sm hover:bg-panel2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50";
+/**
+ * The graph picture.
+ *
+ * It was a fixed radial layout: selected node in the middle, everything else
+ * on evenly spaced rings. That drew every graph the same shape, so structure
+ * was invisible — a hub with twenty leaves and a chain of twenty looked
+ * identical. This is a settled force layout instead, so clusters separate,
+ * hubs sit centrally, and the picture differs when the data differs.
+ *
+ * The simulation is deterministic and finite: initial positions come from a
+ * hash of the node id, then a fixed number of iterations run inside a memo.
+ * No animation frame loop, no randomness, so the same graph draws the same
+ * picture every time and a test can assert on it. Dragging a node pins it
+ * and re-settles the rest around it.
+ */
+
+/**
+ * The picture on its own, for the whole-workspace graph, which has no
+ * backlink panels around it. Same layout, same interactions, one export.
+ */
+export function GraphPictureOnly(props: {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  selectedId: string;
+  select: (id: string) => void;
+  view?: GraphViewSettings;
+  matched?: Set<string>;
+  /**
+   * Shorter, for the panel at the foot of every page.
+   *
+   * The full size is right when the graph is what you came to look at. At the
+   * bottom of a page it is a glance, and 28rem of it under every page in the
+   * product is a scroll rather than a glance.
+   */
+  compact?: boolean;
+}) {
+  return <GraphPicture {...props} />;
+}
+
 function GraphPicture({
   nodes,
   edges,
   selectedId,
   select,
+  view = DEFAULT_VIEW,
+  matched,
+  compact = false,
 }: {
   nodes: GraphNode[];
   edges: GraphEdge[];
   selectedId: string;
   select: (id: string) => void;
+  view?: GraphViewSettings;
+  /** Records matching the search. Non-matches dim rather than disappear. */
+  matched?: Set<string>;
+  compact?: boolean;
 }) {
-  const selected = nodes.find((node) => node.id === selectedId);
-  const others = nodes.filter((node) => node.id !== selectedId);
-  const positions = new Map<string, { x: number; y: number }>();
-  if (selected) positions.set(selected.id, { x: 450, y: 290 });
-  others.forEach((node, index) => {
-    const ring = Math.floor(index / 20);
-    const count = Math.min(20, others.length - ring * 20);
-    const angle =
-      ((index % 20) * 2 * Math.PI) / Math.max(count, 1) - Math.PI / 2;
-    positions.set(node.id, {
-      x: 450 + Math.cos(angle) * (270 + ring * 70),
-      y: 290 + Math.sin(angle) * (175 + ring * 44),
-    });
-  });
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState<Point>({ x: 0, y: 0 });
+  const [pins, setPins] = useState<Map<string, Point>>(new Map());
+  const [dragging, setDragging] = useState<string | null>(null);
+  /**
+   * Dragging the canvas.
+   *
+   * The label has claimed you could do this for as long as it has existed, and
+   * you could not: `pan` was state that only the reset button ever wrote. So a
+   * graph bigger than its frame could be zoomed into and then not moved, which
+   * is the one thing zoom makes necessary.
+   *
+   * Held as the grab point and the pan at the moment of the grab, rather than
+   * as a running delta, so a pointer that leaves the element and comes back
+   * does not jump.
+   */
+  const [grab, setGrab] = useState<{
+    x: number;
+    y: number;
+    pan: Point;
+  } | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  const ids = new Set(nodes.map((node) => node.id));
+  const live = edges.filter((e) => ids.has(e.from) && ids.has(e.to));
+
+  // Identity of the drawn set, as plain strings, so the layout is recomputed
+  // when the records or links change but not when their order does.
+  const nodeKey = nodes.map((node) => node.id).join(",");
+  const edgeKey = live.map((edge) => edge.id).join(",");
+
+  const forceKey = JSON.stringify(view.forces);
+
+  /**
+   * The graph settles where you can watch it, the way Obsidian's and Roam's do.
+   *
+   * A layout that appears fully formed is correct and tells you nothing: the
+   * motion is how you read which records pulled which into place, and where a
+   * cluster came from. So the physics is stepped from an animation frame
+   * rather than run to completion in one go.
+   *
+   * It stops when it cools, so nothing drifts forever and nothing is animating
+   * while you are trying to read it. Dragging a record, changing a filter or
+   * selecting something else warms it back up, because the old arrangement is
+   * wrong the moment any of those change.
+   *
+   * Somebody who has asked for less motion gets the settled layout at once.
+   */
+  const [positions, setPositions] = useState<Map<string, Point>>(() =>
+    settle(nodes, live, selectedId, pins, view.forces),
+  );
+  const simRef = useRef<GraphSimulation | null>(null);
+
+  useEffect(() => {
+    // Somebody who has asked for less motion gets the whole simulation in one
+    // frame, which is the settled layout with no animation rather than a
+    // different layout — the picture is the same either way.
+    const still =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const perFrame = still ? GRAPH_ITERATIONS : 2;
+
+    // Carry the current arrangement over rather than scattering from the hash
+    // again: a filter change should rearrange the graph you are looking at,
+    // not replace it with a different one.
+    const previous = simRef.current?.positions;
+    const sim = createSimulation(nodes, live, selectedId, pins, view.forces);
+    if (previous) {
+      for (const [id, point] of sim.positions) {
+        const carried = previous.get(id);
+        if (carried) sim.positions.set(id, { ...carried });
+        else sim.positions.set(id, point);
+      }
+      reheat(sim);
+    }
+    simRef.current = sim;
+
+    let frame = 0;
+    const tick = () => {
+      // Two steps a frame: fast enough to settle in a couple of seconds, slow
+      // enough that you can see what moved.
+      advanceSimulation(sim, perFrame);
+      setPositions(snapshotSimulation(sim));
+      if (!simulationSettled(sim)) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+    // nodes and live are derived from nodeKey and edgeKey; the forces from
+    // forceKey. Listing the objects themselves would restart every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodeKey, edgeKey, selectedId, pins, forceKey]);
+
+  /** How many live edges touch each record; drives node size. */
+  const degree = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const edge of live) {
+      counts.set(edge.from, (counts.get(edge.from) ?? 0) + 1);
+      counts.set(edge.to, (counts.get(edge.to) ?? 0) + 1);
+    }
+    return counts;
+  }, [live]);
+
+  /** The record under the pointer, or the selection when nothing is hovered. */
+  const focusId = hovered ?? selectedId;
+  const neighbourhood = useMemo(() => {
+    const set = new Set<string>([focusId]);
+    for (const edge of live) {
+      if (edge.from === focusId) set.add(edge.to);
+      if (edge.to === focusId) set.add(edge.from);
+    }
+    return set;
+  }, [live, focusId]);
+
+  /** Pointer position in the SVG's own coordinates, so drag tracks the cursor. */
+  function toGraph(event: { clientX: number; clientY: number }): Point | null {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const box = svg.getBoundingClientRect();
+    const x = ((event.clientX - box.left) / box.width) * VIEW_W;
+    const y = ((event.clientY - box.top) / box.height) * VIEW_H;
+    return { x: (x - pan.x) / zoom, y: (y - pan.y) / zoom };
+  }
+
+  function radius(node: GraphNode): number {
+    const base =
+      node.id === selectedId
+        ? 20
+        : 8 + Math.min(9, (degree.get(node.id) ?? 0) * 1.6);
+    return base * view.display.nodeSize;
+  }
+
   return (
-    <svg
-      viewBox="0 0 900 590"
-      className="min-h-72 w-full rounded border border-edge bg-[#101827]"
-      role="group"
-      aria-label="Interactive knowledge graph. Tab to a record and press Enter to inspect its backlinks."
-    >
-      <title>Stored references and recruiter links</title>
-      {edges.map((edge) => {
-        const from = positions.get(edge.from),
-          to = positions.get(edge.to);
-        if (!from || !to) return null;
-        const active = edge.from === selectedId || edge.to === selectedId;
-        return (
-          <line
-            key={edge.id}
-            x1={from.x}
-            y1={from.y}
-            x2={to.x}
-            y2={to.y}
-            stroke={active ? "#a5b4fc" : "#475569"}
-            strokeWidth={active ? 2 : 1}
-            strokeDasharray={edge.origin === "recruiter" ? "5 5" : undefined}
-            opacity={active ? 0.9 : 0.4}
+    // Clipped, because the picture can be panned and dragged past its own
+    // frame: a record pulled out to the right was making the whole page
+    // scroll sideways, which on a phone is the page coming apart.
+    <div className="relative overflow-hidden">
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+        // No frame and no ground of its own: the graph is a shape, not a box,
+        // and a border is what made a force-directed layout look rectangular
+        // however round the layout itself was.
+        className={`w-full touch-none overflow-hidden bg-transparent ${
+          compact
+            ? "min-h-[13rem] sm:min-h-[15rem]"
+            : "min-h-[20rem] sm:min-h-[28rem]"
+        } ${grab ? "cursor-grabbing" : "cursor-grab"}`}
+        role="group"
+        tabIndex={0}
+        aria-label="Interactive knowledge graph. Tab to a record and press Enter to inspect its backlinks. Drag a record to move it, drag the background to pan, scroll to zoom, arrow keys to pan."
+        onPointerDown={(event) => {
+          // Only the canvas. A node stops this event, because dragging a record
+          // moves the record and dragging what is behind it moves the view.
+          const box = svgRef.current?.getBoundingClientRect();
+          if (!box) return;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          setGrab({ x: event.clientX, y: event.clientY, pan });
+        }}
+        onPointerMove={(event) => {
+          if (dragging) {
+            const point = toGraph(event);
+            if (point)
+              setPins((current) => new Map(current).set(dragging, point));
+            return;
+          }
+          if (!grab) return;
+          const box = svgRef.current?.getBoundingClientRect();
+          if (!box) return;
+          // Client pixels are not view units: at any zoom the picture must
+          // travel exactly as far as the pointer did, or the canvas slides out
+          // from under the cursor.
+          setPan({
+            x: grab.pan.x + ((event.clientX - grab.x) / box.width) * VIEW_W,
+            y: grab.pan.y + ((event.clientY - grab.y) / box.height) * VIEW_H,
+          });
+        }}
+        onPointerUp={() => {
+          setDragging(null);
+          setGrab(null);
+        }}
+        onPointerCancel={() => setGrab(null)}
+        onPointerLeave={() => {
+          setDragging(null);
+          setHovered(null);
+        }}
+        onKeyDown={(event) => {
+          // The same movement without a pointer. A view you can only reach by
+          // dragging is a view somebody navigating by keyboard cannot reach.
+          const step = event.shiftKey ? 160 : 48;
+          const by: Record<string, Point> = {
+            ArrowLeft: { x: step, y: 0 },
+            ArrowRight: { x: -step, y: 0 },
+            ArrowUp: { x: 0, y: step },
+            ArrowDown: { x: 0, y: -step },
+          };
+          const move = by[event.key];
+          if (!move) return;
+          event.preventDefault();
+          setPan((current) => ({
+            x: current.x + move.x,
+            y: current.y + move.y,
+          }));
+        }}
+        onWheel={(event) => {
+          // Zoom about the pointer, not about the origin: zooming into the
+          // middle of the frame when you are looking at a cluster in the corner
+          // moves the thing you were reading off the screen.
+          const box = svgRef.current?.getBoundingClientRect();
+          const next = Math.max(
+            0.4,
+            Math.min(3, event.deltaY < 0 ? zoom * 1.12 : zoom / 1.12),
+          );
+          if (box) {
+            const px = ((event.clientX - box.left) / box.width) * VIEW_W;
+            const py = ((event.clientY - box.top) / box.height) * VIEW_H;
+            const ratio = next / zoom;
+            setPan((current) => ({
+              x: px - (px - current.x) * ratio,
+              y: py - (py - current.y) * ratio,
+            }));
+          }
+          setZoom(next);
+        }}
+      >
+        <title>Stored references and recruiter links</title>
+        <defs>
+          <marker
+            id="graph-arrow"
+            viewBox="0 0 10 10"
+            refX="18"
+            refY="5"
+            markerWidth="5"
+            markerHeight="5"
+            orient="auto-start-reverse"
           >
-            <title>{`${edge.label} · ${edge.origin === "recruiter" ? "Recruiter link" : "Stored reference"}`}</title>
-          </line>
-        );
-      })}
-      {nodes.map((node) => {
-        const position = positions.get(node.id)!;
-        return (
-          <g
-            key={node.id}
-            role="button"
-            tabIndex={0}
-            aria-label={`Inspect ${node.kind}: ${node.label}`}
-            aria-pressed={node.id === selectedId}
-            className="cursor-pointer focus:outline-none [&:focus>circle]:stroke-white [&:focus>circle]:stroke-4"
-            onClick={() => select(node.id)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                select(node.id);
-              }
-            }}
-          >
-            <title>{`${node.kind}: ${node.label}${node.status ? ` · ${node.status}` : ""}`}</title>
-            <circle
-              cx={position.x}
-              cy={position.y}
-              r={node.id === selectedId ? 22 : 13}
-              fill={colors[node.kind]}
-              stroke={node.id === selectedId ? "#fff" : "#101827"}
-              strokeWidth={node.id === selectedId ? 3 : 2}
-            />
-            <text
-              x={position.x}
-              y={position.y + (node.id === selectedId ? 42 : 30)}
-              textAnchor="middle"
-              fill="#f1f5f9"
-              fontSize={12}
-            >
-              {node.label.length > 28
-                ? `${node.label.slice(0, 25)}…`
-                : node.label}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#a5b4fc" opacity="0.7" />
+          </marker>
+        </defs>
+        <g transform={`translate(${pan.x} ${pan.y}) scale(${zoom})`}>
+          {live.map((edge) => {
+            const from = positions.get(edge.from);
+            const to = positions.get(edge.to);
+            if (!from || !to) return null;
+            const active =
+              neighbourhood.has(edge.from) && neighbourhood.has(edge.to);
+            return (
+              <line
+                key={edge.id}
+                x1={from.x}
+                y1={from.y}
+                x2={to.x}
+                y2={to.y}
+                stroke={active ? "#a5b4fc" : "#475569"}
+                strokeWidth={(active ? 1.8 : 1) * view.display.linkThickness}
+                markerEnd={
+                  view.display.arrows ? "url(#graph-arrow)" : undefined
+                }
+                strokeDasharray={
+                  edge.origin === "recruiter" ? "5 5" : undefined
+                }
+                opacity={active ? 0.85 : 0.18}
+              >
+                <title>{`${edge.label} · ${edge.origin === "recruiter" ? "Recruiter link" : "Stored reference"}`}</title>
+              </line>
+            );
+          })}
+          {nodes.map((node) => {
+            const position = positions.get(node.id)!;
+            const inFocus = neighbourhood.has(node.id);
+            const r = radius(node);
+            const connections = degree.get(node.id) ?? 0;
+            const isMatch = !matched || matched.has(node.id);
+            const showLabel =
+              connections >= view.display.labelThreshold &&
+              (inFocus || node.id === selectedId || nodes.length <= 24);
+            return (
+              <g
+                key={node.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Inspect ${node.kind}: ${node.label}`}
+                aria-pressed={node.id === selectedId}
+                // A white ring is invisible on the pale green and amber nodes. Two tones,
+                // the way Chrome's own ring is: the canvas colour inside and the
+                // accent outside, so the pair reads on any node colour.
+                className="cursor-pointer focus:outline-none [&:focus>circle]:stroke-accent [&:focus>circle]:stroke-4 [&:focus>circle]:[paint-order:stroke]"
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                  setDragging(node.id);
+                  const point = toGraph(event);
+                  if (point) {
+                    setPins((current) => new Map(current).set(node.id, point));
+                  }
+                }}
+                onPointerEnter={() => setHovered(node.id)}
+                onClick={() => select(node.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    select(node.id);
+                  }
+                }}
+              >
+                <title>{`${node.kind}: ${node.label}${node.status ? ` · ${node.status}` : ""}`}</title>
+                <circle
+                  cx={position.x}
+                  cy={position.y}
+                  r={r}
+                  fill={colors[node.kind]}
+                  stroke={node.id === selectedId ? "#fff" : "#101827"}
+                  strokeWidth={node.id === selectedId ? 3 : 2}
+                  opacity={isMatch ? (inFocus ? 1 : 0.32) : 0.08}
+                />
+                {showLabel && (
+                  <text
+                    x={position.x}
+                    y={position.y + r + 14}
+                    textAnchor="middle"
+                    fill="#f1f5f9"
+                    fontSize={12}
+                    opacity={isMatch ? (inFocus ? 1 : 0.45) : 0.12}
+                    pointerEvents="none"
+                  >
+                    {node.label.length > 28
+                      ? `${node.label.slice(0, 25)}…`
+                      : node.label}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+      <div className="absolute right-2 top-2 flex gap-1">
+        <button
+          type="button"
+          aria-label="Zoom in"
+          onClick={() => setZoom((z) => Math.min(3, z * 1.2))}
+          className="rounded border border-edge2 bg-panel/80 px-2 py-0.5 text-[14px]"
+        >
+          +
+        </button>
+        <button
+          type="button"
+          aria-label="Zoom out"
+          onClick={() => setZoom((z) => Math.max(0.4, z / 1.2))}
+          className="rounded border border-edge2 bg-panel/80 px-2 py-0.5 text-[14px]"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          aria-label="Reset the view"
+          onClick={() => {
+            setZoom(1);
+            setPan({ x: 0, y: 0 });
+            setPins(new Map());
+          }}
+          className="rounded border border-edge2 bg-panel/80 px-2 py-0.5 text-[12px]"
+        >
+          Reset
+        </button>
+      </div>
+      <p className="mt-1 text-[12px] text-ink-faint">
+        Bigger record, more connections. Hover to light up what a record
+        touches; drag to rearrange; scroll to zoom. A dashed line is a link you
+        drew, a solid line is a reference already in the data.
+      </p>
+    </div>
   );
 }
 export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
+  // `view` is already this component's graph/list switch, so the panel's
+  // settings get their own name rather than shadowing it.
+  const [graphView, setGraphView] = useGraphView();
   const router = useRouter(),
     params = useSearchParams();
   const [filter, setFilter] = useState("");
@@ -144,6 +500,12 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
   const selected =
     graph.nodes.find((node) => node.id === requested) ?? graph.nodes[0];
   const backlinks = graphBacklinks(graph, selected.id);
+  // Two hops, undirected. This is the view a one-way graph cannot produce:
+  // a person, the tag one of their notes carries, and the other person or
+  // search carrying the same word.
+  const nearby = graphWithin(graph, selected.id, 2).filter(
+    (entry) => entry.hops > 1,
+  );
   const filtered = graph.nodes.filter(
     (node) =>
       (kind === "all" || node.kind === kind) &&
@@ -157,12 +519,18 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
   const availablePictureNodes = overview
     ? filtered
     : graph.nodes.filter((node) => neighbors.has(node.id));
-  const pictureNodes = [
+  const shortlist = [
     selected,
     ...availablePictureNodes
       .filter((node) => node.id !== selected.id)
-      .slice(0, overview ? 59 : 20),
+      .slice(0, overview ? 119 : 40),
   ];
+  // The panel's filters run over whatever the overview switch left, so the
+  // two controls compose rather than fight.
+  const shown = applyGraphFilters(shortlist, graph.edges, graphView.filters);
+  const pictureNodes = shown.nodes.some((node) => node.id === selected.id)
+    ? shown.nodes
+    : [selected, ...shown.nodes];
   function select(id: string) {
     router.replace(graphNodeHref(graph.searchProjectId, id), { scroll: false });
   }
@@ -179,6 +547,45 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
       );
       if (result.ok) router.refresh();
     });
+  }
+  function nearbySection() {
+    return (
+      <section aria-label="Nearby records">
+        <h3 className="mb-2 text-sm font-semibold">
+          Two links away ({nearby.length})
+        </h3>
+        {nearby.length === 0 ? (
+          <p className="text-sm text-ink-muted">
+            {EMPTY_STATES.noGraphNearby.detail}
+          </p>
+        ) : (
+          <ul className="space-y-1.5">
+            {nearby.slice(0, 24).map((entry) => (
+              <li
+                key={entry.node.id}
+                className="rounded border border-edge p-2 text-sm"
+              >
+                <button
+                  className="text-left text-accent underline-offset-2 hover:underline"
+                  onClick={() => select(entry.node.id)}
+                >
+                  {entry.node.label}
+                </button>
+                <p className="mt-0.5 text-xs text-ink-muted">
+                  {entry.node.kind} · via{" "}
+                  {entry.path.map((edge) => edge.label).join(" → ")}
+                </p>
+              </li>
+            ))}
+            {nearby.length > 24 && (
+              <li className="text-xs text-ink-faint">
+                +{nearby.length - 24} more
+              </li>
+            )}
+          </ul>
+        )}
+      </section>
+    );
   }
   function connections(direction: "incoming" | "outgoing") {
     const items = backlinks[direction];
@@ -245,7 +652,7 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
   return (
     <div>
       <PageHeader
-        title="Knowledge graph"
+        title="🕸️ Knowledge graph"
         description="Explore both ends of every stored reference. Add your own relationships and follow backlinks between candidates, requirements, document versions and sources. Links describe context; they do not verify qualifications or change candidate stages."
       />
       <div className="mb-4 flex flex-wrap gap-2" aria-label="Graph display">
@@ -285,7 +692,7 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
         </p>
       )}
       <div className="grid items-start gap-4 lg:grid-cols-[210px_minmax(0,1fr)]">
-        <Card title="Records">
+        <Card title="🗃️ Records">
           <label className="block text-xs text-ink-muted">
             Find a record
             <input
@@ -323,7 +730,7 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
                   aria-current={node.id === selected.id ? "true" : undefined}
                   onClick={() => select(node.id)}
                 >
-                  <span className="block text-[10px] text-ink-muted">
+                  <span className="block text-[11px] text-ink-muted">
                     {node.kind}
                   </span>
                   {node.label}
@@ -338,12 +745,27 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
         <div className="min-w-0 space-y-4">
           {view === "graph" && (
             <div>
-              <GraphPicture
-                nodes={pictureNodes}
-                edges={graph.edges}
-                selectedId={selected.id}
-                select={select}
-              />
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <GraphControls
+                  value={graphView}
+                  onChange={setGraphView}
+                  counts={{
+                    shown: pictureNodes.length,
+                    hidden: shown.hidden.nodes,
+                    edges: shown.edges.length,
+                  }}
+                />
+                <div className="min-w-0 flex-1">
+                  <GraphPicture
+                    nodes={pictureNodes}
+                    edges={shown.edges}
+                    selectedId={selected.id}
+                    select={select}
+                    view={graphView}
+                    matched={shown.matched}
+                  />
+                </div>
+              </div>
               <p className="mt-2 text-xs text-ink-muted">
                 {overview ? "Overview" : "Selected record and its neighbors"} ·
                 showing {pictureNodes.length} of{" "}
@@ -411,7 +833,8 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
             <Card>{connections("incoming")}</Card>
             <Card>{connections("outgoing")}</Card>
           </div>
-          <Card title="Add a bidirectional relationship">
+          <Card>{nearbySection()}</Card>
+          <Card title="🔗 Add a bidirectional relationship">
             <p className="mb-3 text-sm text-ink-muted">
               This creates an outgoing link from {selected.label} and an
               incoming backlink on the other record. It records your
@@ -499,7 +922,7 @@ export function KnowledgeGraphWorkspace({ graph }: { graph: KnowledgeGraph }) {
             </p>
           </Card>
           {graph.unavailableLinks.length > 0 && (
-            <Card title="Relationships to unavailable records">
+            <Card title="🚫 Relationships to unavailable records">
               <p className="mb-2 text-sm text-ink-muted">
                 These saved manual links are retained for review and excluded
                 from the graph because an endpoint is no longer present.

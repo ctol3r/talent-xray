@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { moduleNav } from "./helpers/nav";
 
 /**
  * D-034: link-out discovery. The Discover page opens a stored string on the
@@ -11,31 +12,29 @@ const JD = `Founding Recruiter
 Build the talent function from scratch: sourcing, structured interviews,
 ATS setup, employer brand for an AI safety research organisation.`;
 
-function moduleNav(page: Page, label: string) {
-  return page.getByTestId("workspace-nav").getByRole("link", { name: label });
-}
-
 test("a link-out run and its pasted saves are credited to the stored string", async ({
   page,
 }) => {
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "E2E — link-out discovery");
   await page.fill('input[name="roleTitle"]', "Founding Recruiter");
-  await page.fill('input[name="industry"]', "AI safety research");
-  await page.click('button:has-text("Create search")');
+  // Industry is a dropdown now (D-050): a job typed "AI safety research"
+  // and another typed "AI safety" cannot be compared.
+  await page.selectOption('select[name="industry"]', "ai_research");
+  await page.click('button:has-text("Create job")');
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
 
   await page.fill('textarea[name="jd"]', JD);
   await page.click('button:has-text("Save job description")');
   await expect(page.locator("summary", { hasText: "Saved" })).toBeVisible();
 
-  await moduleNav(page, "Strings").click();
+  await moduleNav(page, "Strings");
   await page.click('button:has-text("Generate strings")');
   await expect(page.getByText("site:linkedin.com/in").first()).toBeVisible({
     timeout: 30_000,
   });
 
-  await moduleNav(page, "Discover").click();
+  await moduleNav(page, "Discover");
   const storedQuery = await page.locator("textarea").first().inputValue();
 
   // The hosted page link carries the Core engine id and the string verbatim.
@@ -78,8 +77,11 @@ test("a link-out run and its pasted saves are credited to the stored string", as
   await expect(page.locator("select").first()).toContainText("· 2 saved");
   await expect(page.getByText("Yield for this search")).toBeVisible();
   await expect(page.getByText(/1 run · 2 saved · 1 candidate/)).toBeVisible();
+  // Scoped past the connected-here panel at the foot of every page, which
+  // lists the same records by name (D-100). The page's own content always
+  // comes first in the document.
   await expect(
-    page.getByRole("link", { name: "https://github.com/e2e-linkout" }),
+    page.getByRole("link", { name: "https://github.com/e2e-linkout" }).first(),
   ).toHaveAttribute("rel", "noopener");
 
   // Edited run: recorded, not credited.
@@ -94,11 +96,13 @@ test("a link-out run and its pasted saves are credited to the stored string", as
   await expect(page.locator("select").first()).toContainText("· 2 saved");
   await expect(page.getByText(/2 runs · 2 saved · 1 candidate/)).toBeVisible();
 
-  await moduleNav(page, "Strings").click();
+  await moduleNav(page, "Strings");
   await expect(page.getByText("ran 1× · 2 saved").first()).toBeVisible();
 
-  await moduleNav(page, "Candidates").click();
+  await moduleNav(page, "Candidates");
   await expect(
-    page.getByRole("link", { name: "E2E Linkout Person", exact: true }),
+    page
+      .getByRole("table")
+      .getByRole("link", { name: "E2E Linkout Person", exact: true }),
   ).toBeVisible();
 });

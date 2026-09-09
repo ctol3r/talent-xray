@@ -66,7 +66,7 @@ export function CompleteTaskButton({ taskId }: { taskId: string }) {
       type="button"
       disabled={pending}
       onClick={() => submit(() => completeTaskAction({ taskId }))}
-      className="rounded border border-edge2 px-2 py-0.5 text-[11.5px] text-ink-muted hover:bg-panel2"
+      className="rounded border border-edge2 px-2 py-0.5 text-[12.5px] text-ink-muted hover:bg-panel2"
     >
       {pending ? "…" : "Done"}
     </button>

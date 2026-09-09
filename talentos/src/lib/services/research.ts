@@ -15,7 +15,10 @@ import {
   type ResearchFinding,
   type ResearchProvider,
 } from "@/lib/research/provider";
-import { SESSION_RESEARCH_SOURCE } from "@/lib/research/session-research";
+import {
+  ResearchPendingError,
+  SESSION_RESEARCH_SOURCE,
+} from "@/lib/research/session-research";
 import type { AudienceSegment } from "@/lib/ai/tasks/personas";
 
 export const RESEARCH_SOURCES = [
@@ -118,8 +121,9 @@ export async function listResearchFindings(db: Db, projectId: string) {
 /**
  * Run every audience query not yet answered for this project, persisting
  * findings as they arrive. Resumable: a query is skipped once any finding
- * for it is stored; with the session provider a pending query throws
- * ResearchPendingError after earlier queries' findings were already saved.
+ * for it is stored. With the session provider, every query still needed is
+ * written to the outbox in one pass and a single ResearchPendingError is
+ * thrown naming all of them, after earlier queries' findings were saved.
  */
 export async function researchAudience(
   db: Db,
@@ -140,11 +144,23 @@ export async function researchAudience(
   const answered = new Set(existing.map((row) => row.query));
   const knownUrls = new Set(existing.map((row) => row.url));
 
+  // Every unanswered query is attempted, even after one goes pending. With
+  // the session provider that means the whole run's request files are written
+  // in one pass, so the outbox can be answered once instead of a file at a
+  // time with a re-run between each.
+  const pending: ResearchPendingError[] = [];
   for (const query of queries) {
     if (answered.has(query)) continue;
-    const findings: ResearchFinding[] = await provider.search(query, {
-      limit: 6,
-    });
+    let findings: ResearchFinding[];
+    try {
+      findings = await provider.search(query, { limit: 6 });
+    } catch (error) {
+      if (error instanceof ResearchPendingError) {
+        pending.push(error);
+        continue;
+      }
+      throw error;
+    }
     const fresh = findings.filter((f) => !knownUrls.has(f.url));
     if (fresh.length > 0) {
       await db.insert(researchSources).values(
@@ -160,6 +176,14 @@ export async function researchAudience(
       );
       for (const f of fresh) knownUrls.add(f.url);
     }
+  }
+  if (pending.length > 0) {
+    const [first, ...rest] = pending;
+    throw new ResearchPendingError(
+      first.requestPath,
+      first.responsePath,
+      rest.map((error) => error.requestPath),
+    );
   }
   return { queries, findings: await listResearchFindings(db, projectId) };
 }

@@ -42,7 +42,7 @@ export function HmFeedbackForm({ candidateId }: { candidateId: string }) {
             key={option}
             type="button"
             onClick={() => setDecision(option)}
-            className={`rounded border px-2.5 py-1 text-[12px] ${
+            className={`rounded border px-2.5 py-1 text-[13px] ${
               decision === option
                 ? "border-accent text-accent"
                 : "border-edge2 text-ink-muted hover:bg-panel2"
@@ -57,22 +57,22 @@ export function HmFeedbackForm({ candidateId }: { candidateId: string }) {
         onChange={(e) => setNote(e.target.value)}
         rows={2}
         placeholder="The evidence behind this decision (required) — e.g. “no first-author empirical work; both papers are survey co-authorships.”"
-        className="w-full rounded border border-edge bg-canvas px-2 py-1.5 text-[12.5px]"
+        className="w-full rounded border border-edge bg-canvas px-2 py-1.5 text-[13.5px]"
       />
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={submit}
           disabled={isPending || note.trim().length < 5}
-          className="rounded bg-accent px-3 py-1.5 text-[12.5px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
+          className="rounded bg-accent px-3 py-1.5 text-[13.5px] font-medium text-canvas hover:opacity-90 disabled:opacity-50"
         >
           Record HM feedback
         </button>
-        <span className="text-[11.5px] text-ink-faint">
+        <span className="text-[12.5px] text-ink-faint">
           Recorded verbatim; never moves the stage by itself.
         </span>
       </div>
-      {error && <p className="text-[12px] text-bad">{error}</p>}
+      {error && <p className="text-[13px] text-bad">{error}</p>}
     </div>
   );
 }

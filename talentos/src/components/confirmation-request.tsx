@@ -108,14 +108,14 @@ export function ConfirmationRequest({
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Card title={`Ask ${candidateName}`}>
-        <p className="text-[12px] text-ink-muted">{TOP_COPY}</p>
-        <p className="mt-2 text-[11.5px] text-ink-faint">
+      <Card title={`❓ Ask ${candidateName}`}>
+        <p className="text-[13px] text-ink-muted">{TOP_COPY}</p>
+        <p className="mt-2 text-[12.5px] text-ink-faint">
           This message is also the notice you owe them. Recording it as sent is
           what changes the notice state, currently: {noticeText}.
         </p>
 
-        <label className="mt-3 block text-[12px] text-ink-muted">
+        <label className="mt-3 block text-[13px] text-ink-muted">
           Subject
           <input
             readOnly
@@ -131,13 +131,13 @@ export function ConfirmationRequest({
           {copied === "subject" ? "Copied" : "Copy subject"}
         </button>
 
-        <label className="mt-3 block text-[12px] text-ink-muted">
+        <label className="mt-3 block text-[13px] text-ink-muted">
           Message
           <textarea
             readOnly
             value={draft.body}
             rows={18}
-            className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[11.5px]"
+            className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[12.5px]"
           />
         </label>
         <button
@@ -149,25 +149,25 @@ export function ConfirmationRequest({
         </button>
 
         <div className="mt-4 rounded border border-edge2 px-3 py-2">
-          <p className="text-[12px] font-medium">I sent this</p>
+          <p className="text-[13px] font-medium">I sent this</p>
           <div className="mt-1.5 flex flex-wrap items-end gap-3">
-            <label className="text-[11.5px] text-ink-muted">
+            <label className="text-[12.5px] text-ink-muted">
               On
               <input
                 type="date"
                 value={sentAt}
                 onChange={(e) => setSentAt(e.target.value)}
-                className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[12px]"
+                className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[13px]"
               />
             </label>
-            <label className="text-[11.5px] text-ink-muted">
+            <label className="text-[12.5px] text-ink-muted">
               Via
               <select
                 value={sentChannel}
                 onChange={(e) =>
                   setSentChannel(e.target.value as ConfirmationChannel)
                 }
-                className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[12px]"
+                className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[13px]"
               >
                 {CONFIRMATION_CHANNELS.map((c) => (
                   <option key={c} value={c}>
@@ -188,16 +188,16 @@ export function ConfirmationRequest({
         </div>
       </Card>
 
-      <Card title="Record their answer">
-        <p className="text-[12px] text-ink-muted">
+      <Card title="📝 Record their answer">
+        <p className="text-[13px] text-ink-muted">
           Mark each address as theirs or not. An address they say is not theirs
           is deleted and blocked from coming back by any route.
         </p>
         <ul className="mt-3 space-y-2">
           {links.map((link) => (
             <li key={link.id} className="rounded border border-edge px-3 py-2">
-              <p className="text-[12px] break-all">{link.url}</p>
-              <p className="text-[11px] text-ink-faint">{link.badge}</p>
+              <p className="text-[13px] break-all">{link.url}</p>
+              <p className="text-[12px] text-ink-faint">{link.badge}</p>
               <div className="mt-1 flex gap-3">
                 {(
                   [
@@ -208,7 +208,7 @@ export function ConfirmationRequest({
                 ).map(([value, label]) => (
                   <label
                     key={value}
-                    className="flex items-center gap-1 text-[11.5px] text-ink-muted"
+                    className="flex items-center gap-1 text-[12.5px] text-ink-muted"
                   >
                     <input
                       type="radio"
@@ -226,34 +226,34 @@ export function ConfirmationRequest({
           ))}
         </ul>
 
-        <label className="mt-3 block text-[12px] text-ink-muted">
+        <label className="mt-3 block text-[13px] text-ink-muted">
           Addresses they added — one per line
           <textarea
             value={addedUrls}
             onChange={(e) => setAddedUrls(e.target.value)}
             rows={2}
-            className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[12px]"
+            className="mt-1 w-full rounded border border-edge bg-panel px-2 py-1.5 font-mono text-[13px]"
           />
         </label>
 
         <div className="mt-2 flex flex-wrap items-end gap-3">
-          <label className="text-[11.5px] text-ink-muted">
+          <label className="text-[12.5px] text-ink-muted">
             They replied on
             <input
               type="date"
               value={respondedAt}
               onChange={(e) => setRespondedAt(e.target.value)}
-              className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[12px]"
+              className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[13px]"
             />
           </label>
-          <label className="text-[11.5px] text-ink-muted">
+          <label className="text-[12.5px] text-ink-muted">
             Via
             <select
               value={answerChannel}
               onChange={(e) =>
                 setAnswerChannel(e.target.value as ConfirmationChannel)
               }
-              className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[12px]"
+              className="mt-1 block rounded border border-edge bg-panel px-2 py-1 text-[13px]"
             >
               {CONFIRMATION_CHANNELS.map((c) => (
                 <option key={c} value={c}>
@@ -273,12 +273,12 @@ export function ConfirmationRequest({
         </div>
 
         {status && (
-          <p className="mt-3 rounded border border-ok/40 bg-ok-soft px-3 py-2 text-[12px] text-ok">
+          <p className="mt-3 rounded border border-ok/40 bg-ok-soft px-3 py-2 text-[13px] text-ok">
             {status}
           </p>
         )}
         {error && (
-          <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[12px] text-bad">
+          <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[13px] text-bad">
             {error}
           </p>
         )}

@@ -55,15 +55,36 @@ test("document intake, manual connection, ribbons, persistence, historical revie
   await page
     .getByRole("button", { name: "Save relationship", exact: true })
     .click();
-  await expect(page.locator(".review-ribbons path")).toHaveCount(1);
+  // Two connections are drawn for one relationship: the requirement to the CV
+  // passage that supports it — the one the page exists to show — and the CV
+  // passage on to the JD.
+  await expect(page.locator('[data-ribbon^="requirement-"]')).toHaveCount(1);
+  await expect(page.locator('[data-ribbon^="pair-"]')).toHaveCount(1);
+  await expect(page.locator('[data-ribbon^="pair-"]')).toHaveAttribute(
+    "data-faint",
+    "false",
+  );
+
+  // Scrolling the passage out of view does not delete the connection. It is
+  // clamped to the pane's edge and drawn faint, pointing at where the passage
+  // went — dropping it is why the layer used to be empty on arrival, when
+  // every passage is off-screen.
   await page.locator(".review-cv .review-scroll").evaluate((el) => {
     el.scrollTop = el.scrollHeight;
   });
-  await expect(page.locator(".review-ribbons path")).toHaveCount(0);
+  await expect(page.locator('[data-ribbon^="pair-"]')).toHaveAttribute(
+    "data-faint",
+    "true",
+  );
+  await expect(page.locator(".review-ribbons path")).toHaveCount(2);
+
   await page.locator(".review-jd mark").click();
-  await expect(page.locator(".review-ribbons path")).toHaveCount(1);
+  await expect(page.locator('[data-ribbon^="pair-"]')).toHaveAttribute(
+    "data-faint",
+    "false",
+  );
   await page.setViewportSize({ width: 1450, height: 950 });
-  await expect(page.locator(".review-ribbons path")).toHaveCount(1);
+  await expect(page.locator(".review-ribbons path")).toHaveCount(2);
   await page.setViewportSize({ width: 1800, height: 1100 });
 
   await expect(page.locator(".review-context")).toContainText(

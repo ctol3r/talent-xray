@@ -1,5 +1,9 @@
 # Wave P runbook — what the owner does, then what a Claude Code session does
 
+> **2026-09-08.** The no-fetch rule this runbook carried in Part B rule 2 was
+> reversed by the owner. What replaced it, and what it does not permit, is
+> `docs/DECISIONS.md` D-082. The rest of the runbook stands.
+
 Two parts. Part A is three human steps that no prompt can do for you.
 Part B is a prompt you paste into a Claude Code session in the worktree;
 it runs the entire pilot from there and fills `docs/PILOT-2026-09-06.md`.
@@ -75,8 +79,14 @@ Hard rules for this run:
 1. Never type, read aloud, or move an API key. If TALENTOS_GOOGLE_CSE_KEY in
    talentos/.env is empty, stop and tell the owner; do not substitute a mock
    provider and do not proceed with fixture data.
-2. Never fetch, open programmatically, or scrape a search-result page. Links
-   are opened by the owner in their browser. CV text is pasted by the owner.
+2. **Superseded on 2026-09-08 — see `docs/DECISIONS.md` D-082.** The rule
+   used to read "never fetch, open programmatically, or scrape a search-result
+   page". Fetching is now permitted, and only through the policy gate in
+   `src/lib/fetch/` — which refuses anything `robots.txt` disallows, anything
+   behind a login, a paywall or a challenge, and any host the source registry
+   has not cleared. Nothing else in the app may call `fetch` on a result page.
+   A page is read and discarded: the claim and the address are kept, the page
+   is not. CV text is still pasted by the owner.
 3. Record only what actually happened. Percent-complete is banned; the wave
    is OPEN until the close condition in PILOT-2026-09-06.md is met.
 4. Do not add features. Anything you notice goes to talentos/docs/BACKLOG.md.

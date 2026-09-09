@@ -20,7 +20,7 @@ export default async function StrategyPage({
   return (
     <div>
       <PageHeader
-        title="Sourcing Strategy"
+        title="♟️ Sourcing Strategy"
         description="The search strategy brief: primary and secondary phenotypes, adjacent populations with rationale, and the title/company/geography targeting that drives channels and strings."
         actions={
           <GenerateButton
@@ -38,34 +38,34 @@ export default async function StrategyPage({
         />
       ) : (
         <div className="space-y-4">
-          <Card title="Primary target profile">
+          <Card title="🎯 Primary target profile">
             <ArtifactMeta
               meta={strategy?.meta ?? null}
               kind="sourcing_strategy"
               ownerId={id}
               payload={payload}
             />
-            <p className="text-[13.5px] leading-6">
+            <p className="text-[14.5px] leading-6">
               {payload.primaryTargetProfile}
             </p>
           </Card>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card title="Secondary profiles">
-              <ul className="list-disc space-y-1 pl-5 text-[13px]">
+            <Card title="🎯 Secondary profiles">
+              <ul className="list-disc space-y-1 pl-5 text-[14px]">
                 {payload.secondaryTargetProfiles.map((profile, i) => (
                   <li key={i}>{profile}</li>
                 ))}
               </ul>
             </Card>
-            <Card title="Adjacent possibilities">
+            <Card title="🧭 Adjacent possibilities">
               <ul className="space-y-2">
                 {payload.adjacentPossibilities.map((adjacent) => (
                   <li
                     key={adjacent.id}
                     className="rounded border border-edge bg-panel2/50 px-3 py-2"
                   >
-                    <p className="text-[13px] font-medium">{adjacent.text}</p>
-                    <p className="text-[12.5px] text-ink-muted">
+                    <p className="text-[14px] font-medium">{adjacent.text}</p>
+                    <p className="text-[13.5px] text-ink-muted">
                       {adjacent.rationale}
                     </p>
                   </li>
@@ -73,7 +73,7 @@ export default async function StrategyPage({
               </ul>
             </Card>
           </div>
-          <Card title="Targeting">
+          <Card title="🎯 Targeting">
             <div className="space-y-4">
               <StringList title="Target titles" items={payload.targetTitles} />
               <StringList
@@ -99,13 +99,13 @@ export default async function StrategyPage({
             </div>
           </Card>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card title="Why this strategy">
-              <p className="text-[13px] leading-6 text-ink-muted">
+            <Card title="💡 Why this strategy">
+              <p className="text-[14px] leading-6 text-ink-muted">
                 {payload.rationale}
               </p>
             </Card>
-            <Card title="Where it could fail">
-              <ul className="list-disc space-y-1 pl-5 text-[13px] text-ink-muted">
+            <Card title="⚠️ Where it could fail">
+              <ul className="list-disc space-y-1 pl-5 text-[14px] text-ink-muted">
                 {payload.risks.map((risk, i) => (
                   <li key={i}>{risk}</li>
                 ))}

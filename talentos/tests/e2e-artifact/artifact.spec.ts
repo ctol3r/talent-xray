@@ -1189,3 +1189,55 @@ test.describe("the first-run path", () => {
     expect(errors).toEqual([]);
   });
 });
+
+test.describe("the sourcing console, offline", () => {
+  test("reads a brief in prose and fans it across every angle", async ({
+    page,
+  }) => {
+    await openArtifact(page);
+    await page.getByRole("button", { name: "Sourcing", exact: true }).click();
+
+    await page.fill("#sourcing-q", "technical recruiters in the Bay Area");
+    await page.click("#sourcing-go");
+
+    // The reading is shown, not assumed.
+    await expect(page.getByText("skills: technical recruiters")).toBeVisible();
+    await expect(
+      page.getByText("locations: san francisco bay area"),
+    ).toBeVisible();
+
+    // Every expansion cites the ontology edge that produced it.
+    await expect(
+      page.getByText("Capabilities, and what sits next to them"),
+    ).toBeVisible();
+
+    // The angles are composed in full, with the reason each one finds people
+    // who are not looking — and nothing was fetched to do it.
+    await expect(
+      page.getByText("Public CVs and résumés (PDF)").first(),
+    ).toBeVisible();
+    await expect(page.getByText('"curriculum vitae"').first()).toBeVisible();
+    await expect(
+      page
+        .getByText("People who publish a PDF CV are documenting themselves")
+        .first(),
+    ).toBeVisible();
+  });
+
+  test("shows what it cannot run rather than hiding it", async ({ page }) => {
+    await openArtifact(page);
+    await page.getByRole("button", { name: "Sourcing", exact: true }).click();
+    await page.fill("#sourcing-q", "skill:robotics");
+    await page.click("#sourcing-go");
+
+    await expect(page.getByText(/Angles waiting on a connector/)).toBeVisible();
+    await expect(page.getByText("To run it for you:").first()).toBeVisible();
+    // A dormant angle is one no connector will RUN; it still opens by hand.
+    await expect(
+      page.getByText("nothing here is executed on its own").first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Open in Google/ }).first(),
+    ).toBeVisible();
+  });
+});

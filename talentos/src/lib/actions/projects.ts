@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db/client";
 import {
   createSearchProject,
-  createSearchProjectInput,
+  intakeSearchProjectInput,
   saveHiringManager,
   saveHiringManagerInput,
   saveJobDescription,
@@ -18,7 +18,7 @@ export async function createSearchProjectAction(
   input: unknown,
 ): Promise<ActionResult<{ id: string }>> {
   return act(async () => {
-    const parsed = createSearchProjectInput.parse(input);
+    const parsed = intakeSearchProjectInput.parse(input);
     const project = await createSearchProject(getDb(), parsed);
     revalidatePath("/", "layout");
     return { id: project.id };

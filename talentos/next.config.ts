@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
+  /**
+   * The dev server builds somewhere else.
+   *
+   * `next dev` and `next build` both write `.next` by default, so running the
+   * checks while a dev server is open corrupts whichever one loses the race —
+   * which showed up as pages that would not update and a test server that
+   * would not start. `pnpm dev` sets this; nothing else does.
+   */
+  distDir: process.env.TALENTOS_DIST_DIR ?? ".next",
   // talentos/ is its own workspace root; do not let Turbopack infer the parent repository.
   turbopack: { root: path.join(import.meta.dirname) },
   outputFileTracingRoot: path.join(import.meta.dirname),

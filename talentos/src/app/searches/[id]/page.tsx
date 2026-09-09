@@ -7,6 +7,31 @@ import {
 import { getRoleIntelligence } from "@/lib/services/artifacts";
 import { Card, KeyValue, PageHeader, Tag } from "@/components/ui";
 import { getSearchProject } from "@/lib/services/search-projects";
+import { listPages } from "@/lib/services/pages";
+import { jobLocation } from "@/lib/domain/job-label";
+import {
+  EMPLOYMENT_TYPES,
+  FTE_OPTIONS,
+  INDUSTRIES,
+  JOB_PRIORITIES,
+  SENIORITY_LEVELS,
+  SPONSORSHIP_OPTIONS,
+  WORK_ARRANGEMENTS,
+  labelFor,
+  salaryLine,
+  startDateLine,
+} from "@/lib/domain/job-fields";
+import { SearchNotesForm } from "@/components/search-notes-form";
+import { OpenAsPane } from "@/components/open-as-pane";
+import { JobStatus } from "@/components/job-status";
+import { CompanyMark } from "@/components/company-mark";
+import { companySites } from "@/lib/services/companies";
+import { faviconsOn } from "@/lib/domain/settings-flags";
+import { ActivityBar } from "@/components/activity-bar";
+import { jobActivity } from "@/lib/services/job-activity";
+import { readHillFor } from "@/lib/services/hill";
+import { HillChartView } from "@/components/hill-chart";
+import { todayKey } from "@/lib/services/daily";
 import { notFound } from "next/navigation";
 
 export default async function OverviewPage({
@@ -16,6 +41,9 @@ export default async function OverviewPage({
 }) {
   const { id } = await params;
   const db = getDb();
+  const hill = readHillFor(db, id);
+  const sites = companySites(db);
+  const favicons = faviconsOn();
   const project = await getSearchProject(db, id);
   if (!project) notFound();
   const [actions, snapshot, intel] = await Promise.all([
@@ -62,14 +90,20 @@ export default async function OverviewPage({
   return (
     <div>
       <PageHeader
-        title="Overview"
+        title="📋 Overview"
         description={project.businessObjective ?? undefined}
+        actions={
+          <>
+            <JobStatus projectId={id} status={project.status} />
+            <OpenAsPane target={`job:${id}`} />
+          </>
+        }
       />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="space-y-4 xl:col-span-2">
-          <Card title="What should I do next?">
+          <Card title="🎯 What should I do next?">
             {actions.length === 0 ? (
-              <p className="text-[13px] text-ink-muted">
+              <p className="text-[14px] text-ink-muted">
                 Nothing pending — this search is in a healthy state.
               </p>
             ) : (
@@ -92,10 +126,10 @@ export default async function OverviewPage({
                         P{action.priority}
                       </Tag>
                       <span>
-                        <span className="block text-[13px] font-medium">
+                        <span className="block text-[14px] font-medium">
                           {action.title}
                         </span>
-                        <span className="block text-[12px] text-ink-muted">
+                        <span className="block text-[13px] text-ink-muted">
                           {action.detail}
                         </span>
                       </span>
@@ -106,50 +140,144 @@ export default async function OverviewPage({
             )}
           </Card>
           {intel && (
-            <Card title="Role hypothesis">
-              <p className="text-[13.5px] leading-6 text-ink">
+            <Card title="💡 Role hypothesis">
+              <p className="text-[14.5px] leading-6 text-ink">
                 {intel.payload.roleHypothesis}
               </p>
               <Link
                 href={`/searches/${id}/role`}
-                className="mt-2 inline-block text-[12.5px] text-accent hover:underline"
+                className="mt-2 inline-block text-[13.5px] text-accent hover:underline"
               >
                 Review role intelligence →
               </Link>
             </Card>
           )}
-          <Card title="Search facts">
+          {/* Where the work stands, before the facts about the job. A job page
+              that opens on its fields tells you what the job is; this tells you
+              what is still unknown about filling it, which is the question
+              somebody opening it actually has. */}
+          <Card
+            title={
+              <span className="flex items-baseline justify-between gap-2">
+                <span>⛰️ Where this stands</span>
+                <Link
+                  href={`/searches/${id}/hill`}
+                  className="text-[12px] font-normal text-accent hover:underline"
+                >
+                  the whole hill →
+                </Link>
+              </span>
+            }
+          >
+            <HillChartView
+              jobId={id}
+              chart={hill.chart}
+              readings={hill.readings}
+              says={hill.says}
+            />
+          </Card>
+          <Card title="📈 Activity">
+            <ActivityBar activity={jobActivity(db, id, todayKey())} />
+          </Card>
+          <Card title="📇 Job facts">
             <div className="space-y-1.5">
-              <KeyValue label="Company" value={project.companyName} />
+              <KeyValue
+                label="Company"
+                value={
+                  project.companyName ? (
+                    <span className="flex items-center gap-1.5">
+                      <CompanyMark
+                        name={project.companyName}
+                        url={sites.get(
+                          project.companyName.trim().toLowerCase(),
+                        )}
+                        favicons={favicons}
+                        size={16}
+                      />
+                      {project.companyName}
+                    </span>
+                  ) : null
+                }
+              />
               <KeyValue label="Role" value={project.roleTitle} />
-              <KeyValue label="Geography" value={project.geography} />
+              <KeyValue label="Location" value={jobLocation(project)} />
               <KeyValue label="Country" value={project.country} />
-              <KeyValue label="Industry" value={project.industry} />
-              <KeyValue label="Seniority" value={project.seniority} />
+              <KeyValue
+                label="Industry"
+                value={labelFor(INDUSTRIES, project.industry)}
+              />
+              <KeyValue
+                label="Seniority"
+                value={labelFor(SENIORITY_LEVELS, project.seniority)}
+              />
               <KeyValue
                 label="Employment type"
-                value={project.employmentType}
+                value={labelFor(EMPLOYMENT_TYPES, project.employmentType)}
+              />
+              <KeyValue
+                label="FTE"
+                value={labelFor(FTE_OPTIONS, project.fte)}
               />
               <KeyValue
                 label="Work arrangement"
-                value={project.workArrangement}
+                value={labelFor(WORK_ARRANGEMENTS, project.workArrangement)}
               />
-              <KeyValue label="Compensation" value={project.compensationNote} />
               <KeyValue
-                label="Recruiter notes"
-                value={project.recruiterNotes}
+                label="Sponsorship"
+                value={labelFor(SPONSORSHIP_OPTIONS, project.sponsorship)}
+              />
+              <KeyValue label="Salary" value={salaryLine(project)} />
+              <KeyValue label="Package" value={project.compensationNote} />
+              <KeyValue
+                label="Priority"
+                value={labelFor(JOB_PRIORITIES, project.priority)}
+              />
+              <KeyValue
+                label="Openings"
+                value={project.openings ? String(project.openings) : null}
+              />
+              {/*
+                Always rendered, even with no date. An omitted row is how the
+                fortnight assumption stayed invisible: nothing on screen to
+                question, and every pace reading on the job quietly resting on
+                it.
+              */}
+              <KeyValue
+                label="Target start"
+                value={
+                  <span
+                    className={
+                      startDateLine(project).assumed ? "text-warn" : undefined
+                    }
+                  >
+                    {startDateLine(project).text}
+                  </span>
+                }
               />
             </div>
           </Card>
+          <Card title="🗒️ Notes and tags">
+            <SearchNotesForm
+              projectId={id}
+              notes={project.recruiterNotes}
+              tags={listPages(db).map((page) => ({
+                slug: page.slug,
+                display: page.display,
+                count: page.count,
+                kind: page.kind,
+                hint: page.hint,
+              }))}
+            />
+          </Card>
         </div>
         <div className="space-y-4">
-          <Card title="Search setup">
+          <Card title="🛠️ Job setup">
             <ul className="space-y-1.5">
               {healthItems.map((item) => (
                 <li key={item.label}>
                   <Link
                     href={`/searches/${id}/${item.href}`}
-                    className="flex items-center justify-between rounded px-2 py-1 text-[13px] hover:bg-panel2/60"
+                    className="flex items-center justify-between rounded px-2 py-1 text-[14px] hover:bg-panel2/60"
                   >
                     <span className={item.done ? "text-ink" : "text-ink-muted"}>
                       {item.label}
@@ -162,8 +290,8 @@ export default async function OverviewPage({
               ))}
             </ul>
           </Card>
-          <Card title="Pipeline">
-            <div className="space-y-2 text-[13px]">
+          <Card title="🪜 Pipeline">
+            <div className="space-y-2 text-[14px]">
               <div className="flex justify-between">
                 <span className="text-ink-muted">Candidates</span>
                 <span>{snapshot.candidateCount}</span>

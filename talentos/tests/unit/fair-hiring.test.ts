@@ -79,3 +79,51 @@ describe("scanTextForProtectedTraits", () => {
     expect(hits).toEqual([]);
   });
 });
+
+/**
+ * The other writer.
+ *
+ * `runAiTask` has always scanned what the model produced. The boundary a
+ * *person* types into — "Edit JSON", which in an install with no model key is
+ * the only way a payload is ever written by hand — did not, so the guard was
+ * pointed at the writer least likely to need it and away from the one making
+ * the actual hiring judgement.
+ *
+ * Read from the source rather than by calling the action, because the action
+ * is a server action: importing it drags in `revalidatePath` and a request
+ * scope that does not exist in a unit test. What is being defended here is
+ * structural anyway — that no artifact handler has its own private path to
+ * the database that skips the check.
+ */
+describe("the recruiter-edit boundary", () => {
+  const source = readFileSync(
+    join(root, "src", "lib", "actions", "workflow.ts"),
+    "utf8",
+  );
+
+  it("validates every artifact through the one checked path", () => {
+    // A handler that calls `someSchema.parse(raw)` directly has skipped both
+    // `ensureIds` and the trait scan, which is precisely how this gap opened.
+    const direct = [...source.matchAll(/(\w+Schema)\.parse\(raw\)/g)].map(
+      (m) => m[1],
+    );
+    expect(direct).toEqual([]);
+  });
+
+  it("scans what it saved, not the raw text it was handed", () => {
+    // Scanning `raw` would flag words the schema strips out, and telling
+    // somebody their brief says something it does not say is how a warning
+    // learns to be ignored.
+    expect(source).toContain("scanPayloadForProtectedTraits(saved)");
+    expect(source).not.toContain("scanPayloadForProtectedTraits(raw)");
+  });
+
+  it("warns and never blocks", () => {
+    // The hits come back in the success envelope. If they were thrown, a
+    // benefits note mentioning parental leave would be unsaveable, and a
+    // fair-hiring rule that eats somebody's work is a rule people route
+    // around rather than read.
+    expect(source).toContain("warnings: scanPayloadForProtectedTraits");
+    expect(source).not.toMatch(/throw[^;]*scanPayloadForProtectedTraits/);
+  });
+});

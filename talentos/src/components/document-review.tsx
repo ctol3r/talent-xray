@@ -19,6 +19,13 @@ import type { ActionResult } from "@/lib/actions/helpers";
 import { DocumentImporter } from "./document-importer";
 import { ReviewWheel, type ReviewAction } from "./review-wheel";
 import { ribbonPath } from "../../artifact-src/core/parallel";
+
+/**
+ * Below this the workspace is one column and the ribbons would cross nothing.
+ * Matches the breakpoint in `document-review.css`; changing one means changing
+ * the other, or the layer is drawn where the stylesheet has hidden it.
+ */
+const RIBBON_MIN_WIDTH = 760;
 import "./document-review.css";
 
 type Workspace = ReturnType<typeof reviewWorkspace>;
@@ -136,8 +143,11 @@ export function DocumentReview({
     [exportIds, setExportIds] = useState<string[]>([]);
   const pages = useRef<HTMLDivElement>(null),
     left = useRef<HTMLDivElement>(null),
-    right = useRef<HTMLDivElement>(null);
-  const [ribbons, setRibbons] = useState<{ id: string; path: string }[]>([]);
+    right = useRef<HTMLDivElement>(null),
+    workspace = useRef<HTMLDivElement>(null);
+  const [ribbons, setRibbons] = useState<
+    { id: string; link: string; path: string; faint: boolean }[]
+  >([]);
   const base = `/searches/${searchProjectId}/candidates/${w.candidate.id}/review`;
   const navigate = (updates: Record<string, string | undefined>) => {
     const p = new URLSearchParams(query.toString());
@@ -198,56 +208,136 @@ export function DocumentReview({
     const container = pages.current;
     if (!container) return;
     const measure = () => {
-      if (manual || window.innerWidth < 900) {
+      const frame = workspace.current;
+      if (manual || !frame || window.innerWidth < RIBBON_MIN_WIDTH) {
         setRibbons([]);
         return;
       }
-      const box = container.getBoundingClientRect();
+      const box = frame.getBoundingClientRect();
+
+      /**
+       * The edge of a passage marked in one of the two documents.
+       *
+       * A passage the reader has scrolled past does not stop existing, so the
+       * ribbon does not either: it is clamped to the pane's edge and drawn
+       * thinner, pointing at where the passage is. Dropping it instead was why
+       * the whole layer looked broken — a document is many screens long, so on
+       * arrival every connection was off-screen and nothing was ever drawn.
+       */
       const end = (
         pane: HTMLDivElement | null,
         id: string,
-        side: "cv" | "jd",
+        attach: "left" | "right",
       ) => {
         if (!pane) return null;
         const bounds = pane.getBoundingClientRect();
-        const marks = Array.from(
+        const rects = Array.from(
           pane.querySelectorAll<HTMLElement>(`[data-link~="${id}"]`),
+        ).flatMap((m) => Array.from(m.getClientRects()));
+        if (rects.length === 0) return null;
+        const onScreen = rects.find(
+          (r) => r.bottom > bounds.top && r.top < bounds.bottom,
         );
-        const rect = marks
-          .flatMap((m) => Array.from(m.getClientRects()))
-          .find((r) => r.bottom > bounds.top && r.top < bounds.bottom);
-        if (!rect) return null;
-        const top = Math.max(rect.top, bounds.top),
-          bottom = Math.min(rect.bottom, bounds.bottom);
+        const rect = onScreen ?? rects[0];
+        const top = Math.max(rect.top, bounds.top + 6),
+          bottom = Math.min(rect.bottom, bounds.bottom - 6);
+        const y = onScreen
+          ? (top + bottom) / 2
+          : Math.min(Math.max(rect.top, bounds.top + 6), bounds.bottom - 6);
         return {
-          x: (side === "cv" ? bounds.right : bounds.left) - box.left,
-          y: (top + bottom) / 2 - box.top,
-          height: Math.min(12, bottom - top),
+          x: (attach === "right" ? bounds.right : bounds.left) - box.left,
+          y: y - box.top,
+          height: onScreen ? Math.min(14, Math.max(4, bottom - top)) : 4,
+          offScreen: !onScreen,
         };
       };
-      setRibbons(
-        visibleKey
-          .split(" ")
-          .filter(Boolean)
-          .flatMap((id) => {
-            const a = end(left.current, id, "cv"),
-              b = end(right.current, id, "jd");
-            return a && b ? [{ id, path: ribbonPath(a, b) }] : [];
-          }),
-      );
+
+      /**
+       * The edge of a requirement in the rail.
+       *
+       * This is the ribbon that answers the question the page is for — which
+       * passage supports which requirement — and it was the one missing. The
+       * old layer joined a CV passage to a JD passage, which only ever drew
+       * anything when the same sentence happened to be marked in both.
+       */
+      const requirementEnd = (id: string | undefined) => {
+        if (!id) return null;
+        const button = frame.querySelector<HTMLElement>(
+          `[data-requirement="${id}"]`,
+        );
+        const rail = button?.closest<HTMLElement>(".review-requirements");
+        if (!button || !rail) return null;
+        const rect = button.getBoundingClientRect();
+        const bounds = rail.getBoundingClientRect();
+        const onScreen = rect.bottom > bounds.top && rect.top < bounds.bottom;
+        const top = Math.max(rect.top, bounds.top + 6),
+          bottom = Math.min(rect.bottom, bounds.bottom - 6);
+        return {
+          x: bounds.right - box.left,
+          y:
+            (onScreen
+              ? (top + bottom) / 2
+              : Math.min(
+                  Math.max(rect.top, bounds.top + 6),
+                  bounds.bottom - 6,
+                )) - box.top,
+          height: onScreen ? Math.min(18, Math.max(4, bottom - top)) : 4,
+          offScreen: !onScreen,
+        };
+      };
+
+      const drawn: {
+        id: string;
+        link: string;
+        path: string;
+        faint: boolean;
+      }[] = [];
+      for (const link of visible) {
+        const reqEnd = requirementEnd(link.payload.requirementId);
+        // Into the CV's left edge from the rail, out of its right edge to the JD.
+        const cvIn = end(left.current, link.id, "left");
+        const cvOut = end(left.current, link.id, "right");
+        const jdEnd = end(right.current, link.id, "left");
+        if (reqEnd && cvIn) {
+          drawn.push({
+            id: `requirement-${link.id}`,
+            link: link.id,
+            path: ribbonPath(reqEnd, cvIn),
+            faint: reqEnd.offScreen || cvIn.offScreen,
+          });
+        }
+        if (cvOut && jdEnd) {
+          drawn.push({
+            id: `pair-${link.id}`,
+            link: link.id,
+            path: ribbonPath(cvOut, jdEnd),
+            faint: cvOut.offScreen || jdEnd.offScreen,
+          });
+        }
+      }
+      setRibbons(drawn);
     };
+    const frame = workspace.current;
     const observer = new ResizeObserver(measure);
     observer.observe(container);
+    if (frame) observer.observe(frame);
     if (left.current) observer.observe(left.current);
     if (right.current) observer.observe(right.current);
-    container.addEventListener("scroll", measure, true);
+    // Capture-phase on the frame, not the pages: the requirements rail scrolls
+    // independently, and a ribbon that stays put when its end moves is worse
+    // than no ribbon.
+    // On the document, capture phase: every pane here scrolls independently and
+    // the page scrolls under them, so anything narrower missed a case and left
+    // a ribbon pointing at where its end used to be.
+    document.addEventListener("scroll", measure, true);
     window.addEventListener("resize", measure);
     measure();
     return () => {
       observer.disconnect();
-      container.removeEventListener("scroll", measure, true);
+      document.removeEventListener("scroll", measure, true);
       window.removeEventListener("resize", measure);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleKey, manual, context, cv?.id, jd?.id]);
   useEffect(() => {
     if (!selected || manual) return;
@@ -601,7 +691,10 @@ export function DocumentReview({
           decisions. New documents require new connections and review.
         </p>
       )}
-      <div className={`review-workspace ${context ? "" : "context-hidden"}`}>
+      <div
+        className={`review-workspace ${context ? "" : "context-hidden"}`}
+        ref={workspace}
+      >
         <aside className="review-requirements">
           <h2>Requirements</h2>
           {requirements.map((r) => {
@@ -613,6 +706,7 @@ export function DocumentReview({
             return (
               <button
                 key={r.id}
+                data-requirement={r.id}
                 className={r.id === requirementId ? "selected" : ""}
                 onClick={() => navigate({ requirement: r.id, link: undefined })}
               >
@@ -742,25 +836,27 @@ export function DocumentReview({
               </section>
             );
           })}
-          <svg
-            className="review-ribbons"
-            aria-label="Connections between visible source passages"
-          >
-            {ribbons.map((r) => (
-              <path
-                key={r.id}
-                d={r.path}
-                fill={r.id === selected?.id ? "#147e81" : "#75acac"}
-                stroke="#296b70"
-                strokeWidth="1"
-                strokeDasharray={
-                  reviewState(r.id) === "suggested" ? "4 3" : undefined
-                }
-                opacity=".38"
-              />
-            ))}
-          </svg>
         </div>
+        <svg className="review-ribbons" aria-hidden="true">
+          {ribbons.map((r) => (
+            <path
+              key={r.id}
+              data-ribbon={r.id}
+              data-faint={r.faint ? "true" : "false"}
+              d={r.path}
+              fill={r.link === selected?.id ? "#12908f" : "#5fbdaa"}
+              strokeDasharray={
+                reviewState(r.link) === "suggested" ? "5 4" : undefined
+              }
+              stroke={r.link === selected?.id ? "#0d6f6f" : "none"}
+              strokeWidth={r.link === selected?.id ? 1 : 0}
+              // Selected connection at full strength, the rest present but
+              // quiet: a page of equally loud ribbons is a page you cannot
+              // read, and the point is to follow one claim at a time.
+              opacity={r.link === selected?.id ? 0.62 : r.faint ? 0.16 : 0.38}
+            />
+          ))}
+        </svg>
         {context && (
           <aside className="review-context">
             <h2>{requirement?.label ?? "Review context"}</h2>

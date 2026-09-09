@@ -50,8 +50,8 @@ export function DataRequestCard() {
     });
 
   return (
-    <Card title="Data requests">
-      <p className="text-[13px] text-ink-muted">
+    <Card title="📨 Data requests">
+      <p className="text-[14px] text-ink-muted">
         If someone asks what you hold about them, search by one of their
         addresses. You can open each record to export or delete it, and record
         an objection so the address is never saved again.
@@ -83,14 +83,14 @@ export function DataRequestCard() {
       </div>
 
       {hits && hits.length === 0 && (
-        <p className="mt-3 text-[12.5px] text-ink-muted">
+        <p className="mt-3 text-[13.5px] text-ink-muted">
           Nothing is held at that address.
         </p>
       )}
       {hits && hits.length > 0 && (
         <ul className="mt-3 space-y-1">
           {hits.map((hit) => (
-            <li key={hit.candidateId} className="text-[12.5px]">
+            <li key={hit.candidateId} className="text-[13.5px]">
               <a
                 href={`/searches/${hit.searchProjectId}/candidates/${hit.candidateId}`}
                 className="text-accent hover:underline"
@@ -102,12 +102,12 @@ export function DataRequestCard() {
         </ul>
       )}
       {status && (
-        <p className="mt-3 rounded border border-ok/40 bg-ok-soft px-3 py-2 text-[12px] text-ok">
+        <p className="mt-3 rounded border border-ok/40 bg-ok-soft px-3 py-2 text-[13px] text-ok">
           {status}
         </p>
       )}
       {error && (
-        <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[12px] text-bad">
+        <p className="mt-3 rounded border border-bad/40 bg-bad-soft px-3 py-2 text-[13px] text-bad">
           {error}
         </p>
       )}

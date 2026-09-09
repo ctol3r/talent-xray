@@ -47,6 +47,7 @@ export function OfferControls({
             <option value="preparing">preparing</option>
             <option value="extended">extended</option>
             <option value="accepted">accepted</option>
+            <option value="signed">signed</option>
             <option value="declined">declined</option>
             <option value="withdrawn">withdrawn</option>
           </select>
@@ -62,9 +63,12 @@ export function OfferControls({
         </label>
       </div>
       <ErrorNote error={error} />
-      <p className="text-[11.5px] text-ink-faint">
+      <p className="text-[12.5px] text-ink-faint">
         Offer status drives the pipeline stage (preparing → Offer Preparation,
-        extended → Offer Extended, accepted → Offer Accepted).
+        extended → Offer Extended, accepted → Offer Accepted). Signed is a
+        separate step and leaves the stage where accepted put it: a verbal yes
+        and a returned contract are different days, and only the second one is
+        counted as the signature.
       </p>
     </div>
   );
@@ -115,10 +119,10 @@ export function OnboardingChecklist({
               className="mt-0.5 accent-[#6d9cff]"
             />
             <span
-              className={`text-[13px] ${item.done ? "text-ink-faint line-through" : ""}`}
+              className={`text-[14px] ${item.done ? "text-ink-faint line-through" : ""}`}
             >
               {item.label}
-              <span className="ml-1 text-[11.5px] text-ink-faint">
+              <span className="ml-1 text-[12.5px] text-ink-faint">
                 {item.owner ? `· ${item.owner}` : ""}
                 {item.dueOffsetDays !== undefined
                   ? ` · day ${item.dueOffsetDays >= 0 ? "+" : ""}${item.dueOffsetDays}`
@@ -150,7 +154,7 @@ export function OnboardingChecklist({
               }),
             )
           }
-          className="rounded border border-edge2 px-3 py-2 text-[13px] text-ink-muted hover:bg-panel2"
+          className="rounded border border-edge2 px-3 py-2 text-[14px] text-ink-muted hover:bg-panel2"
         >
           Save date
         </button>
@@ -166,7 +170,7 @@ export function OnboardingChecklist({
               }),
             )
           }
-          className="rounded bg-ok px-3 py-2 text-[13px] font-medium text-canvas disabled:opacity-50"
+          className="rounded bg-ok px-3 py-2 text-[14px] font-medium text-canvas disabled:opacity-50"
         >
           {startConfirmed ? "Start confirmed ✓" : "Confirm start"}
         </button>

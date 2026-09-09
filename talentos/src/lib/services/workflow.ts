@@ -3,6 +3,7 @@ import { z } from "zod";
 import { RUBRIC_LEVELS, LEARNING_KINDS } from "@/lib/core/enums";
 import type { Db } from "@/lib/db/client";
 import {
+  candidates,
   intakeSessions,
   offers,
   outreachMessages,
@@ -15,6 +16,7 @@ import {
 } from "@/lib/db/schema";
 import { getLatestIntakeSession } from "./artifacts";
 import { moveCandidateStage } from "./candidates";
+import { recordMilestone } from "./milestones";
 
 // ── Intake answer capture ───────────────────────────────────────────────────
 
@@ -55,11 +57,32 @@ export async function answerIntakeQuestion(
     .where(eq(intakeSessions.id, input.sessionId));
 }
 
+/**
+ * The intake is finished, which is the moment the brief exists.
+ *
+ * This is the one milestone nobody has to remember to record: completing the
+ * intake is already an explicit act with a button behind it, and it is the
+ * only thing in the product that means "the manager and I have agreed what we
+ * are looking for". Every elapsed-day measure is counted from here, so a job
+ * whose intake was never completed contributes to none of them — correctly,
+ * because there is no brief to count from.
+ */
 export async function completeIntake(db: Db, sessionId: string) {
+  const now = new Date().toISOString();
+  const [session] = await db
+    .select()
+    .from(intakeSessions)
+    .where(eq(intakeSessions.id, sessionId));
+  if (!session) throw new Error("Intake session not found");
   await db
     .update(intakeSessions)
-    .set({ status: "complete", updatedAt: new Date().toISOString() })
+    .set({ status: "complete", updatedAt: now })
     .where(eq(intakeSessions.id, sessionId));
+  await recordMilestone(db, {
+    searchProjectId: session.searchProjectId,
+    kind: "brief",
+    occurredAt: now,
+  });
 }
 
 export async function getIntakeProgress(db: Db, projectId: string) {
@@ -167,6 +190,7 @@ export const upsertOfferInput = z.object({
     "preparing",
     "extended",
     "accepted",
+    "signed",
     "declined",
     "withdrawn",
   ]),
@@ -178,6 +202,10 @@ const OFFER_STAGE: Record<string, string | undefined> = {
   preparing: "offer_prep",
   extended: "offer_extended",
   accepted: "offer_accepted",
+  // Signing does not get a stage of its own. The pipeline's job is to say
+  // where a person is, and a signed offer leaves them exactly where an
+  // accepted one did; the signature is a date, and it is kept as one.
+  signed: "offer_accepted",
 };
 
 export async function upsertOffer(
@@ -192,7 +220,9 @@ export async function upsertOffer(
   const timestamps = {
     extendedAt:
       input.status === "extended" ? now : (existing?.extendedAt ?? undefined),
-    resolvedAt: ["accepted", "declined", "withdrawn"].includes(input.status)
+    resolvedAt: ["accepted", "signed", "declined", "withdrawn"].includes(
+      input.status,
+    )
       ? now
       : undefined,
   };
@@ -222,6 +252,18 @@ export async function upsertOffer(
       note: `Offer ${input.status}`,
     });
   }
+  // The end of the third interval, and the only one of the four that closes a
+  // job. Recorded from `signed` and never from `accepted`: a verbal yes is not
+  // a signature, and a measure that treated it as one would report a date that
+  // had not happened.
+  if (input.status === "signed") {
+    await recordMilestone(db, {
+      searchProjectId: input.searchProjectId,
+      kind: "signature",
+      occurredAt: now,
+      candidateId: input.candidateId,
+    });
+  }
   return offer;
 }
 
@@ -238,6 +280,16 @@ export async function getOffer(db: Db, candidateId: string) {
 export const updateOutreachStatusInput = z.object({
   messageId: z.string(),
   status: z.enum(["drafted", "sent", "replied", "no_reply"]),
+  /**
+   * Whether the reply was worth having, said by the person reading it.
+   *
+   * The product records that a reply arrived; nothing in a reply tells software
+   * whether it was a real candidate or a polite no, and the difference is the
+   * entire content of the brief-to-first-qualified-reply measure. So it is
+   * asked, once, at the moment the reply is being marked — the only moment
+   * somebody has actually read it.
+   */
+  qualified: z.boolean().optional(),
 });
 
 export async function updateOutreachStatus(
@@ -254,6 +306,27 @@ export async function updateOutreachStatus(
       updatedAt: now,
     })
     .where(eq(outreachMessages.id, input.messageId));
+
+  if (input.status !== "replied" || !input.qualified) return;
+  // The message knows its candidate and the candidate knows its job; the
+  // milestone is about the job, because "how long until this search heard
+  // from somebody real" is a question about the search.
+  const [message] = await db
+    .select({ candidateId: outreachMessages.candidateId })
+    .from(outreachMessages)
+    .where(eq(outreachMessages.id, input.messageId));
+  if (!message) return;
+  const [person] = await db
+    .select({ searchProjectId: candidates.searchProjectId })
+    .from(candidates)
+    .where(eq(candidates.id, message.candidateId));
+  if (!person) return;
+  await recordMilestone(db, {
+    searchProjectId: person.searchProjectId,
+    kind: "first_qualified_reply",
+    occurredAt: now,
+    candidateId: message.candidateId,
+  });
 }
 
 export async function listCandidateMessages(db: Db, candidateId: string) {
@@ -380,19 +453,110 @@ export async function createTask(
   return task;
 }
 
-export async function completeTask(db: Db, taskId: string) {
+/**
+ * Tick a task, or untick it.
+ *
+ * Both directions, because a checkbox that only goes one way is not a
+ * checkbox — it is a delete button wearing a tick, and the commonest thing
+ * anybody does with a to-do list after ticking the wrong line is to untick it.
+ * Reopening clears the completion time rather than keeping it, so a task that
+ * is open has never been finished as far as any later reading is concerned.
+ */
+export async function setTaskStatus(db: Db, taskId: string, done: boolean) {
   await db
     .update(tasks)
-    .set({ status: "done", completedAt: new Date().toISOString() })
+    .set({
+      status: done ? "done" : "open",
+      completedAt: done ? new Date().toISOString() : null,
+    })
     .where(eq(tasks.id, taskId));
 }
 
+/** Kept for the callers that only ever finish one. */
+export async function completeTask(db: Db, taskId: string) {
+  await setTaskStatus(db, taskId, true);
+}
+
 export async function listOpenTasks(db: Db) {
-  return db
+  const rows = await db
     .select()
     .from(tasks)
     .where(eq(tasks.status, "open"))
     .orderBy(tasks.dueAt, tasks.createdAt);
+  return sortTasks(rows);
+}
+
+/**
+ * How long a ticked task stays on the list.
+ *
+ * A fortnight, because the reason to keep a done task visible is to see what
+ * you got through this week and to be able to untick the one you ticked by
+ * mistake — and both of those go stale quickly. Older ones are counted rather
+ * than listed: a to-do list that only grows is one nobody opens.
+ */
+export const DONE_VISIBLE_DAYS = 14;
+
+export async function listTasks(db: Db, now = new Date()) {
+  const rows = await db
+    .select()
+    .from(tasks)
+    .orderBy(tasks.dueAt, tasks.createdAt);
+  const cutoff = new Date(now.getTime() - DONE_VISIBLE_DAYS * 86_400_000);
+  const visible = rows.filter((row) => {
+    if (row.status === "open") return true;
+    const at = row.completedAt ? Date.parse(row.completedAt) : Number.NaN;
+    // A done task with no completion time is old data, not a recent tick.
+    return Number.isFinite(at) && at >= cutoff.getTime();
+  });
+  return {
+    rows: sortTasks(visible),
+    open: rows.filter((row) => row.status === "open").length,
+    done: visible.filter((row) => row.status === "done").length,
+    olderDone: rows.length - visible.length,
+  };
+}
+
+/**
+ * Hand-placed first, in the order they were placed; everything else after,
+ * in the order the database gave them, which is by date.
+ *
+ * Keeping the two groups apart is what lets dragging one task not silently
+ * freeze the order of every other one. A task you have never touched keeps
+ * behaving the way it did.
+ */
+export function sortTasks<T extends { sortOrder: number | null }>(
+  rows: T[],
+): T[] {
+  const placed = rows
+    .filter((row) => row.sortOrder !== null)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const unplaced = rows.filter((row) => row.sortOrder === null);
+  return [...placed, ...unplaced];
+}
+
+export const reorderTasksInput = z.object({
+  /** Every open task, in the order they should now appear. */
+  orderedIds: z.array(z.string()).min(1).max(500),
+});
+
+/**
+ * Write the order the recruiter dragged into.
+ *
+ * Every id in the list is given a position, so the result is exactly the
+ * order shown rather than a set of relative nudges that drift. Ids that are
+ * not open tasks are ignored rather than failing the whole move.
+ */
+export async function reorderTasks(
+  db: Db,
+  input: z.infer<typeof reorderTasksInput>,
+) {
+  const open = await db.select().from(tasks).where(eq(tasks.status, "open"));
+  const known = new Set(open.map((row) => row.id));
+  const ordered = input.orderedIds.filter((id) => known.has(id));
+  for (const [index, id] of ordered.entries()) {
+    await db.update(tasks).set({ sortOrder: index }).where(eq(tasks.id, id));
+  }
+  return { placed: ordered.length };
 }
 
 // ── Learnings ───────────────────────────────────────────────────────────────

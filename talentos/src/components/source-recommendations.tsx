@@ -23,7 +23,7 @@ export function SourceEvidence({
 }) {
   if (!evidence.length)
     return (
-      <p className="text-[12px] text-warn">
+      <p className="text-[13px] text-warn">
         No supporting source evidence supplied. Check this venue before using
         it.
       </p>
@@ -31,7 +31,7 @@ export function SourceEvidence({
   return (
     <div className="mt-2 space-y-2">
       {evidence.map((source, index) => (
-        <div key={index} className="border-l-2 border-edge2 pl-3 text-[12px]">
+        <div key={index} className="border-l-2 border-edge2 pl-3 text-[13px]">
           <p>Supplied excerpt: “{source.excerpt}”</p>
           <a
             href={source.url}
@@ -64,8 +64,8 @@ export function SavedSourceDetails({
         <Tag>{sourcePurposeLabel[metadata.purpose]}</Tag>
         {stale && <Tag tone="warn">Search context changed — reassess fit</Tag>}
       </div>
-      <p className="text-[12px] text-ink-muted">{metadata.limitation}</p>
-      <details className="text-[12px] text-ink-faint">
+      <p className="text-[13px] text-ink-muted">{metadata.limitation}</p>
+      <details className="text-[13px] text-ink-faint">
         <summary className="cursor-pointer">
           Evidence and import history
         </summary>
@@ -120,12 +120,12 @@ export function SourceRecommendationsWorkbench({
       <h2 className="text-base font-semibold">
         Recommend venues for this role
       </h2>
-      <p className="text-[13px] text-ink-muted">
+      <p className="text-[14px] text-ink-muted">
         Find places to source candidates and places to give the opportunity
         exposure. Use your Codex or Claude session for research, then review and
         save the suggestions you choose. No model API key is needed.
       </p>
-      <p className="text-[12px] text-ink-faint">
+      <p className="text-[13px] text-ink-faint">
         Recommendations are unverified and may be incomplete. {PRODUCT_NAME}{" "}
         does not scrape profiles, post the role, contact people, or purchase
         access.
@@ -149,7 +149,7 @@ export function SourceRecommendationsWorkbench({
       </button>
       {request && (
         <div className="space-y-2">
-          <label className="block text-[12px] text-ink-muted">
+          <label className="block text-[13px] text-ink-muted">
             Review what will be shared: role, JD, and search context. Copy this
             into the Codex or Claude session you choose.
             <textarea
@@ -177,10 +177,10 @@ export function SourceRecommendationsWorkbench({
         </div>
       )}
       <details open={request ? true : undefined}>
-        <summary className="cursor-pointer text-[13px] font-medium">
+        <summary className="cursor-pointer text-[14px] font-medium">
           2. Import a research response
         </summary>
-        <label className="mt-2 block text-[12px] text-ink-muted">
+        <label className="mt-2 block text-[13px] text-ink-muted">
           Paste the JSON response. Previewing does not save venues.
           <textarea
             className={`${inputClass} mt-1 font-mono text-xs`}
@@ -222,16 +222,16 @@ export function SourceRecommendationsWorkbench({
           <h3 className="text-sm font-semibold">
             3. Review and choose venues to save
           </h3>
-          <p className="text-[13px] text-ink-muted">
+          <p className="text-[14px] text-ink-muted">
             {preview.reasoningSummary}
           </p>
-          <ul className="list-disc pl-4 text-[12px] text-ink-faint">
+          <ul className="list-disc pl-4 text-[13px] text-ink-faint">
             {preview.limitations.map((limitation, index) => (
               <li key={index}>{limitation}</li>
             ))}
           </ul>
           {preview.recommendations.length === 0 && (
-            <p className="text-[13px] text-ink-muted">
+            <p className="text-[14px] text-ink-muted">
               No recommendations returned. Review the limitations or provide
               more role context.
             </p>
@@ -241,7 +241,7 @@ export function SourceRecommendationsWorkbench({
               key={recommendation.id}
               className="rounded border border-edge p-3"
             >
-              <label className="flex items-start gap-2 text-[13px] font-medium">
+              <label className="flex items-start gap-2 text-[14px] font-medium">
                 <input
                   type="checkbox"
                   className="mt-0.5"
@@ -262,20 +262,20 @@ export function SourceRecommendationsWorkbench({
                 <Tag>Reported cost: {recommendation.costModel}</Tag>
                 <Tag tone="warn">Unverified suggestion</Tag>
               </div>
-              <p className="text-[13px]">{recommendation.whyRelevant}</p>
-              <p className="text-[12px] text-ink-muted">
+              <p className="text-[14px]">{recommendation.whyRelevant}</p>
+              <p className="text-[13px] text-ink-muted">
                 Audience: {recommendation.audience} · Geography:{" "}
                 {recommendation.geography}
               </p>
               <a
-                className="text-[12px] text-accent hover:underline"
+                className="text-[13px] text-accent hover:underline"
                 href={recommendation.url}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 Open venue
               </a>
-              <p className="text-[12px] text-ink-faint">
+              <p className="text-[13px] text-ink-faint">
                 {recommendation.limitation}
               </p>
               <SourceEvidence evidence={recommendation.evidence} />
@@ -308,7 +308,7 @@ export function SourceRecommendationsWorkbench({
         </section>
       )}
       <div role="status" aria-live="polite">
-        {message && <p className="text-[13px] text-accent">{message}</p>}
+        {message && <p className="text-[14px] text-accent">{message}</p>}
       </div>
       <div role="alert">
         <ErrorNote error={error} />

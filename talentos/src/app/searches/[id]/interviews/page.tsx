@@ -30,7 +30,7 @@ export default async function InterviewsPage({
   return (
     <div>
       <PageHeader
-        title="Interview Architecture"
+        title="🗣️ Interview Architecture"
         description="Stage design adapted to this profession, with anti-duplication notes — plus structured scorecards where every rating requires written evidence."
         actions={
           <GenerateButton
@@ -58,9 +58,9 @@ export default async function InterviewsPage({
             <div className="space-y-3">
               {payload.stages.map((stage, index) => (
                 <Card key={stage.id} title={`${index + 1}. ${stage.name}`}>
-                  <p className="text-[13px] text-ink-muted">{stage.purpose}</p>
+                  <p className="text-[14px] text-ink-muted">{stage.purpose}</p>
                   {stage.interviewer && (
-                    <p className="mt-1 text-[12.5px] text-ink-faint">
+                    <p className="mt-1 text-[13.5px] text-ink-faint">
                       Interviewer: {stage.interviewer}
                     </p>
                   )}
@@ -79,12 +79,12 @@ export default async function InterviewsPage({
                     />
                   </div>
                   {stage.rubricNotes && (
-                    <p className="mt-2 text-[12.5px] text-ink-muted">
+                    <p className="mt-2 text-[13.5px] text-ink-muted">
                       Rubric: {stage.rubricNotes}
                     </p>
                   )}
                   {stage.doNotDuplicate && (
-                    <p className="mt-1 text-[12.5px] text-warn">
+                    <p className="mt-1 text-[13.5px] text-warn">
                       Do not re-cover: {stage.doNotDuplicate}
                     </p>
                   )}
@@ -94,7 +94,7 @@ export default async function InterviewsPage({
           </>
         )}
 
-        <Card title="Scorecards">
+        <Card title="📊 Scorecards">
           <div className="mb-3">
             <ScorecardForm
               searchProjectId={id}
@@ -105,7 +105,7 @@ export default async function InterviewsPage({
             />
           </div>
           {cards.length === 0 ? (
-            <p className="text-[13px] text-ink-muted">
+            <p className="text-[14px] text-ink-muted">
               No interview evidence recorded yet.
             </p>
           ) : (
@@ -116,7 +116,7 @@ export default async function InterviewsPage({
                   className="rounded border border-edge bg-panel2/50 px-3 py-2"
                 >
                   <summary className="flex cursor-pointer items-center justify-between gap-2">
-                    <span className="text-[13px] font-medium">
+                    <span className="text-[14px] font-medium">
                       {candidateNames.get(card.candidateId) ?? "Candidate"} ·{" "}
                       {card.stageName}
                       {card.interviewer ? ` · ${card.interviewer}` : ""}
@@ -132,7 +132,7 @@ export default async function InterviewsPage({
                         className="rounded border border-edge bg-canvas p-2.5"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[13px] font-medium">
+                          <span className="text-[14px] font-medium">
                             {entry.competency}
                           </span>
                           <Tag
@@ -150,17 +150,17 @@ export default async function InterviewsPage({
                             {RUBRIC_LABELS[entry.rating]}
                           </Tag>
                         </div>
-                        <p className="mt-1 text-[12.5px]">
+                        <p className="mt-1 text-[13.5px]">
                           <span className="text-ink-faint">Observation: </span>
                           {entry.observation}
                         </p>
-                        <p className="text-[12.5px]">
+                        <p className="text-[13.5px]">
                           <span className="text-ink-faint">
                             Interpretation:{" "}
                           </span>
                           {entry.interpretation}
                         </p>
-                        <p className="text-[12.5px]">
+                        <p className="text-[13.5px]">
                           <span className="text-ink-faint">Evidence: </span>
                           {entry.evidenceText}
                         </p>
@@ -168,7 +168,7 @@ export default async function InterviewsPage({
                     ))}
                   </ul>
                   {card.overallNote && (
-                    <p className="mt-2 text-[12.5px] text-ink-muted">
+                    <p className="mt-2 text-[13.5px] text-ink-muted">
                       {card.overallNote}
                     </p>
                   )}

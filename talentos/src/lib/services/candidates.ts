@@ -156,6 +156,13 @@ export const updateCandidateInput = z.object({
   disposition: z
     .enum(["active", "on_hold", "withdrawn", "not_selected", "hired"])
     .optional(),
+  /**
+   * The editable profile: contact details, work history, education, skills.
+   * Validated by the same schema the generated profile uses, so a hand-typed
+   * record and a derived one are the same shape and neither can hold a field
+   * the fair-hiring rules exclude.
+   */
+  profile: candidateProfilePayloadSchema.optional(),
 });
 
 export async function updateCandidate(
@@ -228,7 +235,14 @@ export async function listCandidates(db: Db, projectId: string) {
 
 export async function listAllCandidates(db: Db) {
   return db
-    .select({ candidate: candidates, projectName: searchProjects.name })
+    .select({
+      candidate: candidates,
+      projectName: searchProjects.name,
+      // A person has no priority of their own. The one that exists is the
+      // priority of the job they are being considered for, and the list sorts
+      // by it under that name.
+      jobPriority: searchProjects.priority,
+    })
     .from(candidates)
     .innerJoin(
       searchProjects,

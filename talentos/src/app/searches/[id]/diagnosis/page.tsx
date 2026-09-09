@@ -184,7 +184,7 @@ export default async function DiagnosisPage({
   return (
     <div>
       <PageHeader
-        title="Search Diagnosis"
+        title="🔍 Search Diagnosis"
         description="Why is this search underperforming, what competing explanations exist, and what is the best next experiment to reduce uncertainty? Your beliefs are yours: nothing here changes your confidence for you."
         actions={
           v.status.configured && v.status.reachable ? (
@@ -198,7 +198,7 @@ export default async function DiagnosisPage({
       />
 
       {!v.status.configured && (
-        <Card title="Connect HSAL">
+        <Card title="🔌 Connect HSAL">
           <p className="text-sm text-ink-muted">
             The diagnosis loop is held in HSAL (Human State Access Layer), a
             separate local runtime. Start its gateway (<code>pnpm dev</code> in
@@ -210,7 +210,7 @@ export default async function DiagnosisPage({
         </Card>
       )}
       {v.status.configured && !v.status.reachable && (
-        <Card title="HSAL gateway unreachable">
+        <Card title="🚧 HSAL gateway unreachable">
           <p className="text-sm text-bad">
             {v.status.error ?? `Cannot reach ${v.status.baseUrl}`}
           </p>
@@ -219,7 +219,7 @@ export default async function DiagnosisPage({
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {/* ------------------------------------------------ WHAT'S HAPPENING */}
-        <Card title="What's happening?">
+        <Card title="📡 What's happening?">
           {!v.snapshot ? (
             <div className="space-y-2">
               <EmptyState
@@ -286,7 +286,7 @@ export default async function DiagnosisPage({
         </Card>
 
         {/* ------------------------------------------------ WHAT DO YOU THINK */}
-        <Card title="What do you think?">
+        <Card title="🤔 What do you think?">
           {!v.status.configured || !v.status.reachable ? (
             <p className="text-sm text-ink-muted">
               Connect HSAL to record your belief.
@@ -340,7 +340,7 @@ export default async function DiagnosisPage({
         </Card>
 
         {/* ------------------------------------------------ WHAT ELSE COULD EXPLAIN IT */}
-        <Card title="What else could explain it?">
+        <Card title="🔀 What else could explain it?">
           {v.models.length === 0 ? (
             <EmptyState
               title="No competing explanations yet"
@@ -380,7 +380,7 @@ export default async function DiagnosisPage({
         </Card>
 
         {/* ------------------------------------------------ WHAT EVIDENCE SUPPORTS EACH VIEW */}
-        <Card title="What evidence supports each view?">
+        <Card title="🔍 What evidence supports each view?">
           {v.evidence.length === 0 ? (
             <EmptyState
               title="No evidence linked yet"
@@ -414,7 +414,7 @@ export default async function DiagnosisPage({
         </Card>
 
         {/* ------------------------------------------------ WHAT SHOULD WE TEST NEXT */}
-        <Card title="What should we test next?">
+        <Card title="🧪 What should we test next?">
           {!v.recommended ? (
             <EmptyState
               title="No test recommended yet"
@@ -535,7 +535,7 @@ export default async function DiagnosisPage({
 
         {/* ------------------------------------------------ REVISE */}
         {belief && experimentEvidence.length > 0 && (
-          <Card title="Revise what you think?">
+          <Card title="✏️ Revise what you think?">
             {v.revisions.some((r) => r.beliefId === belief.id) ? (
               <div className="space-y-2 text-sm">
                 <p>
@@ -576,7 +576,7 @@ export default async function DiagnosisPage({
 
         {/* ------------------------------------------------ ACT + OBSERVE AGAIN */}
         {selected && experimentEvidence.length > 0 && (
-          <Card title="Act, then observe again">
+          <Card title="🔄 Act, then observe again">
             <div className="space-y-3 text-sm">
               {profileChanged ? (
                 <p>
@@ -638,7 +638,7 @@ export default async function DiagnosisPage({
         )}
 
         {/* ------------------------------------------------ WHAT DID WE LEARN */}
-        <Card title="What did we learn?">
+        <Card title="📚 What did we learn?">
           {v.learnings.length > 0 ? (
             v.learnings.map((l) => (
               <div key={l.id} className="space-y-1 text-sm">
@@ -673,8 +673,8 @@ export default async function DiagnosisPage({
 
         {/* ------------------------------------------------ PROVENANCE */}
         {v.events.length > 0 && (
-          <Card title="Provenance" className="xl:col-span-2">
-            <ul className="max-h-64 overflow-y-auto font-mono text-[11px] leading-5">
+          <Card title="🧾 Provenance" className="xl:col-span-2">
+            <ul className="max-h-64 overflow-y-auto font-mono text-[12px] leading-5">
               {v.events.map((e, i) => (
                 <li key={`${e.createdAt}-${i}`}>
                   <span className="text-ink-faint">

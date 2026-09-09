@@ -29,13 +29,13 @@ export function IntakeAnswer({
   if (!editing) {
     return (
       <div className="mt-1.5 flex items-start gap-2 rounded border border-ok/20 bg-ok-soft/40 px-3 py-2">
-        <p className="flex-1 text-[13px] whitespace-pre-wrap">
+        <p className="flex-1 text-[14px] whitespace-pre-wrap">
           {existingAnswer}
         </p>
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="shrink-0 text-[11.5px] text-ink-faint hover:text-ink"
+          className="shrink-0 text-[12.5px] text-ink-faint hover:text-ink"
         >
           Edit
         </button>

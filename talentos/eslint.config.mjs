@@ -7,6 +7,8 @@ const eslintConfig = defineConfig([
   ...nextTs,
   globalIgnores([
     ".next/**",
+    // The dev server builds here so it stops fighting `next build` (D-053).
+    ".next-dev/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

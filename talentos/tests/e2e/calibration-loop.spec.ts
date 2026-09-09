@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { moduleNav } from "./helpers/nav";
 import {
   openReviewFixture,
   saveAndAcceptRelationship,
@@ -9,14 +10,10 @@ import {
  * with a visible reason, a later dismissal makes the strings stale, and a
  * regenerate applies the change. Mock model provider; no network.
  */
-function moduleNav(page: Page, label: string) {
-  return page.getByTestId("workspace-nav").getByRole("link", { name: label });
-}
-
 test("accepted evidence calibrates the strings and shows why", async ({
   page,
 }) => {
-  const { project } = await openReviewFixture(page);
+  const { project } = await openReviewFixture(page, "Calibration fixture");
   await saveAndAcceptRelationship(page, "relevant");
 
   await page.goto(`/searches/${project}/strings`);
@@ -42,7 +39,7 @@ test("accepted evidence calibrates the strings and shows why", async ({
   );
 
   // Dismiss the link, come back: stale notice, then regenerate applies it.
-  await moduleNav(page, "Candidates").click();
+  await moduleNav(page, "Candidates");
   await page
     .getByRole("link", { name: "Review Review Fixture · CV ↔ JD", exact: true })
     .click();

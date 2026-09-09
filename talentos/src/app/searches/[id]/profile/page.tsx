@@ -1,9 +1,11 @@
 import { getDb } from "@/lib/db/client";
 import { getSuccessProfile } from "@/lib/services/artifacts";
+import { readCalibration } from "@/lib/services/profile-calibration";
 import { generateSuccessProfileAction } from "@/lib/actions/generate";
 import { ArtifactMeta } from "@/components/artifact-meta";
 import { GenerateButton } from "@/components/generate-button";
 import { TracedList } from "@/components/traced-list";
+import { ProfileRevisions } from "@/components/calibration-question";
 import { Card, EmptyState, KeyValue, PageHeader } from "@/components/ui";
 
 export const metadata = { title: "Success Profile" };
@@ -14,13 +16,15 @@ export default async function ProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const profile = await getSuccessProfile(getDb(), id);
+  const db = getDb();
+  const profile = await getSuccessProfile(db, id);
   const payload = profile?.payload;
+  const { history, question } = readCalibration(db, id);
 
   return (
     <div>
       <PageHeader
-        title="Success Profile"
+        title="🎯 Success Profile"
         description="The structured definition of who succeeds in this role — every criterion carries its provenance, and the hiring manager's answers outrank the JD."
         actions={
           <GenerateButton
@@ -38,20 +42,34 @@ export default async function ProfilePage({
         />
       ) : (
         <div className="space-y-4">
-          <Card title="Mission">
+          <Card title="🧭 Mission">
             <ArtifactMeta
               meta={profile?.meta ?? null}
               kind="success_profile"
               ownerId={id}
               payload={payload}
             />
-            <p className="text-[13.5px] leading-6">{payload.mission}</p>
+            <p className="text-[14.5px] leading-6">{payload.mission}</p>
             <div className="mt-3">
               <KeyValue label="Compensation" value={payload.compensationNote} />
             </div>
           </Card>
+          <Card title="🕰️ Revisions">
+            <p className="mb-2 text-[13px] text-ink-muted">
+              What the bar used to say, and why it stopped saying it. Written
+              only when somebody answered the question the hill raised, so an
+              entry here always has four dispositions or so behind it.
+            </p>
+            <ProfileRevisions history={history} />
+            {question && (
+              <p className="mt-2 text-[13px] text-warn">
+                There is an open question about this profile:{" "}
+                {question.says.toLowerCase()} Answer it on the hill.
+              </p>
+            )}
+          </Card>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card title="The bar">
+            <Card title="📏 The bar">
               <div className="space-y-4">
                 <TracedList title="Must have" items={payload.mustHave} />
                 <TracedList title="Preferred" items={payload.preferred} />
@@ -63,7 +81,7 @@ export default async function ProfilePage({
                 />
               </div>
             </Card>
-            <Card title="Evidence model">
+            <Card title="🔍 Evidence model">
               <div className="space-y-4">
                 <TracedList
                   title="Evidence signals"
@@ -88,7 +106,7 @@ export default async function ProfilePage({
                 />
               </div>
             </Card>
-            <Card title="Targeting">
+            <Card title="🎯 Targeting">
               <div className="space-y-4">
                 <TracedList
                   title="Alternate titles"
@@ -108,7 +126,7 @@ export default async function ProfilePage({
                 />
               </div>
             </Card>
-            <Card title="Closing inputs">
+            <Card title="🤝 Closing inputs">
               <div className="space-y-4">
                 <TracedList
                   title="Candidate motivators"

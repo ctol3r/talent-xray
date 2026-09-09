@@ -35,9 +35,9 @@ function ThreadColumn({
   const items = actions.filter((a) => a.thread === thread);
   return (
     <div className="rounded border border-edge bg-panel p-4">
-      <h3 className="text-[13px] font-semibold">{THREAD_LABELS[thread]}</h3>
+      <h3 className="text-[14px] font-semibold">{THREAD_LABELS[thread]}</h3>
       {items.length === 0 ? (
-        <p className="mt-2 text-[12.5px] text-ink-muted">
+        <p className="mt-2 text-[13.5px] text-ink-muted">
           Nothing urgent on this thread.
         </p>
       ) : (
@@ -50,11 +50,11 @@ function ThreadColumn({
               <div>
                 <Link
                   href={action.href}
-                  className="text-[13px] font-medium hover:text-accent"
+                  className="text-[14px] font-medium hover:text-accent"
                 >
                   {action.title}
                 </Link>
-                <p className="text-[12px] text-ink-muted">{action.detail}</p>
+                <p className="text-[13px] text-ink-muted">{action.detail}</p>
               </div>
             </li>
           ))}
@@ -88,7 +88,7 @@ export default async function GuidePage({
   return (
     <div>
       <PageHeader
-        title="Guide"
+        title="💡 Guide"
         description="The search's three working relationships in one place: what to do next for the pipeline, with the hiring manager, and with each candidate — plus the HM brief and evidence-anchored feedback capture."
       />
 
@@ -113,7 +113,7 @@ export default async function GuidePage({
           }
         >
           {!payload ? (
-            <p className="text-[13px] text-ink-muted">
+            <p className="text-[14px] text-ink-muted">
               A three-minute, HM-facing brief: the agreed bar with provenance,
               calibration questions, and how to give feedback the search can
               use. Best generated after the intake is complete.
@@ -127,28 +127,28 @@ export default async function GuidePage({
                 ownerId={id}
                 payload={payload}
               />
-              <p className="text-[13.5px] leading-6">{payload.headline}</p>
+              <p className="text-[14.5px] leading-6">{payload.headline}</p>
               <div>
-                <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-wide text-ink-muted">
+                <h4 className="mb-1 text-[13px] font-semibold uppercase tracking-wide text-ink-muted">
                   What we are looking for
                 </h4>
                 <ul className="space-y-1">
                   {payload.whatWeAreLookingFor.map((item) => (
-                    <li key={item.text} className="text-[13px]">
+                    <li key={item.text} className="text-[14px]">
                       {item.text} <ProvenanceBadge source={item.provenance} />
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-wide text-ink-muted">
+                <h4 className="mb-1 text-[13px] font-semibold uppercase tracking-wide text-ink-muted">
                   Calibration questions
                 </h4>
                 <ul className="space-y-1.5">
                   {payload.calibrationQuestions.map((q) => (
-                    <li key={q.question} className="text-[13px]">
+                    <li key={q.question} className="text-[14px]">
                       {q.question}
-                      <span className="block text-[12px] text-ink-muted">
+                      <span className="block text-[13px] text-ink-muted">
                         {q.whyItMatters}
                       </span>
                     </li>
@@ -156,16 +156,16 @@ export default async function GuidePage({
                 </ul>
               </div>
               <div>
-                <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-wide text-ink-muted">
+                <h4 className="mb-1 text-[13px] font-semibold uppercase tracking-wide text-ink-muted">
                   How to review candidates
                 </h4>
-                <p className="text-[13px]">{payload.reviewInstructions}</p>
+                <p className="text-[14px]">{payload.reviewInstructions}</p>
               </div>
               <div>
-                <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-wide text-ink-muted">
+                <h4 className="mb-1 text-[13px] font-semibold uppercase tracking-wide text-ink-muted">
                   Process expectations
                 </h4>
-                <ul className="list-disc pl-5 text-[13px]">
+                <ul className="list-disc pl-5 text-[14px]">
                   {payload.processExpectations.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
@@ -173,17 +173,17 @@ export default async function GuidePage({
               </div>
               {payload.openQuestions.length > 0 && (
                 <div>
-                  <h4 className="mb-1 text-[12px] font-semibold uppercase tracking-wide text-ink-muted">
+                  <h4 className="mb-1 text-[13px] font-semibold uppercase tracking-wide text-ink-muted">
                     Still open — only you can settle these
                   </h4>
-                  <ul className="list-disc pl-5 text-[13px]">
+                  <ul className="list-disc pl-5 text-[14px]">
                     {payload.openQuestions.map((q) => (
                       <li key={q}>{q}</li>
                     ))}
                   </ul>
                 </div>
               )}
-              <p className="text-[11.5px] text-ink-faint">
+              <p className="text-[12.5px] text-ink-faint">
                 Share it your way — print this page or copy the content; nothing
                 is sent automatically.
               </p>
@@ -193,9 +193,9 @@ export default async function GuidePage({
       </div>
 
       <div className="mt-6">
-        <Card title={`Awaiting HM feedback (${awaitingFeedback.length})`}>
+        <Card title={`⏳ Awaiting HM feedback (${awaitingFeedback.length})`}>
           {awaitingFeedback.length === 0 ? (
-            <p className="text-[13px] text-ink-muted">
+            <p className="text-[14px] text-ink-muted">
               No candidates are sitting with the hiring manager without
               feedback.
             </p>
@@ -203,7 +203,7 @@ export default async function GuidePage({
             <div className="space-y-5">
               {awaitingFeedback.map((candidate) => (
                 <div key={candidate.id}>
-                  <p className="mb-1.5 text-[13px] font-medium">
+                  <p className="mb-1.5 text-[14px] font-medium">
                     <Link
                       href={`/searches/${id}/candidates/${candidate.id}`}
                       className="hover:text-accent"
@@ -211,7 +211,7 @@ export default async function GuidePage({
                       {candidate.name}
                     </Link>
                     {candidate.currentTitle ? (
-                      <span className="ml-2 text-[12px] text-ink-muted">
+                      <span className="ml-2 text-[13px] text-ink-muted">
                         {candidate.currentTitle}
                       </span>
                     ) : null}

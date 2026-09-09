@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { moduleNav } from "./helpers/nav";
 
 /**
  * Wave A: yield ledger through the real UI with the mock model provider and
@@ -10,25 +11,23 @@ const JD = `Research Scientist / Research Engineer
 We are hiring a research scientist to work on AI safety: alignment,
 interpretability and evaluation of large language models.`;
 
-function moduleNav(page: Page, label: string) {
-  return page.getByTestId("workspace-nav").getByRole("link", { name: label });
-}
-
 test("discovery runs and explicit saves are credited to the stored string", async ({
   page,
 }) => {
   await page.goto("/searches/new");
   await page.fill('input[name="name"]', "E2E — yield ledger");
   await page.fill('input[name="roleTitle"]', "Research Scientist");
-  await page.fill('input[name="industry"]', "AI safety research");
-  await page.click('button:has-text("Create search")');
+  // Industry is a dropdown now (D-050): a job typed "AI safety research"
+  // and another typed "AI safety" cannot be compared.
+  await page.selectOption('select[name="industry"]', "ai_research");
+  await page.click('button:has-text("Create job")');
   await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
 
   await page.fill('textarea[name="jd"]', JD);
   await page.click('button:has-text("Save job description")');
   await expect(page.locator("summary", { hasText: "Saved" })).toBeVisible();
 
-  await moduleNav(page, "Strings").click();
+  await moduleNav(page, "Strings");
   await page.click('button:has-text("Generate strings")');
   await expect(page.getByText("site:linkedin.com/in").first()).toBeVisible({
     timeout: 30_000,
@@ -36,7 +35,7 @@ test("discovery runs and explicit saves are credited to the stored string", asyn
   await expect(page.getByText(/\d+\/32 words/).first()).toBeVisible();
   await expect(page.getByText("never run").first()).toBeVisible();
 
-  await moduleNav(page, "Discover").click();
+  await moduleNav(page, "Discover");
   const select = page.locator("select").first();
   await expect(select).toBeVisible();
   const storedQuery = await page.locator("textarea").first().inputValue();
@@ -66,7 +65,7 @@ test("discovery runs and explicit saves are credited to the stored string", asyn
   await expect(page.locator("select").first()).toContainText("· 1 saved");
   await expect(page.getByText(/2 runs · 2 saved/)).toBeVisible();
 
-  await moduleNav(page, "Strings").click();
+  await moduleNav(page, "Strings");
   await expect(page.getByText("ran 1× · 1 saved").first()).toBeVisible();
   // No channels were generated in this flow, so the coverage card stays
   // hidden (nothing to cover); critical-path.spec.ts asserts the positive case.

@@ -156,6 +156,87 @@ async function sampleJson(
   });
 }
 
+/**
+ * One turn of the conversation with the talent expert.
+ *
+ * Here rather than in the UI module because this is the one place that talks
+ * to the model, and because in the artifact this needs no key and no file: it
+ * is the viewer's own Claude, asked directly. The Next app cannot do that —
+ * a server has no viewer to borrow — which is why the same feature over there
+ * writes a request file for a Claude session to answer.
+ *
+ * It gets no search context on purpose. The expert answers the craft question
+ * in front of it; anything it said about a named person would be invented,
+ * and `declined` is how it says so.
+ */
+export interface ArtifactExpertReply {
+  answer: string;
+  uncertain: string[];
+  declined: boolean;
+  next: string[];
+  traitWarnings: string[];
+}
+
+export async function askExpert(
+  expert: { name: string; does: string },
+  question: string,
+  history: { who: "you" | "expert"; text: string }[],
+  ui?: UiHooks,
+): Promise<ArtifactExpertReply> {
+  const earlier = history
+    .slice(-8)
+    .map(
+      (turn) =>
+        `${turn.who === "you" ? "Recruiter" : "You"}: ${clip(turn.text, 600)}`,
+    )
+    .join("\n\n");
+
+  const prompt = `${systemPrelude(`the ${expert.name.toLowerCase()} specialist on a small talent team — ${expert.does}`)}
+
+You are one specialist on a team the recruiter talks to through a single
+conversation. Rules:
+- Answer as the specialist you are. If the question is really somebody else's,
+  say so in one clause and answer the part that is yours.
+- Be short. Four or five sentences, and fewer where fewer will do. No preamble,
+  no restating the question, no flattery, no summary at the end.
+- You cannot see this workspace's records and you have no live web access. Do
+  not state a fact about a named person, a named company's current situation,
+  or a live market number. If the question needs one, set declined true and say
+  exactly what the recruiter would have to look up.
+- "uncertain" lists what your answer rests on that you cannot check.
+- "next" is at most three things worth asking next, in the recruiter's words.
+
+Reply with JSON only:
+{"answer": string, "uncertain": string[], "declined": boolean, "next": string[]}
+${earlier ? `\nEarlier in this conversation:\n\n${earlier}\n` : ""}
+The recruiter now asks:
+${question}`;
+
+  const raw = await sampleJson(prompt, ui, false);
+  const value = (raw ?? {}) as Record<string, unknown>;
+  const list = (input: unknown, cap: number): string[] =>
+    Array.isArray(input)
+      ? input.filter((x): x is string => typeof x === "string").slice(0, cap)
+      : [];
+  const answer =
+    typeof value.answer === "string" && value.answer.trim()
+      ? value.answer.trim()
+      : "";
+  if (!answer) {
+    throw new GenerationError("bad_shape", "The reply had no answer in it.");
+  }
+  const reply = {
+    answer,
+    uncertain: list(value.uncertain, 5),
+    declined: value.declined === true,
+    next: list(value.next, 3),
+  };
+  // The same scan every generated payload goes through. A hit is a flag for
+  // the recruiter, never a block — legitimate mentions exist and they are the
+  // one who can tell.
+  return { ...reply, traitWarnings: traitWarningsOf(reply) };
+}
+
 function traitWarningsOf(payload: unknown): string[] {
   return Array.from(
     new Set(scanPayloadForProtectedTraits(payload).map((h) => h.trait)),

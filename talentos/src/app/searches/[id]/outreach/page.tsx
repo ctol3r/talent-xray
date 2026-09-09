@@ -59,7 +59,7 @@ export default async function OutreachPage({
   return (
     <div>
       <PageHeader
-        title="Outreach"
+        title="✉️ Outreach"
         description="Sequences are drafts you copy out and track manually — the system never sends a message. Every sequence is written for a research-backed audience persona; statuses feed response-rate analytics."
       />
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -76,7 +76,7 @@ export default async function OutreachPage({
           },
         ].map((stat) => (
           <Card key={stat.label}>
-            <p className="text-[11.5px] tracking-wider text-ink-faint uppercase">
+            <p className="text-[12.5px] tracking-wider text-ink-faint uppercase">
               {stat.label}
             </p>
             <p className="mt-1 text-xl font-semibold">{stat.value}</p>
@@ -84,9 +84,9 @@ export default async function OutreachPage({
         ))}
       </div>
 
-      <Card title="Audience personas (research first)">
+      <Card title="👤 Audience personas (research first)">
         <div className="mb-3 flex items-start justify-between gap-3">
-          <p className="max-w-2xl text-[13px] text-ink-muted">
+          <p className="max-w-2xl text-[14px] text-ink-muted">
             Personas describe the talent segments this search targets — who they
             are, what they value, their concerns, where they read, tone, and
             what this seat genuinely offers. Each rests on cited web research of
@@ -117,7 +117,7 @@ export default async function OutreachPage({
           </Tag>
         </div>
         {!research.configured && (
-          <p className="mb-3 rounded border border-warn/40 bg-warn-soft px-3 py-2 text-[12.5px] text-warn">
+          <p className="mb-3 rounded border border-warn/40 bg-warn-soft px-3 py-2 text-[13.5px] text-warn">
             No general research provider is configured, so personas and outreach
             drafts will stop with an honest error. Set
             TALENTOS_RESEARCH_PROVIDER to &quot;session&quot; (a Claude session
@@ -127,7 +127,7 @@ export default async function OutreachPage({
           </p>
         )}
         {personas.length === 0 ? (
-          <p className="text-[13px] text-ink-muted">
+          <p className="text-[14px] text-ink-muted">
             No personas yet. Research the audience to build one per talent
             segment (from the search plan when it exists, otherwise one for the
             role).
@@ -141,7 +141,7 @@ export default async function OutreachPage({
                 className="rounded border border-edge bg-panel2/50 px-3 py-2"
               >
                 <summary className="flex cursor-pointer flex-wrap items-center gap-2">
-                  <span className="text-[13.5px] font-medium">
+                  <span className="text-[14.5px] font-medium">
                     {persona.label}
                   </span>
                   <Tag tone="neutral">segment: {persona.segmentLabel}</Tag>
@@ -149,48 +149,48 @@ export default async function OutreachPage({
                     {persona.provenance}
                   </Tag>
                 </summary>
-                <div className="mt-2 space-y-2 text-[12.5px]">
+                <div className="mt-2 space-y-2 text-[13.5px]">
                   <p>{persona.whoTheyAre}</p>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <p className="mb-1 text-[11.5px] tracking-wider text-ink-faint uppercase">
+                      <p className="mb-1 text-[12.5px] tracking-wider text-ink-faint uppercase">
                         What they value
                       </p>
                       <List items={persona.whatTheyValue} />
                     </div>
                     <div>
-                      <p className="mb-1 text-[11.5px] tracking-wider text-ink-faint uppercase">
+                      <p className="mb-1 text-[12.5px] tracking-wider text-ink-faint uppercase">
                         Concerns
                       </p>
                       <List items={persona.concerns} />
                     </div>
                     <div>
-                      <p className="mb-1 text-[11.5px] tracking-wider text-ink-faint uppercase">
+                      <p className="mb-1 text-[12.5px] tracking-wider text-ink-faint uppercase">
                         Where they read
                       </p>
                       <List items={persona.whereTheyRead} />
                     </div>
                     <div>
-                      <p className="mb-1 text-[11.5px] tracking-wider text-ink-faint uppercase">
+                      <p className="mb-1 text-[12.5px] tracking-wider text-ink-faint uppercase">
                         Proof points this seat offers
                       </p>
                       <List items={persona.proofPoints} />
                     </div>
                     <div>
-                      <p className="mb-1 text-[11.5px] tracking-wider text-ink-faint uppercase">
+                      <p className="mb-1 text-[12.5px] tracking-wider text-ink-faint uppercase">
                         Do not say
                       </p>
                       <List items={persona.doNotSay} />
                     </div>
                     <div>
-                      <p className="mb-1 text-[11.5px] tracking-wider text-ink-faint uppercase">
+                      <p className="mb-1 text-[12.5px] tracking-wider text-ink-faint uppercase">
                         Tone
                       </p>
                       <p>{persona.toneGuidance}</p>
                     </div>
                   </div>
                   <div>
-                    <p className="mb-1 text-[11.5px] tracking-wider text-ink-faint uppercase">
+                    <p className="mb-1 text-[12.5px] tracking-wider text-ink-faint uppercase">
                       Research citations
                     </p>
                     <ul className="space-y-0.5">
@@ -219,11 +219,11 @@ export default async function OutreachPage({
         )}
         {findings.length > 0 && (
           <details className="mt-3">
-            <summary className="cursor-pointer text-[12.5px] text-ink-muted">
+            <summary className="cursor-pointer text-[13.5px] text-ink-muted">
               Research findings ({findings.length}) — the exact queries and
               sources
             </summary>
-            <ul className="mt-2 space-y-1 text-[12px]">
+            <ul className="mt-2 space-y-1 text-[13px]">
               {findings.map((finding) => (
                 <li key={finding.id}>
                   <a
@@ -251,7 +251,7 @@ export default async function OutreachPage({
           detail="Add candidates first, then draft evidence-grounded, persona-shaped sequences from each candidate's page."
         />
       ) : (
-        <Card title="By candidate">
+        <Card title="👤 By candidate">
           <ul className="divide-y divide-edge">
             {candidates.map((candidate) => {
               const candidateMessages = byCandidate.get(candidate.id) ?? [];
@@ -263,10 +263,10 @@ export default async function OutreachPage({
                     className="flex items-center justify-between gap-3 py-2.5 hover:bg-panel2/40"
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-[13.5px] font-medium">
+                      <span className="block truncate text-[14.5px] font-medium">
                         {candidate.name}
                       </span>
-                      <span className="block text-[12px] text-ink-muted">
+                      <span className="block text-[13px] text-ink-muted">
                         {candidateMessages.length === 0
                           ? "No sequence drafted"
                           : `${candidateMessages.length} steps · ${candidateStats.sent} sent · ${candidateStats.replied} replied`}

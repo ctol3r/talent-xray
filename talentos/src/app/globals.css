@@ -8,8 +8,24 @@
   --color-edge2: #303845;
   --color-ink: #e8ebf0;
   --color-ink-muted: #8d95a3;
-  --color-ink-faint: #5d6572;
+  /**
+   * Lifted from #5d6572, which failed WCAG AA on every ground it was used on
+   * — 3.31 on canvas, 3.11 on panel, 2.87 on panel2 — across 239 uses that are
+   * all 10-13px text. "Faint" has to mean quieter than the words beside it,
+   * not fainter than a reader can see. #7d8694 clears 4.5 on all three
+   * (5.29 / 4.97 / 4.60) and is still visibly the quietest ink.
+   */
+  --color-ink-faint: #7d8694;
+  /**
+   * Line-work in a chart, which is not text and needs 3:1 rather than 4.5.
+   * `edge2` is 1.55 on panel — right for a 1px border between two panels,
+   * invisible for a hill curve or a graph edge, which were using it.
+   */
+  --color-line: #636e80;
   --color-accent: #6d9cff;
+  /* Where a link goes when the pointer is on it. Brighter than the accent so
+     a link that is already accent-coloured still visibly answers. */
+  --color-link-hover: #a8c4ff;
   --color-accent-soft: #1a2a4a;
   --color-ok: #4ade80;
   --color-ok-soft: #12291c;
@@ -17,11 +33,143 @@
   --color-warn-soft: #2d2410;
   --color-bad: #f87171;
   --color-bad-soft: #2d1515;
+  /**
+   * The type scale, one pixel up.
+   *
+   * The whole product was drawn at 10–13px, which is a dense workspace read
+   * by somebody who is in it all day — and a pixel too small for anybody
+   * reading it for the first time, or in the afternoon, or on a laptop that
+   * is not the one it was designed on. Every size moved up by one: the ladder
+   * keeps every rung it had, so nothing that was distinguishable stopped
+   * being, and nothing reflowed except by getting slightly bigger.
+   *
+   * These are Tailwind's own named steps, kept in step with the arbitrary
+   * sizes the components use so `text-sm` and `text-[15px]` do not drift a
+   * pixel apart.
+   */
+  --text-xs: 13px;
+  --text-xs--line-height: 17px;
+  --text-sm: 15px;
+  --text-sm--line-height: 21px;
+  --text-base: 17px;
+  --text-base--line-height: 25px;
+  --text-lg: 19px;
+  --text-lg--line-height: 29px;
+  --text-xl: 21px;
+  --text-xl--line-height: 29px;
+  --text-2xl: 25px;
+  --text-2xl--line-height: 33px;
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter,
     sans-serif;
   --font-mono:
     ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/**
+ * How far down the page each sticky thing comes to rest.
+ *
+ * In one place because they stack: a table's column headings sit under the
+ * page's title bar, and a grouped table's group headings sit under those. Three
+ * components each guessing the two above them is exactly how one of them ends
+ * up half a row too high — the same lesson as `railWidth`.
+ *
+ * Deliberately short. Sticking everything would leave a page whose top third
+ * never moves; what earns it is the bar that says where you are, the headings
+ * that say what a column means, and the heading that says which group you have
+ * scrolled into.
+ *
+ * `--sticky-title` is the title bar's height at its TALLEST — with buttons in
+ * it. The bar rests against the very top of the window, with nothing above it:
+ * a strip of canvas over a bar that is holding your place reads as a bar that
+ * has come loose. Sized for the tallest on purpose: a page without buttons
+ * leaves a few pixels of gap under its bar, which nobody notices, whereas one
+ * pixel too few clips the column headings behind it.
+ */
+:root {
+  --sticky-title: 54px;
+  --sticky-thead: 27px;
+}
+
+/**
+ * Every link answers the pointer.
+ *
+ * A rule rather than a class, because "every link" is not something a hundred
+ * call sites can be trusted to remember — and a link that looks the same
+ * hovered as unhovered is one people click twice to find out whether they
+ * clicked it.
+ *
+ * Underline and a brighter colour together, not either alone: colour by itself
+ * is invisible to some readers, and an underline by itself is easy to miss in
+ * a dense row.
+ *
+ * `data-plain` opts out, for the few links that are a whole surface rather than
+ * a piece of text — a nav row or a card — where underlining the label of a
+ * block you are already highlighting reads as a mistake.
+ */
+a {
+  transition:
+    color 120ms ease,
+    text-decoration-color 120ms ease;
+}
+
+a:hover:not([data-plain]),
+a:focus-visible:not([data-plain]) {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/**
+ * Everything you can operate says so when it has the keyboard.
+ *
+ * A rule rather than a class for the same reason links have one: a hundred
+ * call sites cannot be trusted to remember, and several of them had already
+ * removed the browser's own ring and put nothing in its place — which makes
+ * the product unusable by keyboard without making anything look different, so
+ * nobody notices.
+ *
+ * Two tones, the way Chrome's own ring is: the outer ring is the accent and
+ * the inner is the canvas, so the pair stays visible against a dark panel and
+ * against a light card alike, and against any of the graph's node colours.
+ */
+:where(
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/**
+ * One motion vocabulary, so a thing that moves means the same everywhere.
+ *
+ * 120ms for a colour or an opacity — a thing answering you. 200ms for a
+ * surface arriving or leaving. Nothing over 250ms: past that the interface is
+ * waiting for itself.
+ */
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * Reduced motion means arriving at the end state immediately, NOT losing the
+   * state — which is what `animation: none` does to an animation that ends
+   * somewhere other than where it started. Matching the convention the graph
+   * already uses: it settles in one step rather than not settling.
+   */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 html {
@@ -42,4 +190,20 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-edge2) transparent;
+}
+
+/* The same keyword carries the same colour in notes, lists and ribbons.
+   Text remains the identifier; the hue never communicates a fit score. */
+.keyword-reference {
+  color: hsl(var(--keyword-hue) 78% 78%);
+  background-color: hsl(var(--keyword-hue) 60% 45% / 0.16);
+  border-color: hsl(var(--keyword-hue) 60% 65% / 0.42);
+  border-radius: 4px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.keyword-reference:hover,
+.keyword-reference:focus-visible {
+  background-color: hsl(var(--keyword-hue) 60% 45% / 0.28);
+  text-decoration: underline;
 }

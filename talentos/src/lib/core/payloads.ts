@@ -498,7 +498,46 @@ export type OnboardingPlanPayload = z.infer<typeof onboardingPlanPayloadSchema>;
 
 // ── Candidate structured profile ────────────────────────────────────────────
 
+/**
+ * How a contact detail came to be held. This is not decoration: a pattern
+ * this app generated is a guess, one the person sent you is a fact, and the
+ * Article 14 notice has to be able to tell a person which it holds.
+ */
+export const contactProvenanceSchema = z.enum([
+  "typed_by_recruiter",
+  "given_by_person",
+  "from_a_public_page",
+  "generated_unverified",
+]);
+export type ContactProvenance = z.infer<typeof contactProvenanceSchema>;
+
+export const contactDetailSchema = z.object({
+  value: z.string().min(3).max(200),
+  provenance: contactProvenanceSchema,
+  /** Where it came from, in the recruiter's own words. */
+  note: z.string().max(300).optional(),
+  addedAt: z.string().optional(),
+});
+export type ContactDetail = z.infer<typeof contactDetailSchema>;
+
+export const candidateContactSchema = z.object({
+  emails: z.array(contactDetailSchema).max(10),
+  phones: z.array(contactDetailSchema).max(10),
+  /** Anything else you would reach them on, as an address. */
+  links: z.array(contactDetailSchema).max(20),
+});
+export type CandidateContact = z.infer<typeof candidateContactSchema>;
+
 export const candidateProfilePayloadSchema = z.object({
+  /**
+   * Optional with a default so every profile written before contact details
+   * existed still parses. A record that predates a field is not invalid.
+   */
+  contact: candidateContactSchema
+    .optional()
+    .default({ emails: [], phones: [], links: [] }),
+  headline: z.string().max(300).optional(),
+  summary: z.string().max(4000).optional(),
   experience: z.array(
     z.object({
       title: z.string(),
@@ -506,6 +545,8 @@ export const candidateProfilePayloadSchema = z.object({
       startYear: z.number().optional(),
       endYear: z.number().optional(),
       summary: z.string().optional(),
+      location: z.string().max(120).optional(),
+      current: z.boolean().optional(),
     }),
   ),
   education: z.array(
@@ -543,6 +584,7 @@ export type CandidateProfilePayload = z.infer<
 
 export function emptyCandidateProfile(): CandidateProfilePayload {
   return {
+    contact: { emails: [], phones: [], links: [] },
     experience: [],
     education: [],
     publications: [],
@@ -639,3 +681,32 @@ export const hmFeedbackEntrySchema = z.object({
   evidenceNote: z.string(),
 });
 export type HmFeedbackEntry = z.infer<typeof hmFeedbackEntrySchema>;
+
+// ── Tags proposed from a person's own material ──────────────────────────────
+
+/**
+ * A tag the model suggests for a person, with the words from their material
+ * that justify it. `evidence` is required, so a suggestion the recruiter
+ * cannot check against the CV cannot be made in the first place.
+ */
+export const suggestedTagSchema = z.object({
+  /** As it should read on the page. The slug is derived, never sent. */
+  tag: z.string().min(1).max(60),
+  kind: z.enum([
+    "skill",
+    "tool",
+    "domain",
+    "population",
+    "responsibility",
+    "credential",
+  ]),
+  evidence: z.string().min(3).max(400),
+});
+export type SuggestedTag = z.infer<typeof suggestedTagSchema>;
+
+export const candidateTagsPayloadSchema = z.object({
+  tags: z.array(suggestedTagSchema).max(24),
+  /** What the material did not support, said plainly. */
+  notFound: z.array(z.string().max(160)).max(10).optional(),
+});
+export type CandidateTagsPayload = z.infer<typeof candidateTagsPayloadSchema>;

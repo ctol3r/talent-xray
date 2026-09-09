@@ -44,11 +44,18 @@ export function quoteTerm(term: string): string {
   return /\s/.test(t) ? `"${t.replace(/"/g, "")}"` : t;
 }
 
-/** OR-join a list into a parenthesised group. */
+/**
+ * OR-join a list into a parenthesised group.
+ *
+ * `|` rather than `OR`: Google documents them as the same operator, and it is
+ * three characters shorter every time — which is what counts on the platforms
+ * that cap a query's characters rather than its words. It is also easier to
+ * see where one alternative ends and the next begins in a group of six.
+ */
 export function orGroup(terms: string[]): string {
   const cleaned = terms.filter(Boolean).map(quoteTerm).filter(Boolean);
   if (cleaned.length === 0) return "";
-  return cleaned.length === 1 ? cleaned[0] : `(${cleaned.join(" OR ")})`;
+  return cleaned.length === 1 ? cleaned[0] : `(${cleaned.join("|")})`;
 }
 
 function joinParts(parts: string[]): string {

@@ -23,7 +23,7 @@ export default async function IntakePage({
   return (
     <div>
       <PageHeader
-        title="Hiring-Manager Intake"
+        title="🎙️ Hiring-Manager Intake"
         description="A role-specific intake interview — capture the hiring manager's answers inline, then confront the playback with 'What did I get wrong?'."
         actions={
           <GenerateButton
@@ -46,7 +46,7 @@ export default async function IntakePage({
               <Tag tone={session.status === "complete" ? "ok" : "warn"}>
                 {session.status.replace("_", " ")}
               </Tag>
-              <span className="text-[13px] text-ink-muted">
+              <span className="text-[14px] text-ink-muted">
                 {answered}/{questions.length} answered
               </span>
             </div>
@@ -66,16 +66,16 @@ export default async function IntakePage({
           />
           {payload.categories.map((category) => (
             <Card key={category.id} title={category.title}>
-              <p className="mb-3 text-[12.5px] text-ink-muted italic">
+              <p className="mb-3 text-[13.5px] text-ink-muted italic">
                 {category.rationale}
               </p>
               <div className="space-y-4">
                 {category.questions.map((question) => (
                   <div key={question.id}>
-                    <p className="text-[13.5px] font-medium">
+                    <p className="text-[14.5px] font-medium">
                       {question.question}
                     </p>
-                    <p className="mt-0.5 text-[12px] text-ink-faint">
+                    <p className="mt-0.5 text-[13px] text-ink-faint">
                       Why it matters: {question.whyItMatters}
                     </p>
                     <IntakeAnswer
@@ -89,9 +89,9 @@ export default async function IntakePage({
             </Card>
           ))}
           {payload.playback && (
-            <Card title="Recruiter playback — “Let me summarize the search as I now understand it.”">
+            <Card title="🔁 Recruiter playback — “Let me summarize the search as I now understand it.”">
               <div className="space-y-4">
-                <p className="text-[13.5px]">{payload.playback.target}</p>
+                <p className="text-[14.5px]">{payload.playback.target}</p>
                 <StringList
                   title="Hard requirements"
                   items={payload.playback.hardRequirements}
@@ -101,10 +101,10 @@ export default async function IntakePage({
                   items={payload.playback.flexibleRequirements}
                 />
                 <div>
-                  <h3 className="mb-1.5 text-[11.5px] font-semibold tracking-wider text-ink-faint uppercase">
+                  <h3 className="mb-1.5 text-[12.5px] font-semibold tracking-wider text-ink-faint uppercase">
                     Ideal phenotype
                   </h3>
-                  <p className="text-[13px]">
+                  <p className="text-[14px]">
                     {payload.playback.idealPhenotype}
                   </p>
                 </div>
@@ -120,7 +120,7 @@ export default async function IntakePage({
                   title="Unresolved questions"
                   items={payload.playback.unresolvedQuestions}
                 />
-                <p className="rounded border border-accent/30 bg-accent-soft/50 px-3 py-2 text-[13px] font-medium text-accent">
+                <p className="rounded border border-accent/30 bg-accent-soft/50 px-3 py-2 text-[14px] font-medium text-accent">
                   Ask the hiring manager: “What did I get wrong?” — then edit
                   this playback and the requirements to match reality.
                 </p>

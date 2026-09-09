@@ -1,4 +1,8 @@
 import { ReviewResumeLink } from "@/components/review-resume-link";
+import { CompanyMark } from "@/components/company-mark";
+import { companySites } from "@/lib/services/companies";
+import { faviconsOn } from "@/lib/domain/settings-flags";
+import { MARKS } from "../../../../../../artifact-src/core/marks";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
@@ -32,9 +36,22 @@ import { listProfileLinks } from "@/lib/services/profile-links";
 import { declaredAccounts } from "@/lib/services/declared-links";
 import { noticeStatus } from "@/lib/domain/profile-links";
 import { listCandidates } from "@/lib/services/candidates";
+import { listPages } from "@/lib/services/pages";
 import { getSearchProject } from "@/lib/services/search-projects";
 import { generateCandidatePacketAction } from "@/lib/actions/guidance";
 import { HmFeedbackForm } from "@/components/hm-feedback-form";
+import { CandidateTagSuggestions } from "@/components/candidate-tags";
+import { ContactFinder } from "@/components/contact-finder";
+import { EvidenceTags } from "@/components/evidence-tags";
+import {
+  proposeAssessmentTags,
+  readTagsFromEvidence,
+} from "@/lib/services/tags";
+import { AssessmentTags } from "@/components/assessment-tags";
+import { MatchScorecard } from "@/components/match-scorecard";
+import { CandidateProfileForm } from "@/components/candidate-profile-form";
+import { candidateProfilePayloadSchema } from "@/lib/core/payloads";
+import { candidateMatch } from "@/lib/services/match";
 import { PACKET_KINDS, PACKET_KIND_LABELS } from "@/lib/core/enums";
 import {
   generateEvidenceAlignmentAction,
@@ -46,6 +63,7 @@ import {
   CandidateDataControls,
   NextActionForm,
   NotesForm,
+  DispositionSelect,
   StageSelect,
 } from "@/components/candidate-forms";
 import { GenerateButton } from "@/components/generate-button";
@@ -69,6 +87,13 @@ export default async function CandidatePage({
 }) {
   const { id, candidateId } = await params;
   const db = getDb();
+  const sites = companySites(db);
+  const favicons = faviconsOn();
+  // Read off the evidence, so the words are here before anybody asks for them.
+  const evidenceTags = readTagsFromEvidence(db, candidateId);
+  // Drawn only from words the job itself carries, so keeping one closes a
+  // job-to-person link rather than adding another label to a person.
+  const assessmentTags = proposeAssessmentTags(db, candidateId);
   const candidate = await getCandidate(db, candidateId);
   if (!candidate || candidate.searchProjectId !== id) notFound();
   const [
@@ -122,20 +147,42 @@ export default async function CandidatePage({
   return (
     <div>
       <PageHeader
-        title={candidate.name}
+        title={`${MARKS.candidate} ${candidate.name}`}
         description={
-          [
-            candidate.currentTitle,
-            candidate.currentCompany,
-            candidate.geography,
-          ]
-            .filter(Boolean)
-            .join(" · ") || undefined
+          candidate.currentTitle ||
+          candidate.currentCompany ||
+          candidate.geography ? (
+            <span className="flex flex-wrap items-center gap-1.5">
+              {candidate.currentTitle && <span>{candidate.currentTitle}</span>}
+              {candidate.currentCompany && (
+                <>
+                  {candidate.currentTitle && <span aria-hidden>·</span>}
+                  <CompanyMark
+                    name={candidate.currentCompany}
+                    url={sites.get(
+                      candidate.currentCompany.trim().toLowerCase(),
+                    )}
+                    favicons={favicons}
+                    size={16}
+                  />
+                  <span>{candidate.currentCompany}</span>
+                </>
+              )}
+              {candidate.geography && (
+                <>
+                  {(candidate.currentTitle || candidate.currentCompany) && (
+                    <span aria-hidden>·</span>
+                  )}
+                  <span>{candidate.geography}</span>
+                </>
+              )}
+            </span>
+          ) : undefined
         }
         actions={
           <div className="flex items-start gap-3">
             <ReviewResumeLink
-              className="underline text-teal-800"
+              className="underline text-accent"
               href={`/searches/${id}/candidates/${candidateId}/review`}
             >
               Review CV ↔ JD
@@ -150,6 +197,10 @@ export default async function CandidatePage({
               candidateId={candidateId}
               currentStage={candidate.stage}
               stages={stages}
+            />
+            <DispositionSelect
+              candidateId={candidateId}
+              disposition={candidate.disposition}
             />
           </div>
         }
@@ -172,7 +223,7 @@ export default async function CandidatePage({
               />
             </div>
             {!evidence ? (
-              <p className="text-[13px] text-ink-muted">
+              <p className="text-[14px] text-ink-muted">
                 Compare this candidate&apos;s observable, job-related evidence
                 against the success profile. Advisory decision support — never
                 an automated decision.
@@ -193,11 +244,11 @@ export default async function CandidatePage({
                         " ",
                       )}
                     </Tag>
-                    <span className="text-[11.5px] text-ink-faint">
+                    <span className="text-[12.5px] text-ink-faint">
                       advisory review priority — you decide
                     </span>
                   </div>
-                  <p className="mt-1 text-[12.5px] text-ink-muted">
+                  <p className="mt-1 text-[13.5px] text-ink-muted">
                     {evidence.payload.reviewPriority.rationale}
                   </p>
                 </div>
@@ -208,14 +259,14 @@ export default async function CandidatePage({
                       className="rounded border border-edge bg-panel2/50 px-3 py-2"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[13px] font-medium">
+                        <span className="text-[14px] font-medium">
                           {item.criterion}
                         </span>
                         <Tag tone={EVIDENCE_TONE[item.status]}>
                           {item.status}
                         </Tag>
                       </div>
-                      <p className="mt-1 text-[12.5px] text-ink-muted">
+                      <p className="mt-1 text-[13.5px] text-ink-muted">
                         {item.evidenceText}
                       </p>
                       {item.sourceUrl && (
@@ -223,7 +274,7 @@ export default async function CandidatePage({
                           href={item.sourceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[12px] text-accent hover:underline"
+                          className="text-[13px] text-accent hover:underline"
                         >
                           source
                         </a>
@@ -233,10 +284,10 @@ export default async function CandidatePage({
                 </ul>
                 {evidence.payload.questionsToValidate.length > 0 && (
                   <div>
-                    <h3 className="mb-1.5 text-[11.5px] font-semibold tracking-wider text-ink-faint uppercase">
+                    <h3 className="mb-1.5 text-[12.5px] font-semibold tracking-wider text-ink-faint uppercase">
                       Validate on the screen
                     </h3>
-                    <ul className="list-disc space-y-1 pl-5 text-[13px] text-ink-muted">
+                    <ul className="list-disc space-y-1 pl-5 text-[14px] text-ink-muted">
                       {evidence.payload.questionsToValidate.map((q, i) => (
                         <li key={i}>{q}</li>
                       ))}
@@ -244,16 +295,25 @@ export default async function CandidatePage({
                   </div>
                 )}
                 {evidence.payload.outreachAngle && (
-                  <p className="text-[13px]">
+                  <p className="text-[14px]">
                     <span className="text-ink-faint">Outreach angle: </span>
                     {evidence.payload.outreachAngle}
                   </p>
                 )}
+                <div className="border-t border-edge pt-3">
+                  <h3 className="mb-1.5 text-[12.5px] font-semibold tracking-wider text-ink-faint uppercase">
+                    🏷️ Tags from this assessment
+                  </h3>
+                  <AssessmentTags
+                    candidateId={candidateId}
+                    proposals={assessmentTags}
+                  />
+                </div>
               </div>
             )}
           </Card>
 
-          <Card title="Outreach">
+          <Card title="✉️ Outreach">
             <div className="mb-3 flex justify-end">
               <GenerateButton
                 action={generateOutreachAction}
@@ -265,7 +325,7 @@ export default async function CandidatePage({
               />
             </div>
             {!sequence ? (
-              <p className="text-[13px] text-ink-muted">
+              <p className="text-[14px] text-ink-muted">
                 Drafts a personalized multi-step sequence citing only recorded
                 evidence, written for the research-backed audience persona of
                 this candidate&apos;s segment (the audience is researched on the
@@ -279,7 +339,7 @@ export default async function CandidatePage({
                     persona: {sequence.payload.personaLabel}
                   </Tag>
                 )}
-                <p className="text-[12.5px] text-ink-muted italic">
+                <p className="text-[13.5px] text-ink-muted italic">
                   {sequence.payload.cadenceRationale}
                 </p>
                 {sequence.payload.steps.map((step) => {
@@ -292,7 +352,7 @@ export default async function CandidatePage({
                       className="rounded border border-edge bg-panel2/50 px-3 py-2"
                     >
                       <summary className="flex cursor-pointer items-center justify-between gap-2">
-                        <span className="text-[13px] font-medium">
+                        <span className="text-[14px] font-medium">
                           {step.kind.replaceAll("_", " ")} · day{" "}
                           {step.dayOffset}
                         </span>
@@ -306,21 +366,21 @@ export default async function CandidatePage({
                       {step.subjectVariants.length > 0 && (
                         <div className="mt-2 space-y-0.5">
                           {step.subjectVariants.map((subject, i) => (
-                            <p key={i} className="text-[12.5px] text-ink-muted">
+                            <p key={i} className="text-[13.5px] text-ink-muted">
                               Subject {i + 1}: {subject}
                             </p>
                           ))}
                         </div>
                       )}
-                      <pre className="mt-2 rounded border border-edge bg-canvas p-3 font-sans text-[13px] whitespace-pre-wrap">
+                      <pre className="mt-2 rounded border border-edge bg-canvas p-3 font-sans text-[14px] whitespace-pre-wrap">
                         {step.body}
                       </pre>
                       {step.citations.length > 0 && (
                         <div className="mt-2">
-                          <h4 className="text-[11px] font-semibold tracking-wider text-ink-faint uppercase">
+                          <h4 className="text-[12px] font-semibold tracking-wider text-ink-faint uppercase">
                             Personalization citations
                           </h4>
-                          <ul className="mt-1 space-y-0.5 text-[12px] text-ink-faint">
+                          <ul className="mt-1 space-y-0.5 text-[13px] text-ink-faint">
                             {step.citations.map((citation, i) => (
                               <li key={i}>
                                 “{citation.personalization}” ←{" "}
@@ -338,8 +398,8 @@ export default async function CandidatePage({
           </Card>
 
           {candidate.resumeText && (
-            <Card title="Pasted profile / resume">
-              <pre className="max-h-72 overflow-y-auto rounded border border-edge bg-canvas p-3 font-mono text-[12px] whitespace-pre-wrap text-ink-muted">
+            <Card title="📄 Pasted profile / resume">
+              <pre className="max-h-72 overflow-y-auto rounded border border-edge bg-canvas p-3 font-mono text-[13px] whitespace-pre-wrap text-ink-muted">
                 {candidate.resumeText}
               </pre>
             </Card>
@@ -366,7 +426,7 @@ export default async function CandidatePage({
                 : null
             }
           />
-          <Card title="Next action">
+          <Card title="➡️ Next action">
             <NextActionForm
               candidateId={candidateId}
               nextAction={candidate.nextAction}
@@ -398,10 +458,10 @@ export default async function CandidatePage({
             hosted={hostedEngineIds()}
           />
           {sourceEvidence.length > 0 && (
-            <Card title="Source evidence">
+            <Card title="🔍 Source evidence">
               <ul className="space-y-3">
                 {sourceEvidence.map((item) => (
-                  <li key={item.id} className="text-[12.5px]">
+                  <li key={item.id} className="text-[13.5px]">
                     <div className="mb-0.5 flex items-center gap-1.5">
                       <Tag
                         tone={
@@ -415,13 +475,13 @@ export default async function CandidatePage({
                           : "unverified"}
                       </Tag>
                       {item.provider && (
-                        <span className="text-[11px] text-ink-faint">
+                        <span className="text-[12px] text-ink-faint">
                           {item.provider}
                           {item.providerRank ? ` · #${item.providerRank}` : ""}
                         </span>
                       )}
                       {item.provenance === "imported" && (
-                        <span className="text-[11px] text-warn">
+                        <span className="text-[12px] text-warn">
                           vendor data from {item.retrievedAt.slice(0, 10)} —
                           decays
                         </span>
@@ -436,32 +496,72 @@ export default async function CandidatePage({
                       {item.title ?? item.sourceUrl}
                     </a>
                     {item.snippet && (
-                      <p className="mt-0.5 text-[12px] text-ink-muted">
+                      <p className="mt-0.5 text-[13px] text-ink-muted">
                         “{item.snippet}”
                       </p>
                     )}
                     {item.query && (
-                      <p className="mt-0.5 font-mono text-[11px] text-ink-faint">
+                      <p className="mt-0.5 font-mono text-[12px] text-ink-faint">
                         query: {item.query}
                       </p>
                     )}
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-[11.5px] text-ink-faint">
+              <p className="mt-2 text-[12.5px] text-ink-faint">
                 Search-result snippets are evidence about a source — not resume
                 content. Verify on the source page before relying on one.
               </p>
             </Card>
           )}
-          <Card title="Recruiter notes">
+          <Card title="👤 Profile">
+            <CandidateProfileForm
+              candidateId={candidateId}
+              profile={candidateProfilePayloadSchema.parse(
+                candidate.profile ?? {},
+              )}
+            />
+          </Card>
+          <MatchScorecard score={await candidateMatch(db, candidateId)} />
+          <ContactFinder
+            candidateName={candidate.name}
+            company={candidate.currentCompany}
+          />
+          <Card title="🏷️ Tags">
+            <p className="mb-2 text-[13.5px] text-ink-muted">
+              A tag is a word written in the notes below, in{" "}
+              <code className="text-ink">[[brackets]]</code> or after a{" "}
+              <code className="text-ink">#</code>. Every tag is a page listing
+              everyone and every search that carries it.
+            </p>
+            <EvidenceTags
+              candidateId={candidateId}
+              suggestions={evidenceTags}
+            />
+            <div className="mt-3 border-t border-edge pt-3">
+              <p className="mb-2 text-[13px] text-ink-muted">
+                For words the ontology has never heard of — a company&apos;s own
+                vocabulary, a named system, a niche method — ask the model as
+                well.
+              </p>
+              <CandidateTagSuggestions candidateId={candidateId} />
+            </div>
+          </Card>
+          <Card title="🗒️ Recruiter notes">
             <NotesForm
               candidateId={candidateId}
               notes={candidate.recruiterNotes}
+              tags={listPages(db).map((page) => ({
+                slug: page.slug,
+                display: page.display,
+                count: page.count,
+                kind: page.kind,
+                hint: page.hint,
+              }))}
             />
           </Card>
-          <Card title="Candidate packets">
-            <p className="text-[12.5px] text-ink-muted">
+          <Card title="👤 Candidate packets">
+            <p className="text-[13.5px] text-ink-muted">
               Candidate-facing drafts you share manually — process transparency,
               interview prep, offer explainers. Nothing sends automatically.
             </p>
@@ -485,19 +585,19 @@ export default async function CandidatePage({
                 key={packet.id}
                 className="mt-3 rounded border border-edge2 bg-canvas p-3"
               >
-                <p className="text-[13px] font-semibold">
+                <p className="text-[14px] font-semibold">
                   {packet.payload.title}{" "}
-                  <span className="ml-1 text-[11px] font-normal text-ink-faint">
+                  <span className="ml-1 text-[12px] font-normal text-ink-faint">
                     {PACKET_KIND_LABELS[packet.kind]} ·{" "}
                     {packet.meta?.provider ?? "draft"}
                   </span>
                 </p>
                 {packet.payload.sections.map((section) => (
                   <div key={section.title} className="mt-2">
-                    <p className="text-[12px] font-semibold text-ink-muted">
+                    <p className="text-[13px] font-semibold text-ink-muted">
                       {section.title}
                     </p>
-                    <p className="whitespace-pre-wrap text-[12.5px]">
+                    <p className="whitespace-pre-wrap text-[13.5px]">
                       {section.body}
                     </p>
                   </div>
@@ -505,11 +605,11 @@ export default async function CandidatePage({
               </div>
             ))}
           </Card>
-          <Card title="Hiring-manager feedback">
+          <Card title="💬 Hiring-manager feedback">
             {(candidate.hmFeedback ?? []).length > 0 && (
               <ul className="mb-3 space-y-1.5">
                 {(candidate.hmFeedback ?? []).map((entry) => (
-                  <li key={entry.at} className="text-[12.5px]">
+                  <li key={entry.at} className="text-[13.5px]">
                     <Tag
                       tone={
                         entry.decision === "advance"
@@ -522,7 +622,7 @@ export default async function CandidatePage({
                       {entry.decision}
                     </Tag>{" "}
                     <span className="text-ink-muted">{entry.evidenceNote}</span>
-                    <span className="ml-1 text-[11px] text-ink-faint">
+                    <span className="ml-1 text-[12px] text-ink-faint">
                       {entry.at.slice(0, 10)}
                     </span>
                   </li>
@@ -531,8 +631,8 @@ export default async function CandidatePage({
             )}
             <HmFeedbackForm candidateId={candidateId} />
           </Card>
-          <Card title="Close & onboarding">
-            <p className="text-[13px] text-ink-muted">
+          <Card title="🤝 Close & onboarding">
+            <p className="text-[14px] text-ink-muted">
               Offer, close plan, and onboarding live in the{" "}
               <Link
                 href={`/searches/${id}/close`}
@@ -550,9 +650,9 @@ export default async function CandidatePage({
               .
             </p>
           </Card>
-          <Card title="Data controls">
+          <Card title="🛡️ Data controls">
             <CandidateDataControls candidateId={candidateId} />
-            <p className="mt-2 text-[11.5px] text-ink-faint">
+            <p className="mt-2 text-[12.5px] text-ink-faint">
               Candidate data is sensitive: export everything held about this
               person, or delete it permanently.
             </p>

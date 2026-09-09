@@ -40,7 +40,9 @@ describe("orGroup", () => {
     expect(orGroup(["NeurIPS"])).toBe("NeurIPS");
   });
   it("wraps multiple terms", () => {
-    expect(orGroup(["a", "b c"])).toBe('(a OR "b c")');
+    // `|` rather than `OR`: Google documents them as the same operator, and
+    // it is three characters shorter every time.
+    expect(orGroup(["a", "b c"])).toBe('(a|"b c")');
   });
   it("returns empty string for empty input", () => {
     expect(orGroup([])).toBe("");
@@ -67,9 +69,9 @@ describe("composeQueries", () => {
       (q) => q.platform.includes("LinkedIn x-ray") && q.breadth === "narrow",
     );
     expect(narrow?.query).toContain('"machine learning"');
-    expect(narrow?.query).toContain("(Anthropic OR OpenAI)");
+    expect(narrow?.query).toContain("(Anthropic|OpenAI)");
     expect(narrow?.query).toContain(
-      '("Research Scientist" OR "Research Engineer")',
+      '("Research Scientist"|"Research Engineer")',
     );
   });
 
