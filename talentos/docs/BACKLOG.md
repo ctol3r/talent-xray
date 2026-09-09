@@ -727,3 +727,30 @@ built the same day; what is left is below.
   has no filesystem and no session outbox. This is one of the places local and
   artifact genuinely diverge — worth stating rather than leaving as an
   apparent gap in the standing "must also run as an artifact" constraint.
+
+## From the prefetch-5xx investigation (2026-09-08)
+
+Full record: `docs/RSC-5XX-INVESTIGATION-2026-09-08.md`. The lead was 38
+`?_rsc=` failures across every route; the cause was one pending migration, not
+the SQLite connection strategy, which was measured and cleared. Two things it
+left behind:
+
+- **A pending migration has no readable face.** The guard in
+  `src/lib/db/client.ts` throws the right error for the right reason, but
+  because `getDb()` caches only on success it throws once per request, so a
+  single un-run migration presents as every route in the app returning 500 at
+  once — including every sidebar prefetch. The person seeing it gets a blank
+  workspace and no text; the sentence naming the one command to run is in a
+  server log they do not have open. An error boundary that recognises this one
+  case and renders it as a sentence would turn a wall into an instruction.
+  Deliberately not built here: it is an error-presentation feature, and this
+  was an investigation.
+- **`busy_timeout` is never set, so it is zero.** Latent rather than live:
+  one process holds one connection and better-sqlite3 serialises on it, which
+  is why 36 simultaneous requests measured clean. But `pnpm dev`, `pnpm start`
+  and `pnpm smoke` all resolve to `./data/talentos.db` unless told otherwise,
+  and any two of them running together would meet an immediate `SQLITE_BUSY`
+  rather than waiting. A few hundred milliseconds of timeout is the ordinary
+  setting; it needs a decision rather than a reflex, since a writer that waits
+  is a request that hangs.
+
