@@ -174,6 +174,24 @@ describe("charts the derivation cannot place", () => {
     expect(reading.settled).toEqual([]);
   });
 
+  it("never ticks a phase the job has not reached", () => {
+    // Taken from a real chart: the first five scopes untouched, the last two
+    // dragged along. Decide has nothing uphill in it, and is still ahead.
+    let chart = defaultChart();
+    chart = moveScope(chart, "s6", 0.36);
+    chart = moveScope(chart, "s7", 0.7);
+    const reading = read(chart);
+    expect(reading.phase).toBe("understand");
+    expect(reading.settled).toEqual([]);
+  });
+
+  it("ticks the phases behind the current one", () => {
+    const chart = settle(defaultChart(), ["s1", "s2", "s3", "s4"]);
+    const reading = read(chart);
+    expect(reading.phase).toBe("engage");
+    expect(reading.settled).toEqual(["understand", "find"]);
+  });
+
   it("does not call a phase settled when it has no scopes left", () => {
     // Deleting 'Where these people are' and 'Reaching them' must not report
     // Find as finished — there is nothing there to have finished.

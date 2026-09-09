@@ -36,6 +36,12 @@ import type {
  * ranking the phase row used to do with a second click. Crew is in neither
  * row: it is an instrument for watching background work rather than a step in
  * a job, so it is reachable by name from the "/" menu and nowhere else.
+ *
+ * There is exactly one line of prose here, and it is the phase row's. The
+ * "what this phase is for" line that used to sit under the tabs has moved into
+ * each phase's `title`: with every group named in the row itself, a sentence
+ * explaining the group you happen to be in was the third thing on screen
+ * saying the same word.
  */
 
 interface Module {
@@ -159,7 +165,6 @@ export function WorkspaceNav({
           />
         ))}
       </nav>
-      <p className="mt-1 text-[12.5px] text-ink-faint">{viewing.detail}</p>
     </div>
   );
 }

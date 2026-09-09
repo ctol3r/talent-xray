@@ -62,7 +62,17 @@ export interface JobPhaseReading {
   phase: JobPhaseId;
   /** The scope that put the job here. Null when nothing is left uphill. */
   because: ScopeReading | null;
-  /** Phases whose scopes are all over the crest or off the hill. */
+  /**
+   * Phases the job is past: earlier than the current one, and with scopes of
+   * their own to have finished.
+   *
+   * Deliberately not "every phase with nothing uphill in it". One of the real
+   * pilot charts has the first five scopes untouched at zero and the last two
+   * dragged along, which by that reading would tick Decide as settled while
+   * the job sits in Understand — a mark that says the end is finished and the
+   * beginning is not. Behind you is a thing a phase can be; ahead of you and
+   * incidentally downhill is not.
+   */
   settled: JobPhaseId[];
   /**
    * True when no scope has been touched, so the phase below is where a job
@@ -111,7 +121,7 @@ export function jobPhase(readings: ScopeReading[]): JobPhaseReading {
     JOB_PHASES.find((candidate) => openIn(candidate).length > 0) ??
     JOB_PHASES[JOB_PHASES.length - 1];
 
-  const settled = JOB_PHASES.filter(
+  const settled = JOB_PHASES.slice(0, JOB_PHASES.indexOf(phase)).filter(
     (candidate) =>
       placed.some(
         (reading) => DEFAULT_SCOPE_PHASE[reading.scope.id] === candidate,
