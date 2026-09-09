@@ -124,3 +124,35 @@ test("Tab overrides the classification without retyping", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/sourcing\?q=/);
 });
+
+test("the workspace's promise is kept: / reaches another phase's module", async ({
+  page,
+}) => {
+  // The job workspace says "press / to go anywhere" in so many words. The two
+  // tests above prove the key opens the menu; this one proves the sentence,
+  // which is a larger claim: anywhere has to include a module belonging to a
+  // different phase from the page you are standing on, reached without
+  // touching the nav. Role is in Understand, Analytics is in Decide.
+  await page.goto("/searches/new");
+  await page.fill('input[name="name"]', "E2E — go anywhere");
+  await page.fill('input[name="roleTitle"]', "Founding Recruiter");
+  await page.selectOption('select[name="startDateAgreement"]', "not_agreed");
+  await page.getByRole("button", { name: "Create job", exact: true }).click();
+  await expect(page).toHaveURL(/\/searches\/[^/]+\/role/);
+
+  await expect(page.getByText("press / to go anywhere")).toBeVisible();
+
+  await page.locator("body").click({ position: { x: 5, y: 5 } });
+  await page.keyboard.press("/");
+  const menu = page.getByTestId("command-bar");
+  await expect(menu).toBeVisible();
+
+  // Type, then choose — the menu shows the first twelve until you narrow it,
+  // which is the whole reason it has an input. Analytics is nineteenth.
+  await page.keyboard.type("analytics");
+  await menu
+    .getByRole("button", { name: /Analytics/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/searches\/[^/]+\/analytics/);
+});
