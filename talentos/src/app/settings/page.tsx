@@ -173,6 +173,28 @@ export default function SettingsPage() {
           </p>
         </Card>
         <DataRequestCard />
+        <Card title="📦 Portable workspace">
+          <p className="text-[14px] text-ink-muted">
+            Save this desk as one file, then open it in the portable build — the
+            single-page version that runs in a browser with no server and no
+            database. The jobs and the people on them travel. Generated modules
+            do not: the portable build reaches a model of its own, so it can
+            make its own rather than carry stale ones.
+          </p>
+          <p className="mt-2 text-[13px] text-ink-faint">
+            The file lands in your Downloads folder and goes nowhere else —
+            which is the reason it is a file at all. An address somebody
+            objected to is left out of it, and the download says how many were
+            held back.
+          </p>
+          <a
+            className="mt-3 inline-block rounded border border-edge px-3 py-1.5 text-[13px] text-accent hover:border-accent"
+            href="/api/workspace/export"
+            download
+          >
+            Export workspace
+          </a>
+        </Card>
         <Card title="🔗 Declared profile links">
           <div className="mb-2 flex flex-wrap gap-2">
             <Tag tone={githubMode === "off" ? "neutral" : "ok"}>

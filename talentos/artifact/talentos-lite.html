@@ -119,6 +119,18 @@ body {
   color: var(--faint);
   padding: 0 6px 6px;
 }
+.rail-note {
+  padding: 6px 6px 0;
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.rail-note.ok {
+  color: var(--ok);
+}
+.rail-note.bad {
+  color: var(--bad);
+}
 .search-item {
   display: block;
   width: 100%;
@@ -1313,6 +1325,24 @@ mark.pp-mark:focus-visible {
       >
         + New search
       </button>
+      <button
+        class="btn small"
+        id="import-workspace-btn"
+        type="button"
+        style="margin: 8px 6px 0"
+      >
+        Import workspace
+      </button>
+      <input
+        id="import-workspace-file"
+        type="file"
+        accept="application/json,.json"
+        hidden
+      />
+      <p class="rail-note" id="import-workspace-status" role="status">
+        A workspace file exported from the TalentOS app. It is read here in your
+        browser and never uploaded.
+      </p>
     </div>
     <div class="rail-section">
       <div class="rail-label" id="modules-label">Modules</div>
@@ -1879,5 +1909,5 @@ This is your decision. Continue?`);if(exitSelect.value="",!ok)return;let note=wi
     <span class="chip ${URGENCY_CLASS2[nba.urgency]}">NEXT</span>
     <div class="nba-text"><b>${esc(nba.step.title)}</b><span class="why">${esc(nba.why)}</span></div>
     <span class="spacer"></span>
-  </div>`),wheel=el('<button class="btn small wheel-btn" type="button" aria-haspopup="dialog" title="The eight lettered next steps of the latest output, as a wheel"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"></circle><circle cx="8" cy="8" r="2" fill="currentColor"></circle><path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3" stroke="currentColor" stroke-width="1.6"></path></svg> Wheel</button>');if(wheel.onclick=()=>openWheel(wheel),row.append(wheel),nba.urgency!=="done"){let go=el('<button class="btn small primary" type="button">Take me there</button>');go.onclick=()=>performAction(nba.step),row.append(go)}bar.append(row)}__name(renderHeader,"renderHeader");function goToPhase(key){let entries=entriesFor(key,state.mode);entries.length&&(state.module=entries[0].key,render())}__name(goToPhase,"goToPhase");var ARTIFACT_VERSION="0.1.0+19101881ea";setRenderer(()=>{renderRail(),renderHeader(),renderMain()});installLinkOut();$("#new-search-btn")?.addEventListener("click",()=>{state.current=null,state.module="overview",render()});async function boot(){let versionEl=$("#artifact-version");versionEl&&(versionEl.textContent=ARTIFACT_VERSION),window.__talentos={version:ARTIFACT_VERSION,state,render},await reloadSearches(),state.searches.length||(await store.saveSearch(EXAMPLE_SEARCH),state.searches=[EXAMPLE_SEARCH]),await selectSearch(state.searches[0].id),render();let runtime=window.claude,[db,sample,mcp]=await Promise.all([runtime?runtime.use("db").catch(()=>null):Promise.resolve(null),runtime?runtime.use("sample").catch(()=>null):Promise.resolve(null),runtime?runtime.use("mcp").catch(()=>null):Promise.resolve(null)]);setSample(sample),setMcp(mcp),db&&(attachDb(db),(await store.listSearches()).length||await store.saveSearch(EXAMPLE_SEARCH),await reloadSearches(),await selectSearch(state.current&&state.searches.some(s=>s.id===state.current?.id)?state.current.id:state.searches[0].id)),sample||hideAi(),render(),aiAvailable()||console.info("TalentOS: AI generation unavailable in this view; everything else works.")}__name(boot,"boot");boot();})();
+  </div>`),wheel=el('<button class="btn small wheel-btn" type="button" aria-haspopup="dialog" title="The eight lettered next steps of the latest output, as a wheel"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"></circle><circle cx="8" cy="8" r="2" fill="currentColor"></circle><path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3" stroke="currentColor" stroke-width="1.6"></path></svg> Wheel</button>');if(wheel.onclick=()=>openWheel(wheel),row.append(wheel),nba.urgency!=="done"){let go=el('<button class="btn small primary" type="button">Take me there</button>');go.onclick=()=>performAction(nba.step),row.append(go)}bar.append(row)}__name(renderHeader,"renderHeader");function goToPhase(key){let entries=entriesFor(key,state.mode);entries.length&&(state.module=entries[0].key,render())}__name(goToPhase,"goToPhase");var WORKSPACE_BUNDLE_KIND="talentos.workspace",WORKSPACE_BUNDLE_VERSION=1,bundledCandidateSchema=external_exports.object({id:external_exports.string().min(1),name:external_exports.string().min(1),currentTitle:external_exports.string().optional(),currentCompany:external_exports.string().optional(),geography:external_exports.string().optional(),profileUrls:external_exports.array(external_exports.string()).default([]),notes:external_exports.string().optional(),pastedText:external_exports.string().optional(),createdAt:external_exports.string()}),bundledSearchSchema=external_exports.object({facts:searchFactsSchema,candidates:external_exports.record(external_exports.string(),bundledCandidateSchema).default({}),artifacts:external_exports.record(external_exports.string(),external_exports.unknown()).default({})}),workspaceBundleSchema=external_exports.object({kind:external_exports.literal(WORKSPACE_BUNDLE_KIND),version:external_exports.literal(WORKSPACE_BUNDLE_VERSION),exportedAt:external_exports.string(),source:external_exports.string().default("talentos-app"),storeVersion:external_exports.number().int().positive(),searches:external_exports.record(external_exports.string(),bundledSearchSchema).default({})});var BundleShapeError=class extends Error{static{__name(this,"BundleShapeError")}constructor(message){super(message),this.name="BundleShapeError"}};function readBundle(raw){let parsed=workspaceBundleSchema.safeParse(raw);if(parsed.success)return parsed.data;let first=parsed.error.issues[0],where=first?.path.join(".")||"(root)",looksForeign=typeof raw=="object"&&raw!==null&&raw.kind!==WORKSPACE_BUNDLE_KIND;throw new BundleShapeError(looksForeign?`This is not a ${PRODUCT_NAME} workspace file — it has no "kind": "${WORKSPACE_BUNDLE_KIND}".`:`${where}: ${first?.message??"did not match the workspace shape"}`)}__name(readBundle,"readBundle");async function importWorkspace(bundle,store2){let existing=new Set((await store2.listSearches()).map(s=>s.id)),searches=0,candidates=0,replaced=0;for(let[id,incoming]of Object.entries(bundle.searches)){existing.has(id)&&(replaced+=1),await store2.saveSearch({...incoming.facts,id}),searches+=1;for(let candidate of Object.values(incoming.candidates))await store2.saveCandidate(id,candidate),candidates+=1}return{searches,candidates,replaced,exportedAt:bundle.exportedAt}}__name(importWorkspace,"importWorkspace");function describeOutcome(outcome){let jobs=`${outcome.searches} ${outcome.searches===1?"job":"jobs"}`,people=`${outcome.candidates} ${outcome.candidates===1?"person":"people"}`,again=outcome.replaced>0?` — ${outcome.replaced} already here, overwritten`:"";return`Imported ${jobs} and ${people}${again}.`}__name(describeOutcome,"describeOutcome");function say(message,tone){let note=$("#import-workspace-status");note&&(note.className=tone?`rail-note ${tone}`:"rail-note",note.textContent=message)}__name(say,"say");async function take(file2){say(`Reading ${file2.name}…`,"");let parsed;try{parsed=JSON.parse(await file2.text())}catch{say("That file is not JSON.","bad");return}try{let bundle=readBundle(parsed),outcome=await importWorkspace(bundle,store);await reloadSearches();let first=Object.keys(bundle.searches)[0];first?await selectSearch(first):state.searches[0]&&await selectSearch(state.searches[0].id),render(),say(describeOutcome(outcome),"ok")}catch(error61){say(error61 instanceof BundleShapeError?error61.message:`Import failed: ${error61.message}`,"bad")}}__name(take,"take");function installWorkspaceImport(){let button=$("#import-workspace-btn"),input2=$("#import-workspace-file");!button||!input2||(button.addEventListener("click",()=>input2.click()),input2.addEventListener("change",()=>{let file2=input2.files?.[0];input2.value="",file2&&take(file2)}))}__name(installWorkspaceImport,"installWorkspaceImport");var ARTIFACT_VERSION="0.1.0+acd44fd923";setRenderer(()=>{renderRail(),renderHeader(),renderMain()});installLinkOut();installWorkspaceImport();$("#new-search-btn")?.addEventListener("click",()=>{state.current=null,state.module="overview",render()});async function boot(){let versionEl=$("#artifact-version");versionEl&&(versionEl.textContent=ARTIFACT_VERSION),window.__talentos={version:ARTIFACT_VERSION,state,render},await reloadSearches(),state.searches.length||(await store.saveSearch(EXAMPLE_SEARCH),state.searches=[EXAMPLE_SEARCH]),await selectSearch(state.searches[0].id),render();let runtime=window.claude,[db,sample,mcp]=await Promise.all([runtime?runtime.use("db").catch(()=>null):Promise.resolve(null),runtime?runtime.use("sample").catch(()=>null):Promise.resolve(null),runtime?runtime.use("mcp").catch(()=>null):Promise.resolve(null)]);setSample(sample),setMcp(mcp),db&&(attachDb(db),(await store.listSearches()).length||await store.saveSearch(EXAMPLE_SEARCH),await reloadSearches(),await selectSearch(state.current&&state.searches.some(s=>s.id===state.current?.id)?state.current.id:state.searches[0].id)),sample||hideAi(),render(),aiAvailable()||console.info("TalentOS: AI generation unavailable in this view; everything else works.")}__name(boot,"boot");boot();})();
 </script>

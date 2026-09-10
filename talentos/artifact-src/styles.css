@@ -117,6 +117,18 @@ body {
   color: var(--faint);
   padding: 0 6px 6px;
 }
+.rail-note {
+  padding: 6px 6px 0;
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.rail-note.ok {
+  color: var(--ok);
+}
+.rail-note.bad {
+  color: var(--bad);
+}
 .search-item {
   display: block;
   width: 100%;

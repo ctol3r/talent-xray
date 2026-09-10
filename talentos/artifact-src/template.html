@@ -24,6 +24,24 @@
       >
         + New search
       </button>
+      <button
+        class="btn small"
+        id="import-workspace-btn"
+        type="button"
+        style="margin: 8px 6px 0"
+      >
+        Import workspace
+      </button>
+      <input
+        id="import-workspace-file"
+        type="file"
+        accept="application/json,.json"
+        hidden
+      />
+      <p class="rail-note" id="import-workspace-status" role="status">
+        A workspace file exported from the TalentOS app. It is read here in your
+        browser and never uploaded.
+      </p>
     </div>
     <div class="rail-section">
       <div class="rail-label" id="modules-label">Modules</div>

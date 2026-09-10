@@ -30,6 +30,7 @@ import {
 } from "./ui/shell";
 import { renderHeader } from "./ui/header";
 import { installLinkOut } from "./ui/linkout";
+import { installWorkspaceImport } from "./app/workspace-import";
 
 declare const __TALENTOS_ARTIFACT_VERSION__: string;
 export const ARTIFACT_VERSION =
@@ -56,6 +57,7 @@ setRenderer(() => {
   renderMain();
 });
 installLinkOut();
+installWorkspaceImport();
 
 $("#new-search-btn")?.addEventListener("click", () => {
   state.current = null;
