@@ -1,0 +1,183 @@
+[
+  {
+    "candidateId": "C31",
+    "searchProjectId": "SP104",
+    "observations": [
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-DIST",
+        "statement": "Strong distributed systems experience on large-scale production infrastructure.",
+        "observedAt": "2026-08-05T00:00:00.000Z"
+      },
+      {
+        "type": "misses_requirement",
+        "criterionId": "CRIT-GO",
+        "statement": "Primary language is Rust rather than Go.",
+        "observedAt": "2026-08-05T00:00:00.000Z"
+      },
+      {
+        "type": "other",
+        "statement": "Recruiter screen: strong.",
+        "observedAt": "2026-08-07T00:00:00.000Z"
+      },
+      {
+        "type": "hm_rejected",
+        "criterionId": "CRIT-GO",
+        "statement": "HM rejected: lacks direct Go experience.",
+        "observedAt": "2026-08-12T00:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "candidateId": "C44",
+    "searchProjectId": "SP104",
+    "observations": [
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-DIST",
+        "statement": "Principal Engineer with strong architecture ownership over C++ infrastructure.",
+        "observedAt": "2026-08-08T00:00:00.000Z"
+      },
+      {
+        "type": "misses_requirement",
+        "criterionId": "CRIT-GO",
+        "statement": "C++ infrastructure background; no professional Go.",
+        "observedAt": "2026-08-08T00:00:00.000Z"
+      },
+      {
+        "type": "misses_requirement",
+        "criterionId": "CRIT-STAFF",
+        "statement": "No current Staff Engineer title (Principal Engineer).",
+        "observedAt": "2026-08-08T00:00:00.000Z"
+      },
+      {
+        "type": "hm_rejected",
+        "criterionId": "CRIT-STAFF",
+        "statement": "HM rejected: title/profile mismatch.",
+        "observedAt": "2026-08-14T00:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "candidateId": "C52",
+    "searchProjectId": "SP104",
+    "observations": [
+      {
+        "type": "misses_requirement",
+        "criterionId": "CRIT-STAFF",
+        "statement": "Senior Engineer title.",
+        "observedAt": "2026-08-10T00:00:00.000Z"
+      },
+      {
+        "type": "misses_requirement",
+        "criterionId": "CRIT-GO",
+        "statement": "Java infrastructure background.",
+        "observedAt": "2026-08-10T00:00:00.000Z"
+      },
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-DIST",
+        "statement": "Led a multi-team distributed storage redesign.",
+        "observedAt": "2026-08-10T00:00:00.000Z"
+      },
+      {
+        "type": "other",
+        "statement": "Recruiter screen: strong.",
+        "observedAt": "2026-08-12T00:00:00.000Z"
+      },
+      {
+        "type": "hm_rejected",
+        "criterionId": "CRIT-STAFF",
+        "statement": "HM rejected: wants a current Staff title.",
+        "observedAt": "2026-08-18T00:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "candidateId": "C54",
+    "searchProjectId": "SP104",
+    "observations": [
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-STAFF",
+        "statement": "Current Staff Engineer.",
+        "observedAt": "2026-08-11T00:00:00.000Z"
+      },
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-GO",
+        "statement": "Go and Kubernetes; strong fit.",
+        "observedAt": "2026-08-11T00:00:00.000Z"
+      },
+      {
+        "type": "compensation_objection",
+        "statement": "Expected compensation $310K against a $240K budget.",
+        "observedAt": "2026-08-15T00:00:00.000Z"
+      },
+      {
+        "type": "candidate_withdrew",
+        "statement": "Candidate withdrew after compensation discussion.",
+        "observedAt": "2026-08-16T00:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "candidateId": "C61",
+    "searchProjectId": "SP104",
+    "observations": [
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-STAFF",
+        "statement": "Current Staff Engineer.",
+        "observedAt": "2026-08-13T00:00:00.000Z"
+      },
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-GO",
+        "statement": "Go and distributed systems.",
+        "observedAt": "2026-08-13T00:00:00.000Z"
+      },
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-BAY",
+        "statement": "Bay Area.",
+        "observedAt": "2026-08-13T00:00:00.000Z"
+      },
+      {
+        "type": "hm_advanced",
+        "statement": "HM advanced; reached onsite.",
+        "observedAt": "2026-08-22T00:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "candidateId": "C73",
+    "searchProjectId": "SP104",
+    "observations": [
+      {
+        "type": "meets_requirement",
+        "criterionId": "CRIT-DIST",
+        "statement": "Staff-equivalent technical scope; strong distributed systems.",
+        "observedAt": "2026-08-19T00:00:00.000Z"
+      },
+      {
+        "type": "misses_requirement",
+        "criterionId": "CRIT-GO",
+        "statement": "Rust.",
+        "observedAt": "2026-08-19T00:00:00.000Z"
+      },
+      {
+        "type": "misses_requirement",
+        "criterionId": "CRIT-STAFF",
+        "statement": "Current title: Senior Engineer.",
+        "observedAt": "2026-08-19T00:00:00.000Z"
+      },
+      {
+        "type": "hm_rejected",
+        "criterionId": "CRIT-STAFF",
+        "statement": "HM rejected pre-interview.",
+        "observedAt": "2026-08-25T00:00:00.000Z"
+      }
+    ]
+  }
+]

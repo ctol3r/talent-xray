@@ -1,0 +1,14 @@
+{
+  "beliefId": "B-SP104-SUPPLY",
+  "previousConfidence": 0.76,
+  "newConfidence": 0.31,
+  "reason": "The HM advanced 7 of 10 adjacent candidates when language and title were hidden, and the broadened profile materially improved downstream conversion.",
+  "actorId": "human:recruiter-sp104",
+  "newBelief": {
+    "id": "B-SP104-PROFILE",
+    "searchProjectId": "SP104",
+    "statement": "The original Success Profile was unnecessarily restrictive.",
+    "confidence": 0.82,
+    "actorId": "human:recruiter-sp104"
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE `document_links` ADD `generation_meta` text;

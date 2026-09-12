@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // OpenNext / wrangler build output:
     ".open-next/**",
     ".wrangler/**",
+    // TalentOS is a separate, self-contained app with its own toolchain:
+    "talentos/**",
   ]),
 ]);
 

@@ -1,0 +1,37 @@
+{
+  "mustHave": [
+    {
+      "id": "CRIT-DIST",
+      "label": "Production distributed systems experience",
+      "category": "skill"
+    },
+    { "id": "CRIT-K8S", "label": "Kubernetes experience", "category": "skill" },
+    {
+      "id": "CRIT-8Y",
+      "label": "8+ years software engineering experience",
+      "category": "experience"
+    },
+    {
+      "id": "CRIT-STAFF-SCOPE",
+      "label": "Evidence of Staff-equivalent scope",
+      "category": "experience",
+      "rationale": "Replaces 'Current Staff Engineer title' after the blind review showed title was a weak proxy."
+    },
+    { "id": "CRIT-BAY", "label": "Bay Area", "category": "geography" }
+  ],
+  "preferred": [
+    {
+      "id": "CRIT-AIINFRA",
+      "label": "AI infrastructure company experience",
+      "category": "industry"
+    }
+  ],
+  "transferable": [
+    {
+      "id": "CRIT-LANG",
+      "label": "Go / Rust / C++ / Java",
+      "category": "skill",
+      "rationale": "Language moved from must-have to transferable after 7/10 blind-review advances across four languages."
+    }
+  ]
+}

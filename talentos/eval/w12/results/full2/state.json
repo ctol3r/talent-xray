@@ -1,0 +1,5120 @@
+{
+  "runName": "full2",
+  "startedAt": "2026-09-03T03:04:38.654Z",
+  "provider": "session",
+  "conversations": {
+    "a-01": {
+      "id": "a-01",
+      "occupation": "AI safety research scientist",
+      "fixtureLetter": "A",
+      "categories": [
+        1,
+        2,
+        3,
+        12,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "silent_mutation": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "evidence_signal_recall",
+                "severity": "fail",
+                "detail": "\"Research taste\" evidenceSpec lacks self-initiated / became benchmarks / other people run"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-78e547fc6621.request.json"
+        }
+      ],
+      "projectId": "3739f9e5-a002-4a9c-8a2f-dfe2ab4f032e",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 4,
+              "total": 4
+            },
+            "uncertainty_detection": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "a-02": {
+      "id": "a-02",
+      "occupation": "AI safety research scientist",
+      "fixtureLetter": "A",
+      "categories": [
+        9,
+        10,
+        14
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "proxy_identified": {
+                "pass": 1,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 2,
+                "total": 3
+              },
+              "proxy_as_filter": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "replan_correctness",
+                "severity": "fail",
+                "detail": "adjacent: none of startup / infrastructure / harness / Kaggle present after re-plan"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-66b889cf7336.request.json"
+        }
+      ],
+      "projectId": "95ab33ca-1da3-43b7-a6a5-ffd700c9ba05",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 5,
+              "total": 5
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 2,
+              "total": 2
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "a-03": {
+      "id": "a-03",
+      "occupation": "AI safety research scientist",
+      "fixtureLetter": "A",
+      "categories": [
+        7,
+        1,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-afb5ac1c63cb.request.json"
+        }
+      ],
+      "projectId": "a424f471-2361-463f-8c77-24fc8e808c39",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "a-04": {
+      "id": "a-04",
+      "occupation": "AI safety research scientist",
+      "fixtureLetter": "A",
+      "categories": [
+        11,
+        19,
+        17
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "fabrication": {
+                "pass": 6,
+                "total": 6
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 2,
+                "total": 2
+              },
+              "unknown_preserved": {
+                "pass": 2,
+                "total": 2
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-861a023e765c.request.json"
+        }
+      ],
+      "projectId": "15185852-b929-47fc-b710-c36b8c34068e",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "uncertainty_detection": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "a-05": {
+      "id": "a-05",
+      "occupation": "AI safety research scientist",
+      "fixtureLetter": "A",
+      "categories": [
+        4,
+        16,
+        17,
+        18,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 7,
+                "total": 7
+              },
+              "fabrication": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 3,
+                "total": 3
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-db3201288633.request.json"
+        }
+      ],
+      "projectId": "8277f7f5-0a5c-4a7e-988b-92a6ef81aed2",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 6,
+              "total": 6
+            },
+            "fabrication": {
+              "pass": 3,
+              "total": 3
+            },
+            "protected_traits": {
+              "pass": 0,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            },
+            "uncertainty_detection": {
+              "pass": 2,
+              "total": 2
+            }
+          },
+          "findings": [
+            {
+              "metric": "protected_traits",
+              "severity": "fail",
+              "detail": "age referenced in a requirement's defining text: \"tic AI evaluation is a field only a few years old, so no candidate anywhere has ten years\""
+            }
+          ],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "b-01": {
+      "id": "b-01",
+      "occupation": "ICU registered nurse",
+      "fixtureLetter": "B",
+      "categories": [
+        13,
+        8,
+        2
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 3,
+                "total": 3
+              },
+              "evidence_signal_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"What 'calm under pressure' concretely means in this unit and how it will be assessed\": consequential=false (expected true)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-61a169e750cd.request.json"
+        }
+      ],
+      "projectId": "7f6d0c34-634c-4ca5-8bf9-33c92e1a954e",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 4,
+              "total": 4
+            },
+            "uncertainty_detection": {
+              "pass": 0,
+              "total": 1
+            }
+          },
+          "findings": [
+            {
+              "metric": "uncertainty_detection",
+              "severity": "fail",
+              "detail": "\"What 'calm under pressure' concretely means in this unit and how it will be assessed\": consequential=false (expected true)"
+            }
+          ],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "b-02": {
+      "id": "b-02",
+      "occupation": "ICU registered nurse",
+      "fixtureLetter": "B",
+      "categories": [
+        6,
+        5,
+        10
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "evidence_signal_recall",
+                "severity": "fail",
+                "detail": "\"Has nursed ECMO patients\" evidenceSpec lacks nursed / ECMO patients / cannulat / circuit"
+              },
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"Which specialist therapies the unit runs (for example renal replacement or extracorporeal support) and whether experience with them is expected\": status resolved (expected open)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-a480485b8ab2.request.json"
+        }
+      ],
+      "projectId": "2d5f6507-77b5-4d0a-92d7-dd31cfc3be73",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "b-03": {
+      "id": "b-03",
+      "occupation": "ICU registered nurse",
+      "fixtureLetter": "B",
+      "categories": [
+        16,
+        1,
+        11
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 0,
+                "total": 2
+              },
+              "contradiction_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "unknown_preserved": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Permanent Band 6 post\": origin jd (expected manager_statement)"
+              },
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Permanent Band 6 post\": status explicit (expected needs_clarification)"
+              },
+              {
+                "metric": "contradiction_detection",
+                "severity": "fail",
+                "detail": "expected contradiction \"con-employment\" not recorded"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-6be74f3b111b.request.json"
+        }
+      ],
+      "projectId": "9e4639f2-48dd-4a24-94a5-697f49c7b4ec",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "b-04": {
+      "id": "b-04",
+      "occupation": "ICU registered nurse",
+      "fixtureLetter": "B",
+      "categories": [
+        14,
+        3,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 4,
+                "total": 4
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "proxy_identified": {
+                "pass": 2,
+                "total": 2
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "proxy_as_filter": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-d8d781002be2.request.json"
+        }
+      ],
+      "projectId": "47b00ce5-9f22-4ef2-87c3-ac670d9215d4",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 3,
+              "total": 3
+            },
+            "proxy_identified": {
+              "pass": 1,
+              "total": 1
+            },
+            "uncertainty_detection": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "b-05": {
+      "id": "b-05",
+      "occupation": "ICU registered nurse",
+      "fixtureLetter": "B",
+      "categories": [
+        18,
+        15,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "fabrication": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "must_not_exist": {
+                "pass": 0,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "must_not_exist",
+                "severity": "fail",
+                "detail": "\"Lives within a manageable commute of the unit\" exists as a preferred requirement but must not (No requirement may encode age.)"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-e345484623c6.request.json"
+        }
+      ],
+      "projectId": "e4f2a4b5-4e7c-4548-a867-bd0cdc046df5",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "c-01": {
+      "id": "c-01",
+      "occupation": "Enterprise account executive",
+      "fixtureLetter": "C",
+      "categories": [
+        2,
+        8,
+        13
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "fabrication": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "construct_named": {
+                "pass": 0,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 0,
+                "total": 2
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "construct_named",
+                "severity": "fail",
+                "detail": "\"Owns new-logo enterprise deals\" definition does not name the construct (new logo / opened themselves / seventy percent / 70)"
+              },
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"What 'hungry' and 'hunter' concretely mean to this hiring manager\": consequential=false (expected true)"
+              },
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"What 'executive presence' means here in observable terms\": consequential=false (expected true)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-5b7072baf694.request.json"
+        }
+      ],
+      "projectId": "42e55998-bd7e-4393-ab5f-68ec8b4f2bd3",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 2,
+              "total": 2
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 4,
+              "total": 4
+            },
+            "uncertainty_detection": {
+              "pass": 0,
+              "total": 2
+            }
+          },
+          "findings": [
+            {
+              "metric": "uncertainty_detection",
+              "severity": "fail",
+              "detail": "\"What 'hungry' and 'hunter' concretely mean to this hiring manager\": consequential=false (expected true)"
+            },
+            {
+              "metric": "uncertainty_detection",
+              "severity": "fail",
+              "detail": "\"What 'executive presence' means here in observable terms\": consequential=false (expected true)"
+            }
+          ],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "c-02": {
+      "id": "c-02",
+      "occupation": "Enterprise account executive",
+      "fixtureLetter": "C",
+      "categories": [
+        3,
+        12,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "fabrication": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "proxy_identified": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "expected uncertainty \"unc-proxy\" (Salesforce) not recorded"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-31fe43f888e4.request.json"
+        }
+      ],
+      "projectId": "434fa88d-4278-460c-9d43-d0d608e5815d",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 2,
+              "total": 2
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "c-03": {
+      "id": "c-03",
+      "occupation": "Enterprise account executive",
+      "fixtureLetter": "C",
+      "categories": [
+        4,
+        5,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "fabrication": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"Average deal size and sales-cycle length behind the $1.5M quota\": status resolved (expected open)"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-d84006152008.request.json"
+        }
+      ],
+      "projectId": "a2dbb126-f400-46d4-aa2c-d573929c44f4",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 2,
+              "total": 2
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "c-04": {
+      "id": "c-04",
+      "occupation": "Enterprise account executive",
+      "fixtureLetter": "C",
+      "categories": [
+        17,
+        18,
+        1,
+        11
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "fabrication": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "contradiction_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Remote is acceptable\": status explicit (expected needs_clarification)"
+              },
+              {
+                "metric": "contradiction_detection",
+                "severity": "fail",
+                "detail": "expected contradiction \"con-location\" not recorded"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-9a538e96e33d.request.json"
+        }
+      ],
+      "projectId": "4a1338a1-5dae-4932-b07c-bf7fb1267fc4",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 2,
+              "total": 2
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "c-05": {
+      "id": "c-05",
+      "occupation": "Enterprise account executive",
+      "fixtureLetter": "C",
+      "categories": [
+        6,
+        10,
+        5
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "fabrication": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-0c7cb97128b9.request.json"
+        }
+      ],
+      "projectId": "ae9a7c79-384c-4372-9cdb-9acb8e864b51",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 2,
+              "total": 2
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "d-01": {
+      "id": "d-01",
+      "occupation": "CNC machinist",
+      "fixtureLetter": "D",
+      "categories": [
+        9,
+        13,
+        2
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 3,
+                "total": 4
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Set up and run five-axis machining centres\": origin jd (expected manager_statement)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 6,
+                "total": 6
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-3566ac9798b3.request.json"
+        }
+      ],
+      "projectId": "ce133be9-684e-4bcb-9eaf-e5322fae73e1",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "fabrication": {
+              "pass": 4,
+              "total": 4
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 3,
+              "total": 3
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "d-02": {
+      "id": "d-02",
+      "occupation": "CNC machinist",
+      "fixtureLetter": "D",
+      "categories": [
+        14,
+        15,
+        12
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "proxy_identified": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "proxy_as_filter": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-840ae55355d0.request.json"
+        }
+      ],
+      "projectId": "1fb7d90e-4747-422d-b6fc-c8e583f2aaae",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "fabrication": {
+              "pass": 4,
+              "total": 4
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "d-03": {
+      "id": "d-03",
+      "occupation": "CNC machinist",
+      "fixtureLetter": "D",
+      "categories": [
+        16,
+        20,
+        15
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "fabrication": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-6d1d4d89b538.request.json"
+        }
+      ],
+      "projectId": "b16fc6c3-8981-4aea-85f1-3f76cc5eb583",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "fabrication": {
+              "pass": 4,
+              "total": 4
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "d-04": {
+      "id": "d-04",
+      "occupation": "CNC machinist",
+      "fixtureLetter": "D",
+      "categories": [
+        18,
+        17,
+        11,
+        19
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "fabrication": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 3,
+                "total": 3
+              },
+              "unknown_preserved": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-772b92b2f047.request.json"
+        }
+      ],
+      "projectId": "02c71a44-aa34-449c-ad1b-56576d4a835f",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "fabrication": {
+              "pass": 4,
+              "total": 4
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "d-05": {
+      "id": "d-05",
+      "occupation": "CNC machinist",
+      "fixtureLetter": "D",
+      "categories": [
+        10,
+        5
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 0,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "expected uncertainty \"unc-adjacent\" (who else) not recorded"
+              },
+              {
+                "metric": "next_question_targeting",
+                "severity": "fail",
+                "detail": "next question does not address who else / other / trades / mold / tool / adjacent / background: \"That is the most useful thing I have been told about this seat — it tells me which shops to look in \""
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-9e96e86a3649.request.json"
+        }
+      ],
+      "projectId": "5294b735-670a-468e-9f1b-4e2e4e467d26",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "fabrication": {
+              "pass": 4,
+              "total": 4
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "e-01": {
+      "id": "e-01",
+      "occupation": "Chief financial officer",
+      "fixtureLetter": "E",
+      "categories": [
+        3,
+        12,
+        10
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 2
+              },
+              "construct_named": {
+                "pass": 0,
+                "total": 1
+              },
+              "proxy_identified": {
+                "pass": 0,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "contradiction_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "construct_named",
+                "severity": "fail",
+                "detail": "\"Lead finance through IPO readiness\" definition does not name the construct (S-1 / IPO readiness / SOX / led / roadshow)"
+              },
+              {
+                "metric": "proxy_identified",
+                "severity": "fail",
+                "detail": "\"Lead finance through IPO readiness\": proxy (public-company CFO / CFO title) is neither a false signal nor contextualized by the construct"
+              },
+              {
+                "metric": "false_signal_recall",
+                "severity": "fail",
+                "detail": "\"Lead finance through IPO readiness\" falseSignals lack title / investor dinners"
+              },
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Lead finance through IPO readiness\": origin jd (expected manager_statement)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 3,
+                "total": 4
+              },
+              "proxy_as_filter": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "replan_correctness",
+                "severity": "fail",
+                "detail": "adjacent: none of VP Finance / VP of Finance / number two / Chief Accounting Officer present after re-plan"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-85cae78f67b0.request.json"
+        }
+      ],
+      "projectId": "9b28b4b0-a67b-479c-a413-dfea58022a2a",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 2,
+              "total": 2
+            },
+            "proxy_identified": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "e-02": {
+      "id": "e-02",
+      "occupation": "Chief financial officer",
+      "fixtureLetter": "E",
+      "categories": [
+        7,
+        2,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 0,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"What 'strategic partner to the CEO' means concretely\": consequential=false (expected true)"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-10026b9b88ea.request.json"
+        }
+      ],
+      "projectId": "08e1c150-8439-45a5-b54b-a008c81c73f5",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            },
+            "uncertainty_detection": {
+              "pass": 0,
+              "total": 1
+            }
+          },
+          "findings": [
+            {
+              "metric": "uncertainty_detection",
+              "severity": "fail",
+              "detail": "\"What 'strategic partner to the CEO' means concretely\": consequential=false (expected true)"
+            }
+          ],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "e-03": {
+      "id": "e-03",
+      "occupation": "Chief financial officer",
+      "fixtureLetter": "E",
+      "categories": [
+        4,
+        17,
+        18,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "fabrication": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 3
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"The equity component of the package\": status resolved (expected open)"
+              },
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"Whether relocation to Austin is financially supported\": status resolved (expected open)"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-250c27ad6933.request.json"
+        }
+      ],
+      "projectId": "c78a23c1-4e20-41ca-8057-baa9906f9aa1",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "e-04": {
+      "id": "e-04",
+      "occupation": "Chief financial officer",
+      "fixtureLetter": "E",
+      "categories": [
+        8,
+        2,
+        6
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-1b14af87ccb7.request.json"
+        }
+      ],
+      "projectId": "2879672f-0404-4ade-86f9-fe6f32ac3acf",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "e-05": {
+      "id": "e-05",
+      "occupation": "Chief financial officer",
+      "fixtureLetter": "E",
+      "categories": [
+        11,
+        19,
+        16
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/AudiencePersonas-d1061750f9a5.request.json",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "fabrication": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 2,
+                "total": 2
+              },
+              "unknown_preserved": {
+                "pass": 1,
+                "total": 2
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "unknown_preserved",
+                "severity": "fail",
+                "detail": "\"unc-reloc\" should remain unknown but requirement \"Based in Austin; relocation expected\" asserts it"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        }
+      ],
+      "projectId": "df623361-42a0-440f-932f-f970baae736f",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "f-01": {
+      "id": "f-01",
+      "occupation": "Propulsion engineer",
+      "fixtureLetter": "F",
+      "categories": [
+        9,
+        10,
+        16
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "expected uncertainty \"unc-adjacent\" (adjacent) not recorded"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-ca00500ceaa6.request.json"
+        }
+      ],
+      "projectId": "34a8bed9-9936-4a07-b493-3e31a55a7a2e",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 2,
+              "total": 2
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "f-02": {
+      "id": "f-02",
+      "occupation": "Propulsion engineer",
+      "fixtureLetter": "F",
+      "categories": [
+        20,
+        15,
+        13
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "fabrication": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 0,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "protected_traits",
+                "severity": "fail",
+                "detail": "national origin referenced in a requirement's defining text: \"t, and using them would be screening on national origin.\nThe employer's own documented U.S.-per\""
+              },
+              {
+                "metric": "false_signal_recall",
+                "severity": "fail",
+                "detail": "\"U.S. person as defined by ITAR\" falseSignals lack accent / foreign degree / national origin"
+              }
+            ],
+            "reviewWarnings": [
+              {
+                "trait": "national origin",
+                "excerpt": "k or where they studied is screening on national origin, which is unlawful, and it would also b"
+              }
+            ]
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-c6d74c1acf9a.request.json"
+        }
+      ],
+      "projectId": "d2b3f4fa-17c7-4e68-a844-d7cb906b183f",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      },
+      "error": "[\n  {\n    \"expected\": \"string\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"requirements\",\n      4,\n      \"assertedBy\"\n    ],\n    \"message\": \"Invalid input: expected string, received null\"\n  }\n]"
+    },
+    "f-03": {
+      "id": "f-03",
+      "occupation": "Propulsion engineer",
+      "fixtureLetter": "F",
+      "categories": [
+        3,
+        12,
+        10
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "construct_named": {
+                "pass": 1,
+                "total": 1
+              },
+              "proxy_identified": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "contradiction_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "false_signal_recall",
+                "severity": "fail",
+                "detail": "\"Has fired engines, breadth over brand\" falseSignals lack one valve / big-company / brand"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 5,
+                "total": 5
+              },
+              "proxy_as_filter": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-e52c13cdbba7.request.json"
+        }
+      ],
+      "projectId": "7c82a76b-cd59-4e97-a57d-fbf50ff4842d",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            },
+            "proxy_identified": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "f-04": {
+      "id": "f-04",
+      "occupation": "Propulsion engineer",
+      "fixtureLetter": "F",
+      "categories": [
+        5,
+        16,
+        17
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 2
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Familiarity with test-stand operations\": origin jd (expected manager_statement)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-93ca97ee2f21.request.json"
+        }
+      ],
+      "projectId": "7682de20-a6e6-4550-a8c4-6933c9bb83db",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "f-05": {
+      "id": "f-05",
+      "occupation": "Propulsion engineer",
+      "fixtureLetter": "F",
+      "categories": [
+        19,
+        11,
+        7
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "unknown_preserved": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-5a59cc4c52bd.request.json"
+        }
+      ],
+      "projectId": "5fdaa018-06fe-4141-8732-233a813552bc",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "g-01": {
+      "id": "g-01",
+      "occupation": "Semiconductor process engineer",
+      "fixtureLetter": "G",
+      "categories": [
+        2,
+        13
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 4,
+                "total": 4
+              },
+              "construct_named": {
+                "pass": 2,
+                "total": 2
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-ff30efb88aff.request.json"
+        }
+      ],
+      "projectId": "2118c2eb-561e-4d65-a43b-9317d82e9ede",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 3,
+              "total": 3
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "g-02": {
+      "id": "g-02",
+      "occupation": "Semiconductor process engineer",
+      "fixtureLetter": "G",
+      "categories": [
+        14,
+        3,
+        12
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 4
+              },
+              "proxy_identified": {
+                "pass": 1,
+                "total": 1
+              },
+              "contradiction_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "expected requirement \"pedigree\" (TSMC) is missing"
+              },
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"PhD (corporate posting standard, not a bar)\": kind preferred (expected must_have)"
+              },
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Named-fab preference (the manager's own example refutes it)\": kind preferred (expected trainable)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 5
+              },
+              "proxy_as_filter": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "replan_correctness",
+                "severity": "fail",
+                "detail": "adjacent: none of 200mm / analog / trailing / mature node present after re-plan"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-9df27378dcb8.request.json"
+        }
+      ],
+      "projectId": "66f5888e-5a09-46bc-bd4f-0056f2facea5",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 2,
+              "total": 2
+            },
+            "proxy_identified": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "g-03": {
+      "id": "g-03",
+      "occupation": "Semiconductor process engineer",
+      "fixtureLetter": "G",
+      "categories": [
+        18,
+        17,
+        11,
+        19
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "fabrication": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 3,
+                "total": 3
+              },
+              "unknown_preserved": {
+                "pass": 1,
+                "total": 2
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "unknown_preserved",
+                "severity": "fail",
+                "detail": "\"unc-sponsor\" should remain unknown but requirement \"Own a process module through ramp\" asserts it"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-20692fa2fd49.request.json"
+        }
+      ],
+      "projectId": "922ece00-3b71-48c9-ae72-1529e43e7212",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "g-04": {
+      "id": "g-04",
+      "occupation": "Semiconductor process engineer",
+      "fixtureLetter": "G",
+      "categories": [
+        6,
+        10,
+        5
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 6,
+                "total": 6
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 2
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "uncertainty_detection",
+                "severity": "fail",
+                "detail": "\"Which process module this seat owns\": status resolved (expected open)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-41b0527174c9.request.json"
+        }
+      ],
+      "projectId": "965bd3be-8b80-4fc5-af20-3be2dc9cac4c",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 5,
+              "total": 5
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "uncertainty_detection": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "g-05": {
+      "id": "g-05",
+      "occupation": "Semiconductor process engineer",
+      "fixtureLetter": "G",
+      "categories": [
+        4,
+        20,
+        16
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 3
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Nanosheet development exposure (pilot line acceptable)\": kind preferred (expected must_have)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-404978af3b1c.request.json"
+        }
+      ],
+      "projectId": "495a427f-c0d6-4aff-9cc4-ed1885922ad2",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            },
+            "uncertainty_detection": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "h-01": {
+      "id": "h-01",
+      "occupation": "Public-school principal",
+      "fixtureLetter": "H",
+      "categories": [
+        2,
+        13
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 4,
+                "total": 4
+              },
+              "false_signal_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "construct_named": {
+                "pass": 2,
+                "total": 2
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-0c985debdbc4.request.json"
+        }
+      ],
+      "projectId": "5508422a-56fb-48ad-9264-ae245eef9d49",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 4,
+              "total": 4
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "h-02": {
+      "id": "h-02",
+      "occupation": "Public-school principal",
+      "fixtureLetter": "H",
+      "categories": [
+        7,
+        20,
+        2
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-0bcd224b7940.request.json"
+        }
+      ],
+      "projectId": "36e6ee3b-a90c-4664-aabe-cc23335b11d3",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "h-03": {
+      "id": "h-03",
+      "occupation": "Public-school principal",
+      "fixtureLetter": "H",
+      "categories": [
+        20,
+        15,
+        13
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "fabrication": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "evidence_signal_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "evidence_signal_recall",
+                "severity": "fail",
+                "detail": "\"Bilingual Spanish\" evidenceSpec lacks fluen / proficien / conduct / meetings in Spanish"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-fb056b1e49bb.request.json"
+        }
+      ],
+      "projectId": "08808144-64d7-42db-ac51-627a4838401e",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "h-04": {
+      "id": "h-04",
+      "occupation": "Public-school principal",
+      "fixtureLetter": "H",
+      "categories": [
+        14,
+        3,
+        12
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 6,
+                "total": 6
+              },
+              "heuristic_mutation": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "proxy_identified": {
+                "pass": 1,
+                "total": 2
+              },
+              "false_signal_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "contradiction_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "proxy_identified",
+                "severity": "fail",
+                "detail": "\"Doctorate (a board member's preference, not a bar)\": proxy (Harvard / Stanford / Columbia) is neither a false signal nor contextualized by the construct"
+              },
+              {
+                "metric": "false_signal_recall",
+                "severity": "fail",
+                "detail": "\"Doctorate (a board member's preference, not a bar)\" falseSignals lack Columbia / Ivy / brand / program"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 5,
+                "total": 5
+              },
+              "proxy_as_filter": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-c737f86e524a.request.json"
+        }
+      ],
+      "projectId": "77ffadc6-fe1e-4f41-be04-8830e9f3e99e",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 5,
+              "total": 5
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 2,
+              "total": 2
+            },
+            "proxy_identified": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "h-05": {
+      "id": "h-05",
+      "occupation": "Public-school principal",
+      "fixtureLetter": "H",
+      "categories": [
+        16,
+        4,
+        17,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "fabrication": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 2
+              },
+              "uncertainty_detection": {
+                "pass": 2,
+                "total": 2
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-e4d38fd4f231.request.json"
+        }
+      ],
+      "projectId": "33e3eaac-fbf3-4319-893d-daf7e75b603d",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "i-01": {
+      "id": "i-01",
+      "occupation": "Executive chef",
+      "fixtureLetter": "I",
+      "categories": [
+        2,
+        3,
+        13
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "fabrication": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 4,
+                "total": 4
+              },
+              "construct_named": {
+                "pass": 3,
+                "total": 3
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 2
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "proxy_identified": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "evidence_signal_recall",
+                "severity": "fail",
+                "detail": "\"Retains a brigade\" evidenceSpec lacks retention / turnover / stayed"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 4,
+                "total": 4
+              },
+              "proxy_as_filter": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-28ef45f0fe7d.request.json"
+        }
+      ],
+      "projectId": "2eadb2cf-226e-464e-a8f7-b24b5dfab74c",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 3,
+              "total": 3
+            },
+            "proxy_identified": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "i-02": {
+      "id": "i-02",
+      "occupation": "Executive chef",
+      "fixtureLetter": "I",
+      "categories": [
+        6,
+        5,
+        10
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "fabrication": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "false_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Oversee banquets and in-room dining\": origin jd (expected manager_statement)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-30d6d998ffc1.request.json"
+        }
+      ],
+      "projectId": "bc5d8072-18b4-48c2-8a40-5ae00e559dcf",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "i-03": {
+      "id": "i-03",
+      "occupation": "Executive chef",
+      "fixtureLetter": "I",
+      "categories": [
+        18,
+        17,
+        11,
+        19
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "fabrication": {
+                "pass": 4,
+                "total": 4
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 3,
+                "total": 3
+              },
+              "unknown_preserved": {
+                "pass": 0,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "unknown_preserved",
+                "severity": "fail",
+                "detail": "\"unc-housing\" should remain unknown but requirement \"Housing not provided\" asserts it"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-ced736a74365.request.json"
+        }
+      ],
+      "projectId": "7ef8d72e-809a-46ee-a538-b0b045e4a50a",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "i-04": {
+      "id": "i-04",
+      "occupation": "Executive chef",
+      "fixtureLetter": "I",
+      "categories": [
+        1,
+        4,
+        20
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "fabrication": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 2,
+                "total": 3
+              },
+              "contradiction_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "expected requirement \"no-hotel\" (hotel people) is missing"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-a633629dddac.request.json"
+        }
+      ],
+      "projectId": "23918f29-4ee0-47d3-b551-542b02c7fc8a",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "i-05": {
+      "id": "i-05",
+      "occupation": "Executive chef",
+      "fixtureLetter": "I",
+      "categories": [
+        12,
+        15,
+        3
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "fabrication": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "contradiction_detection": {
+                "pass": 0,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "contradiction_detection",
+                "severity": "fail",
+                "detail": "expected contradiction \"con-chain\" not recorded"
+              }
+            ],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-20b69e6de727.request.json"
+        }
+      ],
+      "projectId": "3852f136-a121-4402-b2d2-3dda182d39b9",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "j-01": {
+      "id": "j-01",
+      "occupation": "Data-center electrical technician",
+      "fixtureLetter": "J",
+      "categories": [
+        13,
+        8,
+        2
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "fabrication": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 4,
+                "total": 4
+              },
+              "false_signal_recall": {
+                "pass": 0,
+                "total": 1
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "false_signal_recall",
+                "severity": "fail",
+                "detail": "\"Data-centre time (rule of thumb, waivable)\" falseSignals lack years"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-57ce28c190ab.request.json"
+        }
+      ],
+      "projectId": "26a6505e-8e4b-416b-bda1-e7b3313610c8",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 4,
+              "total": 4
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "j-02": {
+      "id": "j-02",
+      "occupation": "Data-center electrical technician",
+      "fixtureLetter": "J",
+      "categories": [
+        9,
+        10
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "fabrication": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-07e4fae0eaf1.request.json"
+        }
+      ],
+      "projectId": "a4efd51d-0713-45be-b079-74c0b7ac44ed",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "j-03": {
+      "id": "j-03",
+      "occupation": "Data-center electrical technician",
+      "fixtureLetter": "J",
+      "categories": [
+        20,
+        15,
+        16
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "fabrication": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-28f2eeb75393.request.json"
+        }
+      ],
+      "projectId": "b4011369-db57-4244-a495-d028dd530bc9",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "j-04": {
+      "id": "j-04",
+      "occupation": "Data-center electrical technician",
+      "fixtureLetter": "J",
+      "categories": [
+        17,
+        16,
+        11,
+        19
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 10,
+                "total": 10
+              },
+              "fabrication": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 2,
+                "total": 2
+              },
+              "unknown_preserved": {
+                "pass": 1,
+                "total": 1
+              },
+              "next_question_targeting": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          }
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-01b682d93b49.request.json"
+        }
+      ],
+      "projectId": "89da9895-370b-4c60-ac21-b13209c03abd",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "j-05": {
+      "id": "j-05",
+      "occupation": "Data-center electrical technician",
+      "fixtureLetter": "J",
+      "categories": [
+        14,
+        5,
+        13
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "silent_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "fabrication": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 2,
+                "total": 2
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-770b502edcd4.request.json"
+        }
+      ],
+      "projectId": "d4974657-54c0-4aaf-bd35-ba7290f3a59a",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 8,
+              "total": 8
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 2,
+              "total": 2
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "x-01": {
+      "id": "x-01",
+      "occupation": "Court interpreter",
+      "categories": [
+        13,
+        20,
+        15
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 7,
+                "total": 7
+              },
+              "fabrication": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 2
+              },
+              "must_not_exist": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Simultaneous and consecutive modes\": origin jd (expected manager_statement)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 3,
+                "total": 3
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-0417c89842e4.request.json"
+        }
+      ],
+      "projectId": "dfd18577-d9f1-4445-bf1a-3ac287e6bc84",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 6,
+              "total": 6
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 2,
+              "total": 2
+            },
+            "proxy_identified": {
+              "pass": 1,
+              "total": 1
+            }
+          },
+          "findings": [],
+          "reviewWarnings": [
+            {
+              "trait": "national origin",
+              "excerpt": "curate than the licence and a proxy for national origin. The court needs to be asked what it is"
+            }
+          ]
+        }
+      }
+    },
+    "x-02": {
+      "id": "x-02",
+      "occupation": "Wind-turbine technician",
+      "categories": [
+        8,
+        18,
+        10,
+        13
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 8,
+                "total": 8
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 3,
+                "total": 4
+              },
+              "evidence_signal_recall": {
+                "pass": 1,
+                "total": 1
+              },
+              "uncertainty_detection": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"Troubleshoot converters and pitch systems\": origin jd (expected manager_statement)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 5,
+                "total": 5
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-970a8dbb5aed.request.json"
+        }
+      ],
+      "projectId": "99973270-f8b4-46dd-9b54-77b0a8c64dc5",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 6,
+              "total": 6
+            },
+            "fabrication": {
+              "pass": 1,
+              "total": 1
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 2,
+              "total": 2
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    },
+    "x-03": {
+      "id": "x-03",
+      "occupation": "Clinical research coordinator",
+      "categories": [
+        14,
+        5,
+        7
+      ],
+      "status": "pending",
+      "turns": [
+        {
+          "turnIndex": 0,
+          "status": "done",
+          "check": {
+            "tally": {
+              "provenance_preservation": {
+                "pass": 9,
+                "total": 9
+              },
+              "silent_mutation": {
+                "pass": 2,
+                "total": 2
+              },
+              "heuristic_mutation": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              },
+              "requirement_recall": {
+                "pass": 1,
+                "total": 2
+              },
+              "proxy_identified": {
+                "pass": 1,
+                "total": 1
+              },
+              "replan_signal": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [
+              {
+                "metric": "requirement_recall",
+                "severity": "fail",
+                "detail": "\"EDC systems (Medidata Rave)\": origin jd (expected manager_statement)"
+              }
+            ],
+            "reviewWarnings": []
+          },
+          "replan": {
+            "tally": {
+              "replan_correctness": {
+                "pass": 2,
+                "total": 2
+              },
+              "proxy_as_filter": {
+                "pass": 1,
+                "total": 1
+              },
+              "protected_traits": {
+                "pass": 1,
+                "total": 1
+              }
+            },
+            "findings": [],
+            "reviewWarnings": []
+          },
+          "replanRan": true
+        },
+        {
+          "turnIndex": 1,
+          "status": "pending",
+          "pendingRequest": "/home/user/talent-xray/talentos/eval/w12/results/full2/outbox/IntakeReasoning-34d29bcf2896.request.json"
+        }
+      ],
+      "projectId": "9ba4feca-454e-4a6a-9ab5-d982db53d254",
+      "initial": {
+        "turnIndex": -1,
+        "status": "done",
+        "check": {
+          "tally": {
+            "provenance_preservation": {
+              "pass": 7,
+              "total": 7
+            },
+            "protected_traits": {
+              "pass": 1,
+              "total": 1
+            },
+            "requirement_recall": {
+              "pass": 3,
+              "total": 3
+            }
+          },
+          "findings": [],
+          "reviewWarnings": []
+        }
+      }
+    }
+  }
+}

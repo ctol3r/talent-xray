@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TalentOS companion</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>TalentOS companion</h1>
+    <p>
+      Open the current tab’s URL and title in your local review form. Save only
+      after reviewing them in TalentOS.
+    </p>
+    <form id="capture">
+      <label for="origin">Local TalentOS address</label>
+      <input id="origin" type="url" value="http://127.0.0.1:3000" required />
+      <button type="submit">Review link in TalentOS</button>
+    </form>
+    <p id="status" role="status"></p>
+    <p class="detail">
+      Keep TalentOS running. No page text, screenshots, background browsing
+      history, or AI API keys are used. If this browser page has no HTTP(S) URL,
+      open the local capture form and paste a source link.
+    </p>
+    <script src="popup.js"></script>
+  </body>
+</html>

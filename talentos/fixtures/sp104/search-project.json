@@ -1,0 +1,48 @@
+{
+  "id": "SP104",
+  "companyName": "Axiom Compute",
+  "roleTitle": "Senior / Staff Distributed Systems Engineer",
+  "status": "active",
+  "createdAt": "2026-07-20T00:00:00.000Z",
+  "updatedAt": "2026-08-31T00:00:00.000Z",
+  "compensation": { "currency": "USD", "min": 200000, "max": 240000 },
+  "geography": { "locations": ["Bay Area"], "remoteAllowed": false },
+  "successProfile": {
+    "mustHave": [
+      {
+        "id": "CRIT-DIST",
+        "label": "Production distributed systems experience",
+        "category": "skill"
+      },
+      {
+        "id": "CRIT-GO",
+        "label": "Professional Go experience",
+        "category": "skill"
+      },
+      {
+        "id": "CRIT-K8S",
+        "label": "Kubernetes experience",
+        "category": "skill"
+      },
+      {
+        "id": "CRIT-8Y",
+        "label": "8+ years software engineering experience",
+        "category": "experience"
+      },
+      {
+        "id": "CRIT-STAFF",
+        "label": "Current Staff Engineer title",
+        "category": "title"
+      },
+      { "id": "CRIT-BAY", "label": "Bay Area", "category": "geography" }
+    ],
+    "preferred": [
+      {
+        "id": "CRIT-AIINFRA",
+        "label": "AI infrastructure company experience",
+        "category": "industry"
+      }
+    ],
+    "transferable": []
+  }
+}

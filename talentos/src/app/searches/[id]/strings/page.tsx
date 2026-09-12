@@ -1,0 +1,216 @@
+import { getDb } from "@/lib/db/client";
+import { listChannels, listQueries } from "@/lib/services/workflow";
+import {
+  queryYieldForProject,
+  roleTitleYield,
+} from "@/lib/services/query-yield";
+import {
+  channelCoverage,
+  countTerms,
+  platformsForChannels,
+  qaQuery,
+  termBudgetFor,
+} from "@/lib/domain/query-normalization";
+import {
+  composePlannedQueriesAction,
+  generateSearchStringsAction,
+} from "@/lib/actions/generate";
+import {
+  loadCalibrationSignals,
+  requirementLabels,
+} from "@/lib/services/calibration";
+import { getIntelligence } from "@/lib/services/intelligence";
+import { signalsFingerprint } from "@/lib/domain/calibration";
+import {
+  CalibrationPanel,
+  TermProvenance,
+} from "@/components/calibration-panel";
+import { GenerateButton } from "@/components/generate-button";
+import {
+  CoveragePanel,
+  NormalizationNotes,
+  PartTag,
+  PrunedPlatformsNote,
+  QaBadges,
+  RoleYieldPanel,
+  TermCountTag,
+  YieldLine,
+} from "@/components/query-qa";
+import { AddQueryForm, QueryEditor } from "@/components/query-tools";
+import { Card, EmptyState, PageHeader, Tag } from "@/components/ui";
+import { QueryEconomy } from "@/components/query-economy";
+
+export const metadata = { title: "Search String Lab" };
+
+const BREADTH_TONE: Record<
+  string,
+  "accent" | "neutral" | "warn" | "ok" | "bad"
+> = {
+  narrow: "accent",
+  balanced: "ok",
+  broad: "warn",
+  adjacent: "warn",
+  experimental: "neutral",
+};
+
+export default async function StringsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const db = getDb();
+  const [queries, channels, yieldByProject, roleYield, calibration, ir] =
+    await Promise.all([
+      listQueries(db, id),
+      listChannels(db, id),
+      queryYieldForProject(db, id),
+      roleTitleYield(db, id),
+      loadCalibrationSignals(db, id),
+      getIntelligence(db, id),
+    ]);
+  const labels = requirementLabels(db, id);
+  const hasSearchPlan = Boolean(ir?.payload.searchPlan);
+  const newest = [...queries]
+    .filter((q) => q.calibration)
+    .sort((a, b) =>
+      a.calibration!.generatedAt < b.calibration!.generatedAt ? 1 : -1,
+    )[0];
+  const currentHash = signalsFingerprint(calibration.outcomes);
+  const rowDecisions = queries.flatMap((q) => q.calibration?.decisions ?? []);
+  const byPlatform = new Map<string, typeof queries>();
+  for (const query of queries) {
+    const list = byPlatform.get(query.platform) ?? [];
+    list.push(query);
+    byPlatform.set(query.platform, list);
+  }
+  // Coverage and QA are recomputed at render, so recruiter edits are
+  // checked without a write path and a warning never hides a string.
+  const coverage = channelCoverage(channels, queries);
+  const { pruned } = platformsForChannels(channels);
+
+  return (
+    <div>
+      <PageHeader
+        title="🔤 Search String Lab"
+        description="Boolean and x-ray queries across platforms, in narrow/balanced/broad/adjacent variants. The model expands vocabulary; a deterministic composer builds the strings. Every query is visible, editable, and yours."
+        actions={
+          <div className="flex items-start gap-2">
+            {hasSearchPlan && (
+              <GenerateButton
+                action={composePlannedQueriesAction}
+                input={{ searchProjectId: id }}
+                label="Compose from search plan"
+                regenerate
+              />
+            )}
+            <GenerateButton
+              action={generateSearchStringsAction}
+              input={{ searchProjectId: id }}
+              label={
+                queries.length > 0 ? "Regenerate strings" : "Generate strings"
+              }
+              regenerate={queries.length > 0}
+            />
+          </div>
+        }
+      />
+      {queries.length === 0 ? (
+        <EmptyState
+          title="No strings yet"
+          detail="Generate the variant matrix from the sourcing strategy — or add queries manually."
+        >
+          <AddQueryForm searchProjectId={id} />
+        </EmptyState>
+      ) : (
+        <div className="space-y-4">
+          <CalibrationPanel
+            signals={calibration.signals}
+            decisions={rowDecisions}
+            generatedWith={newest?.calibration ?? null}
+            currentHash={currentHash}
+          />
+          <CoveragePanel coverage={coverage} />
+          <RoleYieldPanel yield={roleYield} />
+          {queries.length > 0 && <PrunedPlatformsNote pruned={pruned} />}
+          {[...byPlatform.entries()].map(([platform, platformQueries]) => (
+            <Card key={platform} title={platform}>
+              <ul className="space-y-2.5">
+                {platformQueries.map((query) => {
+                  const warnings = qaQuery(query.query, query.platform);
+                  return (
+                    <li
+                      key={query.id}
+                      className="rounded border border-edge bg-panel2/50 px-3 py-2"
+                    >
+                      <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                        <Tag tone={BREADTH_TONE[query.breadth] ?? "neutral"}>
+                          {query.breadth}
+                        </Tag>
+                        <TermCountTag
+                          termCount={countTerms(query.query)}
+                          budget={termBudgetFor(query.platform)}
+                        />
+                        <PartTag part={query.qaMeta?.part} />
+                        <QaBadges warnings={warnings} />
+                        {query.expectedPrecision && (
+                          <span className="text-[12.5px] text-ink-faint">
+                            precision: {query.expectedPrecision}
+                          </span>
+                        )}
+                        {query.purpose && (
+                          <span className="text-[12.5px] text-ink-faint">
+                            {query.purpose}
+                          </span>
+                        )}
+                        <YieldLine
+                          yield={yieldByProject.byQuery.get(query.id)}
+                        />
+                      </div>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <code className="block font-mono text-[13.5px] leading-5 break-words text-ink">
+                            {query.query}
+                          </code>
+                          {/* What this string is spending, and what it could
+                              stop spending. Shown, never applied on its own. */}
+                          <QueryEconomy
+                            queryId={query.id}
+                            searchProjectId={id}
+                            platform={query.platform}
+                            breadth={query.breadth}
+                            purpose={query.purpose}
+                            query={query.query}
+                          />
+                        </div>
+                        <QueryEditor
+                          queryId={query.id}
+                          searchProjectId={id}
+                          platform={query.platform}
+                          query={query.query}
+                          purpose={query.purpose}
+                          breadth={query.breadth}
+                        />
+                      </div>
+                      <NormalizationNotes qa={query.qaMeta ?? null} />
+                      <TermProvenance
+                        decisions={query.calibration?.decisions ?? []}
+                        requirementLabels={labels}
+                        stale={
+                          query.calibration !== null &&
+                          query.calibration !== undefined &&
+                          (query.calibration.signalsHash ?? "") !== currentHash
+                        }
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </Card>
+          ))}
+          <AddQueryForm searchProjectId={id} />
+        </div>
+      )}
+    </div>
+  );
+}

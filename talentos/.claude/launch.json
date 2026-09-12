@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "talentos-verify",
+      "autoPort": true,
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "--hostname", "127.0.0.1"]
+    }
+  ]
+}

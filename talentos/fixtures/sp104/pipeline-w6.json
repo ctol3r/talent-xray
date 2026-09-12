@@ -1,0 +1,19 @@
+{
+  "id": "PIPE-SP104-W6",
+  "searchProjectId": "SP104",
+  "periodStart": "2026-07-20",
+  "periodEnd": "2026-08-31",
+  "counts": {
+    "sourced": 124,
+    "outreach_sent": 118,
+    "reply": 17,
+    "positive_reply": 9,
+    "recruiter_screen": 6,
+    "hm_screen": 4,
+    "onsite": 1,
+    "offer": 0,
+    "hire": 0
+  },
+  "observedAt": "2026-08-31T18:00:00.000Z",
+  "source": "seed"
+}

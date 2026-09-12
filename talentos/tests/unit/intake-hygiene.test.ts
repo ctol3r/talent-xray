@@ -1,0 +1,345 @@
+/**
+ * Deterministic backstops behind the intake reasoner's own rules, from the
+ * W12 full-corpus taxonomy (eval/w12/REPORT.md §12.1). Each case is drawn
+ * from a conversation that actually failed: g-04/i-01 (S-2), j-04/x-02
+ * (S-3), j-05/x-01/g-01 (S-4).
+ */
+import { describe, expect, it } from "vitest";
+import type {
+  ContradictionIR,
+  ManagerStatement,
+  RequirementIR,
+  UncertaintyIR,
+} from "@/lib/core/ir";
+import {
+  applyIntakeHygiene,
+  preserveContradictions,
+  dropWithdrawnRequirements,
+  keepMarketComparisonsOpen,
+  narrowSharedStatements,
+  reconcileRequirementOrigins,
+} from "@/lib/domain/intake-hygiene";
+
+const JD =
+  "Executive Chef — The Larkspur Lodge, Telluride. Manage a brigade of 22. Oversee banquets and in-room dining.";
+
+const statement = (
+  text: string,
+  speaker = "hiring_manager",
+): ManagerStatement =>
+  ({
+    id: `s-${text.slice(0, 8)}`,
+    at: "2026-09-02T00:00:00Z",
+    speaker,
+    text,
+  }) as ManagerStatement;
+
+const requirement = (over: Partial<RequirementIR>): RequirementIR => ({
+  label: "Manage a brigade of 22",
+  statement: "Manage a brigade of 22.",
+  definition: "Runs the kitchen's line.",
+  kind: "must_have",
+  origin: "jd",
+  evidenceSpec: [],
+  falseSignals: [],
+  status: "explicit",
+  linkedUncertaintyIds: [],
+  ...over,
+});
+
+const uncertainty = (over: Partial<UncertaintyIR>): UncertaintyIR => ({
+  id: "unc-rate",
+  about: "The rate, and how it compares with the Northern Virginia market",
+  kind: "missing_information",
+  consequence: "Outreach cannot be priced honestly.",
+  consequential: true,
+  status: "open",
+  ...over,
+});
+
+describe("S-2 · requirement origin follows the statement", () => {
+  const restated = statement(
+    "A brigade of twenty-two here is really two brigades, restaurant and banquet, and the person needs to have run both at once.",
+  );
+
+  it("flips a JD origin whose statement is now the manager's words", () => {
+    const [out] = reconcileRequirementOrigins(
+      [requirement({ statement: restated.text })],
+      JD,
+      [restated],
+    );
+    expect(out.origin).toBe("manager_statement");
+    expect(out.assertedBy).toBe("hiring_manager");
+  });
+
+  it("credits the speaker who actually said it", () => {
+    const board = statement(
+      "Manage a brigade of 22, and both services.",
+      "board_president",
+    );
+    const [out] = reconcileRequirementOrigins(
+      [requirement({ statement: board.text })],
+      JD,
+      [restated, board],
+    );
+    expect(out.assertedBy).toBe("board_president");
+  });
+
+  it("leaves a genuinely JD-sourced requirement alone", () => {
+    const [out] = reconcileRequirementOrigins([requirement({})], JD, [
+      restated,
+    ]);
+    expect(out.origin).toBe("jd");
+    expect(out.assertedBy).toBeUndefined();
+  });
+
+  it("leaves a statement that matches no source alone, rather than guessing", () => {
+    const [out] = reconcileRequirementOrigins(
+      [
+        requirement({
+          statement: "Something nobody in this search ever said.",
+        }),
+      ],
+      JD,
+      [restated],
+    );
+    expect(out.origin).toBe("jd");
+  });
+});
+
+describe("S-4 · withdrawn requirements are removed, not demoted", () => {
+  it("drops a requirement the reasoner kept as preferred and labelled withdrawn", () => {
+    const out = dropWithdrawnRequirements([
+      requirement({ label: "BSEE (withdrawn)", kind: "preferred" }),
+      requirement({ label: "Native speaker (withdrawn)", kind: "preferred" }),
+      requirement({
+        label: "Detail-oriented (filler, withdrawn)",
+        kind: "preferred",
+      }),
+      requirement({ label: "Virginia journeyman electrician license" }),
+    ]);
+    expect(out.map((r) => r.label)).toEqual([
+      "Virginia journeyman electrician license",
+    ]);
+  });
+
+  it("does not drop a live requirement that merely discusses a withdrawal", () => {
+    const out = dropWithdrawnRequirements([
+      requirement({
+        label: "Texas Licensed Court Interpreter (Master level)",
+        definition:
+          "The examined competence the withdrawn 'native speaker' line was gesturing at.",
+      }),
+    ]);
+    expect(out).toHaveLength(1);
+  });
+});
+
+describe("S-3 · market comparisons cannot be closed from inside the company", () => {
+  it("reverts a comparison resolved by the manager stating their own number", () => {
+    const [out] = keepMarketComparisonsOpen(
+      [uncertainty({ status: "resolved", resolution: "Forty-two an hour." })],
+      [uncertainty({})],
+    );
+    expect(out.status).toBe("open");
+    expect(out.resolution).toBeUndefined();
+    // The manager's answer is kept — it is one side of the comparison.
+    expect(out.consequence).toContain("Forty-two an hour.");
+  });
+
+  it("leaves an ordinary uncertainty resolved", () => {
+    const plain = uncertainty({
+      id: "unc-shift",
+      about: "Whether the post is nights or a rotating pattern",
+      status: "resolved",
+      resolution: "Nights, fixed.",
+    });
+    const [out] = keepMarketComparisonsOpen(
+      [plain],
+      [{ ...plain, status: "open", resolution: undefined }],
+    );
+    expect(out.status).toBe("resolved");
+  });
+
+  it("leaves one that was already resolved before this turn alone", () => {
+    const resolved = uncertainty({
+      status: "resolved",
+      resolution: "Benchmarked last quarter.",
+    });
+    const [out] = keepMarketComparisonsOpen([resolved], [resolved]);
+    expect(out.status).toBe("resolved");
+  });
+});
+
+const contradiction = (over: Partial<ContradictionIR>): ContradictionIR => ({
+  claimA: {
+    text: "Mission alignment is a must-have for me.",
+    provenance: "manager_statement",
+  },
+  claimB: {
+    text: "Mission alignment is nice-to-have; we've been flexible.",
+    provenance: "manager_statement",
+  },
+  note: "Two stakeholders, unreconciled.",
+  status: "open",
+  ...over,
+});
+
+describe("S-11 · a contradiction never leaves by omission", () => {
+  it("carries a prior contradiction the reasoner stopped emitting", () => {
+    const prior = contradiction({});
+    const out = preserveContradictions([], [prior]);
+    expect(out).toHaveLength(1);
+    expect(out[0].status).toBe("open");
+    expect(out[0].note).toContain("Carried forward");
+  });
+
+  it("keeps the prior status — a resolved one comes back resolved", () => {
+    const prior = contradiction({
+      status: "resolved",
+      resolution: "It stays a must-have.",
+    });
+    const [out] = preserveContradictions([], [prior]);
+    expect(out.status).toBe("resolved");
+    expect(out.resolution).toBe("It stays a must-have.");
+  });
+
+  // a-03 and h-02: the reasoner shortens a claim on the turn it resolves the
+  // contradiction. An exact-text key would read that as a new contradiction
+  // and leave a stale open duplicate beside the resolved one.
+  it("does not duplicate a contradiction whose claims were reworded", () => {
+    const prior = contradiction({});
+    const resolved = contradiction({
+      claimA: {
+        text: "Mission alignment is a must-have for me.",
+        provenance: "manager_statement",
+      },
+      claimB: {
+        text: "Mission alignment is nice-to-have.",
+        provenance: "manager_statement",
+      },
+      status: "resolved",
+      resolution: "The research lead's call: it stays a must-have.",
+    });
+    const out = preserveContradictions([resolved], [prior]);
+    expect(out).toHaveLength(1);
+    expect(out[0].status).toBe("resolved");
+  });
+
+  it("matches the same disagreement with its sides swapped", () => {
+    const prior = contradiction({});
+    const swapped = contradiction({
+      claimA: prior.claimB,
+      claimB: prior.claimA,
+      status: "resolved",
+    });
+    expect(preserveContradictions([swapped], [prior])).toHaveLength(1);
+  });
+
+  it("keeps a genuinely different contradiction alongside the carried one", () => {
+    const prior = contradiction({});
+    const other = contradiction({
+      claimA: {
+        text: "The board sees finalists before I choose.",
+        provenance: "manager_statement",
+      },
+      claimB: { text: "Hiring is entirely my decision.", provenance: "jd" },
+    });
+    expect(preserveContradictions([other], [prior])).toHaveLength(2);
+  });
+
+  it("does not append the carried note twice across turns", () => {
+    const once = preserveContradictions([], [contradiction({})]);
+    const twice = preserveContradictions([], once);
+    expect(twice[0].note?.match(/Carried forward/g)).toHaveLength(1);
+  });
+});
+
+describe("applyIntakeHygiene", () => {
+  it("applies all three backstops to one turn", () => {
+    const said = statement("BSEE — no. Take it off. The rate is forty-two.");
+    const out = applyIntakeHygiene(
+      {
+        requirements: [
+          requirement({ label: "BSEE (withdrawn)", kind: "preferred" }),
+          requirement({ statement: said.text }),
+        ],
+        uncertainties: [
+          uncertainty({ status: "resolved", resolution: "Forty-two an hour." }),
+        ],
+        contradictions: [],
+      },
+      { uncertainties: [uncertainty({})], contradictions: [contradiction({})] },
+      JD,
+      [said],
+    );
+    expect(out.requirements).toHaveLength(1);
+    expect(out.requirements[0].origin).toBe("manager_statement");
+    expect(out.uncertainties[0].status).toBe("open");
+    expect(out.contradictions).toHaveLength(1);
+  });
+});
+
+describe("S-10 · one requirement, one source phrase", () => {
+  // h-01: one answer covers the credential, the tenure heuristic and two
+  // constructs, and the reasoner pasted all of it onto every requirement.
+  const turn =
+    "The credential is state law, done. Five years as AP is a guide, not a bar. Instructional leader means they have coached teachers through observation cycles.";
+
+  it("narrows a statement shared by several requirements to the sentence that asserts each", () => {
+    const out = narrowSharedStatements([
+      requirement({
+        label: "Administrative Services Credential",
+        statement: turn,
+      }),
+      requirement({
+        label: "Assistant-principal service (a guide, not a bar)",
+        statement: turn,
+      }),
+      requirement({ label: "Instructional leader", statement: turn }),
+    ]);
+    expect(out[0].statement).toBe("The credential is state law, done.");
+    expect(out[1].statement).toBe("Five years as AP is a guide, not a bar.");
+    expect(out[2].statement).toBe(
+      "Instructional leader means they have coached teachers through observation cycles.",
+    );
+    // Every narrowed statement is still verbatim from the turn.
+    for (const r of out) expect(turn).toContain(r.statement);
+  });
+
+  it("leaves a statement that only one requirement carries alone", () => {
+    const only = requirement({ label: "Night shift", statement: turn });
+    expect(narrowSharedStatements([only])[0].statement).toBe(turn);
+  });
+
+  it("leaves a requirement alone when its label shares no distinctive word with any sentence", () => {
+    // Conservative by design: an abbreviation the label does not spell out
+    // ("AP") is not matched, and a wrong narrowing is worse than none.
+    const out = narrowSharedStatements([
+      requirement({
+        label: "Administrative Services Credential",
+        statement: turn,
+      }),
+      requirement({ label: "Assistant-principal service", statement: turn }),
+    ]);
+    expect(out[1].statement).toBe(turn);
+  });
+
+  it("leaves a shared statement alone when no sentence clearly wins", () => {
+    const vague = "We need someone good. They should be good.";
+    const out = narrowSharedStatements([
+      requirement({ label: "Excellence", statement: vague }),
+      requirement({ label: "Quality", statement: vague }),
+    ]);
+    expect(out.every((r) => r.statement === vague)).toBe(true);
+  });
+
+  it("leaves a single-sentence shared statement alone — there is nothing to narrow to", () => {
+    const one = "The credential is state law and five years as AP is a guide.";
+    const out = narrowSharedStatements([
+      requirement({ label: "Credential", statement: one }),
+      requirement({ label: "Assistant-principal service", statement: one }),
+    ]);
+    expect(out.every((r) => r.statement === one)).toBe(true);
+  });
+});

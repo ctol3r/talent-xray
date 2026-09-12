@@ -1,0 +1,151 @@
+/**
+ * In-page corpus scoring (W18) — the answer to "the ported brain has never
+ * been scored" (docs/BACKLOG.md, since W12.5).
+ *
+ * The artifact imports the W12 deterministic checkers and a subset of the
+ * adversarial corpus DIRECTLY from `eval/w12/`. Nothing is re-implemented,
+ * so the page and the harness cannot drift on what a failure is.
+ *
+ * What this run is, precisely:
+ * - The generating model sees ONLY the artifact's own prompts and the
+ *   fixture's project, JD and scripted statements. It never sees the
+ *   expectations. That independence is the thing the file-handoff runs in
+ *   `eval/w12/results/` could not have — there, the same person who read
+ *   the expectations wrote the generations.
+ * - Scoring is deterministic and happens afterwards, in code.
+ * - It measures THE ARTIFACT'S prompts on whatever model the viewer's
+ *   Claude serves, over a handful of fixtures. It is not the full corpus,
+ *   it is not an API-key run, and the LLM judge still does not run — so
+ *   every semantic dimension remains unmeasured.
+ */
+import {
+  conversationSchema,
+  type ParsedConversation,
+} from "../../eval/w12/schema";
+import {
+  ZERO_TARGET_METRICS,
+  checkTurn,
+  mergeTallies,
+  type Finding,
+  type MetricId,
+  type Tally,
+} from "../../eval/w12/checks";
+import { conversations as caisConversations } from "../../eval/w12/corpus/a-cais";
+import { conversations as nurseConversations } from "../../eval/w12/corpus/b-icu-nurse";
+import { conversations as machinistConversations } from "../../eval/w12/corpus/d-cnc-machinist";
+
+/**
+ * A deliberately small, occupationally spread subset. Four conversations
+ * is a sample size, not a corpus — the report says so out loud.
+ */
+export const FIXTURE_IDS = ["a-01", "a-02", "b-01", "d-01"] as const;
+
+const ALL = [
+  ...caisConversations,
+  ...nurseConversations,
+  ...machinistConversations,
+];
+
+export const CORPUS_FIXTURES: ParsedConversation[] = FIXTURE_IDS.map((id) => {
+  const raw = ALL.find((c) => c.id === id);
+  if (!raw)
+    throw new Error(`corpus fixture ${id} is not in the imported files`);
+  return conversationSchema.parse(raw);
+});
+
+/** The project facts block the harness feeds a fixture, matching run.ts. */
+export function projectFacts(c: ParsedConversation): string {
+  const p = c.project;
+  return [
+    `Search: ${p.name}`,
+    p.companyName ? `Company: ${p.companyName}` : "",
+    `Role title: ${p.roleTitle}`,
+    p.geography ? `Geography: ${p.geography}` : "",
+    p.country ? `Country: ${p.country}` : "",
+    p.industry ? `Industry: ${p.industry}` : "",
+    p.seniority ? `Seniority: ${p.seniority}` : "",
+    p.businessObjective ? `Business objective: ${p.businessObjective}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+export interface CorpusTurnOutcome {
+  conversationId: string;
+  /** -1 is the job-description derivation; 0+ are the scripted turns. */
+  turnIndex: number;
+  label: string;
+  executed: boolean;
+  /** Why a turn did not run. Empty when it did. */
+  notExecutedReason: string;
+  findings: Finding[];
+  tally: Tally;
+}
+
+export interface CorpusReport {
+  ranAt: string;
+  /** Which fixtures were attempted. */
+  fixtureIds: string[];
+  outcomes: CorpusTurnOutcome[];
+  executed: number;
+  notExecuted: number;
+  tally: Tally;
+  zeroTargetViolations: Array<{ metric: MetricId; count: number }>;
+  verdict: "PASS" | "PARTIAL" | "FAIL";
+  /** The sentence that must accompany any number from this run. */
+  caveat: string;
+}
+
+export function metricRate(
+  tally: Tally,
+  metric: MetricId,
+): {
+  pass: number;
+  total: number;
+  rate: number | null;
+} {
+  const m = tally[metric];
+  if (!m || m.total === 0) return { pass: 0, total: 0, rate: null };
+  return { pass: m.pass, total: m.total, rate: m.pass / m.total };
+}
+
+/**
+ * Aggregate outcomes into a report. A zero-target metric with any failure
+ * is a FAIL whatever else passed; a run where nothing executed is a FAIL,
+ * never a PASS by vacuity.
+ */
+export function scoreCorpusRun(
+  outcomes: CorpusTurnOutcome[],
+  ranAt: string,
+): CorpusReport {
+  const executed = outcomes.filter((o) => o.executed);
+  const tally = mergeTallies(...executed.map((o) => o.tally));
+  const zeroTargetViolations = ZERO_TARGET_METRICS.map((metric) => {
+    const m = tally[metric];
+    return { metric, count: m ? m.total - m.pass : 0 };
+  }).filter((x) => x.count > 0);
+
+  const verdict: CorpusReport["verdict"] =
+    executed.length === 0
+      ? "FAIL"
+      : zeroTargetViolations.length > 0
+        ? "FAIL"
+        : outcomes.some((o) => !o.executed)
+          ? "PARTIAL"
+          : "PASS";
+
+  return {
+    ranAt,
+    fixtureIds: [...new Set(outcomes.map((o) => o.conversationId))],
+    outcomes,
+    executed: executed.length,
+    notExecuted: outcomes.length - executed.length,
+    tally,
+    zeroTargetViolations,
+    verdict,
+    caveat: `${executed.length} turn${executed.length === 1 ? "" : "s"} across ${new Set(executed.map((o) => o.conversationId)).size} of the corpus's 53 conversations, generated by this viewer's Claude and scored deterministically. The generating model never saw the expectations. The LLM judge did not run, so every semantic dimension is unmeasured, and a sample this size cannot support a claim about the corpus as a whole.`,
+  };
+}
+
+export { checkTurn, ZERO_TARGET_METRICS };
+export type { Finding, MetricId, ParsedConversation, Tally };

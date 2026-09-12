@@ -1,0 +1,22 @@
+{
+  "id": "EXP-SP104-BLIND-1",
+  "searchProjectId": "SP104",
+  "interventionId": "TEST-SP104-BLIND",
+  "observedAt": "2026-09-02T17:00:00.000Z",
+  "summary": "Blind Adjacent Profile Review: the HM advanced 7 of 10 adjacent candidates with programming language and current title hidden.",
+  "observations": [
+    "7 of 10 adjacent candidates were advanced by the HM when language and current title were hidden.",
+    "Of the 7 advanced: 2 Rust, 2 C++, 2 Java, 1 Go.",
+    "Advanced candidates' current titles included Senior Engineer, Principal Engineer, Tech Lead and Staff Engineer.",
+    "3 of 10 were declined on demonstrated scope or systems depth, not on language or title."
+  ],
+  "metrics": {
+    "reviewed": 10,
+    "advanced": 7,
+    "advanceRate": 0.7,
+    "advancedGo": 1,
+    "advancedRust": 2,
+    "advancedCpp": 2,
+    "advancedJava": 2
+  }
+}

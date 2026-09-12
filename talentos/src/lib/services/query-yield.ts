@@ -1,0 +1,368 @@
+/**
+ * Yield ledger (Wave A). Records discovery runs against stored strings and
+ * rolls up what each string actually produced: runs, explicitly saved URLs,
+ * candidates created from those saves. Only queries and explicit saves are
+ * ever persisted (product rule 2); a result count is a number, not a result.
+ *
+ * Rollups are computed live — the tables are single-user sized and a
+ * GROUP BY is cheaper than a cache-invalidation bug.
+ */
+import { and, desc, eq, inArray, isNotNull, like, ne, sql } from "drizzle-orm";
+import { z } from "zod";
+import type { Db } from "@/lib/db/client";
+import {
+  candidateSourceEvidence,
+  researchSources,
+  searchProjects,
+  searchQueries,
+  searchQueryRuns,
+} from "@/lib/db/schema";
+import { normalizeRoleTitle } from "@/lib/domain/role-title";
+
+export const recordQueryRunInput = z.object({
+  searchProjectId: z.string(),
+  queryId: z.string().optional(),
+  queryText: z.string().min(2),
+  edited: z.boolean().default(false),
+  engine: z.enum(["core", "reach"]),
+  resultCount: z.number().int().min(0),
+  /** Wave H2: set when the run was a profile sweep for one person. */
+  candidateId: z.string().optional(),
+  sweepTemplate: z.string().max(8).optional(),
+});
+
+export async function recordQueryRun(
+  db: Db,
+  raw: z.input<typeof recordQueryRunInput>,
+) {
+  const input = recordQueryRunInput.parse(raw);
+  // Never credit a stored string with an edited run.
+  const queryId = input.edited ? undefined : input.queryId;
+  const [row] = await db
+    .insert(searchQueryRuns)
+    .values({
+      searchProjectId: input.searchProjectId,
+      queryId,
+      queryText: input.queryText,
+      edited: input.edited,
+      engine: input.engine,
+      resultCount: input.resultCount,
+      candidateId: input.candidateId ?? null,
+      sweepTemplate: input.sweepTemplate ?? null,
+    })
+    .returning();
+  return row;
+}
+
+export interface QueryYield {
+  queryId: string;
+  runs: number;
+  lastRanAt?: string;
+  lastResultCount?: number;
+  savedUrls: number;
+  candidates: number;
+}
+
+export interface ProjectYield {
+  byQuery: Map<string, QueryYield>;
+  totals: { runs: number; savedUrls: number; candidates: number };
+  /** Stored strings that ran at least once and produced no explicit save. */
+  zeroYield: string[];
+}
+
+function emptyYield(queryId: string): QueryYield {
+  return { queryId, runs: 0, savedUrls: 0, candidates: 0 };
+}
+
+/** Discovery saves are labelled `<provider>:<engine>` (services/discovery.ts). */
+const DISCOVERY_SOURCE_PATTERN = "%:core";
+const DISCOVERY_SOURCE_PATTERN_REACH = "%:reach";
+
+export async function queryYieldForProject(
+  db: Db,
+  searchProjectId: string,
+): Promise<ProjectYield> {
+  const byQuery = new Map<string, QueryYield>();
+  const get = (id: string) => {
+    const existing = byQuery.get(id);
+    if (existing) return existing;
+    const fresh = emptyYield(id);
+    byQuery.set(id, fresh);
+    return fresh;
+  };
+
+  const runs = await db
+    .select({
+      queryId: searchQueryRuns.queryId,
+      ranAt: searchQueryRuns.ranAt,
+      resultCount: searchQueryRuns.resultCount,
+    })
+    .from(searchQueryRuns)
+    .where(eq(searchQueryRuns.searchProjectId, searchProjectId))
+    .orderBy(desc(searchQueryRuns.ranAt));
+  for (const run of runs) {
+    if (!run.queryId) continue;
+    const y = get(run.queryId);
+    y.runs += 1;
+    if (!y.lastRanAt) {
+      y.lastRanAt = run.ranAt;
+      y.lastResultCount = run.resultCount;
+    }
+  }
+
+  const saved = await db
+    .select({
+      queryId: researchSources.queryId,
+      count: sql<number>`count(*)`,
+    })
+    .from(researchSources)
+    .where(
+      and(
+        eq(researchSources.searchProjectId, searchProjectId),
+        isNotNull(researchSources.queryId),
+      ),
+    )
+    .groupBy(researchSources.queryId);
+  for (const row of saved) {
+    if (row.queryId) get(row.queryId).savedUrls = Number(row.count);
+  }
+
+  const created = await db
+    .select({
+      queryId: candidateSourceEvidence.queryId,
+      count: sql<number>`count(*)`,
+    })
+    .from(candidateSourceEvidence)
+    .where(
+      and(
+        eq(candidateSourceEvidence.searchProjectId, searchProjectId),
+        isNotNull(candidateSourceEvidence.queryId),
+        eq(candidateSourceEvidence.provenance, "search_result"),
+      ),
+    )
+    .groupBy(candidateSourceEvidence.queryId);
+  for (const row of created) {
+    if (row.queryId) get(row.queryId).candidates = Number(row.count);
+  }
+
+  const [[savedTotal], [candidateTotal]] = await Promise.all([
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(researchSources)
+      .where(
+        and(
+          eq(researchSources.searchProjectId, searchProjectId),
+          sql`(${researchSources.source} LIKE ${DISCOVERY_SOURCE_PATTERN} OR ${researchSources.source} LIKE ${DISCOVERY_SOURCE_PATTERN_REACH})`,
+        ),
+      ),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(candidateSourceEvidence)
+      .where(
+        and(
+          eq(candidateSourceEvidence.searchProjectId, searchProjectId),
+          eq(candidateSourceEvidence.provenance, "search_result"),
+        ),
+      ),
+  ]);
+
+  const zeroYield = [...byQuery.values()]
+    .filter((y) => y.runs > 0 && y.savedUrls === 0)
+    .map((y) => y.queryId);
+
+  return {
+    byQuery,
+    totals: {
+      runs: runs.length,
+      savedUrls: Number(savedTotal?.count ?? 0),
+      candidates: Number(candidateTotal?.count ?? 0),
+    },
+    zeroYield,
+  };
+}
+
+export interface SweepYieldRow {
+  sweepTemplate: string;
+  runs: number;
+  savedUrls: number;
+  candidates: number;
+}
+
+/**
+ * What each sweep template produced across this search (Wave H2). A sweep run
+ * carries no `queryId` — it is composed for one person, not stored in the
+ * Search String Lab — so it is rolled up by template instead.
+ */
+export async function sweepYieldForProject(
+  db: Db,
+  searchProjectId: string,
+): Promise<SweepYieldRow[]> {
+  const runs = await db
+    .select({
+      sweepTemplate: searchQueryRuns.sweepTemplate,
+      queryText: searchQueryRuns.queryText,
+    })
+    .from(searchQueryRuns)
+    .where(
+      and(
+        eq(searchQueryRuns.searchProjectId, searchProjectId),
+        isNotNull(searchQueryRuns.sweepTemplate),
+      ),
+    );
+  if (runs.length === 0) return [];
+
+  const savedByQuery = new Map<string, number>();
+  for (const row of await db
+    .select({ query: researchSources.query })
+    .from(researchSources)
+    .where(eq(researchSources.searchProjectId, searchProjectId))) {
+    if (!row.query) continue;
+    savedByQuery.set(row.query, (savedByQuery.get(row.query) ?? 0) + 1);
+  }
+  const candidatesByQuery = new Map<string, number>();
+  for (const row of await db
+    .select({ query: candidateSourceEvidence.query })
+    .from(candidateSourceEvidence)
+    .where(eq(candidateSourceEvidence.searchProjectId, searchProjectId))) {
+    if (!row.query) continue;
+    candidatesByQuery.set(
+      row.query,
+      (candidatesByQuery.get(row.query) ?? 0) + 1,
+    );
+  }
+
+  const byTemplate = new Map<string, SweepYieldRow>();
+  for (const run of runs) {
+    const key = run.sweepTemplate as string;
+    const existing = byTemplate.get(key) ?? {
+      sweepTemplate: key,
+      runs: 0,
+      savedUrls: 0,
+      candidates: 0,
+    };
+    existing.runs += 1;
+    existing.savedUrls += savedByQuery.get(run.queryText) ?? 0;
+    existing.candidates += candidatesByQuery.get(run.queryText) ?? 0;
+    byTemplate.set(key, existing);
+  }
+  return [...byTemplate.values()].sort((a, b) =>
+    a.sweepTemplate.localeCompare(b.sweepTemplate),
+  );
+}
+
+export interface RoleTitleYield {
+  normalizedTitle: string;
+  /** Other searches sharing the normalized title. */
+  searches: number;
+  rows: {
+    platform: string;
+    breadth: string;
+    runs: number;
+    savedUrls: number;
+    candidates: number;
+  }[];
+}
+
+/**
+ * What the same role produced in other searches, per platform × breadth.
+ * Null when no other search shares the normalized title — no rollup is
+ * shown from a sample of one.
+ */
+export async function roleTitleYield(
+  db: Db,
+  searchProjectId: string,
+): Promise<RoleTitleYield | null> {
+  const [project] = await db
+    .select({ id: searchProjects.id, roleTitle: searchProjects.roleTitle })
+    .from(searchProjects)
+    .where(eq(searchProjects.id, searchProjectId));
+  if (!project) return null;
+  const normalizedTitle = normalizeRoleTitle(project.roleTitle);
+  if (!normalizedTitle) return null;
+
+  const others = (
+    await db
+      .select({ id: searchProjects.id, roleTitle: searchProjects.roleTitle })
+      .from(searchProjects)
+      .where(ne(searchProjects.id, searchProjectId))
+  ).filter((p) => normalizeRoleTitle(p.roleTitle) === normalizedTitle);
+  if (others.length === 0) return null;
+  const otherIds = others.map((p) => p.id);
+
+  const queries = await db
+    .select({
+      id: searchQueries.id,
+      platform: searchQueries.platform,
+      breadth: searchQueries.breadth,
+    })
+    .from(searchQueries)
+    .where(inArray(searchQueries.searchProjectId, otherIds));
+  if (queries.length === 0) {
+    return { normalizedTitle, searches: others.length, rows: [] };
+  }
+  const queryIds = queries.map((q) => q.id);
+  const keyOf = new Map(
+    queries.map((q) => [q.id, `${q.platform} ${q.breadth}`]),
+  );
+
+  const rows = new Map<string, RoleTitleYield["rows"][number]>();
+  const bucket = (queryId: string) => {
+    const key = keyOf.get(queryId);
+    if (!key) return null;
+    const existing = rows.get(key);
+    if (existing) return existing;
+    const [platform, breadth] = key.split(" ");
+    const fresh = { platform, breadth, runs: 0, savedUrls: 0, candidates: 0 };
+    rows.set(key, fresh);
+    return fresh;
+  };
+
+  const runs = await db
+    .select({ queryId: searchQueryRuns.queryId, count: sql<number>`count(*)` })
+    .from(searchQueryRuns)
+    .where(inArray(searchQueryRuns.queryId, queryIds))
+    .groupBy(searchQueryRuns.queryId);
+  for (const r of runs) {
+    const b = r.queryId ? bucket(r.queryId) : null;
+    if (b) b.runs += Number(r.count);
+  }
+  const saved = await db
+    .select({ queryId: researchSources.queryId, count: sql<number>`count(*)` })
+    .from(researchSources)
+    .where(inArray(researchSources.queryId, queryIds))
+    .groupBy(researchSources.queryId);
+  for (const r of saved) {
+    const b = r.queryId ? bucket(r.queryId) : null;
+    if (b) b.savedUrls += Number(r.count);
+  }
+  const created = await db
+    .select({
+      queryId: candidateSourceEvidence.queryId,
+      count: sql<number>`count(*)`,
+    })
+    .from(candidateSourceEvidence)
+    .where(
+      and(
+        inArray(candidateSourceEvidence.queryId, queryIds),
+        eq(candidateSourceEvidence.provenance, "search_result"),
+      ),
+    )
+    .groupBy(candidateSourceEvidence.queryId);
+  for (const r of created) {
+    const b = r.queryId ? bucket(r.queryId) : null;
+    if (b) b.candidates += Number(r.count);
+  }
+
+  return {
+    normalizedTitle,
+    searches: others.length,
+    rows: [...rows.values()].sort(
+      (a, b) => b.savedUrls - a.savedUrls || b.runs - a.runs,
+    ),
+  };
+}
+
+// `like` is imported for readers grepping the ledger's source filter; the
+// pattern is applied through sql`` above so both engines are matched in one
+// predicate.
+void like;

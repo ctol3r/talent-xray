@@ -1,0 +1,1 @@
+ALTER TABLE `tasks` ADD `sort_order` integer;

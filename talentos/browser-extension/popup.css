@@ -1,0 +1,45 @@
+body {
+  width: 330px;
+  margin: 18px;
+  background: #f7f8fa;
+  color: #202b3b;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+}
+h1 {
+  font-size: 19px;
+  margin: 0 0 12px;
+}
+label {
+  display: block;
+  font-weight: 600;
+}
+input {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 7px 0 12px;
+  padding: 9px;
+  border: 1px solid #a8b4c5;
+  border-radius: 5px;
+}
+button {
+  padding: 10px;
+  width: 100%;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  background: #2252ae;
+  cursor: pointer;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #cd8100;
+  outline-offset: 3px;
+}
+.detail {
+  font-size: 12px;
+}
+#status {
+  color: #8b360a;
+}
